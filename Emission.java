@@ -9,37 +9,15 @@ public class Emission implements Runnable{
     private String  message = null;
 
     private Scanner sc = null;
-
-    
-
     public Emission(OutputStream outputStream) {
-
         this.out = outputStream;
-
-        
-
     }
-
-
-    
-
     public void run() {
-
-        
-
           sc = new Scanner(System.in);
-
-          
-
           while(true){
-
                 message = sc.nextLine();
-
                 //out.write(arg0);
-
                 //out.flush();
-
               }
-
     }
 }
