@@ -3,7 +3,6 @@ import java.io.InputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
-
 public class Main {
 	public static void main(String[] args) {
 		try {
@@ -15,8 +14,9 @@ public class Main {
 			while(read != - 1) {
 				read = is.read(buffer);
 				System.out.println(read + " bytes received.");
-				
+				Reader.processBuffer(buffer);
 			}
+			System.out.println("Deconnected from authentification server.");
 
 			is.close();
 			socket.close();		
