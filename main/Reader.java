@@ -1,22 +1,15 @@
+package main;
+
 public class Reader {
-	//private static Reader reader = new Reader();
-	private static Message incompleteMessage; // message incomplet qui attend d'être complété
-	
-	//private Reader() {
-		//incompleteMessage = null;
-	//}
-	
-	//public static Reader getInstance() {
-		//return reader;
-	//}
+	private static Message incompleteMsg; // message incomplet qui attend d'être complété
 	
 	public static void processBuffer(byte[] buffer, int bytesReceived) {
 		int read = 0;
-		if(incompleteMessage != null) {
-			read += incompleteMessage.appendContent(buffer);
-			if(incompleteMessage.isComplete()) {
-				//processMessage()
-				incompleteMessage = null;
+		if(incompleteMsg != null) {
+			read += incompleteMsg.appendContent(buffer);
+			if(incompleteMsg.isComplete()) {
+				Manager.processMessage(incompleteMsg);
+				incompleteMsg = null;
 				buffer = shiftArray(buffer, read);
 			}
 			else
@@ -24,10 +17,10 @@ public class Reader {
 		}
 		while(read < bytesReceived) {
 			Message msg = extractMsgFromBuffer(buffer);
-			//if(msg.isComplete())
-				// processMessage()
-			//else
-				// incompleteMessage = msg;
+			if(msg.isComplete())
+				Manager.processMessage(msg);
+			else
+				incompleteMsg = msg;
 			read += msg.getTotalSize();
 			buffer = shiftArray(buffer, read);
 		}

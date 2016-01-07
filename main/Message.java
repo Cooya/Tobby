@@ -1,3 +1,5 @@
+package main;
+
 public class Message {
 	private int id;
 	private int lenofsize;
@@ -15,7 +17,7 @@ public class Message {
 		this.bytesAvailables = bytesAvailables;
 		this.complete = bytesAvailables == size;
 		
-		System.out.println("Message creation => id : " + id + ", lenofsize : " + lenofsize + ", size : " + size + ", complete : " + this.complete);
+		System.out.println("Message creation => id : " + id + " (" + MessageName.get(id) + "), lenofsize : " + lenofsize + ", size : " + size + ", complete : " + this.complete);
 	}
 	
 	public int getId() {
