@@ -1,7 +1,7 @@
 public class Message {
 	private int id;
-	private int size;
 	private int lenofsize;
+	private int size;
 	private byte[] content;
 	private int bytesAvailables;
 	private boolean complete;
@@ -9,11 +9,13 @@ public class Message {
 	public Message(int id, int size, int lenofsize, byte[] content, int bytesAvailables) {
 		assert bytesAvailables > size;
 		this.id = id;
-		this.size = size;
 		this.lenofsize = lenofsize;
+		this.size = size;
 		this.content = content;
 		this.bytesAvailables = bytesAvailables;
 		this.complete = bytesAvailables == size;
+		
+		System.out.println("Message creation => id : " + id + ", lenofsize : " + lenofsize + ", size : " + size + ", complete : " + this.complete);
 	}
 	
 	public int getId() {

@@ -10,11 +10,11 @@ public class Main {
 			InputStream is = socket.getInputStream();
 			byte[] buffer = new byte[8192];
 			
-			int read = 0;
-			while(read != - 1) {
-				read = is.read(buffer);
-				System.out.println(read + " bytes received.");
-				Reader.processBuffer(buffer);
+			int bytesReceived = 0;
+			while(bytesReceived != - 1) {
+				bytesReceived = is.read(buffer);
+				System.out.println(bytesReceived + " bytes received.");
+				Reader.processBuffer(buffer, bytesReceived);
 			}
 			System.out.println("Deconnected from authentification server.");
 

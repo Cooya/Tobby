@@ -10,32 +10,31 @@ public class Reader {
 		//return reader;
 	//}
 	
-	public static void processBuffer(byte[] buffer) {
+	public static void processBuffer(byte[] buffer, int bytesReceived) {
 		int read = 0;
 		if(incompleteMessage != null) {
 			read += incompleteMessage.appendContent(buffer);
 			if(incompleteMessage.isComplete()) {
 				//processMessage()
 				incompleteMessage = null;
-				shiftArray(buffer, read);
+				buffer = shiftArray(buffer, read);
 			}
 			else
 				return; // si le message est incomplet, cela signifie qu'il n'y a plus rien à lire dans le buffer
 		}
-		while(read < buffer.length) {
+		while(read < bytesReceived) {
 			Message msg = extractMsgFromBuffer(buffer);
-			System.out.println("Message " + msg.getId() + " received.");
 			//if(msg.isComplete())
 				// processMessage()
 			//else
 				// incompleteMessage = msg;
 			read += msg.getTotalSize();
-			shiftArray(buffer, read);
+			buffer = shiftArray(buffer, read);
 		}
 	}
 	
-	private static Message extractMsgFromBuffer(byte[] buffer) {
-		short header =(short) (buffer[0] <<8 | buffer[1]);
+	private static Message extractMsgFromBuffer(byte[] buffer) {	
+		short header = (short) (buffer[0] << 8 | buffer[1]);
 		int id = header >> 2;
 		int lenofsize = header & 3;
 		int size;
