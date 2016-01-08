@@ -126,4 +126,72 @@ public class ByteArray {
 		}
 		writeBytes(var2);
 	}
+	
+	public void writeVarShort(int s) {
+		int var5 = 0;
+		assert(s > SHORT_MAX_VALUE || s < SHORT_MIN_VALUE);
+		ByteArray var2 = new ByteArray();
+		if(s >= 0 && s <= MASK_01111111) {
+			var2.writeByte((byte) s);
+			writeBytes(var2);
+			return;
+		}
+		int var3 = s & 65535;
+		ByteArray var4 = new ByteArray();
+		while(var3 != 0) {
+			var4.writeByte((byte) (var3 & MASK_01111111));
+			var5 = var3 & MASK_01111111;
+			var3 = var3 >>> CHUNCK_BIT_SIZE;
+			if(var3 > 0)
+				var5 = var5 | MASK_10000000;
+			var2.writeByte((byte) var5);
+		}
+		writeBytes(var2);
+	}
+	
+	public void writeVarLong(long l) {
+		int var3 = 0;
+		if(Long.highestOneBit(l) == 0)
+			writeint32((int) Long.lowestOneBit(l));
+	}
+	
+	
+	/*
+	public function writeVarLong(param1:Number) : void
+    {
+       var _loc3_:uint = 0;
+       var _loc2_:Int64 = Int64.fromNumber(param1);
+       if(_loc2_.high == 0)
+       {
+          this.writeint32(this._data,_loc2_.low);
+       }
+       else
+       {
+          _loc3_ = 0;
+          while(_loc3_ < 4)
+          {
+             this._data.writeByte(_loc2_.low & 127 | 128);
+             _loc2_.low = _loc2_.low >>> 7;
+             _loc3_++;
+          }
+          if((_loc2_.high & 268435455 << 3) == 0)
+          {
+             this._data.writeByte(_loc2_.high << 4 | _loc2_.low);
+          }
+          else
+          {
+             this._data.writeByte((_loc2_.high << 4 | _loc2_.low) & 127 | 128);
+             this.writeint32(this._data,_loc2_.high >>> 3);
+          }
+       }
+    }
+    */
+	
+    private void writeint32(int i) { // problème d'unsigned int
+       while(i >= 128) {
+          writeByte((byte) (i & 127 | 128));
+          i = i >>> 7;
+       }
+       writeByte((byte) i);
+    }
 }
