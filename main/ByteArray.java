@@ -40,13 +40,13 @@ public class ByteArray {
 		return (short) ((short) this.array[this.pos++] * 256 + this.array[this.pos++ + 1]);
 	}
 	
-	public char readUShort() { // un char n'est pas signé en Java et est codé sur 2 octets comme un short
-		return (char) readShort();
+	public int readUShort() { // un char n'est pas signé en Java et est codé sur 2 octets comme un short
+		return Character.getNumericValue((char) readShort());
 	}
 	
 	public char[] readUTF() {
-		char len = readUShort();
-		char[] utf = new char[len];
+		int len = readUShort();
+		char[] utf = new char[len + 1];
 		for(int i = 0; i < len; ++i)
 			utf[i] = (char) this.array[this.pos++];
 		utf[len] = '\0';
@@ -98,6 +98,13 @@ public class ByteArray {
 		writeByte((byte) (s & 0xff));
 		writeByte((byte) ((s >> 8) & 0xff));
 	}
+
+	void writeInt(int i) {
+		writeByte((byte) (i >>> 24));
+		writeByte((byte) (i >>> 16));
+		writeByte((byte) (i >>> 8));
+		writeByte((byte) (i));
+	}
 	
 	public void writeUTF(char[] utf) {
 		writeUShort((char) utf.length);
@@ -106,7 +113,7 @@ public class ByteArray {
 		this.size += utf.length + 2;
 	}
 	
-	public void writeVarInt(int i) { // copie des sources du jeu
+	public void writeVarInt(int i) {
 		int var5 = 0;
 		ByteArray var2 = new ByteArray();
 		if(i >= 0 && i <= MASK_01111111) {
@@ -151,47 +158,23 @@ public class ByteArray {
 	
 	public void writeVarLong(long l) {
 		int var3 = 0;
-		if(Long.highestOneBit(l) == 0)
-			writeint32((int) Long.lowestOneBit(l));
+		long var2_high = Long.highestOneBit(l);
+		long var2_low = Long.lowestOneBit(l);
+		if(var2_low == 0)
+			writeInt((int) var2_low);
+		else {
+			var3 = 0;
+			while(var3 < 4) {
+				writeByte((byte) (var2_low & 127 | 128));
+				var2_low = var2_low >>> 7;
+				var3++;
+			}
+			if((var2_high & 268435455 << 3) == 0)
+				writeByte((byte) (var2_high << 4 | var2_low));
+			else {
+				writeByte((byte) ((var2_high << 4 | var2_low) & 127 | 128));
+				writeInt((int) (var2_high >>> 3));
+			}
+		}
 	}
-	
-	
-	/*
-	public function writeVarLong(param1:Number) : void
-    {
-       var _loc3_:uint = 0;
-       var _loc2_:Int64 = Int64.fromNumber(param1);
-       if(_loc2_.high == 0)
-       {
-          this.writeint32(this._data,_loc2_.low);
-       }
-       else
-       {
-          _loc3_ = 0;
-          while(_loc3_ < 4)
-          {
-             this._data.writeByte(_loc2_.low & 127 | 128);
-             _loc2_.low = _loc2_.low >>> 7;
-             _loc3_++;
-          }
-          if((_loc2_.high & 268435455 << 3) == 0)
-          {
-             this._data.writeByte(_loc2_.high << 4 | _loc2_.low);
-          }
-          else
-          {
-             this._data.writeByte((_loc2_.high << 4 | _loc2_.low) & 127 | 128);
-             this.writeint32(this._data,_loc2_.high >>> 3);
-          }
-       }
-    }
-    */
-	
-    private void writeint32(int i) { // problème d'unsigned int
-       while(i >= 128) {
-          writeByte((byte) (i & 127 | 128));
-          i = i >>> 7;
-       }
-       writeByte((byte) i);
-    }
 }

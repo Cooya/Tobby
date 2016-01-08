@@ -26,6 +26,11 @@ public class IdentificationMessage extends Message {
 		buffer.writeVarInt(credentials.length);
 		buffer.writeBytes(credentials);
 		buffer.writeShort((short) 0);
+		buffer.writeByte((byte) 0);
+		buffer.writeByte((byte) 0);
+		buffer.writeByte((byte) 0);
+		buffer.writeByte((byte) 0);
+		buffer.writeByte((byte) 0);
 	}
 		
 	static void writeVersion(ByteArray array, int major, int minor, int release, int buildType, int install, int technology) {
