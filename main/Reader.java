@@ -1,7 +1,9 @@
 package main;
 
+import messages.ReceivedMessage;
+
 public class Reader {
-	private static Message incompleteMsg; // message incomplet qui attend d'être complété
+	private static ReceivedMessage incompleteMsg; // message incomplet qui attend d'être complété
 	
 	public static void processBuffer(byte[] buffer, int bytesReceived) {
 		int read = 0;
@@ -16,7 +18,7 @@ public class Reader {
 				return; // si le message est incomplet, cela signifie qu'il n'y a plus rien à lire dans le buffer
 		}
 		while(read < bytesReceived) {
-			Message msg = extractMsgFromBuffer(buffer);
+			ReceivedMessage msg = extractMsgFromBuffer(buffer);
 			if(msg.isComplete())
 				Manager.processMessage(msg);
 			else
@@ -26,7 +28,7 @@ public class Reader {
 		}
 	}
 	
-	private static Message extractMsgFromBuffer(byte[] buffer) {	
+	private static ReceivedMessage extractMsgFromBuffer(byte[] buffer) {	
 		short header = (short) (buffer[0] << 8 | buffer[1]);
 		short id = (short) (header >> 2);
 		short lenofsize = (short) (header & 3);
@@ -43,7 +45,7 @@ public class Reader {
 		int counter = 0;
 		for(int i = 2 + lenofsize; i < size + 2 + lenofsize; ++i, ++counter)
 			content[counter] = buffer[i];
-	    return new Message(id, size, lenofsize, content, counter);		
+	    return new ReceivedMessage(id, lenofsize, size, content, counter);		
 	}
 	
 	private static byte[] shiftArray(byte[] array, int from) { // suppression des octets traités dans le buffer

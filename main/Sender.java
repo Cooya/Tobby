@@ -5,6 +5,8 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 
+import messages.Message;
+
 public class Sender implements Runnable {
 	private static Sender sender = null;
 	private Socket socket;
@@ -42,20 +44,5 @@ public class Sender implements Runnable {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-	}
-	
-	static byte[] makeHeader(Message msg) {
-		short lenofsize = msg.getLenOfSize();
-		int size = msg.getSize();
-		short header =  (short) (msg.getId() << 2 | lenofsize);
-		ByteBuffer buffer = ByteBuffer.wrap(null);
-		buffer.putShort(header);
-		switch(lenofsize) {
-			case 0 : break; // impossible
-			case 1 : buffer.put((byte) size); break;
-			case 2 : buffer.putShort((short) size); break;
-			case 3 : buffer.put((byte) (size >> 16 & 255)); buffer.putShort((short) (size & 65535)); break;
-		}
-		return buffer.array();
 	}
 }

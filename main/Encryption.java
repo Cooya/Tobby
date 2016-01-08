@@ -29,13 +29,13 @@ public class Encryption {
 		"AQ==\n" +
 		"-----END PUBLIC KEY-----";
 	
-	public int[] encrypt(byte[] encryptedKey, char[] login, char[] password, char[] salt) {
+	public static int[] encrypt(byte[] encryptedKey, char[] login, char[] password, char[] salt) {
 		byte[] decryptedKey = decryptReceivedKey(encryptedKey);
 		//char[] PEM = makePEM(decryptedKey);
 		return encryptCredentials(decryptedKey, login, password, salt);
 	}
 	
-	public static byte[] decryptReceivedKey(byte[] receivedKey) {
+	private static byte[] decryptReceivedKey(byte[] receivedKey) {
 		byte[] resultKey = null;
 		try {
 			Cipher cipher = Cipher.getInstance("RSA");
@@ -50,12 +50,12 @@ public class Encryption {
 		return resultKey;
 	}
 	
-	public static char[] makePEM(byte[] key) {
+	private static char[] makePEM(byte[] key) {
 		//byte[] encodedBytes = Base64.getEncoder().encode(key);
 		return null;
 	}
 	
-	public int[] encryptCredentials(byte[] key, char[] login, char[] password, char[] salt) {
+	private static int[] encryptCredentials(byte[] key, char[] login, char[] password, char[] salt) {
 		int[] encryptedCredentials = null;
 		ByteBuffer buffer = ByteBuffer.wrap(new String(salt).getBytes());
 		buffer.put((byte) login.length);

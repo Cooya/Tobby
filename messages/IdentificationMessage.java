@@ -1,16 +1,38 @@
 package messages;
 
-import main.Message;
+import main.ByteArray;
+import main.Encryption;
 
-public class IdentificationMessage implements Runnable {
-	public static final int id = 4;
+public class IdentificationMessage extends Message {
+	public static final short id = 4;
+	public static final String login = "maxlebgdu93";
+	public static final String password = "represente";
 	
-	public IdentificationMessage(Message msg) {
-		// create response message
-		run();
+	
+	public IdentificationMessage(byte[] content) {
+		super(id, (short) 0, 0, null);
+		ByteArray array = new ByteArray(content);
+		char[] salt = array.readUTF();
+		int size = array.readVarInt();
+		byte[] key = new byte[size];
+		int counter = 0;
+		while(counter < size)
+			key[counter++] = array.readByte();
+		int[] credentials = Encryption.encrypt(key, login.toCharArray(), password.toCharArray(), salt);
+		
+		ByteArray buffer = new ByteArray();
+		buffer.writeByte((byte) 1);
+		writeVersion(buffer, 2, 32, 4, 100752, 1, 1);
+		
+		
 	}
-
-	public void run() {
-		// send to server
+	
+	static void writeVersion(ByteArray array, int major, int minor, int release, int buildType, int install, int technology) {
+		array.writeByte((byte) major);
+		array.writeByte((byte) minor);
+		array.writeByte((byte) release);
+		array.writeByte((byte) buildType);
+		array.writeByte((byte) install);
+		array.writeByte((byte) technology);
 	}
 }

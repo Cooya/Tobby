@@ -1,4 +1,4 @@
-package main;
+package messages;
 public class MessageName {
 	public static String get(int id) {
 	    switch(id) {
