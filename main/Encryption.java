@@ -29,7 +29,7 @@ public class Encryption {
 		"AQ==\n" +
 		"-----END PUBLIC KEY-----";
 	
-	public static int[] encrypt(byte[] encryptedKey, char[] login, char[] password, char[] salt) {
+	public static byte[] encrypt(byte[] encryptedKey, char[] login, char[] password, char[] salt) {
 		byte[] decryptedKey = decryptReceivedKey(encryptedKey);
 		//char[] PEM = makePEM(decryptedKey);
 		return encryptCredentials(decryptedKey, login, password, salt);
@@ -55,8 +55,8 @@ public class Encryption {
 		return null;
 	}
 	
-	private static int[] encryptCredentials(byte[] key, char[] login, char[] password, char[] salt) {
-		int[] encryptedCredentials = null;
+	private static byte[] encryptCredentials(byte[] key, char[] login, char[] password, char[] salt) {
+		byte[] encryptedCredentials = null;
 		ByteBuffer buffer = ByteBuffer.wrap(new String(salt).getBytes());
 		buffer.put((byte) login.length);
 		buffer.put(new String(login).getBytes());
@@ -67,10 +67,7 @@ public class Encryption {
 			KeyFactory kf = KeyFactory.getInstance("RSA");
 			PublicKey publicKey = kf.generatePublic(new X509EncodedKeySpec(key));
 			cipher.init(Cipher.ENCRYPT_MODE, publicKey);
-			byte[] result = cipher.doFinal(buffer.array());
-			encryptedCredentials = new int[result.length];
-			for(int i = 0; i < result.length; ++i)
-				encryptedCredentials[i] = (int) result[i];
+			encryptedCredentials = cipher.doFinal(buffer.array());
 		} catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException | BadPaddingException | InvalidKeySpecException e) {
 			e.printStackTrace();
 		}

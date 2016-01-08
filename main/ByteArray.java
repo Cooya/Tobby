@@ -78,4 +78,52 @@ public class ByteArray {
 		this.array[this.pos++] = b;
 		this.size++;
 	}
+	
+	public void writeBytes(ByteArray buffer) {
+		for(int i = 0; i < buffer.size; ++i)
+			writeByte(buffer.array[i]);
+	}
+	
+	public void writeBytes(byte[] bytes) {
+		for(int i = 0; i < bytes.length; ++i)
+			writeByte(bytes[i]);
+	}
+	
+	public void writeShort(short s) {
+		writeByte((byte) (s & 0xff));
+		writeByte((byte) ((s >> 8) & 0xff));
+	}
+	
+	public void writeUShort(char s) {
+		writeByte((byte) (s & 0xff));
+		writeByte((byte) ((s >> 8) & 0xff));
+	}
+	
+	public void writeUTF(char[] utf) {
+		writeUShort((char) utf.length);
+		for(int i = 0; i < utf.length; ++i)
+			this.array[this.pos++ + i ] = (byte) utf[i];
+		this.size += utf.length + 2;
+	}
+	
+	public void writeVarInt(int i) { // copie des sources du jeu
+		int var5 = 0;
+		ByteArray var2 = new ByteArray();
+		if(i >= 0 && i <= MASK_01111111) {
+			var2.writeByte((byte) i); 
+			writeBytes(var2);
+			return;
+		}
+		int var3 = i;
+		ByteArray var4 = new ByteArray();
+		while(var3 != 0) {
+			var4.writeByte((byte) (var3 & MASK_01111111));
+			var5 = var3 & MASK_01111111;
+			var3 = var3 >>> CHUNCK_BIT_SIZE;
+			if(var3 > 0)
+				var5 = var5 | MASK_10000000;
+			var2.writeByte((byte) var5);
+		}
+		writeBytes(var2);
+	}
 }

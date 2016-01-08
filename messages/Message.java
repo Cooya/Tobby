@@ -1,7 +1,5 @@
 package messages;
 
-import java.nio.ByteBuffer;
-
 public abstract class Message {
 	protected short id;
 	protected short lenofsize;
@@ -40,20 +38,5 @@ public abstract class Message {
 	        return 1;
 	    else
 	        return 0;
-	}
-	
-	static byte[] writeHeader(Message msg) {
-		short lenofsize = msg.getLenOfSize();
-		int size = msg.getSize();
-		short header =  (short) (msg.getId() << 2 | lenofsize);
-		ByteBuffer buffer = ByteBuffer.wrap(null);
-		buffer.putShort(header);
-		switch(lenofsize) {
-			case 0 : break; // impossible
-			case 1 : buffer.put((byte) size); break;
-			case 2 : buffer.putShort((short) size); break;
-			case 3 : buffer.put((byte) (size >> 16 & 255)); buffer.putShort((short) (size & 65535)); break;
-		}
-		return buffer.array();
 	}
 }
