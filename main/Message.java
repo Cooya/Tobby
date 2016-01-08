@@ -1,14 +1,14 @@
 package main;
 
 public class Message {
-	private int id;
-	private int lenofsize;
+	private short id;
+	private short lenofsize;
 	private int size;
 	private byte[] content;
 	private int bytesAvailables;
 	private boolean complete;
 	
-	public Message(int id, int size, int lenofsize, byte[] content, int bytesAvailables) {
+	public Message(short id, int size, short lenofsize, byte[] content, int bytesAvailables) {
 		assert bytesAvailables > size;
 		this.id = id;
 		this.lenofsize = lenofsize;
@@ -20,12 +20,24 @@ public class Message {
 		System.out.println("Message creation => id : " + id + " (" + MessageName.get(id) + "), lenofsize : " + lenofsize + ", size : " + size + ", complete : " + this.complete);
 	}
 	
-	public int getId() {
+	public short getId() {
 		return this.id;
+	}
+
+	public short getLenOfSize() {
+		return this.lenofsize;
 	}
 	
 	public int getTotalSize() {
 		return this.bytesAvailables + 2 + this.lenofsize;
+	}
+	
+	public int getSize() {
+		return this.size;
+	}
+	
+	public byte[] getContent() {
+		return this.content;
 	}
 	
 	public boolean isComplete() {
@@ -41,4 +53,3 @@ public class Message {
 		return read;
 	}
 }
-

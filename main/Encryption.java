@@ -67,12 +67,10 @@ public class Encryption {
 			KeyFactory kf = KeyFactory.getInstance("RSA");
 			PublicKey publicKey = kf.generatePublic(new X509EncodedKeySpec(key));
 			cipher.init(Cipher.ENCRYPT_MODE, publicKey);
-			byte[] toEncrypt = new byte[buffer.remaining()];
-			buffer.get(toEncrypt);
-			byte[] resultKey = cipher.doFinal(toEncrypt);
-			encryptedCredentials = new int[resultKey.length];
-			for(int i = 0; i < resultKey.length; ++i)
-				encryptedCredentials[i] = (int) resultKey[i];
+			byte[] result = cipher.doFinal(buffer.array());
+			encryptedCredentials = new int[result.length];
+			for(int i = 0; i < result.length; ++i)
+				encryptedCredentials[i] = (int) result[i];
 		} catch (InvalidKeyException | NoSuchAlgorithmException | NoSuchPaddingException | IllegalBlockSizeException | BadPaddingException | InvalidKeySpecException e) {
 			e.printStackTrace();
 		}

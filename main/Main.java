@@ -8,6 +8,7 @@ public class Main {
 	public static void main(String[] args) {
 		try {
 			Socket socket = new Socket("213.248.126.39", 5555);
+			Sender.create(socket);
 			InputStream is = socket.getInputStream();
 			byte[] buffer = new byte[8192];
 			

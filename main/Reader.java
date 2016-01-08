@@ -28,8 +28,8 @@ public class Reader {
 	
 	private static Message extractMsgFromBuffer(byte[] buffer) {	
 		short header = (short) (buffer[0] << 8 | buffer[1]);
-		int id = header >> 2;
-		int lenofsize = header & 3;
+		short id = (short) (header >> 2);
+		short lenofsize = (short) (header & 3);
 		int size;
 		if(lenofsize == 0)
 	        size = 0;
