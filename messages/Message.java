@@ -29,7 +29,7 @@ public abstract class Message {
 		return this.content;
 	}
 	
-	static short getLenOfSize(int size) {
+	static short computeLenOfSize(int size) {
 	    if(size > 65535)
 	        return 3;
 	    else if(size > 255)

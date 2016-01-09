@@ -9,12 +9,12 @@ import javax.crypto.Cipher;
 public class Encryption {
 	private static final int AES_KEY_LENGTH = 32;
 	private static final String publicKey = 
-		"MIIBUzANBgkqhkiG9w0BAQEFAAOCAUAAMIIBOwKCATIAq8EYkkGCUg86Bf2CHaM1z1Q2ahQgVXkx" +
-		"49I0igwTVCIqG86jsgNb22na1DThZ+IP7DfyBszIecVSP8nwbYPbx6Z7dwq4pnMVx/lx5lyMZUO1" +
-		"n/HGEkw1S06AlfXzSg58ci5DL9RJ9ZIa1oMDKtrZiNYA5C3L+7NSCVp/2H/yypWkDjzkFan65+TN" +
-		"RExo/2O3+MytJtQ/BXVkbYD58+iiZegddNTNGvz8WlPz2cZvPQt4x1TN+KOgJRKZH5imNAxCtRg6" +
-		"l1OLVxfwwUjKFgM4uAsto8vJv5DUFZQMO1Sh9gMpmzeMwXIF4fDD4O1TNiVmu3ABybt2Y4EdaQhs" +
-		"/ponC0SNcWbrY0stYbX+Wpk9/Hcxmo3zoduf1ZAdGM01E1g3IjQMd0gOP4v1KQtBjoHim2MCAwEA" +
+		"MIIBUzANBgkqhkiG9w0BAQEFAAOCAUAAMIIBOwKCATIAgucoka9J2PXcNdjcu6CuDmgteIMB+rih" +
+		"2UZJIuSoNT/0J/lEKL/W4UYbDA4U/6TDS0dkMhOpDsSCIDpO1gPG6+6JfhADRfIJItyHZflyXNUj" +
+		"WOBG4zuxc/L6wldgX24jKo+iCvlDTNUedE553lrfSU23Hwwzt3+doEfgkgAf0l4ZBez5Z/ldp9it" +
+		"2NH6/2/7spHm0Hsvt/YPrJ+EK8ly5fdLk9cvB4QIQel9SQ3JE8UQrxOAx2wrivc6P0gXp5Q6bHQo" +
+		"ad1aUp81Ox77l5e8KBJXHzYhdeXaM91wnHTZNhuWmFS3snUHRCBpjDBCkZZ+CxPnKMtm2qJIi57R" +
+		"slALQVTykEZoAETKWpLBlSm92X/eXY2DdGf+a7vju9EigYbX0aXxQy2Ln2ZBWmUJyZE8B58CAwEA" +
 		"AQ==";
 	
 	public static byte[] encrypt(byte[] encryptedKey, char[] login, char[] password, char[] salt) {
@@ -22,17 +22,16 @@ public class Encryption {
 		return encryptCredentials(decryptedKey, login, password, salt);
 	}
 	
-	private static byte[] decryptReceivedKey(byte[] receivedKey) {
+	private static byte[] decryptReceivedKey(byte[] encryptedKey) {
 		byte[] resultKey = null;
 		try {
 		    byte[] decodedKey = Base64.getDecoder().decode(publicKey);
 			X509EncodedKeySpec spec = new X509EncodedKeySpec(decodedKey);
 			KeyFactory kf = KeyFactory.getInstance("RSA");
 			PublicKey pk = kf.generatePublic(spec);
-			
 			Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
 			cipher.init(Cipher.DECRYPT_MODE, pk);	
-			resultKey = cipher.doFinal(receivedKey);
+			resultKey = cipher.doFinal(encryptedKey);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -47,13 +46,11 @@ public class Encryption {
 		buffer.writeByte((byte) login.length);
 		buffer.writeUTFBytes(new String(login).toCharArray());
 		buffer.writeUTFBytes(new String(password).toCharArray());
-		
 		try {
 			KeyFactory kf = KeyFactory.getInstance("RSA");
-			X509EncodedKeySpec x509 = new X509EncodedKeySpec(key);
-			PublicKey publicKey = kf.generatePublic(x509);
-			
-			Cipher cipher = Cipher.getInstance("RSA/ECB/NoPadding");
+			X509EncodedKeySpec spec = new X509EncodedKeySpec(key);
+			PublicKey publicKey = kf.generatePublic(spec);
+			Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
 			cipher.init(Cipher.ENCRYPT_MODE, publicKey);
 			encryptedCredentials = cipher.doFinal(buffer.bytes());
 		} catch (Exception e) {

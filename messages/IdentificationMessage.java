@@ -4,20 +4,30 @@ import main.ByteArray;
 import main.Encryption;
 
 public class IdentificationMessage extends Message {
-	public static final short id = 4;
-	public static final String login = "maxlebgdu93";
-	public static final String password = "represente";
+	private static final short id = 4;
+	private static final String login = "maxlebgdu93";
+	private static final String password = "represente";
+	
+	// HCM
+	private char[] salt;
+	private int keySize;
+	private byte[] key;
 	
 	public IdentificationMessage(byte[] content) {
 		super(id, (short) 0, 0, null);
+		deserializeHCM(content);
+		serializeIM();
+	}
+	
+	private void deserializeHCM(byte[] content) {
 		ByteArray array = new ByteArray(content);
-		char[] salt = array.readUTF();
-		int size = array.readVarInt();
-		byte[] key = new byte[size];
-		int counter = 0;
-		while(counter < size)
-			key[counter++] = array.readByte();
-		byte[] credentials = Encryption.encrypt(key, login.toCharArray(), password.toCharArray(), salt);	
+		this.salt = array.readUTF();
+		this.keySize = array.readVarInt();
+		this.key = array.readBytes(keySize);
+	}
+	
+	private void serializeIM() {
+		byte[] credentials = Encryption.encrypt(this.key, login.toCharArray(), password.toCharArray(), this.salt);	
 		ByteArray buffer = new ByteArray();
 		buffer.writeByte((byte) 1);
 		writeVersion(buffer, 2, 32, 4, 100752, 1, 1);
@@ -30,6 +40,10 @@ public class IdentificationMessage extends Message {
 		buffer.writeByte((byte) 0);
 		buffer.writeByte((byte) 0);
 		buffer.writeByte((byte) 0);
+		
+		this.size = buffer.getSize();
+		this.lenofsize = computeLenOfSize(this.size);
+		this.content = buffer.bytes();
 	}
 		
 	static void writeVersion(ByteArray array, int major, int minor, int release, int buildType, int install, int technology) {

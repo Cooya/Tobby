@@ -8,13 +8,17 @@ public class Main {
 	public static void main(String[] args) {
 		try {
 			Socket socket = new Socket("213.248.126.39", 5555);
-			Sender.create(socket);
+			Sender.create(socket.getOutputStream());
 			InputStream is = socket.getInputStream();
 			byte[] buffer = new byte[8192];
 			
+			System.out.println("Connecting to server, waiting response...");
 			int bytesReceived = 0;
-			while(bytesReceived != - 1) {
+			while(true) {
 				bytesReceived = is.read(buffer);
+				if(bytesReceived == -1)
+					break;
+				System.out.println();
 				System.out.println(bytesReceived + " bytes received.");
 				Reader.processBuffer(buffer, bytesReceived);
 			}

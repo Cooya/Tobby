@@ -11,7 +11,14 @@ public class ReceivedMessage extends Message {
 		this.bytesAvailables = bytesAvailables;
 		this.complete = bytesAvailables == size;
 		
-		System.out.println("Received message => id : " + id + " (" + MessageName.get(id) + "), lenofsize : " + lenofsize + ", size : " + size + ", complete : " + this.complete);
+		System.out.println();
+		System.out.println("Receiving message " + id + " (" + MessageName.get(id) + ")");
+		if(lenofsize > 1)
+			System.out.println("Length of size : " + lenofsize + " bytes");
+		else
+			System.out.println("Length of size : " + lenofsize + " byte");
+		System.out.println("Size : " + size + " bytes");
+		System.out.println("Complete : " + complete);
 	}
 	
 	public boolean isComplete() {

@@ -2,14 +2,15 @@ package main;
 
 public class ByteArray {	
     private static final int INT_SIZE = 32;  
-    private static final int SHORT_SIZE = 16;
+    //private static final int SHORT_SIZE = 16;
     private static final int SHORT_MIN_VALUE = -32768;
     private static final int SHORT_MAX_VALUE = 32767;
-    private static final int UNSIGNED_SHORT_MAX_VALUE = 65536;
+    //private static final int UNSIGNED_SHORT_MAX_VALUE = 65536;
     private static final int CHUNCK_BIT_SIZE = 7;
-    private static final int MAX_ENCODING_LENGTH = (int) Math.ceil(INT_SIZE / CHUNCK_BIT_SIZE);
+   // private static final int MAX_ENCODING_LENGTH = (int) Math.ceil(INT_SIZE / CHUNCK_BIT_SIZE);
     private static final int MASK_10000000 = 128;
     private static final int MASK_01111111 = 127;
+	private static final char[] hexArray = "0123456789ABCDEF".toCharArray();
 	
     private static final int defaultSize = 8192;
 	private byte[] array;
@@ -36,6 +37,34 @@ public class ByteArray {
 		return this.pos;
 	}
 	
+	public int getSize() {
+		return this.size;
+	}
+	
+	public static void printBytes(byte[] bytes, String format) {
+		System.out.print(bytes.length + " bytes : ");
+		if(format == "dec")
+			for(int i = 0; i < bytes.length; ++i)
+				System.out.print(bytes[i] + " ");
+		else if (format == "hex")
+			System.out.println(bytesToHex(bytes));
+	}
+	
+	public static String bytesToHex(byte[] bytes) {
+	    char[] hexChars = new char[bytes.length * 3];
+	    for ( int j = 0; j < bytes.length; j++ ) {
+	        int v = bytes[j] & 0xFF;
+	        hexChars[j * 3] = hexArray[v >>> 4];
+	        hexChars[j * 3 + 1] = hexArray[v & 0x0F];
+	        hexChars[j * 3 + 2] = ' ';
+	    }
+	    return new String(hexChars);
+	}
+	
+	public void printArray(String format) {
+		printBytes(bytes(), format);
+	}
+	
 	public byte[] bytes() {
 		byte[] clone = new byte[this.size];
 		for(int i = 0; i < this.size; ++i)
@@ -45,6 +74,13 @@ public class ByteArray {
 	
 	public byte readByte() {
 		return this.array[this.pos++];
+	}
+	
+	public byte[] readBytes(int size) {
+		byte[] bytes = new byte[size];
+		for(int i = 0; i < size; ++i)
+			bytes[i] = readByte();
+		return bytes;
 	}
 	
 	public short readShort() { // un short est toujours signé en Java
