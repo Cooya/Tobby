@@ -17,8 +17,7 @@ public class IdentificationMessage extends Message {
 		int counter = 0;
 		while(counter < size)
 			key[counter++] = array.readByte();
-		byte[] credentials = Encryption.encrypt(key, login.toCharArray(), password.toCharArray(), salt);
-		
+		byte[] credentials = Encryption.encrypt(key, login.toCharArray(), password.toCharArray(), salt);	
 		ByteArray buffer = new ByteArray();
 		buffer.writeByte((byte) 1);
 		writeVersion(buffer, 2, 32, 4, 100752, 1, 1);

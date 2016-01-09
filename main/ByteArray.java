@@ -23,7 +23,7 @@ public class ByteArray {
 	public ByteArray(int size) {
 		this.array = new byte[size];
 		this.pos = 0;
-		this.size = size;
+		this.size = 0;
 	}
 	
 	public ByteArray(byte[] array) {
@@ -32,24 +32,33 @@ public class ByteArray {
 		this.size = 0;
 	}
 	
+	public int getPos() {
+		return this.pos;
+	}
+	
+	public byte[] bytes() {
+		byte[] clone = new byte[this.size];
+		for(int i = 0; i < this.size; ++i)
+			clone[i] = this.array[i];
+		return clone;
+	}
+	
 	public byte readByte() {
 		return this.array[this.pos++];
 	}
 	
 	public short readShort() { // un short est toujours signé en Java
-		return (short) ((short) this.array[this.pos++] * 256 + this.array[this.pos++ + 1]);
-	}
-	
-	public int readUShort() { // un char n'est pas signé en Java et est codé sur 2 octets comme un short
-		return Character.getNumericValue((char) readShort());
+		short s = (short) ((short) this.array[this.pos] * 256 + this.array[this.pos + 1]);
+		this.pos += 2;
+		return s;
 	}
 	
 	public char[] readUTF() {
-		int len = readUShort();
-		char[] utf = new char[len + 1];
+		int len = readShort();
+		char[] utf = new char[len];
 		for(int i = 0; i < len; ++i)
 			utf[i] = (char) this.array[this.pos++];
-		utf[len] = '\0';
+		//utf[len] = '\0';
 		return utf;
 	}
 	
@@ -111,6 +120,12 @@ public class ByteArray {
 		for(int i = 0; i < utf.length; ++i)
 			this.array[this.pos++ + i ] = (byte) utf[i];
 		this.size += utf.length + 2;
+	}
+	
+	public void writeUTFBytes(char[] utf) {
+		for(int i = 0; i < utf.length; ++i)
+			this.array[this.pos++ + i ] = (byte) utf[i];
+		this.size += utf.length;
 	}
 	
 	public void writeVarInt(int i) {
