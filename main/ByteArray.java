@@ -98,26 +98,6 @@ public class ByteArray {
 		return utf;
 	}
 	
-	public int readVarInt() { // copie des sources du jeu
-		int val4 = 0;
-		int val1 = 0;
-		int val2 = 0;
-		boolean val3 = false;
-		while(val2 < INT_SIZE) {
-			val4 = readByte();
-			val3 = (val4 & MASK_10000000) == MASK_10000000;
-			if(val2 > 0)
-				val1 += ((val4 & MASK_01111111) << val2);
-			else
-				val1 += val4 & MASK_01111111;
-			val2 += CHUNCK_BIT_SIZE;
-			if(!val3)
-				return val1;
-		}
-		assert true;
-		return 0;
-	}
-	
 	public void writeByte(byte b) {
 		assert(this.pos >= this.array.length);
 		this.array[this.pos++] = b;
@@ -135,16 +115,11 @@ public class ByteArray {
 	}
 	
 	public void writeShort(short s) {
+		writeByte((byte) (s >> 8));
 		writeByte((byte) (s & 0xff));
-		writeByte((byte) ((s >> 8) & 0xff));
-	}
-	
-	public void writeUShort(char s) {
-		writeByte((byte) (s & 0xff));
-		writeByte((byte) ((s >> 8) & 0xff));
 	}
 
-	void writeInt(int i) {
+	public void writeInt(int i) {
 		writeByte((byte) (i >>> 24));
 		writeByte((byte) (i >>> 16));
 		writeByte((byte) (i >>> 8));
@@ -152,7 +127,7 @@ public class ByteArray {
 	}
 	
 	public void writeUTF(char[] utf) {
-		writeUShort((char) utf.length);
+		writeShort((short) utf.length);
 		for(int i = 0; i < utf.length; ++i)
 			this.array[this.pos++ + i ] = (byte) utf[i];
 		this.size += utf.length + 2;
@@ -162,6 +137,26 @@ public class ByteArray {
 		for(int i = 0; i < utf.length; ++i)
 			this.array[this.pos++ + i ] = (byte) utf[i];
 		this.size += utf.length;
+	}
+	
+	public int readVarInt() {
+		int val4 = 0;
+		int val1 = 0;
+		int val2 = 0;
+		boolean val3 = false;
+		while(val2 < INT_SIZE) {
+			val4 = readByte();
+			val3 = (val4 & MASK_10000000) == MASK_10000000;
+			if(val2 > 0)
+				val1 += ((val4 & MASK_01111111) << val2);
+			else
+				val1 += val4 & MASK_01111111;
+			val2 += CHUNCK_BIT_SIZE;
+			if(!val3)
+				return val1;
+		}
+		assert true;
+		return 0;
 	}
 	
 	public void writeVarInt(int i) {

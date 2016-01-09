@@ -30,7 +30,7 @@ public class IdentificationMessage extends Message {
 		byte[] credentials = Encryption.encrypt(this.key, login.toCharArray(), password.toCharArray(), this.salt);	
 		ByteArray buffer = new ByteArray();
 		buffer.writeByte((byte) 1);
-		writeVersion(buffer, 2, 32, 4, 100752, 1, 1);
+		writeVersion(buffer, 2, 32, 4, 100752, 1, 0, 1, 1);
 		buffer.writeUTF("fr".toCharArray());
 		buffer.writeVarInt(credentials.length);
 		buffer.writeBytes(credentials);
@@ -46,10 +46,12 @@ public class IdentificationMessage extends Message {
 		this.content = buffer.bytes();
 	}
 		
-	static void writeVersion(ByteArray array, int major, int minor, int release, int buildType, int install, int technology) {
+	static void writeVersion(ByteArray array, int major, int minor, int release, int revision, int patch, int buildType, int install, int technology) {
 		array.writeByte((byte) major);
 		array.writeByte((byte) minor);
 		array.writeByte((byte) release);
+		array.writeInt(revision);
+		array.writeByte((byte) patch);
 		array.writeByte((byte) buildType);
 		array.writeByte((byte) install);
 		array.writeByte((byte) technology);
