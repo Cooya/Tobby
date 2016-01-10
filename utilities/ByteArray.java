@@ -11,28 +11,28 @@ public class ByteArray {
     private static final int MASK_10000000 = 128;
     private static final int MASK_01111111 = 127;
 	private static final char[] hexArray = "0123456789ABCDEF".toCharArray();
-	
-    private static final int defaultSize = 8192;
+
+	private static final int defaultSize = 8192;
 	private byte[] array;
 	private int pos;
 	private int size;
-	
+
 	public ByteArray() {
 		this(defaultSize);
 	}
-	
+
 	public ByteArray(int size) {
 		this.array = new byte[size];
 		this.pos = 0;
 		this.size = 0;
 	}
-	
+
 	public ByteArray(byte[] array) {
 		this.array = array;
 		this.pos = 0;
 		this.size = 0;
 	}
-	
+
 	public ByteArray(byte[] array, int size) {
 		this.array = new byte[size];
 		for(int i = 0; i < size; ++i)
@@ -40,23 +40,23 @@ public class ByteArray {
 		this.pos = 0;
 		this.size = size;
 	}
-	
+
 	public int getPos() {
 		return this.pos;
 	}
-	
+
 	public int getSize() {
 		return this.size;
 	}
-	
+
 	public int remaining() {
 		return this.size - this.pos;
 	}
-	
+
 	public boolean endOfArray() {
 		return this.pos == this.size;
 	}
-	
+
 	public static void printBytes(byte[] bytes, String format, int size) {
 		System.out.print(bytes.length + " bytes : ");
 		if(format == "dec")
@@ -65,60 +65,60 @@ public class ByteArray {
 		else if(format == "hex")
 			System.out.println(bytesToHex(bytes));
 	}
-	
+
 	public static void printBytes(byte[] bytes, String format) {
 		printBytes(bytes, format, bytes.length);
 	}
-	
+
 	public static String bytesToHex(byte[] bytes) {
-	    char[] hexChars = new char[bytes.length * 3];
-	    for ( int j = 0; j < bytes.length; j++ ) {
-	        int v = bytes[j] & 0xFF;
-	        hexChars[j * 3] = hexArray[v >>> 4];
-	        hexChars[j * 3 + 1] = hexArray[v & 0x0F];
-	        hexChars[j * 3 + 2] = ' ';
-	    }
-	    return new String(hexChars);
+		char[] hexChars = new char[bytes.length * 3];
+		for ( int j = 0; j < bytes.length; j++ ) {
+			int v = bytes[j] & 0xFF;
+			hexChars[j * 3] = hexArray[v >>> 4];
+			hexChars[j * 3 + 1] = hexArray[v & 0x0F];
+			hexChars[j * 3 + 2] = ' ';
+		}
+		return new String(hexChars);
 	}
-	
+
 	public void printArray(String format) {
 		printBytes(bytes(), format);
 	}
-	
+
 	public byte[] bytesFromPos() {
 		byte[] clone = new byte[this.size - this.pos];
 		for(int i = 0; i < clone.length; ++i)
 			clone[i] = this.array[i + this.pos];
 		return clone;
 	}
-	
+
 	public byte[] bytes() {
 		byte[] clone = new byte[this.size];
 		for(int i = 0; i < this.size; ++i)
 			clone[i] = this.array[i];
 		return clone;
 	}
-	
+
 	public byte readByte() {
 		return this.array[this.pos++];
 	}
-	
+
 	public boolean readBoolean() {
 		return readByte() == 1 ? true : false;
 	}
-	
+
 	public byte[] readBytes(int size) {
 		byte[] bytes = new byte[size];
 		for(int i = 0; i < size; ++i)
 			bytes[i] = readByte();
 		return bytes;
 	}
-	
+
 	public short readShort() { // un short est toujours signé en Java
 		short s = (short) ((short) readByte() * 256 + readByte());
 		return s;
 	}
-	
+
 	public char[] readUTF() {
 		int len = readShort();
 		char[] utf = new char[len];
@@ -126,22 +126,22 @@ public class ByteArray {
 			utf[i] = (char) readByte();
 		return utf;
 	}
-	
+
 	public void writeByte(byte b) {
 		this.array[this.pos++] = b;
 		this.size++;
 	}
-	
+
 	public void writeBytes(ByteArray buffer) {
 		for(int i = 0; i < buffer.size; ++i)
 			writeByte(buffer.array[i]);
 	}
-	
+
 	public void writeBytes(byte[] bytes) {
 		for(int i = 0; i < bytes.length; ++i)
 			writeByte(bytes[i]);
 	}
-	
+
 	public void writeShort(short s) {
 		writeByte((byte) (s >> 8));
 		writeByte((byte) (s & 0xff));
@@ -153,24 +153,24 @@ public class ByteArray {
 		writeByte((byte) (i >>> 8));
 		writeByte((byte) (i));
 	}
-	
+
 	public void writeUTF(char[] utf) {
 		writeShort((short) utf.length);
 		for(int i = 0; i < utf.length; ++i)
 			writeByte((byte) utf[i]);
 	}
-	
+
 	public void writeUTF(byte[] utf) {
 		writeShort((short) utf.length);
 		for(int i = 0; i < utf.length; ++i)
 			writeByte(utf[i]);
 	}
-	
+
 	public void writeUTFBytes(char[] utf) {
 		for(int i = 0; i < utf.length; ++i)
 			writeByte((byte) utf[i]);
 	}
-	
+
 	public int readVarInt() {
 		int val4 = 0;
 		int val1 = 0;
@@ -187,7 +187,7 @@ public class ByteArray {
 			if(!val3)
 				return val1;
 		}
-		return -1;
+		throw new Error("Too much data");
 	}
 	
 	public int readVarShort() {
@@ -209,9 +209,9 @@ public class ByteArray {
 				return var1;
 			}
 		}
-		return -1;
+		throw new Error("Too much data");
 	}
-	
+
 	public void writeVarInt(int i) {
 		int var5 = 0;
 		ByteArray var2 = new ByteArray();
@@ -226,13 +226,13 @@ public class ByteArray {
 			var4.writeByte((byte) (var3 & MASK_01111111));
 			var5 = var3 & MASK_01111111;
 			var3 = var3 >>> CHUNCK_BIT_SIZE;
-			if(var3 > 0)
-				var5 = var5 | MASK_10000000;
-			var2.writeByte((byte) var5);
+				if(var3 > 0)
+					var5 = var5 | MASK_10000000;
+				var2.writeByte((byte) var5);
 		}
 		writeBytes(var2);
 	}
-	
+
 	public void writeVarShort(int s) {
 		int var5 = 0;
 		ByteArray var2 = new ByteArray();
@@ -253,7 +253,7 @@ public class ByteArray {
 		}
 		writeBytes(var2);
 	}
-	
+
 	public void writeVarLong(long l) {
 		int var3 = 0;
 		long var2_high = Long.highestOneBit(l);
