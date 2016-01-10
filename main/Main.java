@@ -1,8 +1,13 @@
 package main;
-import java.io.IOException;
+
 import java.io.InputStream;
 import java.net.Socket;
-import java.net.UnknownHostException;
+import java.util.Stack;
+
+import utilities.ByteArray;
+import utilities.Log;
+import messages.IdentificationMessage;
+import messages.ReceivedMessage;
 
 public class Main {
 	public static void main(String[] args) {
@@ -12,7 +17,7 @@ public class Main {
 			InputStream is = socket.getInputStream();
 			byte[] buffer = new byte[8192];
 			
-			System.out.println("Connecting to server, waiting response...");
+			Log.p("Connecting to server, waiting response...");
 			int bytesReceived = 0;
 			while(true) {
 				bytesReceived = is.read(buffer);
@@ -20,25 +25,25 @@ public class Main {
 					break;
 				System.out.println();
 				System.out.println(bytesReceived + " bytes received.");
-				Reader.processBuffer(new ByteArray(buffer, bytesReceived));
+				processMsgStack(Reader.processBuffer(new ByteArray(buffer, bytesReceived)));
 			}
-			System.out.println("Deconnected from authentification server.");
+			Log.p("Deconnected from authentification server.");
 
 			is.close();
 			socket.close();		
-		} catch (UnknownHostException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}	
+		}
+	}
+	
+	public static void processMsgStack(Stack<ReceivedMessage> msgStack) {
+		ReceivedMessage msg;
+		while(!msgStack.empty()) {
+			msg = msgStack.pop();
+			switch(msg.getId()) {
+				case 3 : Sender.getInstance().send(new IdentificationMessage(msg.getContent())); break;
+				default : return;
+			}
+		}
 	}
 }
-
-/*
-Emission e=new Emission(s.getOutputStream());
-Reception r=new Reception(s.getInputStream());
-Thread t1=new Thread(new Emission(s.getOutputStream()));
-t1.start();
-Thread t2=new Thread(new Reception(s.getInputStream()));
-t2.start();
-*/

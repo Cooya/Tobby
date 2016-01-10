@@ -1,4 +1,4 @@
-package main;
+package utilities;
 
 import messages.Message;
 import messages.MessageName;

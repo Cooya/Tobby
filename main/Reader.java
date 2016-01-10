@@ -1,31 +1,38 @@
 package main;
 
+import java.util.Stack;
+
+import utilities.ByteArray;
+import utilities.Log;
 import messages.ReceivedMessage;
 
 public class Reader {
 	private static ReceivedMessage incompleteMsg; // message incomplet qui attend d'être complété
 	
-	public static void processBuffer(ByteArray buffer) {
+	public static Stack<ReceivedMessage> processBuffer(ByteArray buffer) {
+		Stack<ReceivedMessage> msgStack = new Stack<ReceivedMessage>();
+		
 		if(incompleteMsg != null) {
 			buffer.readBytes(incompleteMsg.appendContent(buffer.bytes()));
 			if(incompleteMsg.isComplete()) {
 				Log.p("r", incompleteMsg);
-				Manager.processMessage(incompleteMsg);
+				msgStack.push(incompleteMsg);
 				incompleteMsg = null;
 			}
 			else
-				return; // si le message est incomplet, cela signifie qu'il n'y a plus rien à lire dans le buffer
+				return msgStack; // si le message est incomplet, cela signifie qu'il n'y a plus rien à lire dans le buffer
 		}
 		while(!buffer.endOfArray()) {
 			ReceivedMessage msg = extractMsgFromBuffer(buffer.bytesFromPos());
 			if(msg.isComplete()) {
 				Log.p("r", msg);
-				Manager.processMessage(msg);
+				msgStack.push(msg);
 			}
 			else
 				incompleteMsg = msg;
 			buffer.readBytes(msg.getTotalSize());
 		}
+		return msgStack;
 	}
 	
 	private static ReceivedMessage extractMsgFromBuffer(byte[] buffer) {

@@ -1,4 +1,4 @@
-package main;
+package utilities;
 
 public class ByteArray {	
     private static final int INT_SIZE = 32;  
@@ -111,8 +111,7 @@ public class ByteArray {
 	}
 	
 	public short readShort() { // un short est toujours signé en Java
-		short s = (short) ((short) this.array[this.pos] * 256 + this.array[this.pos + 1]);
-		this.pos += 2;
+		short s = (short) ((short) readByte() * 256 + readByte());
 		return s;
 	}
 	
@@ -120,8 +119,7 @@ public class ByteArray {
 		int len = readShort();
 		char[] utf = new char[len];
 		for(int i = 0; i < len; ++i)
-			utf[i] = (char) this.array[this.pos++];
-		//utf[len] = '\0';
+			utf[i] = (char) readByte();
 		return utf;
 	}
 	

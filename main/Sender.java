@@ -2,6 +2,8 @@ package main;
 
 import java.io.OutputStream;
 
+import utilities.ByteArray;
+import utilities.Log;
 import messages.Message;
 
 public class Sender implements Runnable {

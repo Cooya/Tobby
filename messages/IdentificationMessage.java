@@ -1,7 +1,7 @@
 package messages;
 
-import main.ByteArray;
-import main.Encryption;
+import utilities.ByteArray;
+import utilities.Encryption;
 
 public class IdentificationMessage extends Message {
 	private static final short id = 4;
