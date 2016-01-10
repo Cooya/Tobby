@@ -42,11 +42,12 @@ public class Encryption {
 	private static byte[] encryptCredentials(byte[] key, char[] login, char[] password, char[] salt) {
 		byte[] encryptedCredentials = null;
 		ByteArray buffer = new ByteArray();
-		buffer.writeBytes(new String(salt).getBytes());
+		buffer.writeUTFBytes(salt);
 		buffer.writeBytes(generateRandomAESKey());
 		buffer.writeByte((byte) login.length);
-		buffer.writeUTFBytes(new String(login).toCharArray());
-		buffer.writeUTFBytes(new String(password).toCharArray());
+		buffer.writeUTFBytes(login);
+		buffer.writeUTFBytes(password);
+		
 		try {
 			KeyFactory kf = KeyFactory.getInstance("RSA");
 			X509EncodedKeySpec spec = new X509EncodedKeySpec(key);

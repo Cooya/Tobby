@@ -2,12 +2,12 @@ package utilities;
 
 public class ByteArray {	
     private static final int INT_SIZE = 32;  
-    //private static final int SHORT_SIZE = 16;
-    private static final int SHORT_MIN_VALUE = -32768;
+    private static final int SHORT_SIZE = 16;
+    //private static final int SHORT_MIN_VALUE = -32768;
     private static final int SHORT_MAX_VALUE = 32767;
-    //private static final int UNSIGNED_SHORT_MAX_VALUE = 65536;
+    private static final int UNSIGNED_SHORT_MAX_VALUE = 65536;
     private static final int CHUNCK_BIT_SIZE = 7;
-   // private static final int MAX_ENCODING_LENGTH = (int) Math.ceil(INT_SIZE / CHUNCK_BIT_SIZE);
+    //private static final int MAX_ENCODING_LENGTH = (int) Math.ceil(INT_SIZE / CHUNCK_BIT_SIZE);
     private static final int MASK_10000000 = 128;
     private static final int MASK_01111111 = 127;
 	private static final char[] hexArray = "0123456789ABCDEF".toCharArray();
@@ -103,6 +103,10 @@ public class ByteArray {
 		return this.array[this.pos++];
 	}
 	
+	public boolean readBoolean() {
+		return readByte() == 1 ? true : false;
+	}
+	
 	public byte[] readBytes(int size) {
 		byte[] bytes = new byte[size];
 		for(int i = 0; i < size; ++i)
@@ -124,7 +128,6 @@ public class ByteArray {
 	}
 	
 	public void writeByte(byte b) {
-		assert(this.pos >= this.array.length);
 		this.array[this.pos++] = b;
 		this.size++;
 	}
@@ -157,6 +160,12 @@ public class ByteArray {
 			writeByte((byte) utf[i]);
 	}
 	
+	public void writeUTF(byte[] utf) {
+		writeShort((short) utf.length);
+		for(int i = 0; i < utf.length; ++i)
+			writeByte(utf[i]);
+	}
+	
 	public void writeUTFBytes(char[] utf) {
 		for(int i = 0; i < utf.length; ++i)
 			writeByte((byte) utf[i]);
@@ -178,8 +187,29 @@ public class ByteArray {
 			if(!val3)
 				return val1;
 		}
-		assert true;
-		return 0;
+		return -1;
+	}
+	
+	public int readVarShort() {
+		int var4 = 0;
+		int var1 = 0;
+		int var2 = 0;
+		boolean var3 = false;
+		while(var2 < SHORT_SIZE) {
+			var4 = readByte();
+			var3 = (var4 & MASK_10000000) == MASK_10000000;
+			if(var2 > 0)
+				var1 += (var4 & MASK_01111111) << var2;
+			else
+				var1 += var4 & MASK_01111111;
+			var2 += CHUNCK_BIT_SIZE;
+			if(!var3) {
+				if(var1 > SHORT_MAX_VALUE)
+					var1 -= UNSIGNED_SHORT_MAX_VALUE;
+				return var1;
+			}
+		}
+		return -1;
 	}
 	
 	public void writeVarInt(int i) {
@@ -205,7 +235,6 @@ public class ByteArray {
 	
 	public void writeVarShort(int s) {
 		int var5 = 0;
-		assert(s > SHORT_MAX_VALUE || s < SHORT_MIN_VALUE);
 		ByteArray var2 = new ByteArray();
 		if(s >= 0 && s <= MASK_01111111) {
 			var2.writeByte((byte) s);

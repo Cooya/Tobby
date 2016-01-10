@@ -27,7 +27,7 @@ public class IdentificationMessage extends Message {
 	}
 	
 	private void serializeIM() {
-		byte[] credentials = Encryption.encrypt(this.key, login.toCharArray(), password.toCharArray(), this.salt);	
+		byte[] credentials = Encryption.encrypt(this.key, login.toCharArray(), password.toCharArray(), this.salt);
 		ByteArray buffer = new ByteArray();
 		buffer.writeByte((byte) 1);
 		writeVersion(buffer, 2, 32, 4, 100752, 1, 0, 1, 1);
