@@ -26,8 +26,9 @@ public class AuthentificationTicketMessage extends Message {
 		this.canCreateNewCharacter = array.readBoolean();
 		this.ticket = array.readBytes(array.readVarInt());
 		
-		short counter = array.readShort();
-		for(int i = 0; i < counter; ++i)
+		short size = array.readShort();
+		this.serverIds = new int[size];
+		for(int i = 0; i < size; ++i)
 			this.serverIds[i] = array.readVarShort();
 	}
 	

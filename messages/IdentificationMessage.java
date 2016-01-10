@@ -34,7 +34,7 @@ public class IdentificationMessage extends Message {
 		buffer.writeUTF("fr".toCharArray());
 		buffer.writeVarInt(credentials.length);
 		buffer.writeBytes(credentials);
-		buffer.writeShort((short) 0);
+		buffer.writeShort((short) 0); // serveur ID automatique
 		buffer.writeByte((byte) 0);
 		buffer.writeByte((byte) 0);
 		buffer.writeByte((byte) 0);

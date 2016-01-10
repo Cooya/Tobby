@@ -15,11 +15,14 @@ public class Main {
 	private static final String authServerIP = "213.248.126.39";
 	private static final int port = 5555;
 	private static String gameServerIP;
+	private static AuthentificationTicketMessage ATM;
 	
 	public static void main(String[] args) {
+		Log.p("Connecting to authentification server, waiting response...");
 		connection(authServerIP);
 		Log.p("Deconnected from authentification server.");
 		if(gameServerIP != null) {
+			Log.p("Connecting to game server, waiting response...");
 			connection(gameServerIP);
 			Log.p("Deconnected from game server.");
 		}
@@ -32,14 +35,12 @@ public class Main {
 			InputStream is = socket.getInputStream();
 			byte[] buffer = new byte[8192];
 			
-			Log.p("Connecting to server, waiting response...");
 			int bytesReceived = 0;
 			while(true) {
 				bytesReceived = is.read(buffer);
 				if(bytesReceived == -1)
 					break;
-				System.out.println();
-				System.out.println(bytesReceived + " bytes received.");
+				Log.p(bytesReceived + " bytes received.");
 				processMsgStack(Reader.processBuffer(new ByteArray(buffer, bytesReceived)));
 			}
 			
@@ -52,14 +53,13 @@ public class Main {
 	
 	public static void processMsgStack(Stack<ReceivedMessage> msgStack) {
 		ReceivedMessage msg;
-		AuthentificationTicketMessage ATM = null;
 		while(!msgStack.empty()) {
 			msg = msgStack.pop();
 			switch(msg.getId()) {
 				case 3 : Sender.getInstance().send(new IdentificationMessage(msg.getContent())); break;
 				case 20 : new IdentificationFailedMessage(msg.getContent()); break;
-				case 6469 : ATM = new AuthentificationTicketMessage(msg.getContent()); gameServerIP = ATM.getIP().toString(); break;
-				case 101 : Sender.getInstance().send(ATM);
+				case 6469 : ATM = new AuthentificationTicketMessage(msg.getContent()); gameServerIP = new String(ATM.getIP()); break;
+				case 101 : Sender.getInstance().send(ATM); break;
 				default : return;
 			}
 		}
