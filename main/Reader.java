@@ -5,37 +5,41 @@ import messages.ReceivedMessage;
 public class Reader {
 	private static ReceivedMessage incompleteMsg; // message incomplet qui attend d'être complété
 	
-	public static void processBuffer(byte[] buffer, int bytesReceived) {
-		int read = 0;
+	public static void processBuffer(ByteArray buffer) {
 		if(incompleteMsg != null) {
-			read += incompleteMsg.appendContent(buffer);
+			buffer.readBytes(incompleteMsg.appendContent(buffer.bytes()));
 			if(incompleteMsg.isComplete()) {
+				Log.p("r", incompleteMsg);
 				Manager.processMessage(incompleteMsg);
 				incompleteMsg = null;
-				buffer = shiftArray(buffer, read);
 			}
 			else
 				return; // si le message est incomplet, cela signifie qu'il n'y a plus rien à lire dans le buffer
 		}
-		while(read < bytesReceived) {
-			ReceivedMessage msg = extractMsgFromBuffer(buffer);
-			if(msg.isComplete())
+		while(!buffer.endOfArray()) {
+			ReceivedMessage msg = extractMsgFromBuffer(buffer.bytesFromPos());
+			if(msg.isComplete()) {
+				Log.p("r", msg);
 				Manager.processMessage(msg);
+			}
 			else
 				incompleteMsg = msg;
-			read += msg.getTotalSize();
-			buffer = shiftArray(buffer, read);
+			buffer.readBytes(msg.getTotalSize());
 		}
 	}
 	
-	private static ReceivedMessage extractMsgFromBuffer(byte[] buffer) {	
-		short header = (short) (buffer[0] << 8 | buffer[1]);
+	private static ReceivedMessage extractMsgFromBuffer(byte[] buffer) {
+		char[] cbuffer = new char[buffer.length];
+		for(int i = 0; i < buffer.length; ++i)
+			cbuffer[i] = (char) (buffer[i] & 0xFF);
+		
+		int header = cbuffer[0] << 8 | cbuffer[1];
 		short id = (short) (header >> 2);
 		short lenofsize = (short) (header & 3);
 		int size;
 		if(lenofsize == 0)
 	        size = 0;
-	    else if(lenofsize  == 1)
+	    else if(lenofsize == 1)
 	        size = buffer[2];
 	    else if(lenofsize == 2)
 	        size = (buffer[2] << 8 | buffer[3]);
@@ -46,12 +50,5 @@ public class Reader {
 		for(int i = 2 + lenofsize; i < size + 2 + lenofsize; ++i, ++counter)
 			content[counter] = buffer[i];
 	    return new ReceivedMessage(id, lenofsize, size, content, counter);		
-	}
-	
-	private static byte[] shiftArray(byte[] array, int from) { // suppression des octets traités dans le buffer
-		byte[] newArray = new byte[array.length - from];
-		for(int i = 0; i < array.length - from; ++i)
-			newArray[i] = array[i + from];
-		return newArray;
 	}
 }

@@ -2,23 +2,14 @@ package messages;
 
 
 public class ReceivedMessage extends Message {
-	private int bytesAvailables;
+	private int contentBytesAvailables; // nombre d'octets du contenu acquis
 	private boolean complete;
 
 	public ReceivedMessage(short id, short lenofsize, int size, byte[] content, int bytesAvailables) {
 		super(id, lenofsize, size, content);
 		assert bytesAvailables > size;
-		this.bytesAvailables = bytesAvailables;
+		this.contentBytesAvailables = bytesAvailables;
 		this.complete = bytesAvailables == size;
-		
-		System.out.println();
-		System.out.println("Receiving message " + id + " (" + MessageName.get(id) + ")");
-		if(lenofsize > 1)
-			System.out.println("Length of size : " + lenofsize + " bytes");
-		else
-			System.out.println("Length of size : " + lenofsize + " byte");
-		System.out.println("Size : " + size + " bytes");
-		System.out.println("Complete : " + complete);
 	}
 	
 	public boolean isComplete() {
@@ -26,16 +17,20 @@ public class ReceivedMessage extends Message {
 	}
 	
 	public int getTotalSize() {
-		return this.bytesAvailables + 2 + this.lenofsize;
+		return this.contentBytesAvailables + 2 + this.lenofsize;
 	}
 	
 	public int appendContent(byte[] buffer) {
-		int read = 0;
-		for(; read < this.size - this.bytesAvailables; ++read)
-			this.content[this.bytesAvailables + read] = buffer[read];
-		this.bytesAvailables += read;
-		this.complete = bytesAvailables == size;
-		return read;
+		int additionSize;
+		if(buffer.length > this.size - this.contentBytesAvailables)
+			additionSize = this.size - this.contentBytesAvailables;
+		else
+			additionSize = buffer.length;
+		for(int read = 0; read < additionSize; ++read)
+			this.content[this.contentBytesAvailables + read] = buffer[read];
+		this.contentBytesAvailables += additionSize;
+		this.complete = contentBytesAvailables == size;
+		return additionSize;
 	}
 
 }

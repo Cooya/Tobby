@@ -33,6 +33,14 @@ public class ByteArray {
 		this.size = 0;
 	}
 	
+	public ByteArray(byte[] array, int size) {
+		this.array = new byte[size];
+		for(int i = 0; i < size; ++i)
+			this.array[i] = array[i];
+		this.pos = 0;
+		this.size = size;
+	}
+	
 	public int getPos() {
 		return this.pos;
 	}
@@ -41,13 +49,25 @@ public class ByteArray {
 		return this.size;
 	}
 	
-	public static void printBytes(byte[] bytes, String format) {
+	public int remaining() {
+		return this.size - this.pos;
+	}
+	
+	public boolean endOfArray() {
+		return this.pos == this.size;
+	}
+	
+	public static void printBytes(byte[] bytes, String format, int size) {
 		System.out.print(bytes.length + " bytes : ");
 		if(format == "dec")
-			for(int i = 0; i < bytes.length; ++i)
+			for(int i = 0; i < size; ++i)
 				System.out.print(bytes[i] + " ");
-		else if (format == "hex")
+		else if(format == "hex")
 			System.out.println(bytesToHex(bytes));
+	}
+	
+	public static void printBytes(byte[] bytes, String format) {
+		printBytes(bytes, format, bytes.length);
 	}
 	
 	public static String bytesToHex(byte[] bytes) {
@@ -63,6 +83,13 @@ public class ByteArray {
 	
 	public void printArray(String format) {
 		printBytes(bytes(), format);
+	}
+	
+	public byte[] bytesFromPos() {
+		byte[] clone = new byte[this.size - this.pos];
+		for(int i = 0; i < clone.length; ++i)
+			clone[i] = this.array[i + this.pos];
+		return clone;
 	}
 	
 	public byte[] bytes() {
@@ -129,14 +156,12 @@ public class ByteArray {
 	public void writeUTF(char[] utf) {
 		writeShort((short) utf.length);
 		for(int i = 0; i < utf.length; ++i)
-			this.array[this.pos++ + i ] = (byte) utf[i];
-		this.size += utf.length + 2;
+			writeByte((byte) utf[i]);
 	}
 	
 	public void writeUTFBytes(char[] utf) {
 		for(int i = 0; i < utf.length; ++i)
-			this.array[this.pos++ + i ] = (byte) utf[i];
-		this.size += utf.length;
+			writeByte((byte) utf[i]);
 	}
 	
 	public int readVarInt() {

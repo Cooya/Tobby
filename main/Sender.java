@@ -3,12 +3,10 @@ package main;
 import java.io.OutputStream;
 
 import messages.Message;
-import messages.MessageName;
 
 public class Sender implements Runnable {
 	private static Sender sender = null;
 	private OutputStream outputStream;
-	private Message currentMsg = null;
 	private byte[] toSend;
 	
 	private Sender(OutputStream outputStream) {
@@ -29,7 +27,6 @@ public class Sender implements Runnable {
 		int size = msg.getSize();
 		byte[] content = msg.getContent();
 		assert(lenofsize == 0 || size == 0 || content == null);
-		this.currentMsg = msg;
 		
 		byte[] header = makeHeader(id, lenofsize, size);
 		toSend = new byte[header.length + size];
@@ -37,6 +34,7 @@ public class Sender implements Runnable {
 			toSend[i] = header[i];
 		for(int i = 0; i < size; ++i)
 			toSend[i + header.length] = content[i];
+		Log.p("s", msg);
 		run();
 	}
 	
@@ -55,17 +53,9 @@ public class Sender implements Runnable {
 	
 	public void run() {
 		try {
-			System.out.println();
-			System.out.println("Sending message " + currentMsg.getId() + " (" + MessageName.get(currentMsg.getId()) + ")");
-			if(currentMsg.getLenOfSize() > 1)
-				System.out.println("Length of size : " + currentMsg.getLenOfSize() + " bytes");
-			else
-				System.out.println("Length of size : " + currentMsg.getLenOfSize() + " byte");
-			System.out.println("Size : " + currentMsg.getSize() + " bytes");
 			outputStream.write(this.toSend);
 			outputStream.flush();
 			this.toSend = null;
-			this.currentMsg = null;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

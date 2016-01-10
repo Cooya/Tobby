@@ -20,7 +20,7 @@ public class Main {
 					break;
 				System.out.println();
 				System.out.println(bytesReceived + " bytes received.");
-				Reader.processBuffer(buffer, bytesReceived);
+				Reader.processBuffer(new ByteArray(buffer, bytesReceived));
 			}
 			System.out.println("Deconnected from authentification server.");
 
