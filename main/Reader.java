@@ -3,7 +3,6 @@ package main;
 import java.util.Stack;
 
 import utilities.ByteArray;
-import utilities.Log;
 import messages.ReceivedMessage;
 
 public class Reader {
@@ -15,7 +14,6 @@ public class Reader {
 		if(incompleteMsg != null) {
 			buffer.readBytes(incompleteMsg.appendContent(buffer.bytes()));
 			if(incompleteMsg.isComplete()) {
-				Log.p("r", incompleteMsg);
 				msgStack.push(incompleteMsg);
 				incompleteMsg = null;
 			}
@@ -24,10 +22,8 @@ public class Reader {
 		}
 		while(!buffer.endOfArray()) {
 			ReceivedMessage msg = extractMsgFromBuffer(buffer.bytesFromPos());
-			if(msg.isComplete()) {
-				Log.p("r", msg);
+			if(msg.isComplete())
 				msgStack.push(msg);
-			}
 			else
 				incompleteMsg = msg;
 			buffer.readBytes(msg.getTotalSize());

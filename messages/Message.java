@@ -1,12 +1,12 @@
 package messages;
 
 public abstract class Message {
-	protected short id;
-	protected short lenofsize;
+	protected int id;
+	protected int lenofsize;
 	protected int size;
 	protected byte[] content;
 	
-	public Message(short id, short lenofsize, int size, byte[] content) {
+	public Message(int id, int lenofsize, int size, byte[] content) {
 		this.id = id;
 		this.lenofsize = lenofsize;
 		this.size = size;
@@ -21,11 +21,11 @@ public abstract class Message {
 		}
 	}
 	
-	public short getId() {
+	public int getId() {
 		return this.id;
 	}
 
-	public short getLenOfSize() {
+	public int getLenOfSize() {
 		return this.lenofsize;
 	}
 	

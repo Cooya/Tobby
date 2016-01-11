@@ -4,17 +4,18 @@ import utilities.ByteArray;
 import utilities.Encryption;
 
 public class AuthentificationTicketMessage extends Message {
-	private static final short id = 110;
-	
+	@SuppressWarnings("unused")
 	private int serverId;
 	private String address;
+	@SuppressWarnings("unused")
 	private int port;
+	@SuppressWarnings("unused")
 	private boolean canCreateNewCharacter;
 	private byte[] ticket;
 	private int[] serverIds;
 	
 	public AuthentificationTicketMessage(byte[] content) {
-		super(id, (short) 0, 0, null);
+		super(110, (short) 0, 0, null);
 		deserializeSSDEM(content);
 		serializeATM(content);
 	}

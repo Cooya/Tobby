@@ -3,10 +3,8 @@ package messages;
 import utilities.Log;
 
 public class IdentificationFailedMessage extends Message {
-	private static final short id = 20;
-
 	public IdentificationFailedMessage(byte[] content) {
-		super(id, (short) 0, 0, null);
+		super(20, (short) 0, 0, null);
 		deserialize(content);
 	}
 

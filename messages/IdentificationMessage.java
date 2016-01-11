@@ -4,7 +4,6 @@ import utilities.ByteArray;
 import utilities.Encryption;
 
 public class IdentificationMessage extends Message {
-	private static final short id = 4;
 	private static final String login = "maxlebgdu93";
 	private static final String password = "represente";
 	
@@ -14,7 +13,7 @@ public class IdentificationMessage extends Message {
 	private byte[] key;
 	
 	public IdentificationMessage(byte[] content) {
-		super(id, (short) 0, 0, null);
+		super(4, (short) 0, 0, null);
 		deserializeHCM(content);
 		serializeIM();
 	}

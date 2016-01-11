@@ -9,6 +9,7 @@ import utilities.Log;
 import messages.AuthentificationTicketMessage;
 import messages.IdentificationFailedMessage;
 import messages.IdentificationMessage;
+import messages.RawDataMessage;
 import messages.ReceivedMessage;
 
 public class Main {
@@ -55,11 +56,13 @@ public class Main {
 		ReceivedMessage msg;
 		while(!msgStack.empty()) {
 			msg = msgStack.pop();
+			Log.p("r", msg);
 			switch(msg.getId()) {
 				case 3 : Sender.getInstance().send(new IdentificationMessage(msg.getContent())); break;
 				case 20 : new IdentificationFailedMessage(msg.getContent()); break;
 				case 6469 : ATM = new AuthentificationTicketMessage(msg.getContent()); gameServerIP = new String(ATM.getIP()); break;
-				case 101 : Sender.getInstance().send(ATM); break;
+				case 101 : Sender.getInstance().send(ATM); ATM = null; break;
+				case 6253 : new RawDataMessage(msg); break;
 				default : return;
 			}
 		}

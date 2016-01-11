@@ -25,7 +25,7 @@ public class Sender implements Runnable {
 	
 	public void send(Message msg) {
 		int id = msg.getId();
-		short lenofsize = msg.getLenOfSize();
+		int lenofsize = msg.getLenOfSize();
 		int size = msg.getSize();
 		byte[] content = msg.getContent();
 		assert(lenofsize == 0 || size == 0 || content == null);
@@ -40,7 +40,7 @@ public class Sender implements Runnable {
 		run();
 	}
 	
-	static byte[] makeHeader(int id, short lenofsize, int size) {
+	static byte[] makeHeader(int id, int lenofsize, int size) {
 		short header =  (short) (id << 2 | lenofsize);
 		ByteArray array = new ByteArray();
 		array.writeShort(header);
