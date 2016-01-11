@@ -7,7 +7,6 @@ public class ReceivedMessage extends Message {
 
 	public ReceivedMessage(short id, short lenofsize, int size, byte[] content, int bytesAvailables) {
 		super(id, lenofsize, size, content);
-		assert bytesAvailables > size;
 		this.contentBytesAvailables = bytesAvailables;
 		this.complete = bytesAvailables == size;
 	}
@@ -25,7 +24,7 @@ public class ReceivedMessage extends Message {
 		if(buffer.length > this.size - this.contentBytesAvailables)
 			additionSize = this.size - this.contentBytesAvailables;
 		else
-			additionSize = buffer.length;
+			additionSize = buffer.length;	
 		for(int read = 0; read < additionSize; ++read)
 			this.content[this.contentBytesAvailables + read] = buffer[read];
 		this.contentBytesAvailables += additionSize;

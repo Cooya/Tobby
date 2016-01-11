@@ -1,6 +1,7 @@
 package messages;
 
 import utilities.ByteArray;
+import utilities.Encryption;
 
 public class AuthentificationTicketMessage extends Message {
 	private static final short id = 110;
@@ -35,7 +36,7 @@ public class AuthentificationTicketMessage extends Message {
 	private void serializeATM(byte[] content) {
 		ByteArray buffer = new ByteArray(content);
 	    buffer.writeUTF("fr".toCharArray());
-	    buffer.writeUTF(this.ticket);
+	    buffer.writeUTF(Encryption.decodeWithAES(this.ticket));
 	    
 	    this.size = buffer.getSize();
 	    this.lenofsize = computeLenOfSize(this.size);

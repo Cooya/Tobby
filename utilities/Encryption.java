@@ -3,11 +3,15 @@ package utilities;
 import java.security.KeyFactory;
 import java.security.PublicKey;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.Arrays;
 import java.util.Base64;
 
 import javax.crypto.Cipher;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 
 public class Encryption {
+	private static byte[] randomAESKey = null;
 	private static final int AES_KEY_LENGTH = 32;
 	private static final String publicKey = 
 		"MIIBUzANBgkqhkiG9w0BAQEFAAOCAUAAMIIBOwKCATIAgucoka9J2PXcNdjcu6CuDmgteIMB+rih" +
@@ -43,7 +47,8 @@ public class Encryption {
 		byte[] encryptedCredentials = null;
 		ByteArray buffer = new ByteArray();
 		buffer.writeUTFBytes(salt);
-		buffer.writeBytes(generateRandomAESKey());
+		randomAESKey = generateRandomAESKey();
+		buffer.writeBytes(randomAESKey);
 		buffer.writeByte((byte) login.length);
 		buffer.writeUTFBytes(login);
 		buffer.writeUTFBytes(password);
@@ -61,10 +66,25 @@ public class Encryption {
 		return encryptedCredentials;
 	}
 	
-	private static ByteArray generateRandomAESKey() {
-		ByteArray array = new ByteArray();
+	private static byte[] generateRandomAESKey() {
+		byte[] key = new byte[AES_KEY_LENGTH];
 		for(int i = 0; i < AES_KEY_LENGTH; ++i)
-			array.writeByte((byte) Math.floor(Math.random() * 256));
-		return array;
+			key[i] = (byte) Math.floor(Math.random() * 256);
+		return key;
+	}
+	
+	public static byte[] decodeWithAES(byte[] ticket) {
+		byte[] decryptedTicket = null;
+		try {
+			SecretKeySpec AESKeySpec = new SecretKeySpec(randomAESKey, "AES");
+			Cipher cipher = Cipher.getInstance("AES/CBC/NoPadding");
+		    IvParameterSpec ivspec = new IvParameterSpec(Arrays.copyOf(randomAESKey, 16));
+			cipher.init(Cipher.DECRYPT_MODE, AESKeySpec, ivspec);
+			decryptedTicket = cipher.doFinal(ticket);
+			randomAESKey = null;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return decryptedTicket;
 	}
 }

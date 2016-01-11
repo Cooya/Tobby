@@ -49,12 +49,14 @@ public class Reader {
 	    else if(lenofsize == 1)
 	        size = buffer[2];
 	    else if(lenofsize == 2)
-	        size = (buffer[2] << 8 | buffer[3]);
+	        size = buffer[2] * 256 + buffer[3];
 	    else // lenofsize = 3
-	        size = ((buffer[2] << 16 | buffer[3] << 8) | buffer[4]);
-		byte[] content = new byte[size];
+	        //size = (((int) buffer[2] << 16 | (int) buffer[3] << 8) | (int) buffer[4]);
+	    	size = buffer[2] * 65536 + buffer[3] * 256 + buffer[4];	
+		int bytesAvailable = size > buffer.length - 2 - lenofsize ? buffer.length - 2 - lenofsize : size;
+		byte[] content = new byte[bytesAvailable];
 		int counter = 0;
-		for(int i = 2 + lenofsize; i < size + 2 + lenofsize; ++i, ++counter)
+		for(int i = 2 + lenofsize; i < bytesAvailable + 2 + lenofsize; ++i, ++counter)
 			content[counter] = buffer[i];
 	    return new ReceivedMessage(id, lenofsize, size, content, counter);		
 	}

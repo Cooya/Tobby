@@ -59,15 +59,26 @@ public class ByteArray {
 
 	public static void printBytes(byte[] bytes, String format, int size) {
 		System.out.print(bytes.length + " bytes : ");
-		if(format == "dec")
+		if(format == "dec") {
 			for(int i = 0; i < size; ++i)
 				System.out.print(bytes[i] + " ");
+			System.out.println();
+		}
 		else if(format == "hex")
 			System.out.println(bytesToHex(bytes));
+		else if(format == "ascii") {
+			for(int i = 0; i < size; ++i)
+				System.out.print((char) bytes[i]);
+			System.out.println();
+		}
 	}
-
+	
 	public static void printBytes(byte[] bytes, String format) {
 		printBytes(bytes, format, bytes.length);
+	}
+	
+	public static void printBytes(byte[] bytes) {
+		printBytes(bytes, "hex", bytes.length);
 	}
 
 	public static String bytesToHex(byte[] bytes) {
@@ -80,18 +91,14 @@ public class ByteArray {
 		}
 		return new String(hexChars);
 	}
-	
-	public static void printCharArray(char[] array) {
-		for(int i = 0; i < array.length; ++i)
-			System.out.print(array[i]);
-		System.out.println();
-	}
 
 	public void printArray(String format) {
 		printBytes(bytes(), format);
 	}
 
 	public byte[] bytesFromPos() {
+		if(this.size <= this.pos)	
+			throw new Error("Size lower than position");
 		byte[] clone = new byte[this.size - this.pos];
 		for(int i = 0; i < clone.length; ++i)
 			clone[i] = this.array[i + this.pos];

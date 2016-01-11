@@ -10,7 +10,15 @@ public abstract class Message {
 		this.id = id;
 		this.lenofsize = lenofsize;
 		this.size = size;
-		this.content = content;
+		if(content != null) {
+			if(content.length == size)		
+				this.content = content;
+			else {
+				this.content = new byte[size];
+				for(int i = 0; i < content.length; ++i)
+					this.content[i] = content[i];
+			}
+		}
 	}
 	
 	public short getId() {
