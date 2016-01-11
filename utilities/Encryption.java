@@ -22,7 +22,7 @@ public class Encryption {
 		"slALQVTykEZoAETKWpLBlSm92X/eXY2DdGf+a7vju9EigYbX0aXxQy2Ln2ZBWmUJyZE8B58CAwEA" +
 		"AQ==";
 	
-	public static byte[] encrypt(byte[] encryptedKey, char[] login, char[] password, char[] salt) {
+	public static byte[] encrypt(byte[] encryptedKey, String login, String password, String salt) {
 		byte[] decryptedKey = decryptReceivedKey(encryptedKey);
 		return encryptCredentials(decryptedKey, login, password, salt);
 	}
@@ -43,13 +43,13 @@ public class Encryption {
 		return resultKey;
 	}
 	
-	private static byte[] encryptCredentials(byte[] key, char[] login, char[] password, char[] salt) {
+	private static byte[] encryptCredentials(byte[] key, String login, String password, String salt) {
 		byte[] encryptedCredentials = null;
 		ByteArray buffer = new ByteArray();
 		buffer.writeUTFBytes(salt);
 		randomAESKey = generateRandomAESKey();
 		buffer.writeBytes(randomAESKey);
-		buffer.writeByte((byte) login.length);
+		buffer.writeByte((byte) login.length());
 		buffer.writeUTFBytes(login);
 		buffer.writeUTFBytes(password);
 		

@@ -7,7 +7,7 @@ public class AuthentificationTicketMessage extends Message {
 	private static final short id = 110;
 	
 	private int serverId;
-	private char[] address;
+	private String address;
 	private int port;
 	private boolean canCreateNewCharacter;
 	private byte[] ticket;
@@ -35,15 +35,15 @@ public class AuthentificationTicketMessage extends Message {
 	
 	private void serializeATM(byte[] content) {
 		ByteArray buffer = new ByteArray(content);
-	    buffer.writeUTF("fr".toCharArray());
-	    buffer.writeUTF(Encryption.decodeWithAES(this.ticket));
+	    buffer.writeUTF("fr");
+	    buffer.writeUTF(new String(Encryption.decodeWithAES(this.ticket)));
 	    
 	    this.size = buffer.getSize();
 	    this.lenofsize = computeLenOfSize(this.size);
 	    this.content = buffer.bytes();
 	}
 	
-	public char[] getIP() {
+	public String getIP() {
 		return this.address;
 	}
 }

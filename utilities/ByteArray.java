@@ -132,12 +132,12 @@ public class ByteArray {
 		return s;
 	}
 
-	public char[] readUTF() {
+	public String readUTF() {
 		int len = readShort();
 		char[] utf = new char[len];
 		for(int i = 0; i < len; ++i)
 			utf[i] = (char) readByte();
-		return utf;
+		return new String(utf);
 	}
 
 	public void writeByte(byte b) {
@@ -167,21 +167,17 @@ public class ByteArray {
 		writeByte((byte) (i));
 	}
 
-	public void writeUTF(char[] utf) {
-		writeShort((short) utf.length);
-		for(int i = 0; i < utf.length; ++i)
-			writeByte((byte) utf[i]);
+	public void writeUTF(String utf) {
+		int length = utf.length();
+		writeShort((short) length);
+		for(int i = 0; i < length; ++i)
+			writeByte((byte) utf.charAt(i));
 	}
 
-	public void writeUTF(byte[] utf) {
-		writeShort((short) utf.length);
-		for(int i = 0; i < utf.length; ++i)
-			writeByte(utf[i]);
-	}
-
-	public void writeUTFBytes(char[] utf) {
-		for(int i = 0; i < utf.length; ++i)
-			writeByte((byte) utf[i]);
+	public void writeUTFBytes(String utf) {
+		int length = utf.length();
+		for(int i = 0; i < length; ++i)
+			writeByte((byte) utf.charAt(i));
 	}
 
 	public int readVarInt() {

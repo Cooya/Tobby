@@ -9,7 +9,7 @@ public class IdentificationMessage extends Message {
 	private static final String password = "represente";
 	
 	// HCM
-	private char[] salt;
+	private String salt;
 	private int keySize;
 	private byte[] key;
 	
@@ -27,11 +27,11 @@ public class IdentificationMessage extends Message {
 	}
 	
 	private void serializeIM() {
-		byte[] credentials = Encryption.encrypt(this.key, login.toCharArray(), password.toCharArray(), this.salt);
+		byte[] credentials = Encryption.encrypt(this.key, login, password, this.salt);
 		ByteArray buffer = new ByteArray();
 		buffer.writeByte((byte) 1);
 		writeVersion(buffer, 2, 32, 4, 100752, 1, 0, 1, 1);
-		buffer.writeUTF("fr".toCharArray());
+		buffer.writeUTF("fr");
 		buffer.writeVarInt(credentials.length);
 		buffer.writeBytes(credentials);
 		buffer.writeShort((short) 0); // serveur ID automatique

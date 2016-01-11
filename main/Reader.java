@@ -47,12 +47,11 @@ public class Reader {
 		if(lenofsize == 0)
 	        size = 0;
 	    else if(lenofsize == 1)
-	        size = buffer[2];
+	        size = cbuffer[2];
 	    else if(lenofsize == 2)
-	        size = buffer[2] * 256 + buffer[3];
+	        size = cbuffer[2] << 8 | cbuffer[3];
 	    else // lenofsize = 3
-	        //size = (((int) buffer[2] << 16 | (int) buffer[3] << 8) | (int) buffer[4]);
-	    	size = buffer[2] * 65536 + buffer[3] * 256 + buffer[4];	
+	        size = (cbuffer[2] << 16 | cbuffer[3] << 8) | cbuffer[4];	
 		int bytesAvailable = size > buffer.length - 2 - lenofsize ? buffer.length - 2 - lenofsize : size;
 		byte[] content = new byte[bytesAvailable];
 		int counter = 0;
