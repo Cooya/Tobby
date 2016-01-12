@@ -2,7 +2,7 @@ package main;
 
 import java.io.InputStream;
 import java.net.Socket;
-import java.util.Stack;
+import java.util.LinkedList;
 
 import utilities.ByteArray;
 import utilities.Log;
@@ -52,10 +52,9 @@ public class Main {
 		}
 	}
 	
-	public static void processMsgStack(Stack<ReceivedMessage> msgStack) {
+	public static void processMsgStack(LinkedList<ReceivedMessage> msgStack) {
 		ReceivedMessage msg;
-		while(!msgStack.empty()) {
-			msg = msgStack.pop();
+		while((msg = msgStack.poll()) != null) {
 			Log.p("r", msg);
 			switch(msg.getId()) {
 				case 3 : Sender.getInstance().send(new IdentificationMessage(msg.getContent())); break;
@@ -63,7 +62,6 @@ public class Main {
 				case 6469 : ATM = new AuthentificationTicketMessage(msg.getContent()); gameServerIP = new String(ATM.getIP()); break;
 				case 101 : Sender.getInstance().send(ATM); ATM = null; break;
 				case 6253 : new RawDataMessage(msg); break;
-				default : return;
 			}
 		}
 	}

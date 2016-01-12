@@ -1,20 +1,19 @@
 package main;
 
-import java.util.Stack;
-
+import java.util.LinkedList;
 import utilities.ByteArray;
 import messages.ReceivedMessage;
 
 public class Reader {
 	private static ReceivedMessage incompleteMsg; // message incomplet qui attend d'être complété
 	
-	public static Stack<ReceivedMessage> processBuffer(ByteArray buffer) {
-		Stack<ReceivedMessage> msgStack = new Stack<ReceivedMessage>();
+	public static LinkedList<ReceivedMessage> processBuffer(ByteArray buffer) {
+		LinkedList<ReceivedMessage> msgStack = new LinkedList<ReceivedMessage>();
 		
 		if(incompleteMsg != null) {
 			buffer.readBytes(incompleteMsg.appendContent(buffer.bytes()));
 			if(incompleteMsg.isComplete()) {
-				msgStack.push(incompleteMsg);
+				msgStack.add(incompleteMsg);
 				incompleteMsg = null;
 			}
 			else
@@ -23,7 +22,7 @@ public class Reader {
 		while(!buffer.endOfArray()) {
 			ReceivedMessage msg = extractMsgFromBuffer(buffer.bytesFromPos());
 			if(msg.isComplete())
-				msgStack.push(msg);
+				msgStack.add(msg);
 			else
 				incompleteMsg = msg;
 			buffer.readBytes(msg.getTotalSize());

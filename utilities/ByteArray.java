@@ -30,7 +30,7 @@ public class ByteArray {
 	public ByteArray(byte[] array) {
 		this.array = array;
 		this.pos = 0;
-		this.size = 0;
+		this.size = array.length;
 	}
 
 	public ByteArray(byte[] array, int size) {
@@ -43,6 +43,14 @@ public class ByteArray {
 
 	public int getPos() {
 		return this.pos;
+	}
+	
+	public void incPos(int nb) {
+		this.pos += nb;
+	}
+	
+	public void setPos(int nb) {
+		this.pos = nb;
 	}
 
 	public int getSize() {
@@ -133,7 +141,10 @@ public class ByteArray {
 	}
 
 	public String readUTF() {
-		int len = readShort();
+		return readUTFBytes(readShort());
+	}
+	
+	public String readUTFBytes(int len) {
 		char[] utf = new char[len];
 		for(int i = 0; i < len; ++i)
 			utf[i] = (char) readByte();
@@ -168,10 +179,8 @@ public class ByteArray {
 	}
 
 	public void writeUTF(String utf) {
-		int length = utf.length();
-		writeShort((short) length);
-		for(int i = 0; i < length; ++i)
-			writeByte((byte) utf.charAt(i));
+		writeShort((short) utf.length());
+		writeUTFBytes(utf);
 	}
 
 	public void writeUTFBytes(String utf) {
