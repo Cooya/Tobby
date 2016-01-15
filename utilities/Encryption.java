@@ -13,7 +13,7 @@ import javax.crypto.spec.SecretKeySpec;
 public class Encryption {
 	private static byte[] randomAESKey = null;
 	private static final int AES_KEY_LENGTH = 32;
-	private static final String publicKey = 
+	private static final String publicKeyBase64 = 
 		"MIIBUzANBgkqhkiG9w0BAQEFAAOCAUAAMIIBOwKCATIAgucoka9J2PXcNdjcu6CuDmgteIMB+rih" +
 		"2UZJIuSoNT/0J/lEKL/W4UYbDA4U/6TDS0dkMhOpDsSCIDpO1gPG6+6JfhADRfIJItyHZflyXNUj" +
 		"WOBG4zuxc/L6wldgX24jKo+iCvlDTNUedE553lrfSU23Hwwzt3+doEfgkgAf0l4ZBez5Z/ldp9it" +
@@ -22,15 +22,10 @@ public class Encryption {
 		"slALQVTykEZoAETKWpLBlSm92X/eXY2DdGf+a7vju9EigYbX0aXxQy2Ln2ZBWmUJyZE8B58CAwEA" +
 		"AQ==";
 	
-	public static byte[] encrypt(byte[] encryptedKey, String login, String password, String salt) {
-		byte[] decryptedKey = decryptReceivedKey(encryptedKey);
-		return encryptCredentials(decryptedKey, login, password, salt);
-	}
-	
-	private static byte[] decryptReceivedKey(byte[] encryptedKey) {
+	public static byte[] decryptReceivedKey(byte[] encryptedKey) {
 		byte[] resultKey = null;
 		try {
-		    byte[] decodedKey = Base64.getDecoder().decode(publicKey);
+		    byte[] decodedKey = Base64.getDecoder().decode(publicKeyBase64);
 			X509EncodedKeySpec spec = new X509EncodedKeySpec(decodedKey);
 			KeyFactory kf = KeyFactory.getInstance("RSA");
 			PublicKey pk = kf.generatePublic(spec);
@@ -43,7 +38,19 @@ public class Encryption {
 		return resultKey;
 	}
 	
-	private static byte[] encryptCredentials(byte[] key, String login, String password, String salt) {
+	public static String makePEM(byte[] decryptedKey) {
+		String encodedKey = Base64.getEncoder().encodeToString(decryptedKey);
+		int len = encodedKey.length();
+		String resultKey = "";
+		for(int i = 0; i < len; i += 76)
+			if(i + 76 < len)	
+				resultKey += encodedKey.substring(i, i + 76) + '\n';
+			else
+				resultKey += encodedKey.substring(i, len - 1) + '\n';
+		return "-----BEGIN PUBLIC KEY-----\n" + resultKey + "-----END PUBLIC KEY-----";
+	}
+	
+	public static byte[] encryptCredentials(byte[] decryptedKey, String login, String password, String salt) {
 		byte[] encryptedCredentials = null;
 		ByteArray buffer = new ByteArray();
 		buffer.writeUTFBytes(salt);
@@ -55,7 +62,7 @@ public class Encryption {
 		
 		try {
 			KeyFactory kf = KeyFactory.getInstance("RSA");
-			X509EncodedKeySpec spec = new X509EncodedKeySpec(key);
+			X509EncodedKeySpec spec = new X509EncodedKeySpec(decryptedKey);
 			PublicKey publicKey = kf.generatePublic(spec);
 			Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
 			cipher.init(Cipher.ENCRYPT_MODE, publicKey);

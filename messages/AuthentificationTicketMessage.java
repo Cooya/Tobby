@@ -11,11 +11,11 @@ public class AuthentificationTicketMessage extends Message {
 	private int port;
 	@SuppressWarnings("unused")
 	private boolean canCreateNewCharacter;
-	private byte[] ticket;
-	private int[] serverIds;
+	private String ticket;
+	//private int[] serverIds;
 	
 	public AuthentificationTicketMessage(byte[] content) {
-		super(110, (short) 0, 0, null);
+		super(110, 0, 0, null);
 		deserializeSSDEM(content);
 		serializeATM();
 	}
@@ -26,12 +26,14 @@ public class AuthentificationTicketMessage extends Message {
 		this.address = array.readUTF();
 		this.port = array.readShort();
 		this.canCreateNewCharacter = array.readBoolean();
-		this.ticket = Encryption.decodeWithAES(array.readBytes(array.readVarInt()));
+		this.ticket = new String(Encryption.decodeWithAES(array.readBytes(array.readVarInt())));
 		
+		/*
 		short size = array.readShort();
 		this.serverIds = new int[size];
 		for(int i = 0; i < size; ++i)
 			this.serverIds[i] = array.readVarShort();
+		*/
 	}
 	
 	private void serializeATM() {
@@ -48,7 +50,7 @@ public class AuthentificationTicketMessage extends Message {
 		return this.address;
 	}
 	
-	public byte[] getTicket() {
+	public String getTicket() {
 		return this.ticket;
 	}
 }

@@ -38,7 +38,7 @@ public class ByteArray {
 		for(int i = 0; i < size; ++i)
 			this.array[i] = array[i];
 		this.pos = 0;
-		this.size = size;
+		this.size = size; // à corriger car c'est un peu bizarre
 	}
 
 	public int getPos() {
@@ -55,6 +55,10 @@ public class ByteArray {
 
 	public int getSize() {
 		return this.size;
+	}
+	
+	public void trimArray(int nb) {
+		this.size -= nb;
 	}
 
 	public int remaining() {

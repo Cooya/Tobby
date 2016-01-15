@@ -10,7 +10,8 @@ public class IdentificationMessage extends Message {
 	// HCM
 	private String salt;
 	private int keySize;
-	private byte[] key;
+	private byte[] encryptedPublicKey;
+	private byte[] decryptedPublicKey;
 	
 	public IdentificationMessage(byte[] content) {
 		super(4, (short) 0, 0, null);
@@ -22,16 +23,18 @@ public class IdentificationMessage extends Message {
 		ByteArray array = new ByteArray(content);
 		this.salt = array.readUTF();
 		this.keySize = array.readVarInt();
-		this.key = array.readBytes(keySize);
+		this.encryptedPublicKey = array.readBytes(keySize);
 	}
 	
 	private void serializeIM() {
-		byte[] credentials = Encryption.encrypt(this.key, login, password, this.salt);
+		this.decryptedPublicKey = Encryption.decryptReceivedKey(this.encryptedPublicKey);
+		byte[] credentials = Encryption.encryptCredentials(this.decryptedPublicKey, login, password, this.salt);
 		ByteArray buffer = new ByteArray();
-		buffer.writeByte((byte) 1);
+		buffer.writeByte((byte) 0);
 		writeVersion(buffer, 2, 32, 4, 100752, 1, 0, 1, 1);
 		buffer.writeUTF("fr");
 		buffer.writeVarInt(credentials.length);
+		
 		buffer.writeBytes(credentials);
 		buffer.writeShort((short) 0); // serveur ID automatique
 		buffer.writeByte((byte) 0);
@@ -54,5 +57,9 @@ public class IdentificationMessage extends Message {
 		array.writeByte((byte) buildType);
 		array.writeByte((byte) install);
 		array.writeByte((byte) technology);
+	}
+	
+	public byte[] getDecryptedPublicKey() {
+		return this.decryptedPublicKey;
 	}
 }

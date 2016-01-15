@@ -17,12 +17,17 @@ public class RawDataMessage extends Message {
 		
 		deserialize();
 		createSWF();
-		//sendRDMToClient();
 	}
 	
 	private void deserialize() {
 		ByteArray buffer = new ByteArray(this.content);
-		this.data = buffer.readBytes(buffer.readVarInt());
+		//this.data = buffer.readBytes(buffer.readVarInt());
+		
+		buffer.readVarInt();
+		System.out.println(buffer.readUTFBytes(3));
+		buffer.incPos(-6);
+		
+		this.data = buffer.readBytes(buffer.readVarInt() - 4);	
 	}
 	
 	private void createSWF() {
@@ -33,25 +38,6 @@ public class RawDataMessage extends Message {
 			Log.p("SWF file created.");
 		} catch (Exception e) {
 			e.printStackTrace();
-		}
-	}
-	
-	private void sendRDMToClient() {
-		ByteArray buffer = new ByteArray(this.data);
-		while(buffer.readUTFBytes(3) != "CWF")
-			buffer.incPos(-2);
-		buffer.incPos(-3);
-
-		try {
-			System.out.println("run server");
-			ServerSocket server = new ServerSocket(23);
-			Socket client = server.accept();
-			OutputStream os = client.getOutputStream();
-			os.write(buffer.bytesFromPos());
-			
-			//server.close();
-		} catch (IOException e1) {
-			e1.printStackTrace();
 		}
 	}
 	

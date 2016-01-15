@@ -6,7 +6,7 @@ import utilities.ByteArray;
 import utilities.Log;
 import messages.Message;
 
-public class Sender implements Runnable {
+public class Sender extends Thread {
 	private static Sender sender = null;
 	private OutputStream outputStream;
 	private byte[] toSend;
@@ -37,7 +37,7 @@ public class Sender implements Runnable {
 		for(int i = 0; i < size; ++i)
 			toSend[i + header.length] = content[i];
 		Log.p("s", msg);
-		run();
+		run(); // pour le moment, l'envoi n'est pas threadé
 	}
 	
 	static byte[] makeHeader(int id, int lenofsize, int size) {
