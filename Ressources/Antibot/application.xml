@@ -9,6 +9,8 @@
 	<description></description> 
 	<copyright></copyright> 
 	
+	<supportedProfiles>extendedDesktop</supportedProfiles>
+	
 	<initialWindow> 
 		<title>Bypass</title> 
 		<content>Antibot.swf</content> 

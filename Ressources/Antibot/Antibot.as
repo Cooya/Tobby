@@ -17,6 +17,7 @@ package {
 		private var server:ServerSocket;
 		private var packetSize:int = -1;
 		private var interval:uint;
+		private var injected:Boolean = false;
 
 		public function Antibot() : void {
 			loadDofus();
@@ -34,13 +35,16 @@ package {
 		
 		private function runServer(e:Event) : void {
 			server = new ServerSocket();
-			server.bind(5555, "127.0.0.1");
+			server.bind(5554, "127.0.0.1");
 			server.addEventListener(ServerSocketConnectEvent.CONNECT, clientConnectionHandler);
 			server.listen();
 		}
 
 		private function clientConnectionHandler(e:ServerSocketConnectEvent): void {
 			var socket:Socket = e.socket;
+			socket.writeBoolean(this.injected);
+			socket.flush();
+			this.injected = true;
 			socket.addEventListener(ProgressEvent.SOCKET_DATA, dataReceptionHandler);
 		}
 
@@ -49,7 +53,7 @@ package {
 			if(packetSize == -1 && socket.bytesAvailable >= 4)
 				packetSize = socket.readInt();
 			if(socket.bytesAvailable == packetSize) {
-				packetSize = -1:
+				packetSize = -1;
 				processData(socket);	
 			}
         }

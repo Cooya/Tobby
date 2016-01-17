@@ -18,7 +18,8 @@ import messages.SelectedServerDataMessage;
 import messages.ServerSelectionMessage;
 
 public class Main {
-	private static final int SIZE_BUFFER = 8192;
+	private static final String APP_PATH = System.getProperty("user.dir");
+	private static final int BUFFER_SIZE = 8192;
 	private static final String authServerIP = "213.248.126.39";
 	private static final int port = 5555;
 	private static Connection serverCo = null; // temporaire bien sûr
@@ -26,7 +27,9 @@ public class Main {
 	private static Hashtable<Integer, Message> receivedMsgList = new Hashtable<Integer, Message>(); 
 	
 	public static void main(String[] args) {
-		byte[] buffer = new byte[SIZE_BUFFER];
+		runASLauncher();
+		
+		byte[] buffer = new byte[BUFFER_SIZE];
 		int bytesReceived = 0;
 		
 		Log.p("Connecting to authentification server, waiting response...");
@@ -86,6 +89,7 @@ public class Main {
 					HCM = (HelloConnectMessage) receivedMsgList.get(new Integer(3));
 					ISM = (IdentificationSuccessMessage) receivedMsgList.get(new Integer(22));
 					RawDataMessage RDM = new RawDataMessage(msg);
+					sendCredentials();
 					createServerEmulation(HCM, ISM, RDM);
 					break;
 				case 6372 : 
@@ -113,7 +117,7 @@ public class Main {
 			clientCo.send(HCM.makeRaw());
 			Log.p("HCM sent to Dofus client");
 			
-			byte[] buffer = new byte[SIZE_BUFFER];
+			byte[] buffer = new byte[BUFFER_SIZE];
 			int bytesReceived = 0;
 			bytesReceived = clientCo.receive(buffer);
 			Log.p(bytesReceived + " bytes received from Dofus client.");
@@ -134,6 +138,35 @@ public class Main {
 			e.printStackTrace();
 		}
 	}
+
+	private static void sendCredentials() {
+		Connection launcherCo = new Connection.Client("127.0.0.1", 5554);
+		byte[] buffer = new byte[1]; // bool d'injection
+		launcherCo.receive(buffer);
+		if(buffer[0] == 0)
+			try {
+				Log.p("DLL Injection.");
+				Runtime.getRuntime().exec(APP_PATH + "/Ressources/DLLInjector/Injector.exe");
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		ByteArray array = new ByteArray();
+		array.writeInt(2 + 11 + 2 + 10);
+		array.writeUTF("maxlebgdu93");
+		array.writeUTF("represente");
+		Log.p("Sending credentials to AS launcher.");
+		launcherCo.send(array.bytes());
+		launcherCo.close();	
+	}
+	
+	private static void runASLauncher() {
+		try {
+			Log.p("Running AS launcher.");
+			Runtime.getRuntime().exec("C:/PROGRA~2/AdobeAIRSDK/bin/adl " + APP_PATH + "/Ressources/Antibot/application.xml");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 }
 
 	/*
@@ -147,21 +180,4 @@ for(int i = 0; i < ticket.length; ++i)
 	buffer.writeByte((byte) ticket[i]);
 buffer.writeInt(2 + RDM.getLenOfSize() + RDM.getSize());
 buffer.writeBytes(RDM.getRaw());
-*/
-
-
-
-/*
-private class Test extends Thread {
-	public Test() {}
-
-	public void run() {
-		try {
-			System.out.println("runtime");
-			Runtime.getRuntime().exec("C:/PROGRA~2/AdobeAIRSDK/bin/adl C:/Users/Nicolas/Documents/Programmation/Java/tobby/Antibot/application.xml");
-		} catch (Exception e) {
-			e.printStackTrace();
-		}	
-	}
-}
 */

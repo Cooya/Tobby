@@ -41,8 +41,8 @@ While 1
 				Sleep(1000)
 				Send("run"&"{ENTER}")
 				Run("C:\Windows\System32\cmd" & ' /k "C:\Program Files (x86)\AdobeAIRSDK\bin\adl" ' & $path2,"C:\Program Files (x86)\AdobeAIRSDK\bin",@SW_MINIMIZE)
-				Sleep(1000)
-				Send("continue"&"{ENTER}")
+				;Sleep(1000)
+				;Send("continue"&"{ENTER}")
 			Else
 				Run(@ComSpec & ' /k  "C:\Program Files (x86)\AdobeAIRSDK\bin\adl"' & $path2)
 			EndIf

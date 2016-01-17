@@ -1,4 +1,11 @@
 bin/
-Ressources/Dofus/
+Ressources/Client décompilé/
+Ressources/Antibot/content
+Ressources/Antibot/data
+Ressources/Antibot/ui
+Ressources/Antibot/config.xml
+Ressources/Antibot/DofusInvoker.swf
+Ressources/Antibot/SharedDefinitions.swf
+Ressources/Antibot/log4as.xml
 .classpath
 .project
