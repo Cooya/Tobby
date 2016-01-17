@@ -4,31 +4,19 @@ import utilities.ByteArray;
 import utilities.Encryption;
 
 public class IdentificationMessage extends Message {
+	public static final int ID = 4;
 	private static final String login = "maxlebgdu93";
 	private static final String password = "represente";
 	
-	// HCM
-	private String salt;
-	private int keySize;
-	private byte[] encryptedPublicKey;
-	private byte[] decryptedPublicKey;
-	
-	public IdentificationMessage(byte[] content) {
-		super(4, (short) 0, 0, null);
-		deserializeHCM(content);
-		serializeIM();
+	public IdentificationMessage(HelloConnectMessage HCM) {
+		super(ID, (short) 0, 0, null);
+		
+		serialize(HCM);
 	}
 	
-	private void deserializeHCM(byte[] content) {
-		ByteArray array = new ByteArray(content);
-		this.salt = array.readUTF();
-		this.keySize = array.readVarInt();
-		this.encryptedPublicKey = array.readBytes(keySize);
-	}
-	
-	private void serializeIM() {
-		this.decryptedPublicKey = Encryption.decryptReceivedKey(this.encryptedPublicKey);
-		byte[] credentials = Encryption.encryptCredentials(this.decryptedPublicKey, login, password, this.salt);
+	private void serialize(HelloConnectMessage HCM) {
+		byte[] decryptedPublicKey = Encryption.decryptReceivedKey(ByteArray.toBytes(HCM.getKey()));
+		byte[] credentials = Encryption.encryptCredentials(decryptedPublicKey, login, password, HCM.getSalt());
 		ByteArray buffer = new ByteArray();
 		buffer.writeByte((byte) 0);
 		writeVersion(buffer, 2, 32, 4, 100752, 1, 0, 1, 1);
@@ -57,9 +45,5 @@ public class IdentificationMessage extends Message {
 		array.writeByte((byte) buildType);
 		array.writeByte((byte) install);
 		array.writeByte((byte) technology);
-	}
-	
-	public byte[] getDecryptedPublicKey() {
-		return this.decryptedPublicKey;
 	}
 }

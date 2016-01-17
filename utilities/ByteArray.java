@@ -40,6 +40,13 @@ public class ByteArray {
 		this.pos = 0;
 		this.size = size; // à corriger car c'est un peu bizarre
 	}
+	
+	private void extendArray() {
+		byte[] newArray = new byte[this.array.length * 2];
+		for(int i = 0; i < this.array.length; ++i)
+			newArray[i] = this.array[i];
+		this.array = newArray;
+	}
 
 	public int getPos() {
 		return this.pos;
@@ -76,13 +83,23 @@ public class ByteArray {
 				System.out.print(bytes[i] + " ");
 			System.out.println();
 		}
-		else if(format == "hex")
-			System.out.println(bytesToHex(bytes));
+		else if(format == "hex") {
+			char[] hexChars = new char[size * 3];
+			for ( int j = 0; j < size; j++ ) {
+				int v = bytes[j] & 0xFF;
+				hexChars[j * 3] = hexArray[v >>> 4];
+				hexChars[j * 3 + 1] = hexArray[v & 0x0F];
+				hexChars[j * 3 + 2] = ' ';
+			}
+			System.out.println(new String(hexChars));
+		}
 		else if(format == "ascii") {
 			for(int i = 0; i < size; ++i)
 				System.out.print((char) bytes[i]);
 			System.out.println();
 		}
+		else
+			System.out.println("Unknown display format.");
 	}
 	
 	public static void printBytes(byte[] bytes, String format) {
@@ -91,17 +108,6 @@ public class ByteArray {
 	
 	public static void printBytes(byte[] bytes) {
 		printBytes(bytes, "hex", bytes.length);
-	}
-
-	public static String bytesToHex(byte[] bytes) {
-		char[] hexChars = new char[bytes.length * 3];
-		for ( int j = 0; j < bytes.length; j++ ) {
-			int v = bytes[j] & 0xFF;
-			hexChars[j * 3] = hexArray[v >>> 4];
-			hexChars[j * 3 + 1] = hexArray[v & 0x0F];
-			hexChars[j * 3 + 2] = ' ';
-		}
-		return new String(hexChars);
 	}
 
 	public void printArray(String format) {
@@ -139,7 +145,7 @@ public class ByteArray {
 		return bytes;
 	}
 
-	public short readShort() { // un short est toujours signé en Java
+	public short readShort() { // pas de unsigned short en Java
 		short s = (short) ((short) readByte() * 256 + readByte());
 		return s;
 	}
@@ -156,6 +162,8 @@ public class ByteArray {
 	}
 
 	public void writeByte(byte b) {
+		if(this.size == this.array.length)
+			extendArray();
 		this.array[this.pos++] = b;
 		this.size++;
 	}
@@ -296,5 +304,12 @@ public class ByteArray {
 				writeInt((int) (var2_high >>> 3));
 			}
 		}
+	}
+	
+	public static byte[] toBytes(int[] array) {
+		byte[] bytes = new byte[array.length];
+		for(int i = 0; i < array.length; ++i)
+			bytes[i] = (byte) array[i];
+		return bytes;
 	}
 }

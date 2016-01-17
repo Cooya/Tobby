@@ -1,5 +1,7 @@
 package messages;
 
+import utilities.ByteArray;
+
 public abstract class Message {
 	protected int id;
 	protected int lenofsize;
@@ -46,5 +48,21 @@ public abstract class Message {
 	        return 1;
 	    else
 	        return 0;
+	}
+	
+	public byte[] makeRaw() {
+		ByteArray buffer = new ByteArray(2 + this.lenofsize + this.size);
+		buffer.writeShort((short) (id << 2 | lenofsize));
+		if(this.lenofsize == 0) return buffer.bytes();
+		else if(this.lenofsize == 1)
+			buffer.writeByte((byte) this.size);
+		else if(this.lenofsize == 2)
+			buffer.writeShort((short) size);
+		else {
+			buffer.writeByte((byte) (this.size >> 16));
+			buffer.writeShort((short) (size & 65535));
+		}
+		buffer.writeBytes(this.content);
+		return buffer.bytes();
 	}
 }

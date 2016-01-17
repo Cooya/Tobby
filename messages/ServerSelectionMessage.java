@@ -1,9 +1,10 @@
 package messages;
 
 public class ServerSelectionMessage extends Message {
-
+	public static final int ID = 40;
+	
 	public ServerSelectionMessage() {
-		super(40, 0, 0, null);
+		super(ID, 0, 0, null);
 		
 		serialize();
 	}

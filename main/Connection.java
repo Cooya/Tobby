@@ -1,0 +1,108 @@
+package main;
+
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.ServerSocket;
+import java.net.Socket;
+
+public interface Connection {
+	void send(byte[] bytes);
+	int receive(byte[] bytes);
+	void close();
+
+	public class Client implements Connection {
+		private Socket client;
+		private InputStream inputStream;
+		private OutputStream outputStream;
+		
+		public Client(String serverIP, int port) {
+			super();
+			try {
+				this.client = new Socket(serverIP, port);
+				this.inputStream = this.client.getInputStream();
+				this.outputStream = this.client.getOutputStream();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		
+		public Client(Socket client) {
+			super();
+			try {
+				this.client = client;
+				this.inputStream = this.client.getInputStream();
+				this.outputStream = this.client.getOutputStream();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		
+		public void send(byte[] bytes) {
+			try {
+				this.outputStream.write(bytes);
+				this.outputStream.flush();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		
+		public int receive(byte[] buffer) {
+			int bytesReceived = 0;
+			try {
+				bytesReceived = this.inputStream.read(buffer);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			return bytesReceived;
+		}
+		
+		public void close() {
+			try {
+				this.inputStream.close();
+				this.outputStream.close();
+				this.client.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		
+	}
+	
+	public class Server implements Connection {
+		private ServerSocket server;
+		private Client client;
+		
+		public Server(int port) {
+			try {
+				this.server = new ServerSocket(port);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		
+		public void send(byte[] bytes) {
+			this.client.send(bytes);
+		}
+
+		public int receive(byte[] bytes) {
+			return this.client.receive(bytes);
+		}
+
+		public void close() {
+			try {
+				this.client.close();
+				this.server.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		
+		public void waitClient() {
+			try {
+				this.client = new Client(server.accept());
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+}
