@@ -7,13 +7,13 @@ public class HelloConnectMessage extends Message {
 	private String salt;
 	private int[] key;
 	
-	public HelloConnectMessage(ReceivedMessage msg) {
-		super(ID, msg.getLenOfSize(), msg.getSize(), msg.getContent());
+	public HelloConnectMessage(Message msg) {
+		super(msg);
 		
 		deserialize();
 	}
 	
-	private void deserialize() {
+	public void deserialize() {
 		ByteArray buffer = new ByteArray(this.content);
 		this.salt = buffer.readUTF();
 		int keySize = buffer.readVarInt();
@@ -22,7 +22,7 @@ public class HelloConnectMessage extends Message {
 			this.key[i] = buffer.readByte();
 	}
 	
-	public void serialize() { // pour émulation
+	public void serialize() {
 		ByteArray buffer = new ByteArray();
 		buffer.writeUTF(this.salt);
 		int len = this.key.length;

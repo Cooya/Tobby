@@ -24,6 +24,7 @@ public class MessageName {
 	        case 170  : return "SetCharacterRestrictionsMessage";
 	        case 175  : return "AtlasPointsInformations";
 	        case 176  : return "BasicNoOperationMessage";
+	        case 189  : return "SystemMessageDisplayMessage";
 	        case 200  : return "GameContextCreateMessage";
 	        case 201  : return "ActorAlignmentInformations";
 	        case 210  : return "MapFightCountMessage";

@@ -11,13 +11,13 @@ public class SelectedServerDataMessage extends Message {
     public boolean canCreateNewCharacter = false;
     public int[] ticket;
 	
-    public SelectedServerDataMessage(ReceivedMessage msg){
-    	super(ID, msg.getLenOfSize(), msg.getSize(), msg.getContent());
+    public SelectedServerDataMessage(Message msg) {
+    	super(msg);
     	
     	deserialize();
     }
     
-    private void deserialize() {
+    public void deserialize() {
     	ByteArray buffer = new ByteArray(this.content);
     	this.serverId = buffer.readVarShort();
     	this.address = buffer.readUTF();

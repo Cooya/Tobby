@@ -2,13 +2,16 @@ package messages;
 
 import utilities.ByteArray;
 
-public abstract class Message {
+public class Message {
 	protected int id;
 	protected int lenofsize;
 	protected int size;
 	protected byte[] content;
 	
-	public Message(int id, int lenofsize, int size, byte[] content) {
+	protected int contentBytesAvailables; // nombre d'octets du contenu acquis
+	protected boolean complete;
+	
+	public Message(int id, int lenofsize, int size, byte[] content, int bytesAvailables) { // message reçu
 		this.id = id;
 		this.lenofsize = lenofsize;
 		this.size = size;
@@ -21,6 +24,17 @@ public abstract class Message {
 					this.content[i] = content[i];
 			}
 		}
+		
+		this.contentBytesAvailables = bytesAvailables;
+		this.complete = bytesAvailables == size;
+	}
+	
+	public Message(Message msg) {
+		this(msg.id, msg.lenofsize, msg.size, msg.content, msg.contentBytesAvailables);
+	}
+	
+	public Message(int id) { // message à envoyer
+		this.id = id;
 	}
 	
 	public int getId() {
@@ -64,5 +78,26 @@ public abstract class Message {
 		}
 		buffer.writeBytes(this.content);
 		return buffer.bytes();
+	}
+	
+	public boolean isComplete() {
+		return this.complete;
+	}
+	
+	public int getTotalSize() {
+		return this.contentBytesAvailables + 2 + this.lenofsize;
+	}
+	
+	public int appendContent(byte[] buffer) {
+		int additionSize;
+		if(buffer.length > this.size - this.contentBytesAvailables)
+			additionSize = this.size - this.contentBytesAvailables;
+		else
+			additionSize = buffer.length;	
+		for(int read = 0; read < additionSize; ++read)
+			this.content[this.contentBytesAvailables + read] = buffer[read];
+		this.contentBytesAvailables += additionSize;
+		this.complete = contentBytesAvailables == size;
+		return additionSize;
 	}
 }

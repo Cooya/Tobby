@@ -8,13 +8,11 @@ public class IdentificationMessage extends Message {
 	private static final String login = "maxlebgdu93";
 	private static final String password = "represente";
 	
-	public IdentificationMessage(HelloConnectMessage HCM) {
-		super(ID, (short) 0, 0, null);
-		
-		serialize(HCM);
+	public IdentificationMessage() {
+		super(ID);
 	}
 	
-	private void serialize(HelloConnectMessage HCM) {
+	public void serialize(HelloConnectMessage HCM) {
 		byte[] decryptedPublicKey = Encryption.decryptReceivedKey(ByteArray.toBytes(HCM.getKey()));
 		byte[] credentials = Encryption.encryptCredentials(decryptedPublicKey, login, password, HCM.getSalt());
 		ByteArray buffer = new ByteArray();

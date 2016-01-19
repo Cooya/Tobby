@@ -1,14 +1,15 @@
 package main;
 
 import java.util.LinkedList;
+
+import messages.Message;
 import utilities.ByteArray;
-import messages.ReceivedMessage;
 
 public class Reader {
-	private static ReceivedMessage incompleteMsg; // message incomplet qui attend d'être complété
+	private static Message incompleteMsg; // message incomplet qui attend d'être complété
 	
-	public static LinkedList<ReceivedMessage> processBuffer(ByteArray buffer) {
-		LinkedList<ReceivedMessage> msgStack = new LinkedList<ReceivedMessage>();
+	public static LinkedList<Message> processBuffer(ByteArray buffer) {
+		LinkedList<Message> msgStack = new LinkedList<Message>();
 		
 		if(incompleteMsg != null) {
 			buffer.readBytes(incompleteMsg.appendContent(buffer.bytes()));
@@ -20,7 +21,7 @@ public class Reader {
 				return msgStack; // si le message est incomplet, cela signifie qu'il n'y a plus rien à lire dans le buffer
 		}
 		while(!buffer.endOfArray()) {
-			ReceivedMessage msg = extractMsgFromBuffer(buffer.bytesFromPos());
+			Message msg = extractMsgFromBuffer(buffer.bytesFromPos());
 			if(msg.isComplete())
 				msgStack.add(msg);
 			else
@@ -30,7 +31,7 @@ public class Reader {
 		return msgStack;
 	}
 	
-	private static ReceivedMessage extractMsgFromBuffer(byte[] buffer) {
+	private static Message extractMsgFromBuffer(byte[] buffer) {
 		char[] cbuffer = new char[buffer.length];
 		for(int i = 0; i < buffer.length; ++i)
 			cbuffer[i] = (char) (buffer[i] & 0xFF);
@@ -52,6 +53,6 @@ public class Reader {
 		int counter = 0;
 		for(int i = 2 + lenofsize; i < bytesAvailable + 2 + lenofsize; ++i, ++counter)
 			content[counter] = buffer[i];
-	    return new ReceivedMessage(id, lenofsize, size, content, counter);		
+	    return new Message(id, lenofsize, size, content, counter);		
 	}
 }

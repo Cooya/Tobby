@@ -13,13 +13,11 @@ import messages.IdentificationMessage;
 import messages.IdentificationSuccessMessage;
 import messages.Message;
 import messages.RawDataMessage;
-import messages.ReceivedMessage;
 import messages.SelectedServerDataMessage;
 import messages.ServerSelectionMessage;
 
 public class Main {
-	private static final String APP_PATH = System.getProperty("user.dir");
-	private static final int BUFFER_SIZE = 8192;
+	protected static final int BUFFER_SIZE = 8192;
 	private static final String authServerIP = "213.248.126.39";
 	private static final int port = 5555;
 	private static Connection serverCo = null; // temporaire bien sûr
@@ -27,8 +25,7 @@ public class Main {
 	private static Hashtable<Integer, Message> receivedMsgList = new Hashtable<Integer, Message>(); 
 	
 	public static void main(String[] args) {
-		runASLauncher();
-		
+		Emulation.runASLauncher();
 		byte[] buffer = new byte[BUFFER_SIZE];
 		int bytesReceived = 0;
 		
@@ -54,23 +51,25 @@ public class Main {
 		}
 	}
 	
-	public static void processMsgStack(LinkedList<ReceivedMessage> msgStack) {
-		ReceivedMessage msg;
+	public static void processMsgStack(LinkedList<Message> msgStack) {
+		Message msg;
 		while((msg = msgStack.poll()) != null) {
 			Log.p("r", msg);
 			switch(msg.getId()) {
 				case 3 :
 					HelloConnectMessage HCM = new HelloConnectMessage(msg);
-					receivedMsgList.put(new Integer(3), HCM);
-					Message IM = new IdentificationMessage(HCM);
+					receivedMsgList.put(3, HCM);
+					IdentificationMessage IM = new IdentificationMessage();
+					IM.serialize(HCM);
 					sendMessage(IM);
 					break;
 				case 22 :
 					IdentificationSuccessMessage ISM = new IdentificationSuccessMessage(msg);
-					receivedMsgList.put(new Integer(ISM.getId()), ISM);
+					receivedMsgList.put(22, ISM);
 					break;
 				case 20 :
-					new IdentificationFailedMessage(msg.getContent()); 
+					IdentificationFailedMessage IFM = new IdentificationFailedMessage(msg); 
+					IFM.deserialize();
 					break;
 				case 30 : 
 					Message SSM = new ServerSelectionMessage();
@@ -78,19 +77,20 @@ public class Main {
 					break;
 				case 42 : 
 					SelectedServerDataMessage SSDM = new SelectedServerDataMessage(msg);
-					receivedMsgList.put(new Integer(SSDM.getId()), SSDM);
+					receivedMsgList.put(42, SSDM);
 					break;
 				case 101 :
-					SSDM = (SelectedServerDataMessage) receivedMsgList.get(new Integer(SelectedServerDataMessage.ID));
-					Message ATM = new AuthentificationTicketMessage(SSDM);
+					SSDM = (SelectedServerDataMessage) receivedMsgList.get(42);
+					AuthentificationTicketMessage ATM = new AuthentificationTicketMessage();
+					ATM.serialize(SSDM);
 					sendMessage(ATM);
 					break;
 				case 6253 :
-					HCM = (HelloConnectMessage) receivedMsgList.get(new Integer(3));
-					ISM = (IdentificationSuccessMessage) receivedMsgList.get(new Integer(22));
+					HCM = (HelloConnectMessage) receivedMsgList.get(3);
+					ISM = (IdentificationSuccessMessage) receivedMsgList.get(22);
 					RawDataMessage RDM = new RawDataMessage(msg);
-					sendCredentials();
-					createServerEmulation(HCM, ISM, RDM);
+					Emulation.sendCredentials();
+					Emulation.createServer(HCM, ISM, RDM);
 					break;
 				case 6372 : 
 					Message CIM = new CheckIntegrityMessage(msg);
@@ -104,68 +104,6 @@ public class Main {
 		serverCo.send(msg.makeRaw());
 		Log.p("s", msg);
 		sentMsgList.put(new Integer(msg.getId()), msg);
-	}
-	
-	private static void createServerEmulation(HelloConnectMessage HCM, IdentificationSuccessMessage ISM, RawDataMessage RDM) {
-		try {
-			Connection.Server clientCo = new Connection.Server(port);
-			Log.p("Running emulation server. Waiting Dofus client connection...");
-			
-			clientCo.waitClient();
-			Log.p("Dofus client connected.");
-			
-			clientCo.send(HCM.makeRaw());
-			Log.p("HCM sent to Dofus client");
-			
-			byte[] buffer = new byte[BUFFER_SIZE];
-			int bytesReceived = 0;
-			bytesReceived = clientCo.receive(buffer);
-			Log.p(bytesReceived + " bytes received from Dofus client.");
-			processMsgStack(Reader.processBuffer(new ByteArray(buffer, bytesReceived)));
-			
-			
-			clientCo.send(ISM.makeRaw());
-			Log.p("ISM sent to Dofus client");
-			clientCo.send(RDM.makeRaw());
-			Log.p("RDM sent to Dofus client");
-			
-			bytesReceived = clientCo.receive(buffer);
-			Log.p(bytesReceived + " bytes received from Dofus client.");
-			processMsgStack(Reader.processBuffer(new ByteArray(buffer, bytesReceived)));
-			
-			clientCo.close();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-	private static void sendCredentials() {
-		Connection launcherCo = new Connection.Client("127.0.0.1", 5554);
-		byte[] buffer = new byte[1]; // bool d'injection
-		launcherCo.receive(buffer);
-		if(buffer[0] == 0)
-			try {
-				Log.p("DLL Injection.");
-				Runtime.getRuntime().exec(APP_PATH + "/Ressources/DLLInjector/Injector.exe");
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		ByteArray array = new ByteArray();
-		array.writeInt(2 + 11 + 2 + 10);
-		array.writeUTF("maxlebgdu93");
-		array.writeUTF("represente");
-		Log.p("Sending credentials to AS launcher.");
-		launcherCo.send(array.bytes());
-		launcherCo.close();	
-	}
-	
-	private static void runASLauncher() {
-		try {
-			Log.p("Running AS launcher.");
-			Runtime.getRuntime().exec("C:/PROGRA~2/AdobeAIRSDK/bin/adl " + APP_PATH + "/Ressources/Antibot/application.xml");
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 	}
 }
 

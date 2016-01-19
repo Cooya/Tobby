@@ -6,12 +6,11 @@ import utilities.Encryption;
 public class AuthentificationTicketMessage extends Message {
 	public static final int ID = 110;
 	
-	public AuthentificationTicketMessage(SelectedServerDataMessage SSDM) {
-		super(ID, 0, 0, null);
-		serialize(SSDM);
+	public AuthentificationTicketMessage() {
+		super(ID);
 	}
 	
-	private void serialize(SelectedServerDataMessage SSDM) {
+	public void serialize(SelectedServerDataMessage SSDM) {
 		ByteArray buffer = new ByteArray();
 	    buffer.writeUTF("fr");
 	    buffer.writeUTF(new String(Encryption.decodeWithAES(ByteArray.toBytes(SSDM.getTicket()))));

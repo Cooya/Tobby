@@ -9,9 +9,7 @@ public class RawDataMessage extends Message {
 	public static final int ID = 6253;
 	
 	public RawDataMessage(Message msg) {
-		super(ID, msg.getLenOfSize(), msg.getSize(), msg.getContent());
-	
-		//createSWF();
+		super(msg);
 	}
 	
 	@SuppressWarnings("unused")

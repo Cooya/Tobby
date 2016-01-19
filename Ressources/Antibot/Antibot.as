@@ -40,12 +40,26 @@ package {
 			server.listen();
 		}
 
-		private function clientConnectionHandler(e:ServerSocketConnectEvent): void {
+		private function clientConnectionHandler(e:ServerSocketConnectEvent) : void {
 			var socket:Socket = e.socket;
 			socket.writeBoolean(this.injected);
 			socket.flush();
 			this.injected = true;
 			socket.addEventListener(ProgressEvent.SOCKET_DATA, dataReceptionHandler);
+			socket.addEventListener(Event.CLOSE, clientDeconnectionHandler);
+		}
+
+		private function clientDeconnectionHandler(e:Event) : void {
+			trace("test");
+
+
+			var Kernel:Class = getDefinitionByName("com.ankamagames.dofus.kernel.Kernel") as Class;
+			var ResetGameAction:Class = getDefinitionByName("com.ankamagames.jerakine.handlers.messages.Action.ResetGameAction") as Class;
+
+			var rga:Object = ResetGameAction["create"]("");
+			var worker:Object = Kernel["getWorker"]();
+
+			worker.process(rga);
 		}
 
 		private function dataReceptionHandler(e:ProgressEvent) : void {
@@ -75,8 +89,6 @@ package {
 			
 			var worker:Object = Kernel["getWorker"]();
 			interval = setInterval(checkAM, 1000, worker, AuthentificationFrame, LoginValidationAction, username, password);
-
-         	// quitter l'app
 		}
 
 		private function checkAM(worker:Object, AuthentificationFrame:Class, LoginValidationAction:Class, username:String, password:String) : void {

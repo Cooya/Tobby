@@ -4,12 +4,10 @@ public class ServerSelectionMessage extends Message {
 	public static final int ID = 40;
 	
 	public ServerSelectionMessage() {
-		super(ID, 0, 0, null);
-		
-		serialize();
+		super(ID);
 	}
 	
-	private void serialize() {
+	public void serialize() {
 		this.size = 1;
 		this.lenofsize = computeLenOfSize(this.size);
 		this.content = new byte[1];

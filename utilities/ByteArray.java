@@ -27,18 +27,18 @@ public class ByteArray {
 		this.size = 0;
 	}
 
-	public ByteArray(byte[] array) {
+	public ByteArray(byte[] array) { // tableau complet
 		this.array = array;
 		this.pos = 0;
 		this.size = array.length;
 	}
-
-	public ByteArray(byte[] array, int size) {
+	
+	public ByteArray(byte[] array, int size) { // à utiliser lorsque le tableau passé est incomplet
 		this.array = new byte[size];
 		for(int i = 0; i < size; ++i)
 			this.array[i] = array[i];
 		this.pos = 0;
-		this.size = size; // à corriger car c'est un peu bizarre
+		this.size = size;
 	}
 	
 	private void extendArray() {
@@ -202,20 +202,20 @@ public class ByteArray {
 	}
 
 	public int readVarInt() {
-		int val4 = 0;
-		int val1 = 0;
-		int val2 = 0;
-		boolean val3 = false;
-		while(val2 < INT_SIZE) {
-			val4 = readByte();
-			val3 = (val4 & MASK_10000000) == MASK_10000000;
-			if(val2 > 0)
-				val1 += ((val4 & MASK_01111111) << val2);
+		int var4 = 0;
+		int var1 = 0;
+		int var2 = 0;
+		boolean var3 = false;
+		while(var2 < INT_SIZE) {
+			var4 = readByte();
+			var3 = (var4 & MASK_10000000) == MASK_10000000;
+			if(var2 > 0)
+				var1 += ((var4 & MASK_01111111) << var2);
 			else
-				val1 += val4 & MASK_01111111;
-			val2 += CHUNCK_BIT_SIZE;
-			if(!val3)
-				return val1;
+				var1 += var4 & MASK_01111111;
+			var2 += CHUNCK_BIT_SIZE;
+			if(!var3)
+				return var1;
 		}
 		throw new Error("Too much data");
 	}

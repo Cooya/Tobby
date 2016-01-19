@@ -3,13 +3,16 @@ package messages;
 import utilities.Log;
 
 public class IdentificationFailedMessage extends Message {
-	public IdentificationFailedMessage(byte[] content) {
-		super(20, (short) 0, 0, null);
-		deserialize(content);
+	public static final int ID = 20;
+	
+	public IdentificationFailedMessage(Message msg) {
+		super(msg);
+		
+		deserialize();
 	}
 
-	private void deserialize(byte[] content) {
-		byte reason = content[0];
+	public void deserialize() {
+		byte reason = this.content[0];
 		Log.p("Authentification failed for reason " + reason);
 	}
 }
