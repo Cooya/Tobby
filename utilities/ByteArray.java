@@ -129,6 +129,13 @@ public class ByteArray {
 			clone[i] = this.array[i];
 		return clone;
 	}
+	
+	public static byte[] toBytes(int[] array) {
+		byte[] bytes = new byte[array.length];
+		for(int i = 0; i < array.length; ++i)
+			bytes[i] = (byte) array[i];
+		return bytes;
+	}
 
 	public byte readByte() {
 		return this.array[this.pos++];
@@ -241,6 +248,45 @@ public class ByteArray {
 		}
 		throw new Error("Too much data");
 	}
+	
+	public long readVarLong() {
+		int var3 = 0;
+		long var2_low = 0;
+		long var2_high = 0;
+		int var4 = 0;
+		while(true) {
+			var3 = readByte();
+			if(var4 == 28)
+				break;
+			if(var3 >= 128) {
+				var2_low = var2_low | (var3 & 127) << var4;
+				var4 += 7;
+				continue;
+			}
+			var2_low = var2_low | var3 << var4;
+			return var2_low;
+		}
+		if(var3 >= 128) {
+			var3 = var3 & 127;
+			var2_low = var2_low | var3 << var4;
+			var2_high = var3 >>> 4;
+			var4 = 3;
+			while(true) {
+				var3 = readByte();
+				if(var4 < 32)
+					if(var3 >= 128)
+						var2_high = var2_high | (var3 & 127) << var4;
+					else
+						break;
+				var4 = var4 + 7;
+			}
+			var2_high = var2_high | var3 << var4;
+			return (long) (var2_high * 4.294967296E9 + var2_low);
+		}
+		var2_low = var2_low | var3 << var4;
+		var2_high = var3 >>> 4;
+		return (long) (var2_high * 4.294967296E9 + var2_low);
+	}
 
 	public void writeVarInt(int i) {
 		int var5 = 0;
@@ -304,12 +350,5 @@ public class ByteArray {
 				writeInt((int) (var2_high >>> 3));
 			}
 		}
-	}
-	
-	public static byte[] toBytes(int[] array) {
-		byte[] bytes = new byte[array.length];
-		for(int i = 0; i < array.length; ++i)
-			bytes[i] = (byte) array[i];
-		return bytes;
 	}
 }

@@ -38,7 +38,7 @@ public class Main {
 		serverCo.close();
 		Log.p("Deconnected from authentification server.");
 		
-		String gameServerIP = ((SelectedServerDataMessage) receivedMsgList.get(SelectedServerDataMessage.ID)).getAddress();
+		String gameServerIP = ((SelectedServerDataMessage) receivedMsgList.get(42)).getAddress();
 		if(gameServerIP != null) {
 			Log.p("Connecting to game server, waiting response...");
 			serverCo = new Connection.Client(gameServerIP, port);
@@ -72,7 +72,8 @@ public class Main {
 					IFM.deserialize();
 					break;
 				case 30 : 
-					Message SSM = new ServerSelectionMessage();
+					ServerSelectionMessage SSM = new ServerSelectionMessage();
+					SSM.serialize();
 					sendMessage(SSM);
 					break;
 				case 42 : 

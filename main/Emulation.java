@@ -73,7 +73,6 @@ public class Emulation {
 			Log.p(bytesReceived + " bytes received from Dofus client.");
 			Main.processMsgStack(Reader.processBuffer(new ByteArray(buffer, bytesReceived)));
 			
-			
 			clientDofusCo.send(ISM.makeRaw());
 			Log.p("ISM sent to Dofus client");
 			clientDofusCo.send(RDM.makeRaw());
@@ -84,7 +83,7 @@ public class Emulation {
 			Main.processMsgStack(Reader.processBuffer(new ByteArray(buffer, bytesReceived)));
 			
 			Log.p("Deconnection from AS launcher and Dofus client.");
-			launcherCo.close(); // permet de lancer le message ResetGameAction
+			launcherCo.close();
 			clientDofusCo.close();
 		} catch (Exception e) {
 			e.printStackTrace();
