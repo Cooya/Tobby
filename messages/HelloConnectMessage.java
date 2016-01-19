@@ -13,7 +13,7 @@ public class HelloConnectMessage extends Message {
 		deserialize();
 	}
 	
-	public void deserialize() {
+	private void deserialize() {
 		ByteArray buffer = new ByteArray(this.content);
 		this.salt = buffer.readUTF();
 		int keySize = buffer.readVarInt();

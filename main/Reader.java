@@ -32,7 +32,7 @@ public class Reader {
 	}
 	
 	private static Message extractMsgFromBuffer(byte[] buffer) {
-		char[] cbuffer = new char[buffer.length];
+		char[] cbuffer = new char[buffer.length]; // étant donné que ce sont des octets signés bruts
 		for(int i = 0; i < buffer.length; ++i)
 			cbuffer[i] = (char) (buffer[i] & 0xFF);
 		

@@ -137,8 +137,8 @@ public class ByteArray {
 		return bytes;
 	}
 
-	public byte readByte() {
-		return this.array[this.pos++];
+	public int readByte() {
+		return this.array[this.pos++] & 0xFF;
 	}
 
 	public boolean readBoolean() {
@@ -148,7 +148,7 @@ public class ByteArray {
 	public byte[] readBytes(int size) {
 		byte[] bytes = new byte[size];
 		for(int i = 0; i < size; ++i)
-			bytes[i] = readByte();
+			bytes[i] = (byte) readByte();
 		return bytes;
 	}
 
@@ -249,43 +249,44 @@ public class ByteArray {
 		throw new Error("Too much data");
 	}
 	
-	public long readVarLong() {
+	public Int64 readVarLong() {
 		int var3 = 0;
-		long var2_low = 0;
-		long var2_high = 0;
+		Int64 var2 = new Int64();
 		int var4 = 0;
 		while(true) {
 			var3 = readByte();
+			System.out.println(var3);
 			if(var4 == 28)
 				break;
 			if(var3 >= 128) {
-				var2_low = var2_low | (var3 & 127) << var4;
+				var2.low = var2.low | (var3 & 127) << var4;
 				var4 += 7;
 				continue;
 			}
-			var2_low = var2_low | var3 << var4;
-			return var2_low;
+			var2.low = var2.low | var3 << var4;
+			return var2;
 		}
 		if(var3 >= 128) {
 			var3 = var3 & 127;
-			var2_low = var2_low | var3 << var4;
-			var2_high = var3 >>> 4;
+			var2.low = var2.low | var3 << var4;
+			var2.high = var3 >>> 4;
 			var4 = 3;
 			while(true) {
 				var3 = readByte();
+				System.out.println(var3);
 				if(var4 < 32)
 					if(var3 >= 128)
-						var2_high = var2_high | (var3 & 127) << var4;
+						var2.high = var2.high | (var3 & 127) << var4;
 					else
 						break;
 				var4 = var4 + 7;
 			}
-			var2_high = var2_high | var3 << var4;
-			return (long) (var2_high * 4.294967296E9 + var2_low);
+			var2.high = var2.high | var3 << var4;
+			return var2;
 		}
-		var2_low = var2_low | var3 << var4;
-		var2_high = var3 >>> 4;
-		return (long) (var2_high * 4.294967296E9 + var2_low);
+		var2.low = var2.low | var3 << var4;
+		var2.high = var3 >>> 4;
+		return var2;
 	}
 
 	public void writeVarInt(int i) {
@@ -330,25 +331,32 @@ public class ByteArray {
 		writeBytes(var2);
 	}
 
-	public void writeVarLong(long l) {
+	public void writeVarLong(Int64 db) {
 		int var3 = 0;
-		long var2_high = Long.highestOneBit(l);
-		long var2_low = Long.lowestOneBit(l);
-		if(var2_low == 0)
-			writeInt((int) var2_low);
+		Int64 var2 = db;
+		if(var2.low == 0)
+			writeInt32(var2.low);
 		else {
 			var3 = 0;
 			while(var3 < 4) {
-				writeByte((byte) (var2_low & 127 | 128));
-				var2_low = var2_low >>> 7;
+				writeByte((byte) (var2.low & 127 | 128));
+				var2.low = var2.low >>> 7;
 				var3++;
 			}
-			if((var2_high & 268435455 << 3) == 0)
-				writeByte((byte) (var2_high << 4 | var2_low));
+			if((var2.high & 268435455 << 3) == 0)
+				writeByte((byte) (var2.high << 4 | var2.low));
 			else {
-				writeByte((byte) ((var2_high << 4 | var2_low) & 127 | 128));
-				writeInt((int) (var2_high >>> 3));
+				writeByte((byte) ((var2.high << 4 | var2.low) & 127 | 128));
+				writeInt32(var2.high >>> 3);
 			}
 		}
+	}
+	
+	private void writeInt32(int i) {
+		while(i >= 128) {
+			writeByte((byte) (i & 127 | 128));
+			i = i >>> 7;
+		}
+		writeByte((byte) i);
 	}
 }

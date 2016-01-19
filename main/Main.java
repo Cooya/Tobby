@@ -6,6 +6,9 @@ import java.util.LinkedList;
 import utilities.ByteArray;
 import utilities.Log;
 import messages.AuthentificationTicketMessage;
+import messages.CharacterSelectionMessage;
+import messages.CharactersListMessage;
+import messages.CharactersListRequestMessage;
 import messages.CheckIntegrityMessage;
 import messages.HelloConnectMessage;
 import messages.IdentificationFailedMessage;
@@ -96,6 +99,17 @@ public class Main {
 				case 6372 : 
 					Message CIM = new CheckIntegrityMessage(msg);
 					sendMessage(CIM);
+					break;
+				case 6267 :
+					CharactersListRequestMessage CLRM = new CharactersListRequestMessage();
+					CLRM.serialize();
+					sendMessage(CLRM);
+					break;
+				case 151 :
+					CharactersListMessage CLM = new CharactersListMessage(msg);
+					CharacterSelectionMessage CSM = new CharacterSelectionMessage();
+					CSM.serialize(CLM);
+					sendMessage(CSM);
 					break;
 			}
 		}

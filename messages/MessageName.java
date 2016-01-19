@@ -12,9 +12,11 @@ public class MessageName {
 	        case 22   : return "IdentificationSuccessMessage";
 	        case 30   : return "ServersListMessage";
 	        case 40   : return "ServerSelectionMessage";
+	        case 41   : return "SelectedServerRefusedMessage";
 	        case 42   : return "SelectedServerDataMessage";
 	        case 50   : return "ServerStatusUpdateMessage";
 	        case 101  : return "HelloGameMessage";
+	        case 109  : return "AlreadyConnectedMessage";
 	        case 110  : return "AuthenticationTicketMessage";
 	        case 111  : return "AuthentificationTicketAcceptedMessage";
 	        case 150  : return "CharactersListRequestMessage";

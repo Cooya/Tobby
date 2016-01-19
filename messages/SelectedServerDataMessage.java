@@ -17,7 +17,7 @@ public class SelectedServerDataMessage extends Message {
     	deserialize();
     }
     
-    public void deserialize() {
+    private void deserialize() {
     	ByteArray buffer = new ByteArray(this.content);
     	this.serverId = buffer.readVarShort();
     	this.address = buffer.readUTF();
