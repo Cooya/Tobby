@@ -1,4 +1,7 @@
-package messages;
+package messages.connection;
+
+
+import messages.Message;
 
 public class CheckIntegrityMessage extends Message {
 	public static final int ID = 6372;

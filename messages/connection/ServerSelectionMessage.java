@@ -1,4 +1,6 @@
-package messages;
+package messages.connection;
+
+import messages.Message;
 
 public class ServerSelectionMessage extends Message {
 	public static final int ID = 40;

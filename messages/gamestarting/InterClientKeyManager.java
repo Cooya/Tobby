@@ -1,13 +1,15 @@
-package gamestarting;
+package messages.gamestarting;
 
 import java.util.Date;
 import java.util.Vector;
 
 public class InterClientKeyManager {
+	/*
 	private static final char[] hex_chars = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
 	private static final int KEY_SIZE = 21;
 	private static final int MAX_CLIENTS = 50;
 	private static final String CONNECTION_NAME= "_dofusClient_RELEASE#";
+	*/
 	private static InterClientKeyManager instance;
 	private static String uidKey = "E4jtiFC4zf5lIQAPrB";
 	
@@ -31,7 +33,7 @@ public class InterClientKeyManager {
 	
 	public static InterClientKeyManager getInstance() {
 		if(instance == null)
-			return new InterClientKeyManager();
+			instance = new InterClientKeyManager();
 		return instance;
 	}
 	

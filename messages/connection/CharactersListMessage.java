@@ -1,5 +1,6 @@
-package messages;
+package messages.connection;
 
+import messages.Message;
 import utilities.ByteArray;
 import utilities.Int64;
 

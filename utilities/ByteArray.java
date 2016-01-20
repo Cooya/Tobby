@@ -153,8 +153,11 @@ public class ByteArray {
 	}
 
 	public short readShort() { // pas de unsigned short en Java
-		short s = (short) ((short) readByte() * 256 + readByte());
-		return s;
+		return (short) (readByte() * 256 + readByte());
+	}
+	
+	public int readInt() {
+		return readByte() * 16777216 + readByte() * 65536 + readByte() * 256 + readByte();
 	}
 
 	public String readUTF() {
@@ -173,6 +176,11 @@ public class ByteArray {
 			extendArray();
 		this.array[this.pos++] = b;
 		this.size++;
+	}
+	
+	public void writeBoolean(boolean b) {
+		if(b) writeByte((byte) 1);
+		else writeByte((byte) 0);
 	}
 
 	public void writeBytes(ByteArray buffer) {

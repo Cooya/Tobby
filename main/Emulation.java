@@ -5,9 +5,9 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-import messages.HelloConnectMessage;
-import messages.IdentificationSuccessMessage;
-import messages.RawDataMessage;
+import messages.connection.HelloConnectMessage;
+import messages.connection.IdentificationSuccessMessage;
+import messages.connection.RawDataMessage;
 import utilities.ByteArray;
 import utilities.Log;
 

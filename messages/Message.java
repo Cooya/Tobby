@@ -84,6 +84,13 @@ public class Message {
 		return buffer.bytes();
 	}
 	
+	public void completeInfos(ByteArray buffer) {
+		this.size = buffer.getSize();
+		this.lenofsize = computeLenOfSize(this.size);
+		if(this.size > 0)
+			this.content = buffer.bytes();
+	}
+	
 	public boolean isComplete() {
 		return this.complete;
 	}

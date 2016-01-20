@@ -47,7 +47,7 @@ public interface Connection {
 		}
 		
 		public int receive(byte[] buffer) {
-			int bytesReceived = 0;
+			int bytesReceived = -1;
 			try {
 				bytesReceived = this.inputStream.read(buffer);
 			} catch (Exception e) {

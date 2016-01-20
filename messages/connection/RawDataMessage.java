@@ -1,7 +1,8 @@
-package messages;
+package messages.connection;
 
 import java.io.FileOutputStream;
 
+import messages.Message;
 import utilities.ByteArray;
 import utilities.Log;
 

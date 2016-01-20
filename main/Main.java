@@ -1,27 +1,31 @@
 package main;
 
-import gamestarting.ClientKeyMessage;
-import gamestarting.InterClientKeyManager;
-
 import java.util.Hashtable;
 import java.util.LinkedList;
 
 import utilities.ByteArray;
 import utilities.Log;
-import messages.AuthenticationTicketMessage;
-import messages.CharacterSelectionMessage;
-import messages.CharactersListMessage;
-import messages.CharactersListRequestMessage;
-import messages.CheckIntegrityMessage;
 import messages.EmptyMessage;
-import messages.HelloConnectMessage;
-import messages.IdentificationFailedMessage;
-import messages.IdentificationMessage;
-import messages.IdentificationSuccessMessage;
 import messages.Message;
-import messages.RawDataMessage;
-import messages.SelectedServerDataMessage;
-import messages.ServerSelectionMessage;
+import messages.connection.AuthenticationTicketMessage;
+import messages.connection.CharacterSelectionMessage;
+import messages.connection.CharactersListMessage;
+import messages.connection.CharactersListRequestMessage;
+import messages.connection.CheckIntegrityMessage;
+import messages.connection.HelloConnectMessage;
+import messages.connection.IdentificationFailedMessage;
+import messages.connection.IdentificationMessage;
+import messages.connection.IdentificationSuccessMessage;
+import messages.connection.RawDataMessage;
+import messages.connection.SelectedServerDataMessage;
+import messages.connection.ServerSelectionMessage;
+import messages.gamestarting.ChannelEnablingMessage;
+import messages.gamestarting.ClientKeyMessage;
+import messages.gamestarting.InterClientKeyManager;
+import messages.gamestarting.PrismsListRegisterMessage;
+import messages.maps.CurrentMapMessage;
+import messages.maps.MapInformationsRequestMessage;
+import messages.synchronisation.SequenceNumberMessage;
 
 public class Main {
 	protected static final int BUFFER_SIZE = 8192;
@@ -114,20 +118,44 @@ public class Main {
 					CSM.serialize(CLM);
 					sendMessage(CSM);
 					break;
+				case 6316 :
+					if(sentMsgList.get(6317) != null) {
+						SequenceNumberMessage SNM = new SequenceNumberMessage();
+						SNM.serialize();
+						sendMessage(SNM);
+					}
+					break;
 				case 6471 :
 					InterClientKeyManager ICKM = InterClientKeyManager.getInstance();
 					ICKM.getKey();
 					EmptyMessage EM1 = new EmptyMessage("FriendsGetListMessage");
 					EmptyMessage EM2 = new EmptyMessage("IgnoredGetListMessage");
 					EmptyMessage EM3 = new EmptyMessage("SpouseGetInformationsMessage");
+					EmptyMessage EM4 = new EmptyMessage("GameContextCreateRequestMessage");
+					EmptyMessage EM5 = new EmptyMessage("QuestListRequestMessage");
+					PrismsListRegisterMessage PLRM = new PrismsListRegisterMessage();
+					PLRM.serialize();
+					ChannelEnablingMessage CEM = new ChannelEnablingMessage();
+					CEM.serialize();
 					ClientKeyMessage CKM = new ClientKeyMessage();
 					CKM.serialize(ICKM);
-					EmptyMessage EM4 = new EmptyMessage("GameContextCreateRequestMessage");
+					SequenceNumberMessage SNM = new SequenceNumberMessage();
+					SNM.serialize();
 					sendMessage(EM1);
 					sendMessage(EM2);
 					sendMessage(EM3);
-					sendMessage(CKM);
 					sendMessage(EM4);
+					sendMessage(EM5);
+					sendMessage(PLRM);
+					sendMessage(CEM);
+					sendMessage(CKM);
+					sendMessage(SNM);
+					break;
+				case 220 :
+					CurrentMapMessage CMM = new CurrentMapMessage(msg);
+					MapInformationsRequestMessage MIRM = new MapInformationsRequestMessage();
+					MIRM.serialize(CMM);
+					sendMessage(MIRM);
 					break;
 			}
 		}

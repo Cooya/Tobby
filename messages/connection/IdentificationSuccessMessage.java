@@ -1,4 +1,6 @@
-package messages;
+package messages.connection;
+
+import messages.Message;
 
 public class IdentificationSuccessMessage extends Message {
 	public static final int ID = 22;

@@ -1,4 +1,4 @@
-package gamestarting;
+package messages.gamestarting;
 
 import utilities.ByteArray;
 import messages.Message;
