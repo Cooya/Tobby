@@ -6,7 +6,7 @@ public class CharacterSelectionMessage extends Message {
 	public static final int ID = 152;
 	
 	public CharacterSelectionMessage() {
-		super(ID);
+		super();
 	}
 	
 	public void serialize(CharactersListMessage CLM) {

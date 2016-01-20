@@ -1,7 +1,7 @@
 package utilities;
 
 import messages.Message;
-import messages.MessageName;
+import messages.MessagesMap;
 
 public class Log {
 	public static void p(String msgDirection, Message msg) {
@@ -9,9 +9,9 @@ public class Log {
 		int lenofsize = msg.getLenOfSize();
 		int size = msg.getSize();
 		if(msgDirection == "r" || msgDirection == "reception")
-			System.out.println("\nReceiving message " + id + " (" + MessageName.get(id) + ")");
+			System.out.println("\nReceiving message " + id + " (" + MessagesMap.get(id) + ")");
 		else if(msgDirection == "s" || msgDirection == "sending")
-			System.out.println("\nSending message " + id + " (" + MessageName.get(id) + ")");
+			System.out.println("\nSending message " + id + " (" + MessagesMap.get(id) + ")");
 		if(lenofsize > 1)
 			System.out.println("Length of size : " + lenofsize + " bytes");
 		else

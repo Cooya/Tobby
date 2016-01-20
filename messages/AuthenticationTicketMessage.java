@@ -3,11 +3,10 @@ package messages;
 import utilities.ByteArray;
 import utilities.Encryption;
 
-public class AuthentificationTicketMessage extends Message {
+public class AuthenticationTicketMessage extends Message {
 	public static final int ID = 110;
-	
-	public AuthentificationTicketMessage() {
-		super(ID);
+	public AuthenticationTicketMessage() {
+		super();
 	}
 	
 	public void serialize(SelectedServerDataMessage SSDM) {

@@ -11,7 +11,7 @@ public class Message {
 	protected int contentBytesAvailables; // nombre d'octets du contenu acquis
 	protected boolean complete;
 	
-	public Message(int id, int lenofsize, int size, byte[] content, int bytesAvailables) { // message reçu
+	public Message(int id, int lenofsize, int size, byte[] content, int bytesAvailables) { // constructeur générique
 		this.id = id;
 		this.lenofsize = lenofsize;
 		this.size = size;
@@ -29,12 +29,16 @@ public class Message {
 		this.complete = bytesAvailables == size;
 	}
 	
-	public Message(Message msg) {
+	public Message(Message msg) { // constructeur spécifique
 		this(msg.id, msg.lenofsize, msg.size, msg.content, msg.contentBytesAvailables);
 	}
 	
-	public Message(int id) { // message à envoyer
-		this.id = id;
+	public Message(String msgName) { // message vide à envoyer
+		this.id = MessagesMap.get(msgName);
+	}
+	
+	public Message() { // message à envoyer
+		this.id = MessagesMap.get(getClass().getSimpleName());
 	}
 	
 	public int getId() {
@@ -53,7 +57,7 @@ public class Message {
 		return this.content;
 	}
 	
-	static short computeLenOfSize(int size) {
+	public static short computeLenOfSize(int size) {
 	    if(size > 65535)
 	        return 3;
 	    else if(size > 255)

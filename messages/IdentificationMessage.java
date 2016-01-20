@@ -9,7 +9,7 @@ public class IdentificationMessage extends Message {
 	private static final String password = "represente";
 	
 	public IdentificationMessage() {
-		super(ID);
+		super();
 	}
 	
 	public void serialize(HelloConnectMessage HCM) {

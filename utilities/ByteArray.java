@@ -255,7 +255,6 @@ public class ByteArray {
 		int var4 = 0;
 		while(true) {
 			var3 = readByte();
-			System.out.println(var3);
 			if(var4 == 28)
 				break;
 			if(var3 >= 128) {
@@ -273,7 +272,6 @@ public class ByteArray {
 			var4 = 3;
 			while(true) {
 				var3 = readByte();
-				System.out.println(var3);
 				if(var4 < 32)
 					if(var3 >= 128)
 						var2.high = var2.high | (var3 & 127) << var4;

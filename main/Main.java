@@ -1,15 +1,19 @@
 package main;
 
+import gamestarting.ClientKeyMessage;
+import gamestarting.InterClientKeyManager;
+
 import java.util.Hashtable;
 import java.util.LinkedList;
 
 import utilities.ByteArray;
 import utilities.Log;
-import messages.AuthentificationTicketMessage;
+import messages.AuthenticationTicketMessage;
 import messages.CharacterSelectionMessage;
 import messages.CharactersListMessage;
 import messages.CharactersListRequestMessage;
 import messages.CheckIntegrityMessage;
+import messages.EmptyMessage;
 import messages.HelloConnectMessage;
 import messages.IdentificationFailedMessage;
 import messages.IdentificationMessage;
@@ -41,10 +45,10 @@ public class Main {
 		serverCo.close();
 		Log.p("Deconnected from authentification server.");
 		
-		String gameServerIP = ((SelectedServerDataMessage) receivedMsgList.get(42)).getAddress();
-		if(gameServerIP != null) {
+		SelectedServerDataMessage SSDM = (SelectedServerDataMessage) receivedMsgList.get(42);
+		if(SSDM != null) {
 			Log.p("Connecting to game server, waiting response...");
-			serverCo = new Connection.Client(gameServerIP, port);
+			serverCo = new Connection.Client(SSDM.getAddress(), port);
 			while((bytesReceived = serverCo.receive(buffer)) != -1) {
 				Log.p(bytesReceived + " bytes received from server.");
 				processMsgStack(Reader.processBuffer(new ByteArray(buffer, bytesReceived)));
@@ -85,7 +89,7 @@ public class Main {
 					break;
 				case 101 :
 					SSDM = (SelectedServerDataMessage) receivedMsgList.get(42);
-					AuthentificationTicketMessage ATM = new AuthentificationTicketMessage();
+					AuthenticationTicketMessage ATM = new AuthenticationTicketMessage();
 					ATM.serialize(SSDM);
 					sendMessage(ATM);
 					break;
@@ -102,7 +106,6 @@ public class Main {
 					break;
 				case 6267 :
 					CharactersListRequestMessage CLRM = new CharactersListRequestMessage();
-					CLRM.serialize();
 					sendMessage(CLRM);
 					break;
 				case 151 :
@@ -110,6 +113,21 @@ public class Main {
 					CharacterSelectionMessage CSM = new CharacterSelectionMessage();
 					CSM.serialize(CLM);
 					sendMessage(CSM);
+					break;
+				case 6471 :
+					InterClientKeyManager ICKM = InterClientKeyManager.getInstance();
+					ICKM.getKey();
+					EmptyMessage EM1 = new EmptyMessage("FriendsGetListMessage");
+					EmptyMessage EM2 = new EmptyMessage("IgnoredGetListMessage");
+					EmptyMessage EM3 = new EmptyMessage("SpouseGetInformationsMessage");
+					ClientKeyMessage CKM = new ClientKeyMessage();
+					CKM.serialize(ICKM);
+					EmptyMessage EM4 = new EmptyMessage("GameContextCreateRequestMessage");
+					sendMessage(EM1);
+					sendMessage(EM2);
+					sendMessage(EM3);
+					sendMessage(CKM);
+					sendMessage(EM4);
 					break;
 			}
 		}
@@ -121,16 +139,3 @@ public class Main {
 		sentMsgList.put(new Integer(msg.getId()), msg);
 	}
 }
-
-	/*
-ByteArray buffer = new ByteArray();
-	buffer.writeInt(publicKey.length + ticket.length + 4); // + 2 shorts
-	buffer.writeShort((short) publicKey.length);
-for(int i = 0; i < publicKey.length; ++i)
-	buffer.writeByte((byte) publicKey[i]);
-buffer.writeShort((short) ticket.length);
-for(int i = 0; i < ticket.length; ++i)
-	buffer.writeByte((byte) ticket[i]);
-buffer.writeInt(2 + RDM.getLenOfSize() + RDM.getSize());
-buffer.writeBytes(RDM.getRaw());
-*/

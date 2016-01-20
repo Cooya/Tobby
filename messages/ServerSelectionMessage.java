@@ -4,7 +4,7 @@ public class ServerSelectionMessage extends Message {
 	public static final int ID = 40;
 	
 	public ServerSelectionMessage() {
-		super(ID);
+		super();
 	}
 	
 	public void serialize() {

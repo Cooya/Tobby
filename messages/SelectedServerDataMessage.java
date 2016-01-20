@@ -5,9 +5,9 @@ import utilities.ByteArray;
 public class SelectedServerDataMessage extends Message {
 	public static final int ID = 42;
     @SuppressWarnings("unused")
-	private int serverId = 0;
-    public String address = "";
-    public int port = 0;
+	private int serverId;
+    public String address;
+    public int port;
     public boolean canCreateNewCharacter = false;
     public int[] ticket;
 	
