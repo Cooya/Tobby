@@ -32,8 +32,7 @@ public class Main {
 	private static final String authServerIP = "213.248.126.39";
 	private static final int port = 5555;
 	private static Connection serverCo = null; // temporaire bien sûr
-	private static Hashtable<Integer, Message> sentMsgList = new Hashtable<Integer, Message>();
-	private static Hashtable<Integer, Message> receivedMsgList = new Hashtable<Integer, Message>(); 
+	private static Hashtable<String, Object> usefulInfos = new Hashtable<String, Object>();
 	
 	public static void main(String[] args) {
 		Emulation.runASLauncher();
@@ -49,10 +48,10 @@ public class Main {
 		serverCo.close();
 		Log.p("Deconnected from authentification server.");
 		
-		SelectedServerDataMessage SSDM = (SelectedServerDataMessage) receivedMsgList.get(42);
-		if(SSDM != null) {
+		String address = (String) usefulInfos.get("address");
+		if(address != null) {
 			Log.p("Connecting to game server, waiting response...");
-			serverCo = new Connection.Client(SSDM.getAddress(), port);
+			serverCo = new Connection.Client(address, port);
 			while((bytesReceived = serverCo.receive(buffer)) != -1) {
 				Log.p(bytesReceived + " bytes received from server.");
 				processMsgStack(Reader.processBuffer(new ByteArray(buffer, bytesReceived)));
@@ -69,14 +68,14 @@ public class Main {
 			switch(msg.getId()) {
 				case 3 :
 					HelloConnectMessage HCM = new HelloConnectMessage(msg);
-					receivedMsgList.put(3, HCM);
+					usefulInfos.put("HCM", HCM);
 					IdentificationMessage IM = new IdentificationMessage();
 					IM.serialize(HCM);
 					sendMessage(IM);
 					break;
 				case 22 :
 					IdentificationSuccessMessage ISM = new IdentificationSuccessMessage(msg);
-					receivedMsgList.put(22, ISM);
+					usefulInfos.put("ISM", ISM);
 					break;
 				case 20 :
 					IdentificationFailedMessage IFM = new IdentificationFailedMessage(msg); 
@@ -89,17 +88,17 @@ public class Main {
 					break;
 				case 42 : 
 					SelectedServerDataMessage SSDM = new SelectedServerDataMessage(msg);
-					receivedMsgList.put(42, SSDM);
+					usefulInfos.put("ticket", SSDM.getTicket());
+					usefulInfos.put("address", SSDM.getAddress());
 					break;
 				case 101 :
-					SSDM = (SelectedServerDataMessage) receivedMsgList.get(42);
 					AuthenticationTicketMessage ATM = new AuthenticationTicketMessage();
-					ATM.serialize(SSDM);
+					ATM.serialize((int[]) usefulInfos.get("ticket"));
 					sendMessage(ATM);
 					break;
 				case 6253 :
-					HCM = (HelloConnectMessage) receivedMsgList.get(3);
-					ISM = (IdentificationSuccessMessage) receivedMsgList.get(22);
+					HCM = (HelloConnectMessage) usefulInfos.get("HCM");
+					ISM = (IdentificationSuccessMessage) usefulInfos.get("ISM");
 					RawDataMessage RDM = new RawDataMessage(msg);
 					Emulation.sendCredentials();
 					Emulation.createServer(HCM, ISM, RDM);
@@ -119,7 +118,7 @@ public class Main {
 					sendMessage(CSM);
 					break;
 				case 6316 :
-					if(sentMsgList.get(6317) != null) {
+					if(usefulInfos.get("SNMCanGo") != null) {
 						SequenceNumberMessage SNM = new SequenceNumberMessage();
 						SNM.serialize();
 						sendMessage(SNM);
@@ -150,6 +149,7 @@ public class Main {
 					sendMessage(CEM);
 					sendMessage(CKM);
 					sendMessage(SNM);
+					usefulInfos.put("SNMCanGo", true);
 					break;
 				case 220 :
 					CurrentMapMessage CMM = new CurrentMapMessage(msg);
@@ -164,6 +164,5 @@ public class Main {
 	private static void sendMessage(Message msg) {
 		serverCo.send(msg.makeRaw());
 		Log.p("s", msg);
-		sentMsgList.put(new Integer(msg.getId()), msg);
 	}
 }

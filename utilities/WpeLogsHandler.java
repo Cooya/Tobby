@@ -8,16 +8,14 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 
-import messages.MessagesMap;
+import messages.Message;
 
 public class WpeLogsHandler {
 	
 	public static void handler(String[] args) {
 		String inputfile= "Log.txt";
 		String outputfile= "test.txt";
-		byte[] chaine = new byte[1000];
 		try {
-			int compteur=0;
 			InputStream ips;
 			OutputStream ops;
 			ips = new FileInputStream(inputfile);
@@ -43,7 +41,7 @@ public class WpeLogsHandler {
 						id=id >> 2;
 						write=write.concat(id+" ");
 						String tmp;
-						if((tmp=MessagesMap.get(id))!=null){
+						if((tmp=Message.get(id))!=null){
 							write=write.concat("("+tmp+")\n");
 						}
 						write=write.concat("Size: "+nb_byte+" bytes\r\n");

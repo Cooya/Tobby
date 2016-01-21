@@ -13,8 +13,6 @@ public class MapInformationsRequestMessage extends Message {
 		ByteArray buffer = new ByteArray();
 		buffer.writeInt(CMM.getId());
 		
-		this.size = 4;
-		this.lenofsize = 1;
-		this.content = buffer.bytes();
+		completeInfos(buffer);
 	}
 }

@@ -1,7 +1,7 @@
 package messages.gamestarting;
 
-import java.util.Date;
-import java.util.Vector;
+//import java.util.Date;
+//import java.util.Vector;
 
 public class InterClientKeyManager {
 	/*
@@ -15,6 +15,7 @@ public class InterClientKeyManager {
 	
     //private var _sendingLc:LocalConnection;
     //private var _receivingLc:LocalConnection;
+	/*
     private String key;
     private double keyTimestamp;
     private boolean initKey;
@@ -24,6 +25,7 @@ public class InterClientKeyManager {
     private Vector<Integer> clientsIds;
     private Vector<Object> clientsKeys;
     private int numAskedClients;
+    */
     
     private String flashKey; // InterClientManager
 	
@@ -63,10 +65,12 @@ public class InterClientKeyManager {
 	*/
 	
     public void getKey() {
+    	/*
         this.initKey = true;
         this.currentClientId = 0;
         this.clientsIds = new Vector<Integer>();
         this.clientsKeys = new Vector<Object>();
+        */
         //pingNext();
         
         saveKey(uidKey); // raccourci
@@ -74,9 +78,9 @@ public class InterClientKeyManager {
     
     private void saveKey(String str) {
     	String flashKey;
-    	Date var3 = new Date();
-    	this.key = str;
-    	this.keyTimestamp = var3.getTime();
+    	//Date var3 = new Date();
+    	//this.key = str;
+    	//this.keyTimestamp = var3.getTime();
     	flashKey = str + "#01";
     	this.flashKey = flashKey;
     }

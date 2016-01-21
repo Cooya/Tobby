@@ -10,13 +10,11 @@ public class AuthenticationTicketMessage extends Message {
 		super();
 	}
 	
-	public void serialize(SelectedServerDataMessage SSDM) {
+	public void serialize(int[] ticket) {
 		ByteArray buffer = new ByteArray();
 	    buffer.writeUTF("fr");
-	    buffer.writeUTF(new String(Encryption.decodeWithAES(ByteArray.toBytes(SSDM.getTicket()))));
+	    buffer.writeUTF(new String(Encryption.decodeWithAES(ByteArray.toBytes(ticket))));
 	    
-	    this.size = buffer.getSize();
-	    this.lenofsize = computeLenOfSize(this.size);
-	    this.content = buffer.bytes();
+	    completeInfos(buffer);
 	}
 }

@@ -1,8 +1,33 @@
 package messages;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+
+import utilities.BiMap;
 import utilities.ByteArray;
+import utilities.Log;
 
 public class Message {
+	private static final String messagesFilePath = "Ressources/messages.txt";
+	private static final BiMap<Integer, String> map = new BiMap<Integer, String>(Integer.class, String.class);
+	
+	static  {
+		try {
+			Log.p("Loading informations from messages file.");
+			BufferedReader buffer = new BufferedReader(new FileReader(messagesFilePath));
+			String[] splitLine;
+			String line = buffer.readLine();
+			while(line != null) {
+				splitLine = line.split(" ");
+				map.put(Integer.parseInt(splitLine[0]), splitLine[1]);
+				line = buffer.readLine();
+			}
+			buffer.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
 	protected int id;
 	protected int lenofsize;
 	protected int size;
@@ -34,11 +59,36 @@ public class Message {
 	}
 	
 	public Message(String msgName) { // message vide à envoyer
-		this.id = MessagesMap.get(msgName);
+		this.id = get(msgName);
 	}
 	
 	public Message() { // message à envoyer
-		this.id = MessagesMap.get(getClass().getSimpleName());
+		this.id = get(getClass().getSimpleName());
+	}
+	
+	public static String get(int id) {
+		return (String) map.get(id);
+	}
+	
+	public static int get(String name) {
+		return (int) map.get(name);
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static Class<Message> getClass(int id) {
+		try {
+			return (Class<Message>) Class.forName(get(id));
+		} catch (Exception e) {
+			return null;
+		}
+	}
+	
+	public static int get(Message msg) {
+		return get(msg.getClass().getSimpleName());
+	}
+	
+	public static int get(Class<Message> c) {
+		return get(c.getSimpleName());
 	}
 	
 	public int getId() {

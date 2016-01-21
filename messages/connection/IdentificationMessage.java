@@ -30,9 +30,7 @@ public class IdentificationMessage extends Message {
 		buffer.writeByte((byte) 0);
 		buffer.writeByte((byte) 0);
 		
-		this.size = buffer.getSize();
-		this.lenofsize = computeLenOfSize(this.size);
-		this.content = buffer.bytes();
+		completeInfos(buffer);
 	}
 		
 	static void writeVersion(ByteArray array, int major, int minor, int release, int revision, int patch, int buildType, int install, int technology) {

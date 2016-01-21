@@ -14,8 +14,6 @@ public class SequenceNumberMessage extends Message {
 		ByteArray buffer = new ByteArray();
 		buffer.writeShort((short) number++);
 		
-		this.size = 2;
-		this.lenofsize = 1;
-		this.content = buffer.bytes();
+		completeInfos(buffer);
 	}
 }

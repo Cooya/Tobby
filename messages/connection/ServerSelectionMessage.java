@@ -1,5 +1,6 @@
 package messages.connection;
 
+import utilities.ByteArray;
 import messages.Message;
 
 public class ServerSelectionMessage extends Message {
@@ -10,9 +11,9 @@ public class ServerSelectionMessage extends Message {
 	}
 	
 	public void serialize() {
-		this.size = 1;
-		this.lenofsize = computeLenOfSize(this.size);
-		this.content = new byte[1];
-		this.content[0] = 11; // Brumaire
+		ByteArray buffer = new ByteArray();
+		buffer.writeByte((byte) 11); 
+		
+		completeInfos(buffer);
 	}
 }

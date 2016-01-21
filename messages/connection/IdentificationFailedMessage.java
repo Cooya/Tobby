@@ -8,7 +8,6 @@ public class IdentificationFailedMessage extends Message {
 	
 	public IdentificationFailedMessage(Message msg) {
 		super(msg);
-		
 		deserialize();
 	}
 

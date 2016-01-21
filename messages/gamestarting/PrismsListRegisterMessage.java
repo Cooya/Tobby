@@ -14,8 +14,6 @@ public class PrismsListRegisterMessage extends Message {
 		ByteArray buffer = new ByteArray();
 		buffer.writeByte((byte) listen); 
 		
-		this.size = 1;
-		this.lenofsize = 1;
-		this.content = buffer.bytes();
+		completeInfos(buffer);
 	}
 }

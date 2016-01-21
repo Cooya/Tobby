@@ -14,8 +14,6 @@ public class CharacterSelectionMessage extends Message {
 		ByteArray buffer = new ByteArray();
 		buffer.writeVarLong(CLM.getCharacterId());
 		
-		this.size = buffer.getSize();
-		this.lenofsize = computeLenOfSize(this.size);
-		this.content = buffer.bytes();
+		completeInfos(buffer);
 	}
 }

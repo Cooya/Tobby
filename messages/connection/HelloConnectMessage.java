@@ -31,9 +31,7 @@ public class HelloConnectMessage extends Message {
 		for(int i = 0; i < len; ++i)
 			buffer.writeByte((byte) this.key[i]);
 		
-		this.size = buffer.getSize();
-		this.lenofsize = computeLenOfSize(this.size);
-		this.content = buffer.bytes();
+		completeInfos(buffer);
 	}
 	
 	public String getSalt() {

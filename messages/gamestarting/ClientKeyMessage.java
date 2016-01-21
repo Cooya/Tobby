@@ -13,8 +13,6 @@ public class ClientKeyMessage extends Message {
 		ByteArray buffer = new ByteArray();
 		buffer.writeUTF(ICKM.getFlashKey());
 		
-		this.size = buffer.getSize();
-		this.lenofsize = computeLenOfSize(this.size);
-		this.content = buffer.bytes();
+		completeInfos(buffer);
 	}
 }
