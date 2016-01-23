@@ -22,6 +22,8 @@
 170 SetCharacterRestrictionsMessage
 175 AtlasPointsInformations
 176 BasicNoOperationMessage
+182 BasicPingMessage
+183 BasicPongMessage
 189 SystemMessageDisplayMessage
 200 GameContextCreateMessage
 201 ActorAlignmentInformations

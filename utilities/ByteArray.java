@@ -1,5 +1,8 @@
 package utilities;
 
+import java.io.File;
+import java.io.FileInputStream;
+
 public class ByteArray {	
     private static final int INT_SIZE = 32;  
     private static final int SHORT_SIZE = 16;
@@ -47,6 +50,12 @@ public class ByteArray {
 			newArray[i] = this.array[i];
 		this.array = newArray;
 	}
+	
+	public void setArray(byte[] array) {
+		this.array = array;
+		this.size = array.length;
+		this.pos = 0;
+	}
 
 	public int getPos() {
 		return this.pos;
@@ -63,10 +72,6 @@ public class ByteArray {
 	public int getSize() {
 		return this.size;
 	}
-	
-	public void trimArray(int nb) {
-		this.size -= nb;
-	}
 
 	public int remaining() {
 		return this.size - this.pos;
@@ -74,6 +79,73 @@ public class ByteArray {
 
 	public boolean endOfArray() {
 		return this.pos == this.size;
+	}
+	
+	public void trimArray(int nb) {
+		this.size -= nb;
+	}
+	
+	public void flushArray() {
+		this.size = 0;
+		this.pos = 0;
+	}
+	
+	public static ByteArray fileToByteArray(String filepath) {
+		File file = new File(filepath);
+		byte[] bytes = new byte[(int) file.length()];
+		FileInputStream is;
+		try {
+			is = new FileInputStream(file);
+			is.read(bytes);
+			is.close();
+		} catch (Exception e) {
+			return null;
+		}
+		return new ByteArray(bytes);
+	}
+	
+	public ByteArray clonePart(int from, int to) {
+		byte[] splitArray = new byte[to - from];
+		for(int i = 0; i < splitArray.length; ++i)
+			splitArray[i] = this.array[i + from];
+		return new ByteArray(splitArray);
+	}
+	
+	public void split(int from, int to) {
+		byte[] splitArray = new byte[to - from];
+		for(int i = 0; i < splitArray.length; ++i)
+			splitArray[i] = this.array[i + from]; 
+		this.array = splitArray;
+	}
+	
+	public static byte[] trimBuffer(byte[] buffer, int limit) {
+		byte[] trimmedBuffer = new byte[limit];
+		for(int i = 0; i < limit; ++i)
+			trimmedBuffer[i] = buffer[i];
+		return trimmedBuffer;
+	}
+	
+	public byte[] bytesFromPos() {
+		if(this.size <= this.pos)	
+			throw new Error("Size lower than position");
+		byte[] clone = new byte[this.size - this.pos];
+		for(int i = 0; i < clone.length; ++i)
+			clone[i] = this.array[i + this.pos];
+		return clone;
+	}
+
+	public byte[] bytes() {
+		byte[] clone = new byte[this.size];
+		for(int i = 0; i < this.size; ++i)
+			clone[i] = this.array[i];
+		return clone;
+	}
+	
+	public static byte[] toBytes(int[] array) {
+		byte[] bytes = new byte[array.length];
+		for(int i = 0; i < array.length; ++i)
+			bytes[i] = (byte) array[i];
+		return bytes;
 	}
 
 	public static void printBytes(byte[] bytes, String format, int size) {
@@ -112,29 +184,6 @@ public class ByteArray {
 
 	public void printArray(String format) {
 		printBytes(bytes(), format);
-	}
-
-	public byte[] bytesFromPos() {
-		if(this.size <= this.pos)	
-			throw new Error("Size lower than position");
-		byte[] clone = new byte[this.size - this.pos];
-		for(int i = 0; i < clone.length; ++i)
-			clone[i] = this.array[i + this.pos];
-		return clone;
-	}
-
-	public byte[] bytes() {
-		byte[] clone = new byte[this.size];
-		for(int i = 0; i < this.size; ++i)
-			clone[i] = this.array[i];
-		return clone;
-	}
-	
-	public static byte[] toBytes(int[] array) {
-		byte[] bytes = new byte[array.length];
-		for(int i = 0; i < array.length; ++i)
-			bytes[i] = (byte) array[i];
-		return bytes;
 	}
 
 	public int readByte() {

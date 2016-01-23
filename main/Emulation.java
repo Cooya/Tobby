@@ -1,15 +1,11 @@
 package main;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-
 import messages.connection.HelloConnectMessage;
 import messages.connection.IdentificationSuccessMessage;
 import messages.connection.RawDataMessage;
 import utilities.ByteArray;
 import utilities.Log;
+import utilities.Processes;
 
 public class Emulation {
 	private static final String APP_PATH = System.getProperty("user.dir");
@@ -19,11 +15,11 @@ public class Emulation {
 	private static Connection.Server clientDofusCo;
 
 	public static void runASLauncher() {
-		if(!isInProcess("adl.exe"))
+		if(!Processes.inProcess("adl.exe"))
 			try {
 				Log.p("Running AS launcher.");
 				String adlPath = "C:/PROGRA~2/AdobeAIRSDK/bin/adl.exe";
-				if(!fileExists(adlPath))
+				if(!Processes.fileExists(adlPath))
 					throw new Error("AIR debug launcher not found.");
 				else
 					Runtime.getRuntime().exec(adlPath + " " + APP_PATH + "/Ressources/Antibot/application.xml");
@@ -39,15 +35,7 @@ public class Emulation {
 		byte[] buffer = new byte[1]; // bool d'injection
 		launcherCo.receive(buffer);
 		if(buffer[0] == 0)
-			try {
-				Process p = Runtime.getRuntime().exec(APP_PATH + "/Ressources/DLLInjector/Injector.exe No.Ankama.dll adl.exe");
-				InputStream in = p.getInputStream();
-				byte[] bytes = new byte[Main.BUFFER_SIZE];
-				in.read(bytes);
-				Log.p("DLL Injection.\n" + new String(bytes));
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+			Processes.injectDLL(Main.dllLocation, "adl.exe");
 		ByteArray array = new ByteArray();
 		array.writeInt(2 + 11 + 2 + 10);
 		array.writeUTF("maxlebgdu93");
@@ -88,27 +76,5 @@ public class Emulation {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	}
-	
-	private static boolean isInProcess(String processName) {
-		try {
-		    String line;
-		    Process p = Runtime.getRuntime().exec("tasklist");
-		    BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
-		    while ((line = input.readLine()) != null)
-		        if(line.split(" ")[0].equals(processName))
-		        	return true;
-		    input.close();
-		} catch (Exception e) {
-		    e.printStackTrace();
-		}
-		return false;
-	}
-	
-	private static boolean fileExists(String filePath) {
-		File f = new File(filePath);
-		if(f.exists() && !f.isDirectory())
-		    return true;
-		return false;
 	}
 }

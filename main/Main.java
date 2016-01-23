@@ -24,23 +24,29 @@ import messages.gamestarting.ClientKeyMessage;
 import messages.gamestarting.InterClientKeyManager;
 import messages.gamestarting.PrismsListRegisterMessage;
 import messages.maps.CurrentMapMessage;
+import messages.maps.D2pReader;
 import messages.maps.MapInformationsRequestMessage;
 import messages.synchronisation.SequenceNumberMessage;
 
 public class Main {
-	protected static final int BUFFER_SIZE = 8192;
-	private static final String authServerIP = "213.248.126.39";
-	private static final int port = 5555;
+	public static final String dllLocation = "Ressources/DLLInjector/No.Ankama.dll";
+	public static final int BUFFER_SIZE = 8192;
+	public static final String authServerIP = "213.248.126.39";
+	public static final int serverPort = 5555;
 	private static Connection serverCo = null; // temporaire bien sûr
 	private static Hashtable<String, Object> usefulInfos = new Hashtable<String, Object>();
 	
 	public static void main(String[] args) {
+		
+		D2pReader.getBinaryMap(84673538);
+		
+		/*
 		Emulation.runASLauncher();
 		byte[] buffer = new byte[BUFFER_SIZE];
 		int bytesReceived = 0;
 		
 		Log.p("Connecting to authentification server, waiting response...");
-		serverCo = new Connection.Client(authServerIP, port);
+		serverCo = new Connection.Client(authServerIP, serverPort);
 		while((bytesReceived = serverCo.receive(buffer)) != -1) {
 			Log.p(bytesReceived + " bytes received from server.");
 			processMsgStack(Reader.processBuffer(new ByteArray(buffer, bytesReceived)));
@@ -51,7 +57,7 @@ public class Main {
 		String address = (String) usefulInfos.get("address");
 		if(address != null) {
 			Log.p("Connecting to game server, waiting response...");
-			serverCo = new Connection.Client(address, port);
+			serverCo = new Connection.Client(address, serverPort);
 			while((bytesReceived = serverCo.receive(buffer)) != -1) {
 				Log.p(bytesReceived + " bytes received from server.");
 				processMsgStack(Reader.processBuffer(new ByteArray(buffer, bytesReceived)));
@@ -59,6 +65,7 @@ public class Main {
 			serverCo.close();
 			Log.p("Deconnected from game server.");
 		}
+		*/
 	}
 	
 	public static void processMsgStack(LinkedList<Message> msgStack) {
