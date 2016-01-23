@@ -17,8 +17,10 @@ public class D2pReader {
     }
     
 	public static ByteArray getBinaryMap(int mapId) {
-		Log.p("Retrieving binary from of map id " + mapId + "...");
+		Log.p("Retrieving binary data from of map id " + mapId + "...");
 		Object[] index = indexes.get(d2pPath).get(getMapUriFromId(mapId));
+		if(index == null)
+			throw new Error("Unknown map id.");
 		ByteArray binaryMap = ((ByteArray) index[2]).clonePart((int) index[0], (int) index[1]);
 		decompressBinaryMap(binaryMap);
 		return binaryMap;
@@ -38,13 +40,16 @@ public class D2pReader {
 		int pos1;
 		int pos2;
 		int size;
+		boolean nextFile;
 		Hashtable<String, Object[]> indexesDico = new Hashtable<String, Object[]>();
 		Hashtable<String, String> propertiesDico = new Hashtable<String, String>();
 		indexes.put(filepath, indexesDico);
 		properties.put(filepath, propertiesDico);
 		
-		while((buffer = ByteArray.fileToByteArray(filepath)) != null) {
+		while(true) {
 			Log.p("Reading d2p file " + filepath + "...");
+			buffer = ByteArray.fileToByteArray(filepath);
+			nextFile = false;
 			if(buffer.readByte() != 2 || buffer.readByte() != 1)
 				throw new Error("Invalid d2p file header.");
 			buffer.setPos(buffer.getSize() - 24);
@@ -54,20 +59,20 @@ public class D2pReader {
 			indexesSize = buffer.readInt();
 			propertiesPos = buffer.readInt();
 			propertiesSize = buffer.readInt();
+			
 			buffer.setPos(propertiesPos);
-			
-			System.out.println(propertiesPos);
-			
 			for(int i = 0; i < propertiesSize; ++i) {
 				property = buffer.readUTF();
 				filename = buffer.readUTF();
+				
 				propertiesDico.put(property, filename);
-				if(property == "link") {
+				if(property.equals("link")) {
 					slashPos = filepath.lastIndexOf("/");
 					if(slashPos != -1)
 						filepath = filepath.substring(0, slashPos) + "/" + filename;
 					else
 						filepath = filename;
+					nextFile = true;
 				}
 			}
 			
@@ -76,10 +81,12 @@ public class D2pReader {
 				index = buffer.readUTF();
 				pos2 = buffer.readInt();
 				size = buffer.readInt();
-				buffer.setPos(0);
 				Object[] array = {pos1 + pos2, size, buffer};
 				indexesDico.put(index, array);
 			}
+			
+			if(!nextFile)
+				break;
 		}
 	}
 	
