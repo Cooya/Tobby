@@ -1,4 +1,4 @@
-package messages.maps;
+package movement;
 
 import java.util.Hashtable;
 import java.util.zip.Inflater;
@@ -17,7 +17,7 @@ public class D2pReader {
     }
     
 	public static ByteArray getBinaryMap(int mapId) {
-		Log.p("Retrieving binary data from of map id " + mapId + "...");
+		Log.p("Retrieving binary data of map id " + mapId + "...");
 		Object[] index = indexes.get(d2pPath).get(getMapUriFromId(mapId));
 		if(index == null)
 			throw new Error("Unknown map id.");
@@ -47,7 +47,7 @@ public class D2pReader {
 		properties.put(filepath, propertiesDico);
 		
 		while(true) {
-			Log.p("Reading d2p file " + filepath + "...");
+			//Log.p("Reading d2p file " + filepath + "...");
 			buffer = ByteArray.fileToByteArray(filepath);
 			nextFile = false;
 			if(buffer.readByte() != 2 || buffer.readByte() != 1)
@@ -113,7 +113,7 @@ public class D2pReader {
 			}
 			binaryMap.writeBytes(buffer);
 		}
-		Log.p(bytesCounter + " bytes got from the map decompression.");
+		Log.p(bytesCounter + " bytes resulting of decompression.");
 		binaryMap.setArray(buffer);
 		if(binaryMap.readByte() == 77)
 			throw new Error("Invalid binary map header.");

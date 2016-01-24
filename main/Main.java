@@ -24,9 +24,9 @@ import messages.gamestarting.ClientKeyMessage;
 import messages.gamestarting.InterClientKeyManager;
 import messages.gamestarting.PrismsListRegisterMessage;
 import messages.maps.CurrentMapMessage;
-import messages.maps.D2pReader;
 import messages.maps.MapInformationsRequestMessage;
 import messages.synchronisation.SequenceNumberMessage;
+import movement.D2pReader;
 
 public class Main {
 	public static final String dllLocation = "Ressources/DLLInjector/No.Ankama.dll";

@@ -5,7 +5,6 @@ import messages.Message;
 
 public class CurrentMapMessage extends Message {
     private int mapId;
-    @SuppressWarnings("unused")
 	private String mapKey;
 
 	public CurrentMapMessage(Message msg) {
@@ -21,5 +20,9 @@ public class CurrentMapMessage extends Message {
 
 	public int getMapId() {
 		return this.mapId;
+	}
+	
+	public String getMapKey() {
+		return this.mapKey;
 	}
 }
