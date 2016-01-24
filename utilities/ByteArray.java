@@ -104,15 +104,15 @@ public class ByteArray {
 		return new ByteArray(bytes);
 	}
 	
-	public ByteArray clonePart(int from, int to) {
-		byte[] splitArray = new byte[to - from];
+	public ByteArray clonePart(int from, int size) {
+		byte[] splitArray = new byte[size];
 		for(int i = 0; i < splitArray.length; ++i)
 			splitArray[i] = this.array[i + from];
 		return new ByteArray(splitArray);
 	}
 	
-	public void split(int from, int to) {
-		byte[] splitArray = new byte[to - from];
+	public void split(int from, int size) {
+		byte[] splitArray = new byte[size];
 		for(int i = 0; i < splitArray.length; ++i)
 			splitArray[i] = this.array[i + from]; 
 		this.array = splitArray;
