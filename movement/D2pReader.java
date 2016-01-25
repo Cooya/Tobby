@@ -95,27 +95,29 @@ public class D2pReader {
     }
 	
 	private static void decompressBinaryMap(ByteArray binaryMap) {
-		Log.p("Decompressing binary data...");
 		if(binaryMap.readByte() == 77) {
 			binaryMap.setPos(0);
 			return;
 		}
+		Log.p("Decompressing binary data...");
 		Inflater inflater = new Inflater();
 		inflater.setInput(binaryMap.bytes());
 		byte[] buffer = new byte[Main.BUFFER_SIZE];
 		binaryMap.flushArray();
 		int bytesCounter = 0;
+		int bufferSize = 0;
 		while (!inflater.finished()) {
 			try {
-				bytesCounter += inflater.inflate(buffer);
+				bufferSize = inflater.inflate(buffer);
+				bytesCounter += bufferSize;
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			binaryMap.writeBytes(buffer);
+			binaryMap.writeBytes(buffer, bufferSize);
 		}
 		Log.p(bytesCounter + " bytes resulting of decompression.");
-		binaryMap.setArray(buffer);
-		if(binaryMap.readByte() == 77)
+		binaryMap.setPos(0);
+		if(binaryMap.readByte() != 77)
 			throw new Error("Invalid binary map header.");
 		binaryMap.setPos(0);
 	}

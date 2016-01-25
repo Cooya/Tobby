@@ -1,4 +1,4 @@
-package movement;
+package movement.ankama;
 
 import java.awt.Point;
 import java.util.Vector;

@@ -1,4 +1,4 @@
-package movement;
+package useless;
 
 import java.awt.Point;
 import java.util.Vector;
@@ -187,7 +187,7 @@ public class MapPoint {
 			mp = getNearestCellInDirection(j);
 			if(mp != null && vector.indexOf(mp.getCellId()) == -1) {
 				i2 = dmp.getCellSpeed(mp.getCellId());
-				if(!dmp.pointMov(mp._nX, mp._nX, b2, this._nCellId))
+				if(!dmp.pointMov(mp._nX, mp._nX, b2, this._nCellId, -1))
 					i2 = -100;
 				vector2.add(getOrientationsDistance(j, i) + (b3 ? 0 : (i2 >= 0) ? (5 - i2) : (11 + Math.abs(i2))));
 			}
@@ -197,7 +197,7 @@ public class MapPoint {
 		}
 		int i0 = vector2.get(0);
 		int i3;
-		int i4;
+		int i4 = -1;
 		for(int j = 0; j < 8; ++j) {
 			i3 = vector2.get(j);
 			if(i3 < i0 && vector1.get(j) != null) {
@@ -206,7 +206,7 @@ public class MapPoint {
 			}
 		}
 		mp = vector1.get(i4);
-		if(mp == null && b1 && dmp.pointMov(this._nX, this._nY, b2, this._nCellId))
+		if(mp == null && b1 && dmp.pointMov(this._nX, this._nY, b2, this._nCellId, -1))
 			return this;
 		return mp;
 	}

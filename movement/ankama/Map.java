@@ -1,4 +1,4 @@
-package movement;
+package movement.ankama;
 
 import java.util.Vector;
 
@@ -49,8 +49,13 @@ public class Map {
     //private Vector<> _gfxList;
     //private Vector<> _gfxCount;
     
-    public Map() {
+    public Map(ByteArray raw, String decryptionKey) {
     	this.mapClass = Map.class;
+		this.topArrowCell = new Vector<Integer>();
+		this.bottomArrowCell = new Vector<Integer>();
+		this.leftArrowCell = new Vector<Integer>();
+		this.rightArrowCell = new Vector<Integer>();
+    	fromRaw(raw, decryptionKey);
 	}
     
     public boolean getParsed() {
@@ -70,15 +75,18 @@ public class Map {
     		this.encryptionVersion = raw.readByte();
     		int dataLen = raw.readInt();
     		if(this.encrypted) {
-    			if (decryptionKey == null)
+    			if(decryptionKey == null)
                     throw new Error("Map decryption key is empty.");
-    			byte[] encryptedData;
-    			encryptedData = raw.readBytes(dataLen);
-    			for(int i = 0; i < dataLen; ++i)
-    				encryptedData[i] = (byte) (encryptedData[i] ^ decryptionKey.charAt(i % decryptionKey.length()));
+    			byte[] encryptedData = raw.readBytes(dataLen);
+    			int decryptionKeyLen = decryptionKey.length();
+    			for(int i = 0; i < 100; ++i) {
+    				encryptedData[i] = (byte) (encryptedData[i] ^ decryptionKey.charAt(i % decryptionKeyLen));
+    				//System.out.println(encryptedData[i]);
+    				System.out.println(encryptedData[i] ^ decryptionKey.charAt(i % decryptionKeyLen));
+    			}
     			raw.setArray(encryptedData);
     		}
-    	}
+    	} 	
 		this.relativeId = raw.readInt();
 		this.mapType = raw.readByte();
 		this.subareaId = raw.readInt();

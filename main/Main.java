@@ -2,6 +2,7 @@ package main;
 
 import java.util.Hashtable;
 import java.util.LinkedList;
+import java.util.Vector;
 
 import utilities.ByteArray;
 import utilities.Log;
@@ -26,7 +27,10 @@ import messages.gamestarting.PrismsListRegisterMessage;
 import messages.maps.CurrentMapMessage;
 import messages.maps.MapInformationsRequestMessage;
 import messages.synchronisation.SequenceNumberMessage;
+import movement.Cell;
 import movement.D2pReader;
+import movement.Pathfinder;
+import movement.ankama.Map;
 
 public class Main {
 	public static final String dllLocation = "Ressources/DLLInjector/No.Ankama.dll";
@@ -38,9 +42,17 @@ public class Main {
 	
 	public static void main(String[] args) {
 		
-		D2pReader.getBinaryMap(84673538);
-		
 		/*
+		ByteArray binaryMap = D2pReader.getBinaryMap(84804608);
+		Map map = new Map(binaryMap, "ea16bfba377d3c4f7a0f04c431c4ee40");
+		
+		Pathfinder.initMap(map);
+		Vector<Cell> path = Pathfinder.compute(267, 326);
+		for(int i = 0; i < path.size(); ++i)
+			System.out.println(path.get(i));
+		*/
+		
+		
 		Emulation.runASLauncher();
 		byte[] buffer = new byte[BUFFER_SIZE];
 		int bytesReceived = 0;
@@ -65,7 +77,6 @@ public class Main {
 			serverCo.close();
 			Log.p("Deconnected from game server.");
 		}
-		*/
 	}
 	
 	public static void processMsgStack(LinkedList<Message> msgStack) {
@@ -125,11 +136,9 @@ public class Main {
 					sendMessage(CSM);
 					break;
 				case 6316 :
-					if(usefulInfos.get("SNMCanGo") != null) {
-						SequenceNumberMessage SNM = new SequenceNumberMessage();
-						SNM.serialize();
-						sendMessage(SNM);
-					}
+					SequenceNumberMessage SNM = new SequenceNumberMessage();
+					SNM.serialize();
+					sendMessage(SNM);
 					break;
 				case 6471 :
 					InterClientKeyManager ICKM = InterClientKeyManager.getInstance();
@@ -138,31 +147,33 @@ public class Main {
 					EmptyMessage EM2 = new EmptyMessage("IgnoredGetListMessage");
 					EmptyMessage EM3 = new EmptyMessage("SpouseGetInformationsMessage");
 					EmptyMessage EM4 = new EmptyMessage("GameContextCreateRequestMessage");
-					EmptyMessage EM5 = new EmptyMessage("QuestListRequestMessage");
+					//EmptyMessage EM5 = new EmptyMessage("ObjectAveragePricesGetMessage");
+					EmptyMessage EM6 = new EmptyMessage("QuestListRequestMessage");
 					PrismsListRegisterMessage PLRM = new PrismsListRegisterMessage();
 					PLRM.serialize();
 					ChannelEnablingMessage CEM = new ChannelEnablingMessage();
 					CEM.serialize();
 					ClientKeyMessage CKM = new ClientKeyMessage();
 					CKM.serialize(ICKM);
-					SequenceNumberMessage SNM = new SequenceNumberMessage();
-					SNM.serialize();
 					sendMessage(EM1);
 					sendMessage(EM2);
 					sendMessage(EM3);
+					sendMessage(CKM);
 					sendMessage(EM4);
-					sendMessage(EM5);
+					//sendMessage(EM5);
+					sendMessage(EM6);
 					sendMessage(PLRM);
 					sendMessage(CEM);
-					sendMessage(CKM);
-					sendMessage(SNM);
-					usefulInfos.put("SNMCanGo", true);
 					break;
 				case 220 :
 					CurrentMapMessage CMM = new CurrentMapMessage(msg);
 					MapInformationsRequestMessage MIRM = new MapInformationsRequestMessage();
 					MIRM.serialize(CMM);
-					sendMessage(MIRM);
+					sendMessage(MIRM);	
+					
+					ByteArray binaryMap = D2pReader.getBinaryMap(CMM.getMapId());
+					Map map = new Map(binaryMap, CMM.getMapKey());
+					
 					break;
 			}
 		}

@@ -236,10 +236,14 @@ public class ByteArray {
 		for(int i = 0; i < buffer.size; ++i)
 			writeByte(buffer.array[i]);
 	}
+	
+	public void writeBytes(byte[] bytes, int limit) {
+		for(int i = 0; i < limit; ++i)
+			writeByte(bytes[i]);
+	}
 
 	public void writeBytes(byte[] bytes) {
-		for(int i = 0; i < bytes.length; ++i)
-			writeByte(bytes[i]);
+		writeBytes(bytes, bytes.length);
 	}
 
 	public void writeShort(short s) {

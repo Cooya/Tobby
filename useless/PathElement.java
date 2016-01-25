@@ -1,4 +1,5 @@
-package movement;
+package useless;
+
 
 public class PathElement {
 	private MapPoint _oStep;
