@@ -42,17 +42,15 @@ public class Main {
 	
 	public static void main(String[] args) {
 		
-		/*
-		ByteArray binaryMap = D2pReader.getBinaryMap(84804608);
-		Map map = new Map(binaryMap, "ea16bfba377d3c4f7a0f04c431c4ee40");
+		ByteArray binaryMap = D2pReader.getBinaryMap(84804865);
+		Map map = new Map(binaryMap);
 		
 		Pathfinder.initMap(map);
-		Vector<Cell> path = Pathfinder.compute(267, 326);
+		Vector<Cell> path = Pathfinder.compute(301, 191);
 		for(int i = 0; i < path.size(); ++i)
-			System.out.println(path.get(i));
-		*/
+			System.out.println(path.get(i) + " " + Pathfinder.getIdFromCell(path.get(i)));
 		
-		
+		/*
 		Emulation.runASLauncher();
 		byte[] buffer = new byte[BUFFER_SIZE];
 		int bytesReceived = 0;
@@ -77,6 +75,7 @@ public class Main {
 			serverCo.close();
 			Log.p("Deconnected from game server.");
 		}
+		*/
 	}
 	
 	public static void processMsgStack(LinkedList<Message> msgStack) {
@@ -172,7 +171,7 @@ public class Main {
 					sendMessage(MIRM);	
 					
 					ByteArray binaryMap = D2pReader.getBinaryMap(CMM.getMapId());
-					Map map = new Map(binaryMap, CMM.getMapKey());
+					Map map = new Map(binaryMap);
 					
 					break;
 			}

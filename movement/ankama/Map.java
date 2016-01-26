@@ -5,6 +5,7 @@ import java.util.Vector;
 import utilities.ByteArray;
 
 public class Map {
+	private static final String decryptionKey = "649ae451ca33ec53bbcbcc33becf15f4";
 	private static final int MAP_CELLS_COUNT = 560;
     public Class<Map> mapClass;
     public int mapVersion;
@@ -49,13 +50,13 @@ public class Map {
     //private Vector<> _gfxList;
     //private Vector<> _gfxCount;
     
-    public Map(ByteArray raw, String decryptionKey) {
+    public Map(ByteArray raw) {
     	this.mapClass = Map.class;
 		this.topArrowCell = new Vector<Integer>();
 		this.bottomArrowCell = new Vector<Integer>();
 		this.leftArrowCell = new Vector<Integer>();
 		this.rightArrowCell = new Vector<Integer>();
-    	fromRaw(raw, decryptionKey);
+    	fromRaw(raw);
 	}
     
     public boolean getParsed() {
@@ -66,7 +67,7 @@ public class Map {
     	return this._failed;
     }
     
-    public void fromRaw(ByteArray raw, String decryptionKey) {
+    public void fromRaw(ByteArray raw) {
     	raw.readByte(); // 77
     	this.mapVersion = raw.readByte();
     	this.id = raw.readInt();
@@ -78,12 +79,9 @@ public class Map {
     			if(decryptionKey == null)
                     throw new Error("Map decryption key is empty.");
     			byte[] encryptedData = raw.readBytes(dataLen);
-    			int decryptionKeyLen = decryptionKey.length();
-    			for(int i = 0; i < 100; ++i) {
-    				encryptedData[i] = (byte) (encryptedData[i] ^ decryptionKey.charAt(i % decryptionKeyLen));
-    				//System.out.println(encryptedData[i]);
-    				System.out.println(encryptedData[i] ^ decryptionKey.charAt(i % decryptionKeyLen));
-    			}
+    			int keySize = decryptionKey.length();
+    			for(int i = 0; i < dataLen; ++i)
+    				encryptedData[i] = (byte) (encryptedData[i] ^ decryptionKey.charAt(i % keySize));
     			raw.setArray(encryptedData);
     		}
     	} 	

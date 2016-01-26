@@ -51,7 +51,6 @@ public class Pathfinder {
 				currentCell = path.lastElement();
 			}
 		}
-		path.add(dest);
 		return path;
 	}
 	
@@ -108,21 +107,24 @@ public class Pathfinder {
 	}
 	
 	private static Cell getCellFromDirection(int direction) {
+		int offsetX;
+		if(currentCell.y % 2 == 0) offsetX = 0;
+		else offsetX = 1;
 		switch(direction) {
 			case RIGHT :
 				if(currentCell.x + 1 < MAP_WIDTH)
 					return cells[currentCell.x + 1][currentCell.y];
 				return null;
 			case DOWN_RIGHT :
-				if(currentCell.x + 1 < MAP_WIDTH && currentCell.y + 1 < MAP_HEIGHT)
+				if(currentCell.x + offsetX < MAP_WIDTH && currentCell.y + 1 < MAP_HEIGHT)
 					return cells[currentCell.x + 1][currentCell.y + 1];
 				return null;
 			case DOWN :
-				if(currentCell.y + 1 < MAP_HEIGHT)
-					return cells[currentCell.x][currentCell.y + 1];
+				if(currentCell.y + 2 < MAP_HEIGHT)
+					return cells[currentCell.x][currentCell.y + 2];
 				return null;
 			case DOWN_LEFT :
-				if(currentCell.x - 1 > 0 && currentCell.y + 1 < MAP_HEIGHT)
+				if(currentCell.x - 1 + offsetX > 0 && currentCell.y + 1 < MAP_HEIGHT)
 					return cells[currentCell.x - 1][currentCell.y + 1];
 				return null;
 			case LEFT :
@@ -130,25 +132,30 @@ public class Pathfinder {
 					return cells[currentCell.x - 1][currentCell.y];
 				return null;
 			case UP_LEFT :
-				if(currentCell.x - 1 > 0 && currentCell.y - 1 > 0)
+				if(currentCell.x - 1 + offsetX > 0 && currentCell.y - 1 > 0)
 					return cells[currentCell.x - 1][currentCell.y - 1];
 				return null;
 			case UP :
-				if(currentCell.y - 1 > 0)
-					return cells[currentCell.x][currentCell.y - 1];
+				if(currentCell.y - 2 > 0)
+					return cells[currentCell.x][currentCell.y - 2];
 				return null;
 			case UP_RIGHT :
-				if(currentCell.x + 1 < MAP_WIDTH && currentCell.y - 1 > 0)
+				if(currentCell.x + offsetX < MAP_WIDTH && currentCell.y - 1 > 0)
 					return cells[currentCell.x + 1][currentCell.y - 1];
 				return null;
 		}
 		throw new Error("Invalid direction.");
 	}
 	
-	private static Cell getCellFromId(int cellId) {
+	public static Cell getCellFromId(int cellId) {
 		if(cellId < 0 || cellId > 559)
 			throw new Error("Invalid cell id");
 		return cells[cellId % MAP_WIDTH][cellId / MAP_WIDTH];
+	}
+	
+	
+	public static int getIdFromCell(Cell cell) {
+		return cell.y * MAP_WIDTH + cell.x;
 	}
 	
 	private static int determineDirection(Cell src, Cell dest) {
