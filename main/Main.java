@@ -46,7 +46,8 @@ public class Main {
 		Map map = new Map(binaryMap);
 		
 		Pathfinder.initMap(map);
-		Vector<Cell> path = Pathfinder.compute(301, 191);
+		//Vector<Cell> obs = Pathfinder.getObstacles();
+		Vector<Cell> path = Pathfinder.compute(214, 133);
 		for(int i = 0; i < path.size(); ++i)
 			System.out.println(path.get(i) + " " + Pathfinder.getIdFromCell(path.get(i)));
 		

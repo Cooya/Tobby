@@ -2,9 +2,12 @@ package movement.ankama;
 
 import java.util.Vector;
 
+import movement.Cell;
 import utilities.ByteArray;
 
 public class Map {
+	public static final int WIDTH = 14;
+	public static final int HEIGHT = 40; // normalement 20
 	private static final String decryptionKey = "649ae451ca33ec53bbcbcc33becf15f4";
 	private static final int MAP_CELLS_COUNT = 560;
     public Class<Map> mapClass;
@@ -40,7 +43,7 @@ public class Map {
     public int layersCount;
     public boolean isUsingNewMovementSystem = false;
     public Vector<Layer> layers;
-    public Vector<CellData> cells;
+    public Vector<Cell> cells;
     public Vector<Integer> topArrowCell;
     public Vector<Integer> leftArrowCell;
     public Vector<Integer> bottomArrowCell;
@@ -139,11 +142,11 @@ public class Map {
             	layer.fromRaw(raw, this.mapVersion);
             	this.layers.add(layer);
             }
-            this.cells = new Vector<CellData>();
-            CellData cd;
+            this.cells = new Vector<Cell>();
+            Cell cd;
             int _oldMvtSystem = -1;
             for(int i = 0; i < cellsCount; ++i) {
-            	cd = new CellData(this, i);
+            	cd = new Cell(this, i);
             	cd.fromRaw(raw);
             	if(_oldMvtSystem == -1)
             		_oldMvtSystem = cd.moveZone;

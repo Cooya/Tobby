@@ -2,12 +2,9 @@ package movement;
 
 import java.util.Vector;
 
-import movement.ankama.CellData;
 import movement.ankama.Map;
 
 public class Pathfinder {
-	public static final int MAP_WIDTH = 14;
-	public static final int MAP_HEIGHT = 40; // normalement 20
 	public static final int RIGHT = 0;
 	public static final int DOWN_RIGHT = 1;
 	public static final int DOWN = 2;
@@ -16,20 +13,16 @@ public class Pathfinder {
 	public static final int UP_LEFT = 5;
 	public static final int UP = 6;
 	public static final int UP_RIGHT = 7;
-	private static Cell[][] cells = new Cell[MAP_WIDTH][MAP_HEIGHT];
+	private static Cell[][] cells = new Cell[Map.WIDTH][Map.HEIGHT];
 	private static Vector<Cell> path;
 	private static Cell currentCell;
 	private static Cell dest;
 	
 	public static void initMap(Map map) {
-		CellData cd;
-		int id = 0;
-    	for(int i = 0; i < MAP_WIDTH; ++i) {
-    		cells[i] = new Cell[MAP_HEIGHT];
-    		for(int j = 0; j < MAP_HEIGHT; ++j) {
-    			cd = map.cells.get(id++);
-    			cells[i][j] = new Cell(i ,j, cd.speed, cd.getNonWalkableDuringFight(), cd.getNonWalkableDuringRP());
-    		}
+    	for(int i = 0; i < Map.WIDTH; ++i) {
+    		cells[i] = new Cell[Map.HEIGHT];
+    		for(int j = 0; j < Map.HEIGHT; ++j)
+    			cells[i][j] = map.cells.get(getIdFromCoords(i, j));
     	}
 	}
 	
@@ -112,20 +105,20 @@ public class Pathfinder {
 		else offsetX = 1;
 		switch(direction) {
 			case RIGHT :
-				if(currentCell.x + 1 < MAP_WIDTH)
+				if(currentCell.x + 1 < Map.WIDTH)
 					return cells[currentCell.x + 1][currentCell.y];
 				return null;
 			case DOWN_RIGHT :
-				if(currentCell.x + offsetX < MAP_WIDTH && currentCell.y + 1 < MAP_HEIGHT)
-					return cells[currentCell.x + 1][currentCell.y + 1];
+				if(currentCell.x + offsetX < Map.WIDTH && currentCell.y + 1 < Map.HEIGHT)
+					return cells[currentCell.x + offsetX][currentCell.y + 1];
 				return null;
 			case DOWN :
-				if(currentCell.y + 2 < MAP_HEIGHT)
+				if(currentCell.y + 2 < Map.HEIGHT)
 					return cells[currentCell.x][currentCell.y + 2];
 				return null;
 			case DOWN_LEFT :
-				if(currentCell.x - 1 + offsetX > 0 && currentCell.y + 1 < MAP_HEIGHT)
-					return cells[currentCell.x - 1][currentCell.y + 1];
+				if(currentCell.x - 1 + offsetX > 0 && currentCell.y + 1 < Map.HEIGHT)
+					return cells[currentCell.x - 1 + offsetX][currentCell.y + 1];
 				return null;
 			case LEFT :
 				if(currentCell.x - 1 > 0)
@@ -133,15 +126,15 @@ public class Pathfinder {
 				return null;
 			case UP_LEFT :
 				if(currentCell.x - 1 + offsetX > 0 && currentCell.y - 1 > 0)
-					return cells[currentCell.x - 1][currentCell.y - 1];
+					return cells[currentCell.x - 1 + offsetX][currentCell.y - 1];
 				return null;
 			case UP :
 				if(currentCell.y - 2 > 0)
 					return cells[currentCell.x][currentCell.y - 2];
 				return null;
 			case UP_RIGHT :
-				if(currentCell.x + offsetX < MAP_WIDTH && currentCell.y - 1 > 0)
-					return cells[currentCell.x + 1][currentCell.y - 1];
+				if(currentCell.x + offsetX < Map.WIDTH && currentCell.y - 1 > 0)
+					return cells[currentCell.x + offsetX][currentCell.y - 1];
 				return null;
 		}
 		throw new Error("Invalid direction.");
@@ -150,13 +143,31 @@ public class Pathfinder {
 	public static Cell getCellFromId(int cellId) {
 		if(cellId < 0 || cellId > 559)
 			throw new Error("Invalid cell id");
-		return cells[cellId % MAP_WIDTH][cellId / MAP_WIDTH];
+		return cells[cellId % Map.WIDTH][cellId / Map.WIDTH];
 	}
 	
+	public static Cell getCellFromCoords(int x, int y) {
+		return getCellFromId(y * Map.WIDTH + x);
+	}
 	
 	public static int getIdFromCell(Cell cell) {
-		return cell.y * MAP_WIDTH + cell.x;
+		return cell.y * Map.WIDTH + cell.x;
 	}
+	
+	public static int getIdFromCoords(int x, int y) {
+		return y * Map.WIDTH + x;
+	}
+	
+	/*
+	public static Vector<Cell> getObstacles() {
+		Vector<Cell> obs = new Vector<Cell>();
+		for(int i = 0; i < cells.length; ++i)
+			for(int j = 0; j < cells[i].length; ++j)
+				if(!cells[i][j].isWalkableDuringRP())
+					obs.add(cells[i][j]);
+		return obs;
+	}
+	*/
 	
 	private static int determineDirection(Cell src, Cell dest) {
 		if(src.x == dest.x)
