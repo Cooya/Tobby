@@ -4,7 +4,6 @@ import utilities.ByteArray;
 import messages.Message;
 
 public class ServerSelectionMessage extends Message {
-	public static final int ID = 40;
 	
 	public ServerSelectionMessage() {
 		super();

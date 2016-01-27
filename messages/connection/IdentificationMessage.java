@@ -5,7 +5,6 @@ import utilities.ByteArray;
 import utilities.Encryption;
 
 public class IdentificationMessage extends Message {
-	public static final int ID = 4;
 	private static final String login = "maxlebgdu93";
 	private static final String password = "represente";
 	

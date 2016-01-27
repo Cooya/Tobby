@@ -1,5 +1,4 @@
-package useless;
-
+package movement.ankama;
 
 public class PathElement {
 	private MapPoint _oStep;

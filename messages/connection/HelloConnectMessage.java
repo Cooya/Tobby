@@ -4,7 +4,6 @@ import messages.Message;
 import utilities.ByteArray;
 
 public class HelloConnectMessage extends Message {
-	public static final int ID = 3;
 	private String salt;
 	private int[] key;
 	

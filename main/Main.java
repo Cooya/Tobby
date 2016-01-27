@@ -1,5 +1,6 @@
 package main;
 
+import java.lang.reflect.Field;
 import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.Vector;
@@ -25,12 +26,15 @@ import messages.gamestarting.ClientKeyMessage;
 import messages.gamestarting.InterClientKeyManager;
 import messages.gamestarting.PrismsListRegisterMessage;
 import messages.maps.CurrentMapMessage;
+import messages.maps.MapComplementaryInformationsDataMessage;
 import messages.maps.MapInformationsRequestMessage;
 import messages.synchronisation.SequenceNumberMessage;
 import movement.Cell;
 import movement.D2pReader;
 import movement.Pathfinder;
 import movement.ankama.Map;
+import movement.ankama.MapMovementAdapter;
+import movement.ankama.MovementPath;
 
 public class Main {
 	public static final String dllLocation = "Ressources/DLLInjector/No.Ankama.dll";
@@ -42,16 +46,19 @@ public class Main {
 	
 	public static void main(String[] args) {
 		
+		/*
 		ByteArray binaryMap = D2pReader.getBinaryMap(84804865);
 		Map map = new Map(binaryMap);
 		
 		Pathfinder.initMap(map);
 		//Vector<Cell> obs = Pathfinder.getObstacles();
-		Vector<Cell> path = Pathfinder.compute(214, 133);
-		for(int i = 0; i < path.size(); ++i)
-			System.out.println(path.get(i) + " " + Pathfinder.getIdFromCell(path.get(i)));
+		MovementPath path = Pathfinder.compute(214, 133);
+		Vector<Integer> vector = MapMovementAdapter.getServerMovement(path);
+		System.out.println(vector);
+		*/
 		
-		/*
+		
+		
 		Emulation.runASLauncher();
 		byte[] buffer = new byte[BUFFER_SIZE];
 		int bytesReceived = 0;
@@ -76,7 +83,6 @@ public class Main {
 			serverCo.close();
 			Log.p("Deconnected from game server.");
 		}
-		*/
 	}
 	
 	public static void processMsgStack(LinkedList<Message> msgStack) {
@@ -174,13 +180,37 @@ public class Main {
 					ByteArray binaryMap = D2pReader.getBinaryMap(CMM.getMapId());
 					Map map = new Map(binaryMap);
 					
+					Pathfinder.initMap(map);
+					MovementPath path = Pathfinder.compute(214, 133);
+					Vector<Integer> vector = MapMovementAdapter.getServerMovement(path);
+					System.out.println(vector);
+					
+					break;
+				case 226 :
+					MapComplementaryInformationsDataMessage MCIDM = new MapComplementaryInformationsDataMessage(msg);
+					System.out.println(MCIDM.getClass().getDeclaredFields());
+					
 					break;
 			}
 		}
 	}
 	
 	private static void sendMessage(Message msg) {
+		
+		//displayAllFields(msg);
+		
 		serverCo.send(msg.makeRaw());
 		Log.p("s", msg);
+	}
+	
+	private static void displayAllFields(Object o) {
+		Field[] fields = o.getClass().getDeclaredFields();
+		for(Field field : fields)
+			try {
+				field.setAccessible(true);
+				System.out.println(field.getName() + " = " + field.get(o));
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 	}
 }

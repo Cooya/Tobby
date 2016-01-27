@@ -74,19 +74,19 @@ public class Cell {
 	}
 	
 	public boolean getUseTopArrow() {
-		return !((this._arrow & 1) == 0);
+		return (this._arrow & 1) != 0;
 	}
 	
 	public boolean getUseBottomArrow() {
-		return !((this._arrow & 2) == 0);
+		return (this._arrow & 2) != 0;
 	}
 	
 	public boolean getUseRightArrow() {
-		return !((this._arrow & 4) == 0);
+		return (this._arrow & 4) != 0;
 	}
 	
 	public boolean getUseLeftArrow() {
-		return !((this._arrow & 8) == 0);
+		return (this._arrow & 8) != 0;
 	}
 	
 	public void fromRaw(ByteArray raw) {

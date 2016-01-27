@@ -4,7 +4,6 @@ import messages.Message;
 import utilities.Log;
 
 public class IdentificationFailedMessage extends Message {
-	public static final int ID = 20;
 	
 	public IdentificationFailedMessage(Message msg) {
 		super(msg);

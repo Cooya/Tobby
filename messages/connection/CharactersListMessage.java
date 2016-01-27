@@ -5,7 +5,6 @@ import utilities.ByteArray;
 import utilities.Int64;
 
 public class CharactersListMessage extends Message {
-	public static final int ID = 151;
 	private int nbCharacters;
 	private Int64 id;
 	
