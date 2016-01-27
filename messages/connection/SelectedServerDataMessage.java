@@ -4,7 +4,6 @@ import messages.Message;
 import utilities.ByteArray;
 
 public class SelectedServerDataMessage extends Message {
-	public static final int ID = 42;
     @SuppressWarnings("unused")
 	private int serverId;
     public String address;

@@ -2,6 +2,7 @@ package utilities;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.nio.ByteBuffer;
 
 public class ByteArray {	
     private static final int INT_SIZE = 32;  
@@ -208,6 +209,10 @@ public class ByteArray {
 	public int readInt() {
 		return readByte() * 16777216 + readByte() * 65536 + readByte() * 256 + readByte();
 	}
+	
+	public double readDouble() {
+		return ByteBuffer.wrap(readBytes(8)).getDouble();
+	}
 
 	public String readUTF() {
 		return readUTFBytes(readShort());
@@ -256,6 +261,12 @@ public class ByteArray {
 		writeByte((byte) (i >>> 16));
 		writeByte((byte) (i >>> 8));
 		writeByte((byte) (i));
+	}
+	
+	public void writeDouble(double d) {
+		byte[] bytes = new byte[8];
+		ByteBuffer.wrap(bytes).putDouble(d);
+		writeBytes(bytes);
 	}
 
 	public void writeUTF(String utf) {

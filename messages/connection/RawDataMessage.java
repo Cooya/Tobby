@@ -7,7 +7,6 @@ import utilities.ByteArray;
 import utilities.Log;
 
 public class RawDataMessage extends Message {
-	public static final int ID = 6253;
 	
 	public RawDataMessage(Message msg) {
 		super(msg);

@@ -5,15 +5,18 @@ import utilities.ByteArray;
 import utilities.Encryption;
 
 public class AuthenticationTicketMessage extends Message {
-	public static final int ID = 110;
+	private final String lang = "fr";
+	private String ticket;
+	
 	public AuthenticationTicketMessage() {
 		super();
 	}
 	
 	public void serialize(int[] ticket) {
+		this.ticket = new String(Encryption.decodeWithAES(ByteArray.toBytes(ticket)));
 		ByteArray buffer = new ByteArray();
-	    buffer.writeUTF("fr");
-	    buffer.writeUTF(new String(Encryption.decodeWithAES(ByteArray.toBytes(ticket))));
+	    buffer.writeUTF(lang);
+	    buffer.writeUTF(this.ticket);
 	    
 	    completeInfos(buffer);
 	}

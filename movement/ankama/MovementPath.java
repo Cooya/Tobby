@@ -1,4 +1,4 @@
-package useless;
+package movement.ankama;
 
 import java.util.Vector;
 
@@ -50,6 +50,7 @@ public class MovementPath {
 		return this._aPath.size();
 	}
 
+	/*
 	public void fillFromCellIds(Vector<Integer> vector) {
 		int vectorSize = vector.size();
 		for(int i = 0; i < vectorSize; ++i)
@@ -61,6 +62,7 @@ public class MovementPath {
 			this._oEnd = this._aPath.get(this._aPath.size() - 1).getStep();
 		}
 	}
+	*/
 
 	public void addPoint(PathElement pe) {
 		this._aPath.add(pe);
@@ -93,7 +95,7 @@ public class MovementPath {
 	public void compress() {
 		int vectorSize = this._aPath.size();
 		if(vectorSize > 0) {
-			for(int i = vectorSize; i > 0; --i)
+			for(int i = vectorSize - 1; i > 0; --i)
 				if(this._aPath.get(i).getOrientation() == this._aPath.get(i - 1).getOrientation())
 					deletePoint(i, 1);
 		}

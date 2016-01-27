@@ -3,6 +3,9 @@ package movement;
 import java.util.Vector;
 
 import movement.ankama.Map;
+import movement.ankama.MapPoint;
+import movement.ankama.MovementPath;
+import movement.ankama.PathElement;
 
 public class Pathfinder {
 	public static final int RIGHT = 0;
@@ -18,6 +21,8 @@ public class Pathfinder {
 	private static Cell currentCell;
 	private static Cell dest;
 	
+	private static MovementPath _movPath;
+	
 	public static void initMap(Map map) {
     	for(int i = 0; i < Map.WIDTH; ++i) {
     		cells[i] = new Cell[Map.HEIGHT];
@@ -26,10 +31,9 @@ public class Pathfinder {
     	}
 	}
 	
-	public static Vector<Cell> compute(int srcId, int destId) {
+	public static MovementPath compute(int srcId, int destId) {
     	path = new Vector<Cell>();
     	currentCell = getCellFromId(srcId);
-    	path.add(currentCell);
     	dest = getCellFromId(destId);
     	
 		Cell next;
@@ -44,7 +48,7 @@ public class Pathfinder {
 				currentCell = path.lastElement();
 			}
 		}
-		return path;
+		return movementPathFromArray(path);
 	}
 	
 	private static Cell getNextCell() {
@@ -158,17 +162,6 @@ public class Pathfinder {
 		return y * Map.WIDTH + x;
 	}
 	
-	/*
-	public static Vector<Cell> getObstacles() {
-		Vector<Cell> obs = new Vector<Cell>();
-		for(int i = 0; i < cells.length; ++i)
-			for(int j = 0; j < cells[i].length; ++j)
-				if(!cells[i][j].isWalkableDuringRP())
-					obs.add(cells[i][j]);
-		return obs;
-	}
-	*/
-	
 	private static int determineDirection(Cell src, Cell dest) {
 		if(src.x == dest.x)
 			if(src.y > dest.y)
@@ -216,4 +209,26 @@ public class Pathfinder {
 	private static double distanceBetween(Cell src, Cell dest) {
 		return Math.sqrt(Math.pow(dest.x - src.x, 2) + Math.pow(dest.y - src.y, 2));
 	}
+	
+	// fonction traduite mais légèrement modifiée
+    private static MovementPath movementPathFromArray(Vector<Cell> cPath) {
+    	MovementPath mp = new MovementPath();
+    	
+    	int cPathLen = cPath.size();
+    	Vector<MapPoint> mpPath = new Vector<MapPoint>();
+    	for(int i = 0; i < cPathLen; ++i)
+    		mpPath.add(MapPoint.fromCellId(cPath.get(i).id));
+    	int vectorSize = mpPath.size();
+    	PathElement pe;
+    	for(int i = 0; i < vectorSize - 1; ++i) {
+    		pe = new PathElement(null, 0);
+    		pe.getStep().setX(mpPath.get(i).getX());
+    		pe.getStep().setY(mpPath.get(i).getY());
+    		pe.setOrientation(mpPath.get(i).orientationTo(mpPath.get(i + 1)));
+    		mp.addPoint(pe);
+    	}
+    	mp.compress();
+    	mp.fill();
+    	return mp;
+    }
 }

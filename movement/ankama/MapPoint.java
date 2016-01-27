@@ -1,4 +1,4 @@
-package useless;
+package movement.ankama;
 
 import java.awt.Point;
 import java.util.Vector;
@@ -58,12 +58,12 @@ public class MapPoint {
 		int i3 = 0;
 		for(int i = 0; i < MAP_HEIGHT; ++i) {
 			for(int j = 0; j < MAP_WIDTH; ++j) {
-				CELLPOS.set(i3, new Point(i1 + j, i2 + j));
+				CELLPOS.add(i3, new Point(i1 + j, i2 + j));
 				i3++;
 			}
 			i1++;
 			for(int j = 0; j < MAP_WIDTH; ++j) {
-				CELLPOS.set(i3, new Point(i1 + j, i2 + j));
+				CELLPOS.add(i3, new Point(i1 + j, i2 + j));
 				i3++;
 			}
 			i2--;
@@ -150,6 +150,8 @@ public class MapPoint {
 		return i3;
 	}
 
+	/*
+	
 	public MapPoint getNearestFreeCell(DataMapProvider dmp, boolean b) {
 		MapPoint mp = null;
 		for(int i = 0; i < 8; ++i) {
@@ -210,6 +212,8 @@ public class MapPoint {
 			return this;
 		return mp;
 	}
+	
+	*/
 
 	public MapPoint pointSymetry(MapPoint mp) {
 		int i1 = 2 * mp._nX - this._nX;
