@@ -1,6 +1,8 @@
 package main;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Type;
+import java.security.ProtectionDomain;
 import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.Vector;
@@ -37,6 +39,7 @@ import movement.ankama.MapMovementAdapter;
 import movement.ankama.MovementPath;
 
 public class Main {
+	public static final ProtectionDomain currentDomain = Main.class.getProtectionDomain();
 	public static final String dllLocation = "Ressources/DLLInjector/No.Ankama.dll";
 	public static final int BUFFER_SIZE = 8192;
 	public static final String authServerIP = "213.248.126.39";
@@ -173,10 +176,9 @@ public class Main {
 					break;
 				case 220 :
 					CurrentMapMessage CMM = new CurrentMapMessage(msg);
-					MapInformationsRequestMessage MIRM = new MapInformationsRequestMessage();
-					MIRM.serialize(CMM);
-					sendMessage(MIRM);	
-					
+					usefulInfos.put("currentMapId", CMM.getMapId());
+						
+					/*
 					ByteArray binaryMap = D2pReader.getBinaryMap(CMM.getMapId());
 					Map map = new Map(binaryMap);
 					
@@ -184,33 +186,44 @@ public class Main {
 					MovementPath path = Pathfinder.compute(214, 133);
 					Vector<Integer> vector = MapMovementAdapter.getServerMovement(path);
 					System.out.println(vector);
-					
+					*/
 					break;
 				case 226 :
 					MapComplementaryInformationsDataMessage MCIDM = new MapComplementaryInformationsDataMessage(msg);
-					System.out.println(MCIDM.getClass().getDeclaredFields());
 					
 					break;
+				case 891 :
+					MapInformationsRequestMessage MIRM = new MapInformationsRequestMessage();
+					MIRM.serialize((int) usefulInfos.get("currentMapId"));
+					sendMessage(MIRM);
 			}
 		}
 	}
 	
 	private static void sendMessage(Message msg) {
-		
-		//displayAllFields(msg);
-		
 		serverCo.send(msg.makeRaw());
 		Log.p("s", msg);
 	}
 	
-	private static void displayAllFields(Object o) {
-		Field[] fields = o.getClass().getDeclaredFields();
-		for(Field field : fields)
-			try {
-				field.setAccessible(true);
-				System.out.println(field.getName() + " = " + field.get(o));
-			} catch (Exception e) {
-				e.printStackTrace();
+	public static void displayAllFields(Object o, String gap) {
+		Class<?> current = o.getClass();
+		while(current.getSuperclass() != null) {
+			Field[] fields = current.getDeclaredFields();
+			for(Field field : fields) {
+				try {
+					field.setAccessible(true);
+					System.out.println(gap + field.getName() + " = " + field.get(o));
+					if(field.get(o).getClass().getProtectionDomain() == currentDomain)
+						displayAllFields(field.get(o), gap + "   ");
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
+		    current = current.getSuperclass();
+		}
+	}
+	
+	public static void displayAllFields(Object o) {
+		displayAllFields(o, "");
 	}
 }

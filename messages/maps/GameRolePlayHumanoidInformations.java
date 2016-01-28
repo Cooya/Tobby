@@ -8,7 +8,8 @@ public class GameRolePlayHumanoidInformations extends GameRolePlayNamedActorInfo
     
     public GameRolePlayHumanoidInformations(ByteArray buffer) {
     	super(buffer);
-    	buffer.readShort(); // id du message HumanInformations
+    	if(buffer.readShort() != 157) // HumanInformations
+    		throw new Error("Invalid value read.");
     	this.humanoidInfo = new HumanInformations(buffer);
     	this.accountId = buffer.readInt();
     }

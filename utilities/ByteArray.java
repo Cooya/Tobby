@@ -188,7 +188,10 @@ public class ByteArray {
 	}
 
 	public int readByte() {
-		return this.array[this.pos++] & 0xFF;
+		int val = this.array[this.pos++] & 0xFF;
+		if(val < 0)
+			throw new Error("Negative byte.");
+		return val;
 	}
 
 	public boolean readBoolean() {
@@ -202,8 +205,11 @@ public class ByteArray {
 		return bytes;
 	}
 
-	public short readShort() { // pas de unsigned short en Java
-		return (short) (readByte() * 256 + readByte());
+	public int readShort() { // pas de unsigned short en Java
+		int val = readByte() * 256 + readByte();
+		if(val < 0)
+			throw new Error("Negative short.");
+		return val;
 	}
 	
 	public int readInt() {
@@ -281,11 +287,14 @@ public class ByteArray {
 	}
 
 	public int readVarInt() {
+		int pos = getPos();
 		int var4 = 0;
 		int var1 = 0;
 		int var2 = 0;
 		boolean var3 = false;
-		while(var2 < INT_SIZE) {
+		do {
+			if(var2 >= INT_SIZE)
+				throw new Error("Too much data");
 			var4 = readByte();
 			var3 = (var4 & MASK_10000000) == MASK_10000000;
 			if(var2 > 0)
@@ -293,18 +302,21 @@ public class ByteArray {
 			else
 				var1 += var4 & MASK_01111111;
 			var2 += CHUNCK_BIT_SIZE;
-			if(!var3)
-				return var1;
-		}
-		throw new Error("Too much data");
+		} while(var3);
+		if(getPos() - pos > 4)
+			throw new Error("So many bytes read.");
+		return var1;
 	}
 	
 	public int readVarShort() {
+		int pos = getPos();
 		int var4 = 0;
 		int var1 = 0;
 		int var2 = 0;
 		boolean var3 = false;
-		while(var2 < SHORT_SIZE) {
+		do {
+			if(var2 >= SHORT_SIZE)
+				throw new Error("Too much data");
 			var4 = readByte();
 			var3 = (var4 & MASK_10000000) == MASK_10000000;
 			if(var2 > 0)
@@ -312,13 +324,12 @@ public class ByteArray {
 			else
 				var1 += var4 & MASK_01111111;
 			var2 += CHUNCK_BIT_SIZE;
-			if(!var3) {
-				if(var1 > SHORT_MAX_VALUE)
-					var1 -= UNSIGNED_SHORT_MAX_VALUE;
-				return var1;
-			}
-		}
-		throw new Error("Too much data");
+		} while(var3);
+		if(var1 > SHORT_MAX_VALUE)
+			var1 -= UNSIGNED_SHORT_MAX_VALUE;	
+		if(getPos() - pos > 2)
+			throw new Error("So many bytes read.");
+		return var1;
 	}
 	
 	public Int64 readVarLong() {

@@ -10,7 +10,8 @@ public class GameContextActorInformations {
 	public GameContextActorInformations(ByteArray buffer) {
         this.contextualId = buffer.readDouble();
         this.look = new EntityLook(buffer);
-        buffer.readShort(); // id du message EntityDispositionInformations
+        if(buffer.readShort() != 60)
+        	throw new Error("Invalid value read");
         this.disposition = new EntityDispositionInformations(buffer);
 	}
 }

@@ -28,22 +28,21 @@ public class MapComplementaryInformationsDataMessage extends Message {
 
 	private void deserialize() {
 		ByteArray buffer = new ByteArray(this.content);
-		int nb;
 		this.subAreaId = buffer.readVarShort();
 		this.mapId = buffer.readInt();
-		nb = buffer.readShort();
+		int nb = buffer.readShort();
 		for(int i = 0; i < nb; ++i) {
-			buffer.readShort(); // id du message HouseInformations
+			buffer.readShort();
 			houses.add(new HouseInformations(buffer));
 		}
 		nb = buffer.readShort();
 		for(int i = 0; i < nb; ++i) {
-			buffer.readShort(); // id du message GameRolePlayActorInformations
+			buffer.readShort();
 			actors.add(new GameRolePlayCharacterInformations(buffer));
 		}
 		nb = buffer.readShort();
 		for(int i = 0; i < nb; ++i) {
-			buffer.readShort(); // id du message InteractiveElement
+			buffer.readShort();
 			interactiveElements.add(new InteractiveElement(buffer));
 		}
 		nb = buffer.readShort();
