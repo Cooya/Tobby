@@ -70,6 +70,8 @@
 5683 EmotePlayMessage
 5684 LifePointsRegenBeginMessage
 5689 EmoteListMessage
+5708 InteractiveElementUpdatedMessage
+5709 StatedElementUpdatedMessage
 5726 OnConnectionEventMessage
 5745 InteractiveUsedMessage
 5809 JobExperienceMultiUpdateMessage

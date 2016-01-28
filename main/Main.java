@@ -7,6 +7,14 @@ import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.Vector;
 
+import roleplay.currentmap.EntityDispositionInformations;
+import roleplay.currentmap.MapComplementaryInformationsDataMessage;
+import roleplay.movement.Cell;
+import roleplay.movement.D2pReader;
+import roleplay.movement.Pathfinder;
+import roleplay.movement.ankama.Map;
+import roleplay.movement.ankama.MapMovementAdapter;
+import roleplay.movement.ankama.MovementPath;
 import utilities.ByteArray;
 import utilities.Log;
 import messages.EmptyMessage;
@@ -23,20 +31,13 @@ import messages.connection.IdentificationSuccessMessage;
 import messages.connection.RawDataMessage;
 import messages.connection.SelectedServerDataMessage;
 import messages.connection.ServerSelectionMessage;
+import messages.currentmap.CurrentMapMessage;
+import messages.currentmap.MapInformationsRequestMessage;
 import messages.gamestarting.ChannelEnablingMessage;
 import messages.gamestarting.ClientKeyMessage;
 import messages.gamestarting.InterClientKeyManager;
 import messages.gamestarting.PrismsListRegisterMessage;
-import messages.maps.CurrentMapMessage;
-import messages.maps.MapComplementaryInformationsDataMessage;
-import messages.maps.MapInformationsRequestMessage;
 import messages.synchronisation.SequenceNumberMessage;
-import movement.Cell;
-import movement.D2pReader;
-import movement.Pathfinder;
-import movement.ankama.Map;
-import movement.ankama.MapMovementAdapter;
-import movement.ankama.MovementPath;
 
 public class Main {
 	public static final ProtectionDomain currentDomain = Main.class.getProtectionDomain();
@@ -177,25 +178,29 @@ public class Main {
 				case 220 :
 					CurrentMapMessage CMM = new CurrentMapMessage(msg);
 					usefulInfos.put("currentMapId", CMM.getMapId());
-						
-					/*
-					ByteArray binaryMap = D2pReader.getBinaryMap(CMM.getMapId());
-					Map map = new Map(binaryMap);
-					
-					Pathfinder.initMap(map);
-					MovementPath path = Pathfinder.compute(214, 133);
-					Vector<Integer> vector = MapMovementAdapter.getServerMovement(path);
-					System.out.println(vector);
-					*/
-					break;
-				case 226 :
-					MapComplementaryInformationsDataMessage MCIDM = new MapComplementaryInformationsDataMessage(msg);
-					
 					break;
 				case 891 :
 					MapInformationsRequestMessage MIRM = new MapInformationsRequestMessage();
 					MIRM.serialize((int) usefulInfos.get("currentMapId"));
 					sendMessage(MIRM);
+					break;
+				case 226 :
+					MapComplementaryInformationsDataMessage MCIDM = new MapComplementaryInformationsDataMessage(msg);
+					EntityDispositionInformations dispo = MCIDM.getCharacterDisposition("Anoxy");
+					if(dispo != null) {
+						usefulInfos.put("currentCellId", dispo.cellId);
+						usefulInfos.put("currentDirection", dispo.direction);
+					}
+					else
+						throw new Error("Invalid character name");
+					
+					Map map = new Map(D2pReader.getBinaryMap((int) usefulInfos.get("currentMapId")));
+					Pathfinder.initMap(map);
+					MovementPath path = Pathfinder.compute(214, 133);
+					Vector<Integer> vector = MapMovementAdapter.getServerMovement(path);
+					System.out.println(vector);
+					
+					break;
 			}
 		}
 	}
