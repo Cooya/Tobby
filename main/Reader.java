@@ -7,11 +7,16 @@ import utilities.ByteArray;
 
 public class Reader {
 	private static Message incompleteMsg; // message incomplet qui attend d'être complété
+	private static byte[] incompleteHeader; // header incomplet qui attend d'être complété
 	
 	public static LinkedList<Message> processBuffer(ByteArray buffer) {
 		LinkedList<Message> msgStack = new LinkedList<Message>();
 		
-		if(incompleteMsg != null) {
+		if(incompleteHeader != null) {
+			buffer.appendBefore(incompleteHeader);
+			incompleteHeader = null;
+		}
+		else if(incompleteMsg != null) {
 			buffer.readBytes(incompleteMsg.appendContent(buffer.bytes()));
 			if(incompleteMsg.isComplete()) {
 				msgStack.add(incompleteMsg);
@@ -22,7 +27,9 @@ public class Reader {
 		}
 		while(!buffer.endOfArray()) {
 			Message msg = extractMsgFromBuffer(buffer.bytesFromPos());
-			if(msg.isComplete())
+			if(msg == null)
+				incompleteHeader = buffer.bytesFromPos();
+			else if(msg.isComplete())
 				msgStack.add(msg);
 			else
 				incompleteMsg = msg;
@@ -32,6 +39,8 @@ public class Reader {
 	}
 	
 	private static Message extractMsgFromBuffer(byte[] buffer) {
+		if(buffer.length < 2)
+			return null;
 		char[] cbuffer = new char[buffer.length]; // étant donné que ce sont des octets signés bruts
 		for(int i = 0; i < buffer.length; ++i)
 			cbuffer[i] = (char) (buffer[i] & 0xFF);
@@ -39,6 +48,8 @@ public class Reader {
 		int header = cbuffer[0] << 8 | cbuffer[1];
 		short id = (short) (header >> 2);
 		short lenofsize = (short) (header & 3);
+		if(buffer.length < 2 + lenofsize)
+			return null;
 		int size;
 		if(lenofsize == 0)
 	        size = 0;

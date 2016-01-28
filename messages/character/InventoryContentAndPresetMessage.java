@@ -9,7 +9,6 @@ import roleplay.inventory.Preset;
 import utilities.ByteArray;
 
 public class InventoryContentAndPresetMessage extends Message {
-	public static final int ID = 3016;
 	public Vector<ObjectItem> inventory;
 	public int kamas;
 	public Vector<Preset> presets;
@@ -17,19 +16,19 @@ public class InventoryContentAndPresetMessage extends Message {
 	
 	public InventoryContentAndPresetMessage(Message msg) {
 		super(msg);
-		inventory=new Vector<ObjectItem>();
-		presets=new Vector<Preset>();
-		idolsPresets=new Vector<IdolsPreset>();
-		ByteArray buffer=new ByteArray(msg.getContent());
-		deserialize(buffer);
+		inventory = new Vector<ObjectItem>();
+		presets = new Vector<Preset>();
+		idolsPresets = new Vector<IdolsPreset>();
+		deserialize();
 	}
 
-	private void deserialize(ByteArray buffer) {
+	private void deserialize() {
+		ByteArray buffer = new ByteArray(this.content);
 		deserializeInventory(buffer);
 		deserializePresets(buffer);
 	}
 
-	public void deserializeInventory(ByteArray buffer){
+	private void deserializeInventory(ByteArray buffer){
 		ObjectItem obj = null;
 		int loc2 = buffer.readShort();
 		int loc3 = 0;
@@ -48,9 +47,7 @@ public class InventoryContentAndPresetMessage extends Message {
 		}
 	}
 
-
-
-	public void deserializePresets(ByteArray buffer){
+	private void deserializePresets(ByteArray buffer){
 		Preset loc6 = null;
 		IdolsPreset  loc7 = null;
 		int loc2 = buffer.readShort();

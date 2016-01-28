@@ -57,6 +57,17 @@ public class ByteArray {
 		this.size = array.length;
 		this.pos = 0;
 	}
+	
+	public void appendBefore(byte[] array) {
+		byte[] newArray = new byte[array.length + this.array.length];
+		int i = 0;
+		for(; i < array.length; ++i)
+			newArray[i] = array[i];
+		for(int j = 0; j < this.array.length; ++j, ++i)
+			newArray[i] = this.array[j];
+		this.pos = 0;
+		this.size += array.length;
+	}
 
 	public int getPos() {
 		return this.pos;

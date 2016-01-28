@@ -1,7 +1,6 @@
 package main;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Type;
 import java.security.ProtectionDomain;
 import java.util.Hashtable;
 import java.util.LinkedList;
@@ -9,7 +8,6 @@ import java.util.Vector;
 
 import roleplay.currentmap.EntityDispositionInformations;
 import roleplay.currentmap.MapComplementaryInformationsDataMessage;
-import roleplay.movement.Cell;
 import roleplay.movement.D2pReader;
 import roleplay.movement.Pathfinder;
 import roleplay.movement.ankama.Map;
@@ -49,20 +47,6 @@ public class Main {
 	private static Hashtable<String, Object> usefulInfos = new Hashtable<String, Object>();
 	
 	public static void main(String[] args) {
-		
-		/*
-		ByteArray binaryMap = D2pReader.getBinaryMap(84804865);
-		Map map = new Map(binaryMap);
-		
-		Pathfinder.initMap(map);
-		//Vector<Cell> obs = Pathfinder.getObstacles();
-		MovementPath path = Pathfinder.compute(214, 133);
-		Vector<Integer> vector = MapMovementAdapter.getServerMovement(path);
-		System.out.println(vector);
-		*/
-		
-		
-		
 		Emulation.runASLauncher();
 		byte[] buffer = new byte[BUFFER_SIZE];
 		int bytesReceived = 0;
