@@ -1,4 +1,4 @@
-package roleplay.inventory;
+package game;
 
 import java.util.Vector;
 
@@ -17,6 +17,8 @@ public class ObjectItem {
 	public int objectUID = 0;
 
 	public int quantity = 0;
+	
+	public String Name="";
 
 	public ObjectItem()
 	{
