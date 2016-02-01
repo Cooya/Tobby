@@ -1,11 +1,8 @@
-package game;
+package roleplay.inventory;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.IOException;
 import java.util.Hashtable;
 
 public class ItemsLoader {
@@ -22,6 +19,7 @@ public class ItemsLoader {
 				String[] parseline=line.split("	");
 				tmp.put(Integer.valueOf(parseline[0]),parseline[1]);
 			}
+			br.close();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

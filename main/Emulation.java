@@ -84,8 +84,8 @@ public class Emulation {
 		}
 	}
 	
-	public static void hashMessage(ByteArray msg) {
-		Log.p("Haching message...");
+	public static ByteArray hashMessage(ByteArray msg) {
+		Log.p("Hashing message...");
 		ByteArray bytes = new ByteArray(msg.getSize() + 2);
 		bytes.writeInt(1 + msg.getSize());
 		bytes.writeByte((byte) 3); 
@@ -93,6 +93,6 @@ public class Emulation {
 		launcherCo.send(bytes.bytes());
 		byte[] buffer = new byte[Main.BUFFER_SIZE];
 		int size = launcherCo.receive(buffer);
-		msg = new ByteArray(buffer, size);
+		return new ByteArray(buffer, size);
 	}
 }

@@ -164,9 +164,11 @@ public class Pathfinder {
 	}
 	
 	public static void printPath() {
+		PathNode lastNode = path.lastElement();
 		for(PathNode node : path)
-			System.out.print(node.cell.id + " ");
-		System.out.println();
+			if(node != lastNode)
+				System.out.print(node.cell.id + "->");
+		System.out.println(lastNode.cell.id + "\n");
 	}
 	
 	private static int determineDirection(Cell src, Cell dest) {

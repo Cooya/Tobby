@@ -78,6 +78,7 @@
 5726 OnConnectionEventMessage
 5734 HousePropertiesMessage
 5745 InteractiveUsedMessage
+5747 JobMultiCraftAvailableSkillsMessage
 5809 JobExperienceMultiUpdateMessage
 5816 BasicLatencyStatsRequestMessage
 5834 SpellForgottenMessage

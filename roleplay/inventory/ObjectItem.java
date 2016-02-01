@@ -1,4 +1,4 @@
-package game;
+package roleplay.inventory;
 
 import java.util.Vector;
 

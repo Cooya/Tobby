@@ -24,7 +24,6 @@ public class GameMapMovementRequestMessage extends Message {
 			buffer.writeShort((short) i);
 		buffer.writeInt(mapId);
 		
-		Emulation.hashMessage(buffer);
-		completeInfos(buffer);
+		completeInfos(Emulation.hashMessage(buffer));
 	}
 }

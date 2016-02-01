@@ -1,4 +1,4 @@
-package messages.game;
+package messages.character;
 
 import messages.Message;
 import utilities.ByteArray;

@@ -88,6 +88,11 @@ public class CharacterController {
 		GMMRM.serialize(vector, this.currentMap.id);
 		Main.sendMessage(GMMRM);
 		
+		Pathfinder.printPath();
+		for(int i : vector)
+			System.out.print(i + " ");
+		System.out.println("\n");
+		
 		try {
 			Thread.sleep(Pathfinder.getPathTime());
 		} catch(Exception e) {
@@ -96,5 +101,7 @@ public class CharacterController {
 		
 		EmptyMessage EM = new EmptyMessage("GameMapMovementConfirmMessage");
 		Main.sendMessage(EM);
+		
+		this.currentCellId = cellId;
 	}
 }

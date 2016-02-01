@@ -28,6 +28,8 @@ import messages.gamestarting.ChannelEnablingMessage;
 import messages.gamestarting.ClientKeyMessage;
 import messages.gamestarting.InterClientKeyManager;
 import messages.gamestarting.PrismsListRegisterMessage;
+import messages.synchronisation.BasicNoOperationMessage;
+import messages.synchronisation.BasicStatMessage;
 import messages.synchronisation.SequenceNumberMessage;
 
 public class Main {
@@ -36,7 +38,7 @@ public class Main {
 	public static final String authServerIP = "213.248.126.39";
 	public static final int serverPort = 5555;
 	private static Connection serverCo = null; // temporaire bien sûr
-	public static CharacterController CC = null; // temporaire aussi
+	private static CharacterController CC = null; // temporaire aussi
 	private static Hashtable<String, Object> usefulInfos = new Hashtable<String, Object>();
 	
 	public static void main(String[] args) {
@@ -124,10 +126,23 @@ public class Main {
 					CSM.serialize(CLM);
 					sendMessage(CSM);
 					break;
+				case 153 :
+					BasicStatMessage BSM = new BasicStatMessage();
+					BSM.serialize();
+					sendMessage(BSM);
+					break;
 				case 6316 :
 					SequenceNumberMessage SNM = new SequenceNumberMessage();
 					SNM.serialize();
 					sendMessage(SNM);
+					break;
+				case 176 :
+					new BasicNoOperationMessage(msg);
+					if(BasicNoOperationMessage.getCounter() % 10 == 0) {
+						BSM = new BasicStatMessage();
+						BSM.serialize();
+						sendMessage(BSM);
+					}
 					break;
 				case 6471 :
 					InterClientKeyManager ICKM = InterClientKeyManager.getInstance();
@@ -178,8 +193,7 @@ public class Main {
 					}
 					else
 						throw new Error("Invalid character id");
-					
-					CC.moveTo(496);
+					break;
 			}
 		}
 	}
