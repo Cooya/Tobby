@@ -16,10 +16,10 @@ public class Sniffer extends Thread {
 	private static boolean mustDeconnectClient = false;
 	
 	public Sniffer() {
-		
+		launch();
 	}
 	
-	public void launch() {
+	private void launch() {
 		Log.p("Waiting for " + dofusExe +" process...");
 		while(!Processes.inProcess(dofusExe))
 			try {
@@ -46,6 +46,7 @@ public class Sniffer extends Thread {
 			serverCo.send(ByteArray.trimBuffer(buffer, bytesReceived));
 		}
 		
+		Log.p("Waiting client reconnection...");
 		clientCo.waitClient();
 		Log.p("Dofus client reconnected.");
 		
@@ -62,12 +63,12 @@ public class Sniffer extends Thread {
 		int bytesReceived = 0;
 		
 		while((bytesReceived = serverCo.receive(buffer)) != -1) {
-			processMsgStack(Reader.processBuffer(new ByteArray(buffer, bytesReceived)), "r");
-			clientCo.send(ByteArray.trimBuffer(buffer, bytesReceived));
+			if(processMsgStack(Reader.processBuffer(new ByteArray(buffer, bytesReceived)), "r"))
+				clientCo.send(ByteArray.trimBuffer(buffer, bytesReceived));
 			if(mustDeconnectClient)
 				break;
 		}
-		clientCo.close();
+		clientCo.closeClient();
 		Log.p("Deconnection from Dofus client.");
 		serverCo.close();
 		Log.p("Deconnected from authentification server.");
@@ -84,16 +85,21 @@ public class Sniffer extends Thread {
 		}
 	}
 	
-	public static void processMsgStack(LinkedList<Message> msgStack, String direction) {
+	public static boolean processMsgStack(LinkedList<Message> msgStack, String direction) {
 		Message msg;
 		while((msg = msgStack.poll()) != null) {
 			Log.p(direction, msg);
 			if(direction == "r" && msg.getId() == 42) {
 				SelectedServerDataMessage SSDM = new SelectedServerDataMessage(msg);
-				gameServerAddress = SSDM.getAddress();
+				gameServerAddress = SSDM.address;
 				mustDeconnectClient = true;
-				System.out.println(gameServerAddress);
+				if(msgStack.size() > 1)
+					throw new Error("Little problem !");
+				SSDM.serialize("127.0.0.1");
+				clientCo.send(SSDM.makeRaw());
+				return false;
 			}
 		}
+		return true;
 	}
 }

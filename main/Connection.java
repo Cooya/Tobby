@@ -51,7 +51,8 @@ public interface Connection {
 			try {
 				bytesReceived = this.inputStream.read(buffer);
 			} catch (Exception e) {
-				e.printStackTrace();
+				//e.printStackTrace();
+				return bytesReceived;
 			}
 			return bytesReceived;
 		}
@@ -66,11 +67,14 @@ public interface Connection {
 			}
 		}
 		
+		public boolean isClosed() {
+			return this.client.isClosed();
+		}
 	}
 	
 	public class Server implements Connection {
 		private ServerSocket server;
-		private Client client;
+		private Client client = null;
 		
 		public Server(int port) {
 			try {
@@ -97,12 +101,24 @@ public interface Connection {
 			}
 		}
 		
+		public void closeClient() {
+			try {
+				this.client.close();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		
 		public void waitClient() {
 			try {
 				this.client = new Client(server.accept());
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+		}
+		
+		public boolean haveClient() {
+			return this.client != null || !this.client.isClosed();
 		}
 	}
 }
