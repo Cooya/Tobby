@@ -8,14 +8,17 @@ public class MapMovementAdapter {
 		mp.compress();
 		int nb;
 		Vector<Integer> result = new Vector<Integer>();
-		PathElement pe;
+		PathElement pe = null;
 		int mpLength = mp.getPath().size();
 		for(int i = 0; i < mpLength; ++i) {
 			pe = mp.getPath().get(i);
 			nb = ((pe.getOrientation() & 7) << 12) | (pe.getStep().getCellId() & 4095);
 			result.add(nb);
 		}
-		// to check
+		if(pe != null) {
+			nb = ((pe.getOrientation() & 7) << 12) | (mp.getEnd().getCellId() & 4095);
+			result.add(nb);
+		}
 		return result;
 	}
 	

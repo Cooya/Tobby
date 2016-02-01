@@ -37,7 +37,8 @@ public class Emulation {
 		if(buffer[0] == 0)
 			Processes.injectDLL(Main.dllLocation, "adl.exe");
 		ByteArray array = new ByteArray();
-		array.writeInt(2 + 11 + 2 + 10);
+		array.writeInt(1 + 2 + 11 + 2 + 10);
+		array.writeByte((byte) 1);
 		array.writeUTF("maxlebgdu93");
 		array.writeUTF("represente");
 		Log.p("Sending credentials to AS launcher.");
@@ -70,11 +71,28 @@ public class Emulation {
 			Log.p(bytesReceived + " bytes received from Dofus client.");
 			Main.processMsgStack(Reader.processBuffer(new ByteArray(buffer, bytesReceived)));
 			
-			Log.p("Deconnection from AS launcher and Dofus client.");
-			launcherCo.close();
+			ByteArray array = new ByteArray();
+			array.writeInt(1);
+			array.writeByte((byte) 2);
+			Log.p("Asking hash function to AS launcher.");
+			launcherCo.send(array.bytes());
+			
+			Log.p("Deconnection from Dofus client.");
 			clientDofusCo.close();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public static void hashMessage(ByteArray msg) {
+		Log.p("Haching message...");
+		ByteArray bytes = new ByteArray(msg.getSize() + 2);
+		bytes.writeInt(1 + msg.getSize());
+		bytes.writeByte((byte) 3); 
+		bytes.writeBytes(msg);
+		launcherCo.send(bytes.bytes());
+		byte[] buffer = new byte[Main.BUFFER_SIZE];
+		int size = launcherCo.receive(buffer);
+		msg = new ByteArray(buffer, size);
 	}
 }

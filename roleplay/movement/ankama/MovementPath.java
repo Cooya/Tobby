@@ -129,8 +129,8 @@ public class MovementPath {
 					this._aPath.add(i + 1, pe2);
 				}
 			}
+			this._aPath.remove(_aPath.size() - 1);
 		}
-		this._aPath.remove(_aPath.size() - 1);
 	}
 
 	public Vector<Integer> getCells() {

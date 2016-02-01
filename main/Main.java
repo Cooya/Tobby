@@ -1,18 +1,11 @@
 package main;
 
-import java.lang.reflect.Field;
-import java.security.ProtectionDomain;
 import java.util.Hashtable;
 import java.util.LinkedList;
-import java.util.Vector;
 
+import roleplay.CharacterController;
 import roleplay.currentmap.EntityDispositionInformations;
 import roleplay.currentmap.MapComplementaryInformationsDataMessage;
-import roleplay.movement.D2pReader;
-import roleplay.movement.Pathfinder;
-import roleplay.movement.ankama.Map;
-import roleplay.movement.ankama.MapMovementAdapter;
-import roleplay.movement.ankama.MovementPath;
 import utilities.ByteArray;
 import utilities.Log;
 import messages.EmptyMessage;
@@ -38,19 +31,20 @@ import messages.gamestarting.PrismsListRegisterMessage;
 import messages.synchronisation.SequenceNumberMessage;
 
 public class Main {
-	public static final ProtectionDomain currentDomain = Main.class.getProtectionDomain();
 	public static final String dllLocation = "Ressources/DLLInjector/No.Ankama.dll";
 	public static final int BUFFER_SIZE = 8192;
 	public static final String authServerIP = "213.248.126.39";
 	public static final int serverPort = 5555;
 	private static Connection serverCo = null; // temporaire bien sûr
+	public static CharacterController CC = null; // temporaire aussi
 	private static Hashtable<String, Object> usefulInfos = new Hashtable<String, Object>();
 	
 	public static void main(String[] args) {
 		Emulation.runASLauncher();
+		CC = new CharacterController("maxlebgdu93", "represente");
+		
 		byte[] buffer = new byte[BUFFER_SIZE];
 		int bytesReceived = 0;
-		
 		Log.p("Connecting to authentification server, waiting response...");
 		serverCo = new Connection.Client(authServerIP, serverPort);
 		while((bytesReceived = serverCo.receive(buffer)) != -1) {
@@ -82,7 +76,7 @@ public class Main {
 					HelloConnectMessage HCM = new HelloConnectMessage(msg);
 					usefulInfos.put("HCM", HCM);
 					IdentificationMessage IM = new IdentificationMessage();
-					IM.serialize(HCM);
+					IM.serialize(HCM, CC.getLogin(), CC.getPassword());
 					sendMessage(IM);
 					break;
 				case 22 :
@@ -125,6 +119,7 @@ public class Main {
 					break;
 				case 151 :
 					CharactersListMessage CLM = new CharactersListMessage(msg);
+					CC.setCharacterId(CLM.getCharacterId().toNumber());
 					CharacterSelectionMessage CSM = new CharacterSelectionMessage();
 					CSM.serialize(CLM);
 					sendMessage(CSM);
@@ -161,58 +156,36 @@ public class Main {
 					break;
 				case 220 :
 					CurrentMapMessage CMM = new CurrentMapMessage(msg);
-					usefulInfos.put("currentMapId", CMM.getMapId());
+					CC.setCurrentMap(CMM.getMapId());
 					break;
 				case 891 :
 					MapInformationsRequestMessage MIRM = new MapInformationsRequestMessage();
-					MIRM.serialize((int) usefulInfos.get("currentMapId"));
+					MIRM.serialize(CC.getCurrentMapId());
 					sendMessage(MIRM);
 					break;
 				case 226 :
 					MapComplementaryInformationsDataMessage MCIDM = new MapComplementaryInformationsDataMessage(msg);
-					EntityDispositionInformations dispo = MCIDM.getCharacterDisposition("Anoxy");
+					double characterId = CC.getCharacterId();
+					String characterName = MCIDM.getCharacterName(characterId);
+					if(characterName != null)
+						CC.setCharacterName(characterName);
+					else
+						throw new Error("Invalid character id.");
+					EntityDispositionInformations dispo = MCIDM.getCharacterDisposition(characterId);
 					if(dispo != null) {
-						usefulInfos.put("currentCellId", dispo.cellId);
-						usefulInfos.put("currentDirection", dispo.direction);
+						CC.setCurrentCellId(dispo.cellId);
+						CC.setCurrentDirection(dispo.direction);
 					}
 					else
-						throw new Error("Invalid character name");
+						throw new Error("Invalid character id");
 					
-					Map map = new Map(D2pReader.getBinaryMap((int) usefulInfos.get("currentMapId")));
-					Pathfinder.initMap(map);
-					MovementPath path = Pathfinder.compute(214, 133);
-					Vector<Integer> vector = MapMovementAdapter.getServerMovement(path);
-					System.out.println(vector);
-					
-					break;
+					CC.moveTo(496);
 			}
 		}
 	}
 	
-	private static void sendMessage(Message msg) {
+	public static void sendMessage(Message msg) {
 		serverCo.send(msg.makeRaw());
 		Log.p("s", msg);
-	}
-	
-	public static void displayAllFields(Object o, String gap) {
-		Class<?> current = o.getClass();
-		while(current.getSuperclass() != null) {
-			Field[] fields = current.getDeclaredFields();
-			for(Field field : fields) {
-				try {
-					field.setAccessible(true);
-					System.out.println(gap + field.getName() + " = " + field.get(o));
-					if(field.get(o).getClass().getProtectionDomain() == currentDomain)
-						displayAllFields(field.get(o), gap + "   ");
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		    current = current.getSuperclass();
-		}
-	}
-	
-	public static void displayAllFields(Object o) {
-		displayAllFields(o, "");
 	}
 }

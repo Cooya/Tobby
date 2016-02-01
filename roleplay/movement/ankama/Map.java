@@ -9,7 +9,7 @@ public class Map {
 	public static final int WIDTH = 14;
 	public static final int HEIGHT = 40; // normalement 20
 	private static final String decryptionKey = "649ae451ca33ec53bbcbcc33becf15f4";
-	private static final int MAP_CELLS_COUNT = 560;
+	public static final int CELLS_COUNT = 560;
     public Class<Map> mapClass;
     public int mapVersion;
     public boolean encrypted;
@@ -131,7 +131,7 @@ public class Map {
             	bg.fromRaw(raw);
             	this.foregroundFixtures.add(bg);
             }
-            this.cellsCount = MAP_CELLS_COUNT;
+            this.cellsCount = CELLS_COUNT;
             raw.readInt();
             this.groundCRC = raw.readInt();
             this.layersCount = raw.readByte();

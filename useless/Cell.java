@@ -4,9 +4,6 @@ import roleplay.movement.ankama.Map;
 import utilities.ByteArray;
 
 public class Cell {
-	public static final int WIDTH = 86;
-	public static final int HALF_WIDTH = 43;
-	public static final double HALF_HEIGHT = 21.5;
 	public int id;
 	public int speed;
 	public int mapChangeData;
@@ -24,17 +21,16 @@ public class Cell {
 	private boolean _visible;
 	private boolean _nonWalkableDuringRP;
 	
-	public double x;
-	public double y;
+	protected int x;
+	protected int y;
 	protected boolean visited;
 	
 	public Cell(Map map, int id) {
 		this._map = map;
 		this.id = id;
 		this.visited = false;
-		int tmp = id % Map.WIDTH;
-		this.x = (id / Map.WIDTH) % 2 == 0 ? HALF_WIDTH + WIDTH * tmp : WIDTH * (tmp + 1); 
-		this.y = HALF_HEIGHT * (id / Map.WIDTH + 1);
+		this.x = id % Map.WIDTH;
+		this.y = id / Map.WIDTH;
 	}
 	
 	public Map getMap() {

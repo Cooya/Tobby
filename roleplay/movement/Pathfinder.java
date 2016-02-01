@@ -16,42 +16,40 @@ public class Pathfinder {
 	public static final int UP_LEFT = 5;
 	public static final int UP = 6;
 	public static final int UP_RIGHT = 7;
-	private static Cell[][] cells = new Cell[Map.WIDTH][Map.HEIGHT];
-	private static Vector<Cell> path;
-	private static Cell currentCell;
+	private static Cell[] cells = new Cell[Map.CELLS_COUNT];
+	private static Vector<PathNode> path;
+	private static PathNode currentNode;
 	private static Cell dest;
 	
 	public static void initMap(Map map) {
-    	for(int i = 0; i < Map.WIDTH; ++i) {
-    		cells[i] = new Cell[Map.HEIGHT];
-    		for(int j = 0; j < Map.HEIGHT; ++j)
-    			cells[i][j] = map.cells.get(getIdFromCoords(i, j));
-    	}
-	}
+    	for(int i = 0; i < Map.CELLS_COUNT; ++i)
+    		cells[i] = map.cells.get(i);
+    }
 	
 	public static MovementPath compute(int srcId, int destId) {
-    	path = new Vector<Cell>();
-    	currentCell = getCellFromId(srcId);
+    	path = new Vector<PathNode>();
+    	currentNode = new PathNode(getCellFromId(srcId));
+    	path.add(currentNode);
     	dest = getCellFromId(destId);
     	
-		Cell next;
-		while(!currentCell.equals(dest)) {
+		PathNode next;
+		while(!currentNode.cell.equals(dest)) {
 			next = getNextCell();
 			if(next != null) {
 				path.add(next);
-				currentCell = next;
+				currentNode = next;
 			}
 			else { // retour en arrière
 				path.remove(path.lastElement());
-				currentCell = path.lastElement();
+				currentNode = path.lastElement();
 			}
 		}
 		return movementPathFromArray(path);
 	}
 	
-	private static Cell getNextCell() {
-		int direction = determineDirection(currentCell, dest);
-		Vector<Cell> possibilities = getPossibilities(direction);
+	private static PathNode getNextCell() {
+		int direction = determineDirection(currentNode.cell, dest);
+		Vector<PathNode> possibilities = getPossibilities(direction);
 		if(possibilities != null)
 			return chooseNextCell(possibilities);
 		possibilities = getPossibilities(direction);
@@ -60,83 +58,83 @@ public class Pathfinder {
 		return null; // aucune possibilité, il faut revenir en arrière
 	}
 	
-	private static Cell chooseNextCell(Vector<Cell> possibilities) { // choisit la cellule la plus proche de la destination
+	private static PathNode chooseNextCell(Vector<PathNode> possibilities) { // choisit la cellule la plus proche de la destination
 		int nbPossibilities = possibilities.size();
 		double minDistance = Double.MAX_VALUE;
-		Cell nearestCell = null;
+		PathNode nearestNode = null;
 		double distance;
-		Cell cell = null;
+		PathNode node = null;
 		for(int i = 0; i < nbPossibilities; ++i) {
-			cell = possibilities.get(i);
-			distance = distanceBetween(cell, dest);
+			node = possibilities.get(i);
+			distance = distanceBetween(node.cell, currentNode.cell) + distanceBetween(node.cell, dest);
 			if(distance < minDistance) {
 				minDistance = distance;
-				nearestCell = cell;
+				nearestNode = node;
 			}
 		}
-		return nearestCell;
+		return nearestNode;
 	}
 	
-	private static Vector<Cell> getPossibilities(int direction) {
-		Vector<Cell> possibilities = new Vector<Cell>();
-		Cell cell;
+	private static Vector<PathNode> getPossibilities(int direction) {
+		Vector<PathNode> possibilities = new Vector<PathNode>();
+		PathNode node;
 		
 		int[] directions = besideDirections(direction);
 		for(int i = 0; i < 3; ++i) {
-			cell = getCellFromDirection(directions[i]);
-			if(cell != null && cell.check())
-				possibilities.add(cell);
+			node = getCellFromDirection(directions[i]);
+			if(node != null && node.cell.check())
+				possibilities.add(node);
 		}
 		if(possibilities.size() > 0)
 			return possibilities;
 		
 		directions = otherDirections(direction);
 		for(int i = 0;  i < 5; ++i) {
-			cell = getCellFromDirection(directions[i]);
-			if(cell != null && cell.check())
-				possibilities.add(cell);
+			node = getCellFromDirection(directions[i]);
+			if(node != null && node.cell.check())
+				possibilities.add(node);
 		}
 		if(possibilities.size() > 0)
 			return possibilities;
 		return null;
 	}
 	
-	private static Cell getCellFromDirection(int direction) {
-		int offsetX;
-		if(currentCell.y % 2 == 0) offsetX = 0;
-		else offsetX = 1;
+	private static PathNode getCellFromDirection(int direction) {
+		int offsetId;
+		if((currentNode.cell.id / Map.WIDTH) % 2 == 0) offsetId = 0;
+		else offsetId = 1;
 		switch(direction) {
 			case RIGHT :
-				if(currentCell.x + 1 < Map.WIDTH)
-					return cells[currentCell.x + 1][currentCell.y];
+				if(currentNode.cell.id + 1 < Map.CELLS_COUNT)
+					return new PathNode(cells[currentNode.cell.id + 1], direction);
 				return null;
 			case DOWN_RIGHT :
-				if(currentCell.x + offsetX < Map.WIDTH && currentCell.y + 1 < Map.HEIGHT)
-					return cells[currentCell.x + offsetX][currentCell.y + 1];
+				if(currentNode.cell.id + Map.WIDTH + offsetId < Map.CELLS_COUNT)
+					return new PathNode(cells[currentNode.cell.id + Map.WIDTH + offsetId], direction);
 				return null;
 			case DOWN :
-				if(currentCell.y + 2 < Map.HEIGHT)
-					return cells[currentCell.x][currentCell.y + 2];
+				if(currentNode.cell.id + Map.WIDTH * 2 < Map.CELLS_COUNT)
+					return new PathNode(cells[currentNode.cell.id + Map.WIDTH * 2], direction);
 				return null;
 			case DOWN_LEFT :
-				if(currentCell.x - 1 + offsetX > 0 && currentCell.y + 1 < Map.HEIGHT)
-					return cells[currentCell.x - 1 + offsetX][currentCell.y + 1];
+				if(currentNode.cell.id + Map.WIDTH - 1 + offsetId < Map.CELLS_COUNT)
+					return new PathNode(cells[currentNode.cell.id + Map.WIDTH - 1 + offsetId], direction);
 				return null;
 			case LEFT :
-				if(currentCell.x - 1 > 0)
-					return cells[currentCell.x - 1][currentCell.y];
+				if(currentNode.cell.id - 1 > 0)
+					return new PathNode(cells[currentNode.cell.id - 1], direction);
 				return null;
 			case UP_LEFT :
-				if(currentCell.x - 1 + offsetX > 0 && currentCell.y - 1 > 0)
-					return cells[currentCell.x - 1 + offsetX][currentCell.y - 1];
+				if(currentNode.cell.id + Map.WIDTH - 1 + offsetId > 0)
+					return new PathNode(cells[currentNode.cell.id + Map.WIDTH - 1 + offsetId], direction);
 				return null;
 			case UP :
-				if(currentCell.y - 2 > 0)
-					return cells[currentCell.x][currentCell.y - 2];
+				if(currentNode.cell.id - Map.WIDTH * 2 > 0)
+					return new PathNode(cells[currentNode.cell.id - Map.WIDTH * 2], direction);
 				return null;
 			case UP_RIGHT :
-				if(currentCell.x + offsetX < Map.WIDTH && currentCell.y - 1 > 0)
-					return cells[currentCell.x + offsetX][currentCell.y - 1];
+				if(currentNode.cell.id - Map.WIDTH + offsetId > 0)
+					return new PathNode(cells[currentNode.cell.id - Map.WIDTH + offsetId], direction);
 				return null;
 		}
 		throw new Error("Invalid direction.");
@@ -145,19 +143,30 @@ public class Pathfinder {
 	public static Cell getCellFromId(int cellId) {
 		if(cellId < 0 || cellId > 559)
 			throw new Error("Invalid cell id");
-		return cells[cellId % Map.WIDTH][cellId / Map.WIDTH];
+		return cells[cellId];
 	}
 	
-	public static Cell getCellFromCoords(int x, int y) {
-		return getCellFromId(y * Map.WIDTH + x);
+	public static Cell getCellFromCoords(double x, double y) {
+		double y2 = y / Cell.HALF_HEIGHT - 1;
+		double x2 = x % Cell.WIDTH != 0 ? (x - Cell.HALF_WIDTH) / Cell.WIDTH : x / Cell.WIDTH - 1;
+		return getCellFromId((int) (y2 * Map.WIDTH + x2));
 	}
 	
-	public static int getIdFromCell(Cell cell) {
-		return cell.y * Map.WIDTH + cell.x;
+	public static int getPathTime() {
+		int pathLen = path.size();
+		int time = 0;
+		for(int i = 1; i < pathLen; ++i) // on saute la première cellule
+			if(pathLen > 3)
+				time += path.get(i).getCrossingDuration(true); // run
+			else
+				time += path.get(i).getCrossingDuration(false); // walk
+		return time;
 	}
 	
-	public static int getIdFromCoords(int x, int y) {
-		return y * Map.WIDTH + x;
+	public static void printPath() {
+		for(PathNode node : path)
+			System.out.print(node.cell.id + " ");
+		System.out.println();
 	}
 	
 	private static int determineDirection(Cell src, Cell dest) {
@@ -209,13 +218,12 @@ public class Pathfinder {
 	}
 	
 	// fonction traduite mais légèrement modifiée
-    private static MovementPath movementPathFromArray(Vector<Cell> cPath) {
+    private static MovementPath movementPathFromArray(Vector<PathNode> nPath) {
     	MovementPath mp = new MovementPath();
-    	
-    	int cPathLen = cPath.size();
+    	int cPathLen = nPath.size();
     	Vector<MapPoint> mpPath = new Vector<MapPoint>();
     	for(int i = 0; i < cPathLen; ++i)
-    		mpPath.add(MapPoint.fromCellId(cPath.get(i).id));
+    		mpPath.add(MapPoint.fromCellId(nPath.get(i).cell.id));
     	int vectorSize = mpPath.size();
     	PathElement pe;
     	for(int i = 0; i < vectorSize - 1; ++i) {
@@ -228,5 +236,31 @@ public class Pathfinder {
     	mp.compress();
     	mp.fill();
     	return mp;
+    }
+    
+    public static class PathNode {
+    	protected static final int WALK_DURATION = 500;
+    	protected static final int DIAGONAL_RUN_DURATION = 200;
+    	protected static final int STRAIGHT_RUN_DURATION = 333;
+    	protected Cell cell;
+    	protected int direction;
+    	
+    	public PathNode(Cell cell, int direction) {
+    		this.cell = cell;
+    		this.direction = direction;
+    	}
+    	
+    	public PathNode(Cell cell) {
+    		this(cell, -1);
+    	}
+    	
+    	public int getCrossingDuration(boolean mode) {
+    		if(!mode) // marche
+    			return WALK_DURATION;
+    		if(this.direction % 2 == 0)
+    			return STRAIGHT_RUN_DURATION;
+    		else
+    			return DIAGONAL_RUN_DURATION;
+    	}
     }
 }

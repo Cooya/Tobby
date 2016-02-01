@@ -71,7 +71,10 @@ public class Message {
 	}
 	
 	public static int get(String name) {
-		return (int) map.get(name);
+		Object id = map.get(name);
+		if(id == null)
+			throw new Error("Unknown message name : \"" + name + "\".");
+		return (int) id;
 	}
 	
 	@SuppressWarnings("unchecked")

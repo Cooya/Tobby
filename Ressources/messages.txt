@@ -48,7 +48,10 @@
 891 ChannelEnablingChangeMessage
 892 EnabledChannelsMessage
 946 GameMapChangeOrientationMessage
+950 GameMapMovementRequestMessage
 951 GameMapMovementMessage
+952 GameMapMovementConfirmMessage
+954 GameMapNoMovementMessage
 1200 SpellListMessage
 1301 StartupActionsListMessage
 3009 InventoryWeightMessage
@@ -73,6 +76,7 @@
 5708 InteractiveElementUpdatedMessage
 5709 StatedElementUpdatedMessage
 5726 OnConnectionEventMessage
+5734 HousePropertiesMessage
 5745 InteractiveUsedMessage
 5809 JobExperienceMultiUpdateMessage
 5816 BasicLatencyStatsRequestMessage

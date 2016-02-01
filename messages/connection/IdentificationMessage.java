@@ -5,14 +5,12 @@ import utilities.ByteArray;
 import utilities.Encryption;
 
 public class IdentificationMessage extends Message {
-	private static final String login = "maxlebgdu93";
-	private static final String password = "represente";
 	
 	public IdentificationMessage() {
 		super();
 	}
 	
-	public void serialize(HelloConnectMessage HCM) {
+	public void serialize(HelloConnectMessage HCM, String login, String password) {
 		byte[] decryptedPublicKey = Encryption.decryptReceivedKey(ByteArray.toBytes(HCM.getKey()));
 		byte[] credentials = Encryption.encryptCredentials(decryptedPublicKey, login, password, HCM.getSalt());
 		ByteArray buffer = new ByteArray();

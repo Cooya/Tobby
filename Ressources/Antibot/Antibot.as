@@ -15,9 +15,11 @@ package {
 	
 	public class Antibot extends Sprite {
 		private var server:ServerSocket;
+		private var client:Socket;
 		private var packetSize:int = -1;
 		private var interval:uint;
 		private var injected:Boolean = false;
+		private var hashFunction:Function;
 
 		public function Antibot() : void {
 			loadDofus();
@@ -41,15 +43,16 @@ package {
 		}
 
 		private function clientConnectionHandler(e:ServerSocketConnectEvent) : void {
-			var socket:Socket = e.socket;
-			socket.writeBoolean(this.injected);
-			socket.flush();
+			client = e.socket;
+			client.writeBoolean(this.injected);
+			client.flush();
 			this.injected = true;
-			socket.addEventListener(ProgressEvent.SOCKET_DATA, dataReceptionHandler);
+			client.addEventListener(ProgressEvent.SOCKET_DATA, dataReceptionHandler);
 		}
 
 		private function dataReceptionHandler(e:ProgressEvent) : void {
 			var socket:Socket = Socket(e.target);
+			trace(socket.bytesAvailable + " bytes received from client.");
 			if(packetSize == -1 && socket.bytesAvailable >= 4)
 				packetSize = socket.readInt();
 			if(socket.bytesAvailable == packetSize) {
@@ -59,10 +62,24 @@ package {
         }
 		
         private function processData(socket:Socket) : void {
-        	var username:String = socket.readUTF();
-        	var password:String = socket.readUTF();
-			socket.close();
-			login(username, password);
+        	var id:int = socket.readByte();
+        	if(id == 1) {
+        		var username:String = socket.readUTF();
+        		var password:String = socket.readUTF();
+				login(username, password);
+        	}
+        	else if(id == 2)
+        		getHashFunction();
+        	else if(id == 3) {
+        		var msg:ByteArray = new ByteArray();
+        		socket.readBytes(msg, 0);
+        		hashFunction.call(null, msg);
+        		msg.position = 0;
+        		socket.writeBytes(msg, 0);
+        		socket.flush();
+        	}
+        	else
+        		trace("Invalid packet id.");
         }
 
 		private function login(username:String, password:String) : void {
@@ -84,6 +101,11 @@ package {
 				worker.process(lva);
 				trace("LoginValidationAction sent.");
 			}
+		}
+
+		private function getHashFunction() : void {
+			var NetworkMessage:Class = getDefinitionByName("com.ankamagames.jerakine.network.NetworkMessage") as Class;
+			hashFunction = NetworkMessage.HASH_FUNCTION;
 		}
     }
 }

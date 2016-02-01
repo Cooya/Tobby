@@ -36,6 +36,8 @@ public class MapComplementaryInformationsDataMessage extends Message {
 			protocolId = buffer.readShort();
 			if(protocolId == 111)
 				houses.add(new HouseInformations(buffer));
+			else if(protocolId == 112)
+				houses.add(new HouseInformationsExtended(buffer));
 			else
 				throw new Error("Invalid or unhandled protocol id : " + protocolId + ".");
 		}
@@ -44,8 +46,12 @@ public class MapComplementaryInformationsDataMessage extends Message {
 			protocolId = buffer.readShort();
 			if(protocolId == 36)
 				actors.add(new GameRolePlayCharacterInformations(buffer));
+			else if(protocolId == 156)
+				actors.add(new GameRolePlayNpcInformations(buffer));
 			else if(protocolId == 160)
 				actors.add(new GameRolePlayGroupMonsterInformations(buffer));
+			else if(protocolId == 383)
+				actors.add(new GameRolePlayNpcWithQuestInformations(buffer));
 			else
 				throw new Error("Invalid or unhandled protocol id : " + protocolId + ".");
 		}
@@ -70,12 +76,18 @@ public class MapComplementaryInformationsDataMessage extends Message {
 			fights.add(new FightCommonInformations(buffer));
 	}
 	
-	public EntityDispositionInformations getCharacterDisposition(String name) {
+	public EntityDispositionInformations getCharacterDisposition(double characterId) {
 		for(GameRolePlayActorInformations actor : actors) {
-			if(actor instanceof GameRolePlayCharacterInformations)
-				if(((GameRolePlayCharacterInformations) actor).name.equals(name))
-					return actor.disposition;
+			if(actor.contextualId == characterId)
+				return actor.disposition;
 		}
 		return null;	
+	}
+	
+	public String getCharacterName(double characterId) {
+		for(GameRolePlayActorInformations actor : actors)
+			if(actor.contextualId == characterId)
+				return ((GameRolePlayNamedActorInformations) actor).name;
+		return null;
 	}
 }
