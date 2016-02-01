@@ -29,6 +29,7 @@
 201 ActorAlignmentInformations
 210 MapFightCountMessage
 220 CurrentMapMessage
+221 ChangeMapMessage
 225 MapInformationsRequestMessage
 226 MapComplementaryInformationsDataMessage
 250 GameContextCreateRequestMessage
@@ -51,6 +52,7 @@
 950 GameMapMovementRequestMessage
 951 GameMapMovementMessage
 952 GameMapMovementConfirmMessage
+953 GameMapMovementCancelMessage
 954 GameMapNoMovementMessage
 1200 SpellListMessage
 1301 StartupActionsListMessage
@@ -68,6 +70,7 @@
 5637 GameContextRefreshEntityLookMessage
 5652 JobCrafterDirectorySettingsMessage
 5655 JobDescriptionMessage
+5663 BasicLatencyStatsMessage
 5674 IgnoredListMessage
 5676 IgnoredGetListMessage
 5683 EmotePlayMessage

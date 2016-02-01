@@ -33,6 +33,7 @@ import messages.synchronisation.BasicStatMessage;
 import messages.synchronisation.SequenceNumberMessage;
 
 public class Main {
+	private static final boolean MODE = true; // sniffer = false
 	public static final String dllLocation = "Ressources/DLLInjector/No.Ankama.dll";
 	public static final int BUFFER_SIZE = 8192;
 	public static final String authServerIP = "213.248.126.39";
@@ -42,31 +43,35 @@ public class Main {
 	private static Hashtable<String, Object> usefulInfos = new Hashtable<String, Object>();
 	
 	public static void main(String[] args) {
-		Emulation.runASLauncher();
-		CC = new CharacterController("maxlebgdu93", "represente");
-		
-		byte[] buffer = new byte[BUFFER_SIZE];
-		int bytesReceived = 0;
-		Log.p("Connecting to authentification server, waiting response...");
-		serverCo = new Connection.Client(authServerIP, serverPort);
-		while((bytesReceived = serverCo.receive(buffer)) != -1) {
-			Log.p(bytesReceived + " bytes received from server.");
-			processMsgStack(Reader.processBuffer(new ByteArray(buffer, bytesReceived)));
-		}
-		serverCo.close();
-		Log.p("Deconnected from authentification server.");
-		
-		String address = (String) usefulInfos.get("address");
-		if(address != null) {
-			Log.p("Connecting to game server, waiting response...");
-			serverCo = new Connection.Client(address, serverPort);
+		if(MODE) {
+			Emulation.runASLauncher();
+			CC = new CharacterController("maxlebgdu93", "represente");
+			
+			byte[] buffer = new byte[BUFFER_SIZE];
+			int bytesReceived = 0;
+			Log.p("Connecting to authentification server, waiting response...");
+			serverCo = new Connection.Client(authServerIP, serverPort);
 			while((bytesReceived = serverCo.receive(buffer)) != -1) {
 				Log.p(bytesReceived + " bytes received from server.");
 				processMsgStack(Reader.processBuffer(new ByteArray(buffer, bytesReceived)));
 			}
 			serverCo.close();
-			Log.p("Deconnected from game server.");
+			Log.p("Deconnected from authentification server.");
+			
+			String address = (String) usefulInfos.get("address");
+			if(address != null) {
+				Log.p("Connecting to game server, waiting response...");
+				serverCo = new Connection.Client(address, serverPort);
+				while((bytesReceived = serverCo.receive(buffer)) != -1) {
+					Log.p(bytesReceived + " bytes received from server.");
+					processMsgStack(Reader.processBuffer(new ByteArray(buffer, bytesReceived)));
+				}
+				serverCo.close();
+				Log.p("Deconnected from game server.");
+			}
 		}
+		else
+			new Sniffer();
 	}
 	
 	public static void processMsgStack(LinkedList<Message> msgStack) {
@@ -96,8 +101,8 @@ public class Main {
 					break;
 				case 42 : 
 					SelectedServerDataMessage SSDM = new SelectedServerDataMessage(msg);
-					usefulInfos.put("ticket", SSDM.getTicket());
-					usefulInfos.put("address", SSDM.getAddress());
+					usefulInfos.put("ticket", SSDM.ticket);
+					usefulInfos.put("address", SSDM.address);
 					break;
 				case 101 :
 					AuthenticationTicketMessage ATM = new AuthenticationTicketMessage();

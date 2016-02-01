@@ -4,7 +4,6 @@ import messages.Message;
 import utilities.ByteArray;
 
 public class SelectedServerDataMessage extends Message {
-    @SuppressWarnings("unused")
 	private int serverId;
     public String address;
     public int port;
@@ -13,7 +12,6 @@ public class SelectedServerDataMessage extends Message {
 	
     public SelectedServerDataMessage(Message msg) {
     	super(msg);
-    	
     	deserialize();
     }
     
@@ -29,11 +27,18 @@ public class SelectedServerDataMessage extends Message {
     		ticket[i] = buffer.readByte();
     }
     
-    public int[] getTicket() {
-    	return this.ticket;
-    }
-    
-    public String getAddress() {
-    	return this.address;
+    public void serialize(String localAddress) {
+    	this.address = localAddress;
+    	
+		ByteArray buffer = new ByteArray();
+	    buffer.writeVarShort(this.serverId);
+	    buffer.writeUTF(this.address);
+	    buffer.writeShort((short) this.port);
+	    buffer.writeBoolean(this.canCreateNewCharacter);
+	    buffer.writeVarInt(this.ticket.length);
+	    for(int i = 0; i < this.ticket.length; ++i)
+	    	buffer.writeByte((byte) this.ticket[i]);
+	    
+	    completeInfos(buffer);
     }
 }
