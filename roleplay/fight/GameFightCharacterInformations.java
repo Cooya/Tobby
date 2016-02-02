@@ -1,4 +1,4 @@
-package messages.fight;
+package roleplay.fight;
 
 import roleplay.currentmap.ActorAlignmentInformations;
 import utilities.ByteArray;
@@ -13,9 +13,9 @@ public class GameFightCharacterInformations extends GameFightFighterNamedInforma
     
     public boolean sex = false;
     
-    public GameFightCharacterInformations()
+    public GameFightCharacterInformations(ByteArray buffer)
     {
-    	super();
+    	super(buffer);
     }
     
     public void deserialize(ByteArray buffer)

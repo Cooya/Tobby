@@ -18,10 +18,10 @@ public class GameFightFighterInformations extends GameContextActorInformations{
     
     public Vector<Integer> previousPositions;
     
-    public GameFightFighterInformations()
-    {
-       this.stats = new GameFightMinimalStats();
-       this.previousPositions = new Vector<Integer>();
+    public GameFightFighterInformations(ByteArray buffer) {
+    	super(buffer);
+    	this.stats = new GameFightMinimalStats();
+    	this.previousPositions = new Vector<Integer>();
        
     }
     
@@ -48,7 +48,7 @@ public class GameFightFighterInformations extends GameContextActorInformations{
           throw new Error("Forbidden value (" + this.wave + ") on element of GameFightFighterInformations.wave.");
        }
        this.alive = buffer.readBoolean();
-       int loc2 = buffer.readShort();
+       buffer.readShort();
        this.stats = new GameFightMinimalStatsPreparation();
        this.stats.deserialize(buffer);
        int loc3 = buffer.readShort();

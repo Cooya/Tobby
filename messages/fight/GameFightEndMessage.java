@@ -6,6 +6,7 @@ import messages.Message;
 import utilities.ByteArray;
 
 public class GameFightEndMessage extends Message{
+	/*
 
 	public static final int Id = 720;
 
@@ -59,4 +60,5 @@ public class GameFightEndMessage extends Message{
           _loc5_++;
        }
     }
+    */
 }

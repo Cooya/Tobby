@@ -1,6 +1,5 @@
-package messages.fight;
+package roleplay.fight;
 
-import roleplay.fight.GameFightFighterInformations;
 import utilities.ByteArray;
 
 public class GameFightMonsterInformations extends GameFightAIInformations{
@@ -9,9 +8,9 @@ public class GameFightMonsterInformations extends GameFightAIInformations{
     
     public int creatureGrade = 0;
     
-    public GameFightMonsterInformations()
+    public GameFightMonsterInformations(ByteArray buffer)
     {
-       super();
+       super(buffer);
     }
     
     public void deserialize(ByteArray buffer)

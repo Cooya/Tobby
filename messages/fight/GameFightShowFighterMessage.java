@@ -1,7 +1,9 @@
 package messages.fight;
 
 import messages.Message;
+import roleplay.fight.GameFightCharacterInformations;
 import roleplay.fight.GameFightFighterInformations;
+import roleplay.fight.GameFightMonsterInformations;
 import utilities.ByteArray;
 
 public class GameFightShowFighterMessage extends Message{
@@ -12,7 +14,6 @@ public class GameFightShowFighterMessage extends Message{
 	public GameFightShowFighterMessage(Message msg)
 	{
 		super(msg);
-		this.informations = new GameFightFighterInformations();
 	}
 
 	public void deserialize() 
@@ -21,10 +22,10 @@ public class GameFightShowFighterMessage extends Message{
 		int loc2 = buffer.readShort();
 		switch(loc2){
 		case 29: 
-			this.informations=new GameFightMonsterInformations();
+			this.informations=new GameFightMonsterInformations(buffer);
 			break;
 		case 46:
-			this.informations=new GameFightCharacterInformations();
+			this.informations=new GameFightCharacterInformations(buffer);
 			break;
 		}
 		this.informations.deserialize(buffer);

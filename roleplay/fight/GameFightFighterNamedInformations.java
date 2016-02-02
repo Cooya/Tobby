@@ -1,6 +1,5 @@
-package messages.fight;
+package roleplay.fight;
 
-import roleplay.fight.GameFightFighterInformations;
 import utilities.ByteArray;
 
 public class GameFightFighterNamedInformations extends GameFightFighterInformations{
@@ -9,9 +8,9 @@ public class GameFightFighterNamedInformations extends GameFightFighterInformati
     
     public PlayerStatus status;
     
-    public GameFightFighterNamedInformations()
+    public GameFightFighterNamedInformations(ByteArray buffer)
     {
-    	super();
+    	super(buffer);
        this.status = new PlayerStatus();
     }
     

@@ -1,13 +1,11 @@
-package messages.fight;
+package roleplay.fight;
 
-import roleplay.fight.GameFightFighterInformations;
 import utilities.ByteArray;
 
 public class GameFightAIInformations extends GameFightFighterInformations{
 	
-    public GameFightAIInformations()
-    {
-       super();
+    public GameFightAIInformations(ByteArray buffer) {
+       super(buffer);
     }
     
    

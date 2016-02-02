@@ -12,6 +12,7 @@ import roleplay.movement.ankama.Map;
 import roleplay.movement.ankama.MapMovementAdapter;
 import roleplay.movement.ankama.MapPoint;
 import roleplay.movement.ankama.MovementPath;
+import roleplay.paths.PathsManager;
 
 public class CharacterController {
 	private String login;
@@ -21,6 +22,7 @@ public class CharacterController {
 	private int currentCellId;
 	private int currentDirection;
 	private Map currentMap;
+	private String currentPathName;
 	
 	public CharacterController(String login, String password) {
 		this.login = login;
@@ -76,6 +78,10 @@ public class CharacterController {
 		Pathfinder.initMap(this.currentMap);
 	}
 	
+	public String getCurrentPathName() {
+		return this.currentPathName;
+	}
+	
 	public void moveTo(int cellId) {
 		MapPoint src = MapPoint.fromCellId(this.currentCellId);
 		MapPoint dest = MapPoint.fromCellId(cellId);
@@ -111,5 +117,12 @@ public class CharacterController {
 		ChangeMapMessage CMM = new ChangeMapMessage();
 		CMM.serialize(this.currentMap.getNeighbourMapFromDirection(direction));
 		Main.sendMessage(CMM);
+	}
+	
+	public void runPath(String pathName) {
+		this.currentPathName = pathName;
+		if(PathsManager.getCurrentMapId(pathName) != this.currentMap.id)
+			throw new Error("Impossible to run this path, invalid character position.");
+		changeMap(PathsManager.nextMap(pathName));
 	}
 }

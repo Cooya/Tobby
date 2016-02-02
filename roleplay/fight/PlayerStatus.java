@@ -1,4 +1,4 @@
-package messages.fight;
+package roleplay.fight;
 
 import utilities.ByteArray;
 
