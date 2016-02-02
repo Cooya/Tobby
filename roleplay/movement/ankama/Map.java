@@ -3,6 +3,7 @@ package roleplay.movement.ankama;
 import java.util.Vector;
 
 import roleplay.movement.Cell;
+import roleplay.movement.Pathfinder;
 import utilities.ByteArray;
 
 public class Map {
@@ -156,5 +157,15 @@ public class Map {
             }
             this._parsed = true;
 		}
+    }
+    
+    public int getNeighbourMapFromDirection(int direction) {
+    	switch(direction) {
+    		case Pathfinder.LEFT : return this.leftNeighbourId;
+    		case Pathfinder.RIGHT : return this.rightNeighbourId;
+    		case Pathfinder.UP : return this.topNeighbourId;
+    		case Pathfinder.DOWN : return this.bottomNeighbourId;
+    		default : throw new Error("Invalid direction for find neighbour map id");
+    	}
     }
 }

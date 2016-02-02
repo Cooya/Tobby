@@ -4,6 +4,7 @@ import java.util.Vector;
 
 import main.Main;
 import messages.EmptyMessage;
+import messages.currentmap.ChangeMapMessage;
 import messages.currentmap.GameMapMovementRequestMessage;
 import roleplay.movement.D2pReader;
 import roleplay.movement.Pathfinder;
@@ -103,5 +104,12 @@ public class CharacterController {
 		Main.sendMessage(EM);
 		
 		this.currentCellId = cellId;
+	}
+	
+	public void changeMap(int direction) {
+		moveTo(Pathfinder.getChangementMapCell(direction));
+		ChangeMapMessage CMM = new ChangeMapMessage();
+		CMM.serialize(this.currentMap.getNeighbourMapFromDirection(direction));
+		Main.sendMessage(CMM);
 	}
 }

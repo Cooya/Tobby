@@ -81,7 +81,7 @@ public class Pathfinder {
 		
 		int[] directions = besideDirections(direction);
 		for(int i = 0; i < 3; ++i) {
-			node = getCellFromDirection(directions[i]);
+			node = new PathNode(getNeighbourCellFromDirection(directions[i]), directions[i]);
 			if(node != null && node.cell.check())
 				possibilities.add(node);
 		}
@@ -90,7 +90,7 @@ public class Pathfinder {
 		
 		directions = otherDirections(direction);
 		for(int i = 0;  i < 5; ++i) {
-			node = getCellFromDirection(directions[i]);
+			node = new PathNode(getNeighbourCellFromDirection(directions[i]), directions[i]);
 			if(node != null && node.cell.check())
 				possibilities.add(node);
 		}
@@ -99,45 +99,53 @@ public class Pathfinder {
 		return null;
 	}
 	
-	private static PathNode getCellFromDirection(int direction) {
+	private static Cell getNeighbourCellFromDirection(int srcId, int direction) {
 		int offsetId;
-		if((currentNode.cell.id / Map.WIDTH) % 2 == 0) offsetId = 0;
+		if((srcId / Map.WIDTH) % 2 == 0) offsetId = 0;
 		else offsetId = 1;
 		switch(direction) {
 			case RIGHT :
-				if(currentNode.cell.id + 1 < Map.CELLS_COUNT)
-					return new PathNode(cells[currentNode.cell.id + 1], direction);
+				if(srcId + 1 < Map.CELLS_COUNT)
+					return cells[srcId + 1];
 				return null;
 			case DOWN_RIGHT :
-				if(currentNode.cell.id + Map.WIDTH + offsetId < Map.CELLS_COUNT)
-					return new PathNode(cells[currentNode.cell.id + Map.WIDTH + offsetId], direction);
+				if(srcId + Map.WIDTH + offsetId < Map.CELLS_COUNT)
+					return cells[srcId + Map.WIDTH + offsetId];
 				return null;
 			case DOWN :
-				if(currentNode.cell.id + Map.WIDTH * 2 < Map.CELLS_COUNT)
-					return new PathNode(cells[currentNode.cell.id + Map.WIDTH * 2], direction);
+				if(srcId + Map.WIDTH * 2 < Map.CELLS_COUNT)
+					return cells[srcId + Map.WIDTH * 2];
 				return null;
 			case DOWN_LEFT :
-				if(currentNode.cell.id + Map.WIDTH - 1 + offsetId < Map.CELLS_COUNT)
-					return new PathNode(cells[currentNode.cell.id + Map.WIDTH - 1 + offsetId], direction);
+				if(srcId + Map.WIDTH - 1 + offsetId < Map.CELLS_COUNT)
+					return cells[srcId + Map.WIDTH - 1 + offsetId];
 				return null;
 			case LEFT :
-				if(currentNode.cell.id - 1 > 0)
-					return new PathNode(cells[currentNode.cell.id - 1], direction);
+				if(srcId - 1 > 0)
+					return cells[srcId - 1];
 				return null;
 			case UP_LEFT :
-				if(currentNode.cell.id + Map.WIDTH - 1 + offsetId > 0)
-					return new PathNode(cells[currentNode.cell.id + Map.WIDTH - 1 + offsetId], direction);
+				if(srcId + Map.WIDTH - 1 + offsetId > 0)
+					return cells[srcId + Map.WIDTH - 1 + offsetId];
 				return null;
 			case UP :
-				if(currentNode.cell.id - Map.WIDTH * 2 > 0)
-					return new PathNode(cells[currentNode.cell.id - Map.WIDTH * 2], direction);
+				if(srcId - Map.WIDTH * 2 > 0)
+					return cells[srcId - Map.WIDTH * 2];
 				return null;
 			case UP_RIGHT :
-				if(currentNode.cell.id - Map.WIDTH + offsetId > 0)
-					return new PathNode(cells[currentNode.cell.id - Map.WIDTH + offsetId], direction);
+				if(srcId - Map.WIDTH + offsetId > 0)
+					return cells[srcId - Map.WIDTH + offsetId];
 				return null;
 		}
 		throw new Error("Invalid direction.");
+	}
+	
+	private static Cell getNeighbourCellFromDirection(Cell srcCell, int direction) {
+		return getNeighbourCellFromDirection(srcCell.id, direction);
+	}
+	
+	private static Cell getNeighbourCellFromDirection(int direction) {
+		return getNeighbourCellFromDirection(currentNode.cell.id, direction);
 	}
 	
 	public static Cell getCellFromId(int cellId) {
@@ -169,6 +177,47 @@ public class Pathfinder {
 			if(node != lastNode)
 				System.out.print(node.cell.id + "->");
 		System.out.println(lastNode.cell.id + "\n");
+	}
+	
+	public static int getChangementMapCell(int direction) {
+		switch(direction) {
+			case RIGHT : return getNearestCellId(279, direction); // (Map.CELLS_COUNT - 1) / 2
+			case DOWN : return getNearestCellId(552, direction); // (Map.CELLS_COUNT - 1 - Map.WIDTH) + (Map.WIDTH / 2)
+			case LEFT : return getNearestCellId(280, direction); // Map.CELLS_COUNT * (Map.HEIGHT / 2)
+			case UP : return getNearestCellId(7, direction); // Map.WIDTH / 2
+			default : throw new Error("Invalid direction for changing map.");
+		}
+	}
+	
+	private static int getNearestCellId(int cellId, int direction) {
+		if(getCellFromId(cellId).isAccessible())
+			return cellId;
+		
+		int currentDirection;
+		if(direction == LEFT || direction == RIGHT)
+			currentDirection = UP;
+		else
+			currentDirection = LEFT;
+		
+		Cell cell = getNeighbourCellFromDirection(cellId, currentDirection);
+		while(cell != null) {
+			if(cell != null && cell.isAccessible())
+				return cell.id;
+			cell = getNeighbourCellFromDirection(cell, currentDirection);
+		}
+		
+		if(direction == LEFT || direction == RIGHT)
+			currentDirection = DOWN;
+		else
+			currentDirection = RIGHT;
+		
+		cell = getNeighbourCellFromDirection(cellId, currentDirection);
+		while(cell != null) {
+			if(cell != null && cell.isAccessible())
+				return cell.id;
+			cell = getNeighbourCellFromDirection(cell, currentDirection);
+		}
+		return -1;
 	}
 	
 	private static int determineDirection(Cell src, Cell dest) {
@@ -246,6 +295,11 @@ public class Pathfinder {
     	protected static final int STRAIGHT_RUN_DURATION = 333;
     	protected Cell cell;
     	protected int direction;
+    	
+    	public PathNode(int cellId, int direction) {
+    		this.cell = getCellFromId(cellId);
+    		this.direction = direction;
+    	}
     	
     	public PathNode(Cell cell, int direction) {
     		this.cell = cell;

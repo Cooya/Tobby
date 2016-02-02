@@ -127,10 +127,14 @@ public class Cell {
 		return this.x == cell.x && this.y == cell.y;
 	}
 	
-	public boolean check() { // to do
+	public boolean check() { // à corriger
 		boolean isVisited = this.visited;
 		this.visited = true;
-		return !isVisited && !this._nonWalkableDuringRP && _mov;
+		return !isVisited && isAccessible();
+	}
+	
+	public boolean isAccessible() {
+		return !this._nonWalkableDuringRP && _mov;
 	}
 	
 	public String toString() {
