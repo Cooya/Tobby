@@ -128,11 +128,11 @@ public class CharacterController {
 		net.sendMessage(CMM);
 	}
 	
-	public void lunchFight(int position,double id){
-		this.moveTo(position);
-		GameRolePlayAttackMonsterRequestMessage GRPAMRM=new GameRolePlayAttackMonsterRequestMessage();
+	public void launchFight(int position, double id) {
+		moveTo(position);
+		GameRolePlayAttackMonsterRequestMessage GRPAMRM = new GameRolePlayAttackMonsterRequestMessage();
 		GRPAMRM.serialize(id);
-		Main.sendMessage(GRPAMRM);
+		net.sendMessage(GRPAMRM);
 	}
 	
 	public void runPath(String pathName) {
