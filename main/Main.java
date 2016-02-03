@@ -14,7 +14,6 @@ public class Main {
 	public static void main(String[] args) {
 		if(MODE) {
 			Emulation.runASLauncher();
-			createPathExample();
 			new Instance("maxlebgdu93", "represente", 11); // pour le moment, on en gère qu'un seul
 		}
 		else

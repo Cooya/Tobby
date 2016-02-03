@@ -130,6 +130,10 @@ public class Cell {
 		return !this._nonWalkableDuringRP && _mov;
 	}
 	
+	public boolean allowsChangementMap() {
+		return this.mapChangeData != 0;
+	}
+	
 	public String toString() {
 		return "[" + this.x + ", " + this.y + "]";
 	}

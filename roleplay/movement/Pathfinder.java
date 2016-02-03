@@ -36,9 +36,6 @@ public class Pathfinder {
     	if(DEBUG)
     		System.out.println(currentNode.cell.id);
     	
-    	if(srcId == destId)
-    		return movementPathFromArray(path);
-    	
 		PathNode next;
 		while(!currentNode.cell.equals(dest)) {
 			next = getNextCell();
@@ -158,6 +155,37 @@ public class Pathfinder {
 		return null;
 	}
 	
+	private static int getNearestCellId(int cellId, int direction) {
+		if(getCellFromId(cellId).isAccessibleDuringRP())
+			return cellId;
+		
+		int currentDirection;
+		if(direction == LEFT || direction == RIGHT)
+			currentDirection = UP;
+		else
+			currentDirection = LEFT;
+		
+		Cell cell = getNeighbourCellFromDirection(cellId, currentDirection);
+		while(cell != null) {
+			if(cell != null && cell.isAccessibleDuringRP())
+				return cell.id;
+			cell = getNeighbourCellFromDirection(cell, currentDirection);
+		}
+		
+		if(direction == LEFT || direction == RIGHT)
+			currentDirection = DOWN;
+		else
+			currentDirection = RIGHT;
+		
+		cell = getNeighbourCellFromDirection(cellId, currentDirection);
+		while(cell != null) {
+			if(cell != null && cell.isAccessibleDuringRP())
+				return cell.id;
+			cell = getNeighbourCellFromDirection(cell, currentDirection);
+		}
+		return -1;
+	}
+	
 	private static Cell getNeighbourCellFromDirection(int srcId, int direction) {
 		int offsetId;
 		if((srcId / Map.WIDTH) % 2 == 0) offsetId = 0;
@@ -205,37 +233,6 @@ public class Pathfinder {
 	
 	private static Cell getNeighbourCellFromDirection(int direction) {
 		return getNeighbourCellFromDirection(currentNode.cell.id, direction);
-	}
-	
-	private static int getNearestCellId(int cellId, int direction) {
-		if(getCellFromId(cellId).isAccessibleDuringRP())
-			return cellId;
-		
-		int currentDirection;
-		if(direction == LEFT || direction == RIGHT)
-			currentDirection = UP;
-		else
-			currentDirection = LEFT;
-		
-		Cell cell = getNeighbourCellFromDirection(cellId, currentDirection);
-		while(cell != null) {
-			if(cell != null && cell.isAccessibleDuringRP())
-				return cell.id;
-			cell = getNeighbourCellFromDirection(cell, currentDirection);
-		}
-		
-		if(direction == LEFT || direction == RIGHT)
-			currentDirection = DOWN;
-		else
-			currentDirection = RIGHT;
-		
-		cell = getNeighbourCellFromDirection(cellId, currentDirection);
-		while(cell != null) {
-			if(cell != null && cell.isAccessibleDuringRP())
-				return cell.id;
-			cell = getNeighbourCellFromDirection(cell, currentDirection);
-		}
-		return -1;
 	}
 	
 	private static int determineDirection(Cell src, Cell dest) {

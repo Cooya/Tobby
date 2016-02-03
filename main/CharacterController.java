@@ -119,12 +119,12 @@ public class CharacterController extends Thread {
 	public void moveTo(int cellId) {
 		waitCharacterAccessibility();
 		
-		MapPoint src = MapPoint.fromCellId(this.currentCellId);
-		MapPoint dest = MapPoint.fromCellId(cellId);
+		if(this.currentCellId == cellId) // déjà sur la cellule cible
+			return;
 		
 		MovementPath path = Pathfinder.compute(this.currentCellId, cellId);
-		path.setStart(src);
-		path.setEnd(dest);
+		path.setStart(MapPoint.fromCellId(this.currentCellId));
+		path.setEnd(MapPoint.fromCellId(cellId));
 		
 		Vector<Integer> vector = MapMovementAdapter.getServerMovement(path);
 		GameMapMovementRequestMessage GMMRM = new GameMapMovementRequestMessage();
@@ -160,7 +160,7 @@ public class CharacterController extends Thread {
 		while(true) {
 			waitCharacterAccessibility();
 			Path path = PathsManager.getPathByName("test");
-			path.run(this);
+			//path.run(this);
 		}
 	}
 	
