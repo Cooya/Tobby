@@ -30,7 +30,7 @@ public class Processes {
 		try {
 			Process p = Runtime.getRuntime().exec(injectorPath + " " + dllName + " " + exeName);
 			InputStream in = p.getInputStream();
-			byte[] bytes = new byte[Main.BUFFER_SIZE];
+			byte[] bytes = new byte[Main.BUFFER_DEFAULT_SIZE];
 			in.read(bytes);
 			Log.p("DLL Injection.\n" + new String(bytes));
 		} catch (Exception e) {

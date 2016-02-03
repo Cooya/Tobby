@@ -122,6 +122,7 @@
 6469 SelectedServerDataExtendedMessage
 6471 CharacterLoadingCompleteMessage
 6513 WarnOnPermaDeathStateMessage
+6525 CurrentServerStatusUpdateMessage
 6530 BasicStatMessage
 6585 IdolListMessage
 6620 HavenBagPackListMessage

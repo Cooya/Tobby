@@ -102,7 +102,7 @@ public class D2pReader {
 		Log.p("Decompressing binary data...");
 		Inflater inflater = new Inflater();
 		inflater.setInput(binaryMap.bytes());
-		byte[] buffer = new byte[Main.BUFFER_SIZE];
+		byte[] buffer = new byte[Main.BUFFER_DEFAULT_SIZE];
 		binaryMap.flushArray();
 		int bytesCounter = 0;
 		int bufferSize = 0;

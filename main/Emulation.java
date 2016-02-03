@@ -1,5 +1,8 @@
 package main;
 
+import java.util.LinkedList;
+
+import messages.Message;
 import messages.connection.HelloConnectMessage;
 import messages.connection.IdentificationSuccessMessage;
 import messages.connection.RawDataMessage;
@@ -13,6 +16,7 @@ public class Emulation {
 	private static final int serverPort = 5555;
 	private static Connection.Client launcherCo;
 	private static Connection.Server clientDofusCo;
+	private static Reader reader = new Reader();
 
 	public static void runASLauncher() {
 		if(!Processes.inProcess("adl.exe"))
@@ -35,7 +39,7 @@ public class Emulation {
 		byte[] buffer = new byte[1]; // bool d'injection
 		launcherCo.receive(buffer);
 		if(buffer[0] == 0)
-			Processes.injectDLL(Main.dllLocation, "adl.exe");
+			Processes.injectDLL(Main.DLL_LOCATION, "adl.exe");
 		ByteArray array = new ByteArray();
 		array.writeInt(1 + 2 + 11 + 2 + 10);
 		array.writeByte((byte) 1);
@@ -45,7 +49,7 @@ public class Emulation {
 		launcherCo.send(array.bytes());
 	}
 	
-	public static void createServer(HelloConnectMessage HCM, IdentificationSuccessMessage ISM, RawDataMessage RDM) {
+	public static Message createServer(HelloConnectMessage HCM, IdentificationSuccessMessage ISM, RawDataMessage RDM) {
 		try {
 			clientDofusCo = new Connection.Server(serverPort);
 			Log.p("Running emulation server. Waiting Dofus client connection...");
@@ -56,11 +60,11 @@ public class Emulation {
 			clientDofusCo.send(HCM.makeRaw());
 			Log.p("HCM sent to Dofus client");
 			
-			byte[] buffer = new byte[Main.BUFFER_SIZE];
+			byte[] buffer = new byte[Main.BUFFER_DEFAULT_SIZE];
 			int bytesReceived = 0;
 			bytesReceived = clientDofusCo.receive(buffer);
 			Log.p(bytesReceived + " bytes received from Dofus client.");
-			Main.processMsgStack(Reader.processBuffer(new ByteArray(buffer, bytesReceived)));
+			processMsgStack(reader.processBuffer(new ByteArray(buffer, bytesReceived)));
 			
 			clientDofusCo.send(ISM.makeRaw());
 			Log.p("ISM sent to Dofus client");
@@ -69,7 +73,7 @@ public class Emulation {
 			
 			bytesReceived = clientDofusCo.receive(buffer);
 			Log.p(bytesReceived + " bytes received from Dofus client.");
-			Main.processMsgStack(Reader.processBuffer(new ByteArray(buffer, bytesReceived)));
+			Message CIM = processMsgStack(reader.processBuffer(new ByteArray(buffer, bytesReceived)));
 			
 			ByteArray array = new ByteArray();
 			array.writeInt(1);
@@ -79,9 +83,11 @@ public class Emulation {
 			
 			Log.p("Deconnection from Dofus client.");
 			clientDofusCo.close();
+			return CIM;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		return null;
 	}
 	
 	public static ByteArray hashMessage(ByteArray msg) {
@@ -91,8 +97,18 @@ public class Emulation {
 		bytes.writeByte((byte) 3); 
 		bytes.writeBytes(msg);
 		launcherCo.send(bytes.bytes());
-		byte[] buffer = new byte[Main.BUFFER_SIZE];
+		byte[] buffer = new byte[Main.BUFFER_DEFAULT_SIZE];
 		int size = launcherCo.receive(buffer);
 		return new ByteArray(buffer, size);
+	}
+	
+	public static Message processMsgStack(LinkedList<Message> msgStack) {
+		Message msg;
+		while((msg = msgStack.poll()) != null) {
+			Log.p("r", msg);
+			if(msg.getId() == 6372)
+				return msg;
+		}
+		return null;
 	}
 }

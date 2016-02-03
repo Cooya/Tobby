@@ -2,7 +2,7 @@ package roleplay;
 
 import java.util.Vector;
 
-import main.Main;
+import main.NetworkInterface;
 import messages.EmptyMessage;
 import messages.currentmap.ChangeMapMessage;
 import messages.currentmap.GameMapMovementRequestMessage;
@@ -15,8 +15,10 @@ import roleplay.movement.ankama.MovementPath;
 import roleplay.paths.PathsManager;
 
 public class CharacterController {
+	private NetworkInterface net;
 	private String login;
 	private String password;
+	private int serverId;
 	private String characterName;
 	private double characterId;
 	private int currentCellId;
@@ -24,9 +26,11 @@ public class CharacterController {
 	private Map currentMap;
 	private String currentPathName;
 	
-	public CharacterController(String login, String password) {
+	public CharacterController(NetworkInterface net, String login, String password, int serverId) {
+		this.net = net;
 		this.login = login;
 		this.password = password;
+		this.serverId = serverId;
 	}
 	
 	public String getLogin() {
@@ -35,6 +39,10 @@ public class CharacterController {
 	
 	public String getPassword() {
 		return this.password;
+	}
+	
+	public int getServerId() {
+		return this.serverId;
 	}
 	
 	public String getCharacterName() {
@@ -93,7 +101,7 @@ public class CharacterController {
 		Vector<Integer> vector = MapMovementAdapter.getServerMovement(path);
 		GameMapMovementRequestMessage GMMRM = new GameMapMovementRequestMessage();
 		GMMRM.serialize(vector, this.currentMap.id);
-		Main.sendMessage(GMMRM);
+		net.sendMessage(GMMRM);
 		
 		Pathfinder.printPath();
 		for(int i : vector)
@@ -107,7 +115,7 @@ public class CharacterController {
 		}
 		
 		EmptyMessage EM = new EmptyMessage("GameMapMovementConfirmMessage");
-		Main.sendMessage(EM);
+		net.sendMessage(EM);
 		
 		this.currentCellId = cellId;
 	}
@@ -116,7 +124,7 @@ public class CharacterController {
 		moveTo(Pathfinder.getChangementMapCell(direction));
 		ChangeMapMessage CMM = new ChangeMapMessage();
 		CMM.serialize(this.currentMap.getNeighbourMapFromDirection(direction));
-		Main.sendMessage(CMM);
+		net.sendMessage(CMM);
 	}
 	
 	public void runPath(String pathName) {

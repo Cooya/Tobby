@@ -9,7 +9,6 @@ public class HelloConnectMessage extends Message {
 	
 	public HelloConnectMessage(Message msg) {
 		super(msg);
-		
 		deserialize();
 	}
 	

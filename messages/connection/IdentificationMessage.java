@@ -15,7 +15,7 @@ public class IdentificationMessage extends Message {
 		byte[] credentials = Encryption.encryptCredentials(decryptedPublicKey, login, password, HCM.getSalt());
 		ByteArray buffer = new ByteArray();
 		buffer.writeByte((byte) 0);
-		writeVersion(buffer, 2, 32, 4, 100752, 1, 0, 1, 1);
+		writeVersion(buffer, 2, 33, 0, 101615, 2, 0, 1, 1);
 		buffer.writeUTF("fr");
 		buffer.writeVarInt(credentials.length);
 		

@@ -6,21 +6,21 @@ import messages.Message;
 import utilities.ByteArray;
 
 public class Reader {
-	private static Message incompleteMsg; // message incomplet qui attend d'être complété
-	private static byte[] incompleteHeader; // header incomplet qui attend d'être complété
+	private Message incompleteMsg; // message incomplet qui attend d'être complété
+	private byte[] incompleteHeader; // header incomplet qui attend d'être complété
 	
-	public static LinkedList<Message> processBuffer(ByteArray buffer) {
+	public LinkedList<Message> processBuffer(ByteArray buffer) {
 		LinkedList<Message> msgStack = new LinkedList<Message>();
 		
-		if(incompleteHeader != null) {
-			buffer.appendBefore(incompleteHeader);
-			incompleteHeader = null;
+		if(this.incompleteHeader != null) {
+			buffer.appendBefore(this.incompleteHeader);
+			this.incompleteHeader = null;
 		}
-		else if(incompleteMsg != null) {
-			buffer.readBytes(incompleteMsg.appendContent(buffer.bytes()));
-			if(incompleteMsg.isComplete()) {
-				msgStack.add(incompleteMsg);
-				incompleteMsg = null;
+		else if(this.incompleteMsg != null) {
+			buffer.readBytes(this.incompleteMsg.appendContent(buffer.bytes()));
+			if(this.incompleteMsg.isComplete()) {
+				msgStack.add(this.incompleteMsg);
+				this.incompleteMsg = null;
 			}
 			else
 				return msgStack; // si le message est incomplet, cela signifie qu'il n'y a plus rien à lire dans le buffer
@@ -28,11 +28,11 @@ public class Reader {
 		while(!buffer.endOfArray()) {
 			Message msg = extractMsgFromBuffer(buffer.bytesFromPos());
 			if(msg == null)
-				incompleteHeader = buffer.bytesFromPos();
+				this.incompleteHeader = buffer.bytesFromPos();
 			else if(msg.isComplete())
 				msgStack.add(msg);
 			else
-				incompleteMsg = msg;
+				this.incompleteMsg = msg;
 			buffer.readBytes(msg.getTotalSize());
 		}
 		return msgStack;

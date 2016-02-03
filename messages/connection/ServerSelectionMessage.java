@@ -9,9 +9,9 @@ public class ServerSelectionMessage extends Message {
 		super();
 	}
 	
-	public void serialize() {
+	public void serialize(int serverId) {
 		ByteArray buffer = new ByteArray();
-		buffer.writeByte((byte) 11); 
+		buffer.writeByte((byte) serverId); 
 		
 		completeInfos(buffer);
 	}

@@ -12,9 +12,10 @@ public class GameMapMovementMessage extends Message{
 	public GameMapMovementMessage(Message msg) {
 		super(msg);
 		this.keyMovements = new  Vector<Integer>();
+		deserialize();
 	}
 
-	public void deserialize() {
+	private void deserialize() {
 		ByteArray buffer = new ByteArray(this.content);
 		int nb = buffer.readShort();
 		for(int i = 0; i < nb; ++i)
