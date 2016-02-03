@@ -2,14 +2,17 @@ package roleplay.paths;
 
 import java.util.Vector;
 
+import main.CharacterController;
 import roleplay.movement.Pathfinder;
 
 public class Path {
+	private String name;
 	private Vector<PathNode> nodes;
 	private int currentPos;
 	private boolean isLoop;
 	
-	public Path(boolean isLoop) {
+	public Path(String name, boolean isLoop) {
+		this.name = name;
 		this.nodes = new Vector<PathNode>();
 		this.currentPos = 0;
 		this.isLoop = isLoop;
@@ -44,4 +47,17 @@ public class Path {
 			}
 		throw new Error("Impossible to run this path, invalid character position.");
 	}
+	
+	public void run(CharacterController CC) {
+		checkCurrentPos(CC.getCurrentMapId()); // vérifie si le perso est bien sur le trajet
+		CC.setCurrentPathName(this.name);
+		int nextMapId;
+		while((nextMapId = nextMap()) != -1)
+			CC.changeMap(nextMapId);
+	}
+	
+	public String getName() {
+		return this.name;
+	}
+
 }

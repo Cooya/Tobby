@@ -6,7 +6,7 @@ import messages.EmptyMessage;
 import messages.currentmap.ChangeMapMessage;
 import messages.currentmap.GameMapMovementRequestMessage;
 import messages.roleplay.GameRolePlayAttackMonsterRequestMessage;
-import roleplay.movement.D2pReader;
+import roleplay.movement.MapsCache;
 import roleplay.movement.Pathfinder;
 import roleplay.movement.ankama.Map;
 import roleplay.movement.ankama.MapMovementAdapter;
@@ -14,6 +14,7 @@ import roleplay.movement.ankama.MapPoint;
 import roleplay.movement.ankama.MovementPath;
 import roleplay.paths.Path;
 import roleplay.paths.PathsManager;
+import utilities.Log;
 
 public class CharacterController extends Thread {
 	private Instance instance;
@@ -103,12 +104,16 @@ public class CharacterController extends Thread {
 	}
 	
 	public void setCurrentMap(int mapId) {
-		this.currentMap = new Map(D2pReader.getBinaryMap(mapId));
+		this.currentMap = MapsCache.loadMap(mapId);
 		Pathfinder.initMap(this.currentMap);
 	}
 	
 	public String getCurrentPathName() {
 		return this.currentPathName;
+	}
+	
+	public void setCurrentPathName(String pathName) {
+		this.currentPathName = pathName;
 	}
 	
 	public void moveTo(int cellId) {
@@ -141,6 +146,8 @@ public class CharacterController extends Thread {
 	public void changeMap(int direction) {
 		waitCharacterAccessibility();
 		
+		Log.p("Changing map : " + this.currentMap.id + " -> " + direction);
+		
 		moveTo(Pathfinder.getChangementMapCell(direction));
 		ChangeMapMessage CMM = new ChangeMapMessage();
 		CMM.serialize(this.currentMap.getNeighbourMapFromDirection(direction));
@@ -149,19 +156,11 @@ public class CharacterController extends Thread {
 		this.isAccessible = false; // on attend la fin du changement de map
 	}
 	
-	public void runPath(String pathName) {
-		Path path = PathsManager.getPathByName(pathName);
-		path.checkCurrentPos(this.currentMap.id); // vérifie si le perso est sur le trajet
-		this.currentPathName = pathName;
-		int nextMapId;
-		while((nextMapId = path.nextMap()) != -1)
-			changeMap(nextMapId);
-	}
-	
 	public void run() {
 		while(true) {
 			waitCharacterAccessibility();
-			runPath("test");
+			Path path = PathsManager.getPathByName("test");
+			path.run(this);
 		}
 	}
 	

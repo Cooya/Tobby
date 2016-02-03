@@ -9,7 +9,7 @@ public class PathsManager {
 	
 	public static Path createPath(String name, boolean isLoop) {
 		Log.p("Creation of a path named \"" + name + "\".");
-		Path path = new Path(isLoop);
+		Path path = new Path(name, isLoop);
 		paths.put(name, path);
 		return path;
 	}
