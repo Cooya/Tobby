@@ -27,11 +27,13 @@ public class Reader {
 		}
 		while(!buffer.endOfArray()) {
 			Message msg = extractMsgFromBuffer(buffer.bytesFromPos());
-			if(msg == null)
+			if(msg == null) { // header incomplet
 				this.incompleteHeader = buffer.bytesFromPos();
-			else if(msg.isComplete())
+				break;
+			}
+			else if(msg.isComplete()) // message complet
 				msgStack.add(msg);
-			else
+			else // message incomplet
 				this.incompleteMsg = msg;
 			buffer.readBytes(msg.getTotalSize());
 		}

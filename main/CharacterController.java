@@ -16,7 +16,7 @@ import roleplay.paths.Path;
 import roleplay.paths.PathsManager;
 
 public class CharacterController extends Thread {
-	private NetworkInterface net;
+	private Instance instance;
 	private String login;
 	private String password;
 	private int serverId;
@@ -28,8 +28,8 @@ public class CharacterController extends Thread {
 	private String currentPathName;
 	private boolean isAccessible;
 	
-	public CharacterController(NetworkInterface net, String login, String password, int serverId) {
-		this.net = net;
+	public CharacterController(Instance instance, String login, String password, int serverId) {
+		this.instance = instance;
 		this.login = login;
 		this.password = password;
 		this.serverId = serverId;
@@ -124,7 +124,7 @@ public class CharacterController extends Thread {
 		Vector<Integer> vector = MapMovementAdapter.getServerMovement(path);
 		GameMapMovementRequestMessage GMMRM = new GameMapMovementRequestMessage();
 		GMMRM.serialize(vector, this.currentMap.id);
-		net.sendMessage(GMMRM);
+		instance.outPush(GMMRM);
 		
 		try {
 			Thread.sleep(Pathfinder.getPathTime());
@@ -133,7 +133,7 @@ public class CharacterController extends Thread {
 		}
 		
 		EmptyMessage EM = new EmptyMessage("GameMapMovementConfirmMessage");
-		net.sendMessage(EM);
+		instance.outPush(EM);
 		
 		this.currentCellId = cellId;
 	}
@@ -144,7 +144,7 @@ public class CharacterController extends Thread {
 		moveTo(Pathfinder.getChangementMapCell(direction));
 		ChangeMapMessage CMM = new ChangeMapMessage();
 		CMM.serialize(this.currentMap.getNeighbourMapFromDirection(direction));
-		net.sendMessage(CMM);
+		instance.outPush(CMM);
 		
 		this.isAccessible = false; // on attend la fin du changement de map
 	}
@@ -169,6 +169,6 @@ public class CharacterController extends Thread {
 		moveTo(position);
 		GameRolePlayAttackMonsterRequestMessage GRPAMRM = new GameRolePlayAttackMonsterRequestMessage();
 		GRPAMRM.serialize(id);
-		net.sendMessage(GRPAMRM);
+		instance.outPush(GRPAMRM);
 	}
 }

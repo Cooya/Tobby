@@ -26,12 +26,10 @@ public class Cell {
 	
 	public double x;
 	public double y;
-	protected boolean visited;
 	
 	public Cell(Map map, int id) {
 		this._map = map;
 		this.id = id;
-		this.visited = false;
 		int tmp = id % Map.WIDTH;
 		this.x = (id / Map.WIDTH) % 2 == 0 ? HALF_WIDTH + WIDTH * tmp : WIDTH * (tmp + 1); 
 		this.y = HALF_HEIGHT * (id / Map.WIDTH + 1);
@@ -124,13 +122,8 @@ public class Cell {
 	}
 	
 	public boolean equals(Cell cell) {
-		return this.x == cell.x && this.y == cell.y;
-	}
-	
-	public boolean check() { // à corriger
-		boolean isVisited = this.visited;
-		this.visited = true;
-		return !isVisited && isAccessibleDuringRP();
+		return this.id == cell.id;
+		//return this.x == cell.x && this.y == cell.y;
 	}
 	
 	public boolean isAccessibleDuringRP() {

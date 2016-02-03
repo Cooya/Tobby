@@ -1,22 +1,22 @@
 package main;
 
 import java.util.LinkedList;
-import java.util.Vector;
 
-import frames.Frame;
 import messages.Message;
 import utilities.ByteArray;
 import utilities.Log;
 
 public class NetworkInterface extends Thread {
+	private Instance instance;
 	private Reader reader;
 	private Connection serverCo;
 	private String gameServerIP;
-	private Vector<Frame> workingFrames;
+	protected Sender sender; 
 	
-	public NetworkInterface(Vector<Frame> workingFrames) {
-		this.workingFrames = workingFrames;
+	public NetworkInterface(Instance instance) {
+		this.instance = instance;
 		this.reader = new Reader();
+		this.sender = new Sender();
 	}
 	
 	public void run() {
@@ -48,17 +48,33 @@ public class NetworkInterface extends Thread {
 		Message msg;
 		while((msg = msgStack.poll()) != null) {
 			Log.p("r", msg);
-			for(Frame frame : this.workingFrames)
-				frame.processMessage(msg);
+			instance.inPush(msg);
 		}
-	}
-	
-	public void sendMessage(Message msg) {
-		serverCo.send(msg.makeRaw());
-		Log.p("s", msg);
 	}
 	
 	public void setGameServerIP(String gameServerIP) {
 		this.gameServerIP = gameServerIP;
+	}
+	
+	class Sender extends Thread {
+		public synchronized void run() {
+			Message msg;
+			while(true) {
+				if((msg = instance.outPull()) != null) {
+					serverCo.send(msg.makeRaw());
+					Log.p("s", msg);
+				}
+				else
+					try {
+						wait();
+					} catch(Exception e) {
+						e.printStackTrace();
+					}
+			}
+		}
+		
+		public synchronized void wakeUp() {
+			notify();
+		}
 	}
 }

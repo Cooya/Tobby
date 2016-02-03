@@ -16,7 +16,6 @@ public interface Connection {
 		private OutputStream outputStream;
 		
 		public Client(String serverIP, int port) {
-			super();
 			try {
 				this.client = new Socket(serverIP, port);
 				this.inputStream = this.client.getInputStream();
@@ -27,7 +26,6 @@ public interface Connection {
 		}
 		
 		public Client(Socket client) {
-			super();
 			try {
 				this.client = client;
 				this.inputStream = this.client.getInputStream();

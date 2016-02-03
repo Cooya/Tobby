@@ -100,10 +100,10 @@ public class Pathfinder {
 	
 	private static PathNode getNextCell() {
 		int direction = determineDirection(currentNode.cell, dest);
-		Vector<PathNode> possibilities = getPossibilities(direction);
+		Vector<PathNode> possibilities = getPossibilities(currentNode, direction);
 		if(possibilities != null)
 			return chooseNextCell(possibilities);
-		possibilities = getPossibilities(direction);
+		possibilities = getPossibilities(currentNode, direction);
 		if(possibilities != null)
 			return chooseNextCell(possibilities);
 		return null; // aucune possibilité, il faut revenir en arrière
@@ -126,7 +126,7 @@ public class Pathfinder {
 		return nearestNode;
 	}
 	
-	private static Vector<PathNode> getPossibilities(int direction) {
+	private static Vector<PathNode> getPossibilities(PathNode currentNode, int direction) {
 		Vector<PathNode> possibilities = new Vector<PathNode>();
 		PathNode node;
 		
@@ -137,7 +137,7 @@ public class Pathfinder {
 			if(DEBUG)
 				System.out.println(directions[i] + " " + node);
 			
-			if(node != null && node.cell.check())
+			if(node != null && currentNode.checkCell(node.cell))
 				possibilities.add(node);
 		}
 		if(possibilities.size() > 0)
@@ -150,7 +150,7 @@ public class Pathfinder {
 			if(DEBUG)
 				System.out.println(directions[i] + " " + node);
 			
-			if(node != null && node.cell.check())
+			if(node != null && currentNode.checkCell(node.cell))
 				possibilities.add(node);
 		}
 		if(possibilities.size() > 0)
@@ -313,19 +313,20 @@ public class Pathfinder {
     	protected static final int STRAIGHT_RUN_DURATION = 333;
     	protected Cell cell;
     	protected int direction;
-    	
-    	protected PathNode(int cellId, int direction) {
-    		this.cell = getCellFromId(cellId);
-    		this.direction = direction;
-    	}
+    	protected Vector<Cell> checkedCells;
     	
     	protected PathNode(Cell cell, int direction) {
     		this.cell = cell;
     		this.direction = direction;
+    		this.checkedCells = new Vector<Cell>();
     	}
     	
     	protected PathNode(Cell cell) {
     		this(cell, -1);
+    	}
+    	
+    	protected PathNode(int cellId, int direction) {
+    		this(getCellFromId(cellId), direction);
     	}
     	
     	protected int getCrossingDuration(boolean mode) {
@@ -335,6 +336,14 @@ public class Pathfinder {
     			return STRAIGHT_RUN_DURATION;
     		else
     			return DIAGONAL_RUN_DURATION;
+    	}
+    	
+    	protected boolean checkCell(Cell cell) {
+    		for(Cell checkedCell : this.checkedCells)
+    			if(checkedCell.equals(cell))
+    				return false;
+    		this.checkedCells.add(cell);
+    		return cell.isAccessibleDuringRP();
     	}
     }
 }

@@ -26,6 +26,8 @@ public class HumanInformations {
         		this.options.add(new HumanOptionTitle(buffer));
         	else if(protocolId == 409)
         		this.options.add(new HumanOptionGuild(buffer));
+        	else if(protocolId == 410)
+        		this.options.add(new HumanOptionFollowers(buffer));
         	else if(protocolId == 411)
         		this.options.add(new HumanOptionOrnament(buffer));
         	else if(protocolId == 425)

@@ -5,7 +5,7 @@ import java.util.Hashtable;
 import utilities.Log;
 import main.CharacterController;
 import main.Emulation;
-import main.NetworkInterface;
+import main.Instance;
 import messages.Message;
 import messages.connection.AuthenticationTicketMessage;
 import messages.connection.CharacterSelectionMessage;
@@ -20,11 +20,14 @@ import messages.connection.SelectedServerDataMessage;
 import messages.connection.ServerSelectionMessage;
 import messages.connection.ServersListMessage;
 
-public class ConnectionFrame extends Frame {
+public class ConnectionFrame implements Frame {
+	private Instance instance;
+	private CharacterController CC;
 	private Hashtable<String, Object> usefulInfos = new Hashtable<String, Object>();
 	
-	public ConnectionFrame(NetworkInterface net, CharacterController CC) {
-		super(net, CC);
+	public ConnectionFrame(Instance instance, CharacterController CC) {
+		this.instance = instance;
+		this.CC = CC;
 	}
 	
 	public void processMessage(Message msg) {
@@ -34,7 +37,7 @@ public class ConnectionFrame extends Frame {
 				this.usefulInfos.put("HCM", HCM);
 				IdentificationMessage IM = new IdentificationMessage();
 				IM.serialize(HCM, CC.getLogin(), CC.getPassword());
-				net.sendMessage(IM);
+				instance.outPush(IM);
 				break;
 			case 22 :
 				IdentificationSuccessMessage ISM = new IdentificationSuccessMessage(msg);
@@ -50,7 +53,7 @@ public class ConnectionFrame extends Frame {
 				if(SLM.isSelectable(serverId)) {
 					ServerSelectionMessage SSM = new ServerSelectionMessage();
 					SSM.serialize(serverId);
-					net.sendMessage(SSM);
+					instance.outPush(SSM);
 				}
 				else
 					Log.p("Backup in progress on the requested server.");
@@ -58,12 +61,12 @@ public class ConnectionFrame extends Frame {
 			case 42 : 
 				SelectedServerDataMessage SSDM = new SelectedServerDataMessage(msg);
 				this.usefulInfos.put("ticket", SSDM.ticket);
-				net.setGameServerIP(SSDM.address);
+				instance.setGameServerIP(SSDM.address);
 				break;
 			case 101 :
 				AuthenticationTicketMessage ATM = new AuthenticationTicketMessage();
 				ATM.serialize((int[]) this.usefulInfos.get("ticket"));
-				net.sendMessage(ATM);
+				instance.outPush(ATM);
 				break;
 			case 6253 :
 				HCM = (HelloConnectMessage) this.usefulInfos.get("HCM");
@@ -71,18 +74,18 @@ public class ConnectionFrame extends Frame {
 				RawDataMessage RDM = new RawDataMessage(msg);
 				Emulation.sendCredentials();
 				Message CIM = Emulation.createServer(HCM, ISM, RDM);
-				net.sendMessage(CIM);
+				instance.outPush(CIM);
 				break;
 			case 6267 :
 				CharactersListRequestMessage CLRM = new CharactersListRequestMessage();
-				net.sendMessage(CLRM);
+				instance.outPush(CLRM);
 				break;
 			case 151 :
 				CharactersListMessage CLM = new CharactersListMessage(msg);
 				CC.setCharacterId(CLM.getCharacterId().toNumber());
 				CharacterSelectionMessage CSM = new CharacterSelectionMessage();
 				CSM.serialize(CLM);
-				net.sendMessage(CSM);
+				instance.outPush(CSM);
 				break;
 		}
 	}

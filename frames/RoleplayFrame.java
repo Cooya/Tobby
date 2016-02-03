@@ -1,7 +1,7 @@
 package frames;
 
 import main.CharacterController;
-import main.NetworkInterface;
+import main.Instance;
 import messages.EmptyMessage;
 import messages.Message;
 import messages.currentmap.CurrentMapMessage;
@@ -13,10 +13,13 @@ import roleplay.InterClientKeyManager;
 import roleplay.currentmap.EntityDispositionInformations;
 import roleplay.currentmap.MapComplementaryInformationsDataMessage;
 
-public class RoleplayFrame extends Frame {
+public class RoleplayFrame implements Frame {
+	private Instance instance;
+	private CharacterController CC;
 	
-	public RoleplayFrame(NetworkInterface net, CharacterController CC) {
-		super(net, CC);
+	public RoleplayFrame(Instance instance, CharacterController CC) {
+		this.instance = instance;
+		this.CC = CC;
 	}
 	
 	public void processMessage(Message msg) {
@@ -36,22 +39,22 @@ public class RoleplayFrame extends Frame {
 				CEM.serialize();
 				ClientKeyMessage CKM = new ClientKeyMessage();
 				CKM.serialize(ICKM);
-				net.sendMessage(EM1);
-				net.sendMessage(EM2);
-				net.sendMessage(EM3);
-				net.sendMessage(CKM);
-				net.sendMessage(EM4);
-				//net.sendMessage(EM5);
-				net.sendMessage(EM6);
-				net.sendMessage(PLRM);
-				net.sendMessage(CEM);
+				instance.outPush(EM1);
+				instance.outPush(EM2);
+				instance.outPush(EM3);
+				instance.outPush(CKM);
+				instance.outPush(EM4);
+				//instance.outPush(EM5);
+				instance.outPush(EM6);
+				instance.outPush(PLRM);
+				instance.outPush(CEM);
 				break;
 			case 220 :
 				CurrentMapMessage CMM = new CurrentMapMessage(msg);
 				CC.setCurrentMap(CMM.getMapId());
 				MapInformationsRequestMessage MIRM = new MapInformationsRequestMessage();
 				MIRM.serialize(CC.getCurrentMapId());
-				net.sendMessage(MIRM);
+				instance.outPush(MIRM);
 				break;
 			case 226 :
 				MapComplementaryInformationsDataMessage MCIDM = new MapComplementaryInformationsDataMessage(msg);
