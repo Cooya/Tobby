@@ -6,6 +6,7 @@ import main.NetworkInterface;
 import messages.EmptyMessage;
 import messages.currentmap.ChangeMapMessage;
 import messages.currentmap.GameMapMovementRequestMessage;
+import messages.roleplay.GameRolePlayAttackMonsterRequestMessage;
 import roleplay.movement.D2pReader;
 import roleplay.movement.Pathfinder;
 import roleplay.movement.ankama.Map;
@@ -125,6 +126,13 @@ public class CharacterController {
 		ChangeMapMessage CMM = new ChangeMapMessage();
 		CMM.serialize(this.currentMap.getNeighbourMapFromDirection(direction));
 		net.sendMessage(CMM);
+	}
+	
+	public void lunchFight(int position,double id){
+		this.moveTo(position);
+		GameRolePlayAttackMonsterRequestMessage GRPAMRM=new GameRolePlayAttackMonsterRequestMessage();
+		GRPAMRM.serialize(id);
+		Main.sendMessage(GRPAMRM);
 	}
 	
 	public void runPath(String pathName) {

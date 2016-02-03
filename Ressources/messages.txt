@@ -37,7 +37,11 @@
 300 GameRolePlayRemoveChallengeMessage
 301 GameRolePlayShowChallengeMessage
 500 CharacterStatsListMessage
+700 GameFightStartingMessage
 711 GameFightRemoveTeamMemberMessage
+713 GameFightTurnListMessage
+715 GameFightTurnReadyRequestMessage
+716 GameFightTurnReadyMessage
 780 TextInformationMessage
 801 ChatSmileyMessage
 851 ChatClientPrivateMessage
@@ -86,6 +90,7 @@
 5816 BasicLatencyStatsRequestMessage
 5834 SpellForgottenMessage
 5836 CharacterSelectedErrorMessage
+5864 GameFightShowFighterMessage
 5927 GameFightOptionStateUpdateMessage
 5968 MountSetMessage
 5970 MountXpRatioMessage
@@ -95,6 +100,7 @@
 6100 QueueStatusMessage
 6160 GuildMemberWarnOnConnectionStateMessage
 6162 InventoryContentAndPresetMessage
+6191 GameRolePlayAttackMonsterRequestMessage
 6205 AchievementListMessage
 6216 AccountCapabilitiesMessage
 6231 ShortcutBarContentMessage
