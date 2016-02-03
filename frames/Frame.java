@@ -1,6 +1,6 @@
 package frames;
 
-import roleplay.CharacterController;
+import main.CharacterController;
 import main.NetworkInterface;
 import messages.Message;
 

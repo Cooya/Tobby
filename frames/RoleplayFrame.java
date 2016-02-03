@@ -1,5 +1,6 @@
 package frames;
 
+import main.CharacterController;
 import main.NetworkInterface;
 import messages.EmptyMessage;
 import messages.Message;
@@ -7,9 +8,8 @@ import messages.currentmap.CurrentMapMessage;
 import messages.currentmap.MapInformationsRequestMessage;
 import messages.gamestarting.ChannelEnablingMessage;
 import messages.gamestarting.ClientKeyMessage;
-import messages.gamestarting.InterClientKeyManager;
 import messages.gamestarting.PrismsListRegisterMessage;
-import roleplay.CharacterController;
+import roleplay.InterClientKeyManager;
 import roleplay.currentmap.EntityDispositionInformations;
 import roleplay.currentmap.MapComplementaryInformationsDataMessage;
 
@@ -49,8 +49,6 @@ public class RoleplayFrame extends Frame {
 			case 220 :
 				CurrentMapMessage CMM = new CurrentMapMessage(msg);
 				CC.setCurrentMap(CMM.getMapId());
-				break;
-			case 891 :
 				MapInformationsRequestMessage MIRM = new MapInformationsRequestMessage();
 				MIRM.serialize(CC.getCurrentMapId());
 				net.sendMessage(MIRM);
@@ -69,7 +67,10 @@ public class RoleplayFrame extends Frame {
 					CC.setCurrentDirection(dispo.direction);
 				}
 				else
-					throw new Error("Invalid character id");
+					throw new Error("Invalid character id.");
+				
+				CC.makeCharacterAccessible(); // on peut de nouveau bouger
+				
 				break;
 		}
 	}

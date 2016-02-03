@@ -130,10 +130,10 @@ public class Cell {
 	public boolean check() { // à corriger
 		boolean isVisited = this.visited;
 		this.visited = true;
-		return !isVisited && isAccessible();
+		return !isVisited && isAccessibleDuringRP();
 	}
 	
-	public boolean isAccessible() {
+	public boolean isAccessibleDuringRP() {
 		return !this._nonWalkableDuringRP && _mov;
 	}
 	

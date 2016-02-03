@@ -2,8 +2,8 @@ package frames;
 
 import java.util.Hashtable;
 
-import roleplay.CharacterController;
 import utilities.Log;
+import main.CharacterController;
 import main.Emulation;
 import main.NetworkInterface;
 import messages.Message;

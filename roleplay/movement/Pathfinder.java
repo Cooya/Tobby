@@ -8,6 +8,7 @@ import roleplay.movement.ankama.MovementPath;
 import roleplay.movement.ankama.PathElement;
 
 public class Pathfinder {
+	public static final boolean DEBUG = false;
 	public static final int RIGHT = 0;
 	public static final int DOWN_RIGHT = 1;
 	public static final int DOWN = 2;
@@ -32,12 +33,21 @@ public class Pathfinder {
     	path.add(currentNode);
     	dest = getCellFromId(destId);
     	
+    	if(DEBUG)
+    		System.out.println(currentNode.cell.id);
+    	
+    	if(srcId == destId)
+    		return movementPathFromArray(path);
+    	
 		PathNode next;
 		while(!currentNode.cell.equals(dest)) {
 			next = getNextCell();
 			if(next != null) {
 				path.add(next);
 				currentNode = next;
+				
+				if(DEBUG)
+					System.out.println(currentNode.cell.id);
 			}
 			else { // retour en arrière
 				path.remove(path.lastElement());
@@ -45,107 +55,6 @@ public class Pathfinder {
 			}
 		}
 		return movementPathFromArray(path);
-	}
-	
-	private static PathNode getNextCell() {
-		int direction = determineDirection(currentNode.cell, dest);
-		Vector<PathNode> possibilities = getPossibilities(direction);
-		if(possibilities != null)
-			return chooseNextCell(possibilities);
-		possibilities = getPossibilities(direction);
-		if(possibilities != null)
-			return chooseNextCell(possibilities);
-		return null; // aucune possibilité, il faut revenir en arrière
-	}
-	
-	private static PathNode chooseNextCell(Vector<PathNode> possibilities) { // choisit la cellule la plus proche de la destination
-		int nbPossibilities = possibilities.size();
-		double minDistance = Double.MAX_VALUE;
-		PathNode nearestNode = null;
-		double distance;
-		PathNode node = null;
-		for(int i = 0; i < nbPossibilities; ++i) {
-			node = possibilities.get(i);
-			distance = distanceBetween(node.cell, currentNode.cell) + distanceBetween(node.cell, dest);
-			if(distance < minDistance) {
-				minDistance = distance;
-				nearestNode = node;
-			}
-		}
-		return nearestNode;
-	}
-	
-	private static Vector<PathNode> getPossibilities(int direction) {
-		Vector<PathNode> possibilities = new Vector<PathNode>();
-		PathNode node;
-		
-		int[] directions = besideDirections(direction);
-		for(int i = 0; i < 3; ++i) {
-			node = new PathNode(getNeighbourCellFromDirection(directions[i]), directions[i]);
-			if(node != null && node.cell.check())
-				possibilities.add(node);
-		}
-		if(possibilities.size() > 0)
-			return possibilities;
-		
-		directions = otherDirections(direction);
-		for(int i = 0;  i < 5; ++i) {
-			node = new PathNode(getNeighbourCellFromDirection(directions[i]), directions[i]);
-			if(node != null && node.cell.check())
-				possibilities.add(node);
-		}
-		if(possibilities.size() > 0)
-			return possibilities;
-		return null;
-	}
-	
-	private static Cell getNeighbourCellFromDirection(int srcId, int direction) {
-		int offsetId;
-		if((srcId / Map.WIDTH) % 2 == 0) offsetId = 0;
-		else offsetId = 1;
-		switch(direction) {
-			case RIGHT :
-				if(srcId + 1 < Map.CELLS_COUNT)
-					return cells[srcId + 1];
-				return null;
-			case DOWN_RIGHT :
-				if(srcId + Map.WIDTH + offsetId < Map.CELLS_COUNT)
-					return cells[srcId + Map.WIDTH + offsetId];
-				return null;
-			case DOWN :
-				if(srcId + Map.WIDTH * 2 < Map.CELLS_COUNT)
-					return cells[srcId + Map.WIDTH * 2];
-				return null;
-			case DOWN_LEFT :
-				if(srcId + Map.WIDTH - 1 + offsetId < Map.CELLS_COUNT)
-					return cells[srcId + Map.WIDTH - 1 + offsetId];
-				return null;
-			case LEFT :
-				if(srcId - 1 > 0)
-					return cells[srcId - 1];
-				return null;
-			case UP_LEFT :
-				if(srcId + Map.WIDTH - 1 + offsetId > 0)
-					return cells[srcId + Map.WIDTH - 1 + offsetId];
-				return null;
-			case UP :
-				if(srcId - Map.WIDTH * 2 > 0)
-					return cells[srcId - Map.WIDTH * 2];
-				return null;
-			case UP_RIGHT :
-				if(srcId - Map.WIDTH + offsetId > 0)
-					return cells[srcId - Map.WIDTH + offsetId];
-				return null;
-		}
-		throw new Error("Invalid direction.");
-	}
-	
-	private static Cell getNeighbourCellFromDirection(Cell srcCell, int direction) {
-		return getNeighbourCellFromDirection(srcCell.id, direction);
-	}
-	
-	private static Cell getNeighbourCellFromDirection(int direction) {
-		return getNeighbourCellFromDirection(currentNode.cell.id, direction);
 	}
 	
 	public static Cell getCellFromId(int cellId) {
@@ -189,8 +98,117 @@ public class Pathfinder {
 		}
 	}
 	
+	private static PathNode getNextCell() {
+		int direction = determineDirection(currentNode.cell, dest);
+		Vector<PathNode> possibilities = getPossibilities(direction);
+		if(possibilities != null)
+			return chooseNextCell(possibilities);
+		possibilities = getPossibilities(direction);
+		if(possibilities != null)
+			return chooseNextCell(possibilities);
+		return null; // aucune possibilité, il faut revenir en arrière
+	}
+	
+	private static PathNode chooseNextCell(Vector<PathNode> possibilities) { // choisit la cellule la plus proche de la destination
+		int nbPossibilities = possibilities.size();
+		double minDistance = Double.MAX_VALUE;
+		PathNode nearestNode = null;
+		double distance;
+		PathNode node = null;
+		for(int i = 0; i < nbPossibilities; ++i) {
+			node = possibilities.get(i);
+			distance = distanceBetween(node.cell, currentNode.cell) + distanceBetween(node.cell, dest);
+			if(distance < minDistance) {
+				minDistance = distance;
+				nearestNode = node;
+			}
+		}
+		return nearestNode;
+	}
+	
+	private static Vector<PathNode> getPossibilities(int direction) {
+		Vector<PathNode> possibilities = new Vector<PathNode>();
+		PathNode node;
+		
+		int[] directions = besideDirections(direction);
+		for(int i = 0; i < 3; ++i) {
+			node = new PathNode(getNeighbourCellFromDirection(directions[i]), directions[i]);
+			
+			if(DEBUG)
+				System.out.println(directions[i] + " " + node);
+			
+			if(node != null && node.cell.check())
+				possibilities.add(node);
+		}
+		if(possibilities.size() > 0)
+			return possibilities;
+		
+		directions = otherDirections(direction);
+		for(int i = 0;  i < 5; ++i) {
+			node = new PathNode(getNeighbourCellFromDirection(directions[i]), directions[i]);
+			
+			if(DEBUG)
+				System.out.println(directions[i] + " " + node);
+			
+			if(node != null && node.cell.check())
+				possibilities.add(node);
+		}
+		if(possibilities.size() > 0)
+			return possibilities;
+		return null;
+	}
+	
+	private static Cell getNeighbourCellFromDirection(int srcId, int direction) {
+		int offsetId;
+		if((srcId / Map.WIDTH) % 2 == 0) offsetId = 0;
+		else offsetId = 1;
+		switch(direction) {
+			case RIGHT :
+				if(srcId + 1 < Map.CELLS_COUNT)
+					return cells[srcId + 1];
+				return null;
+			case DOWN_RIGHT :
+				if(srcId + Map.WIDTH + offsetId < Map.CELLS_COUNT)
+					return cells[srcId + Map.WIDTH + offsetId];
+				return null;
+			case DOWN :
+				if(srcId + Map.WIDTH * 2 < Map.CELLS_COUNT)
+					return cells[srcId + Map.WIDTH * 2];
+				return null;
+			case DOWN_LEFT :
+				if(srcId + Map.WIDTH - 1 + offsetId < Map.CELLS_COUNT)
+					return cells[srcId + Map.WIDTH - 1 + offsetId];
+				return null;
+			case LEFT :
+				if(srcId - 1 > 0)
+					return cells[srcId - 1];
+				return null;
+			case UP_LEFT :
+				if(srcId - Map.WIDTH + offsetId > 0)
+					return cells[srcId - Map.WIDTH + offsetId];
+				return null;
+			case UP :
+				if(srcId - Map.WIDTH * 2 > 0)
+					return cells[srcId - Map.WIDTH * 2];
+				return null;
+			case UP_RIGHT :
+				if(srcId - Map.WIDTH + offsetId > 0)
+					return cells[srcId - Map.WIDTH + offsetId];
+				return null;
+		}
+		throw new Error("Invalid direction.");
+	}
+	
+	private static Cell getNeighbourCellFromDirection(Cell srcCell, int direction) {
+		return getNeighbourCellFromDirection(srcCell.id, direction);
+	}
+	
+	private static Cell getNeighbourCellFromDirection(int direction) {
+		return getNeighbourCellFromDirection(currentNode.cell.id, direction);
+	}
+	
 	private static int getNearestCellId(int cellId, int direction) {
-		if(getCellFromId(cellId).isAccessible())
+		if(getCellFromId(cellId).isAccessibleDuringRP())
 			return cellId;
 		
 		int currentDirection;
@@ -201,7 +219,7 @@ public class Pathfinder {
 		
 		Cell cell = getNeighbourCellFromDirection(cellId, currentDirection);
 		while(cell != null) {
-			if(cell != null && cell.isAccessible())
+			if(cell != null && cell.isAccessibleDuringRP())
 				return cell.id;
 			cell = getNeighbourCellFromDirection(cell, currentDirection);
 		}
@@ -213,7 +231,7 @@ public class Pathfinder {
 		
 		cell = getNeighbourCellFromDirection(cellId, currentDirection);
 		while(cell != null) {
-			if(cell != null && cell.isAccessible())
+			if(cell != null && cell.isAccessibleDuringRP())
 				return cell.id;
 			cell = getNeighbourCellFromDirection(cell, currentDirection);
 		}
@@ -296,21 +314,21 @@ public class Pathfinder {
     	protected Cell cell;
     	protected int direction;
     	
-    	public PathNode(int cellId, int direction) {
+    	protected PathNode(int cellId, int direction) {
     		this.cell = getCellFromId(cellId);
     		this.direction = direction;
     	}
     	
-    	public PathNode(Cell cell, int direction) {
+    	protected PathNode(Cell cell, int direction) {
     		this.cell = cell;
     		this.direction = direction;
     	}
     	
-    	public PathNode(Cell cell) {
+    	protected PathNode(Cell cell) {
     		this(cell, -1);
     	}
     	
-    	public int getCrossingDuration(boolean mode) {
+    	protected int getCrossingDuration(boolean mode) {
     		if(!mode) // marche
     			return WALK_DURATION;
     		if(this.direction % 2 == 0)

@@ -1,8 +1,7 @@
-package roleplay;
+package main;
 
 import java.util.Vector;
 
-import main.NetworkInterface;
 import messages.EmptyMessage;
 import messages.currentmap.ChangeMapMessage;
 import messages.currentmap.GameMapMovementRequestMessage;
@@ -13,9 +12,10 @@ import roleplay.movement.ankama.Map;
 import roleplay.movement.ankama.MapMovementAdapter;
 import roleplay.movement.ankama.MapPoint;
 import roleplay.movement.ankama.MovementPath;
+import roleplay.paths.Path;
 import roleplay.paths.PathsManager;
 
-public class CharacterController {
+public class CharacterController extends Thread {
 	private NetworkInterface net;
 	private String login;
 	private String password;
@@ -26,12 +26,14 @@ public class CharacterController {
 	private int currentDirection;
 	private Map currentMap;
 	private String currentPathName;
+	private boolean isAccessible;
 	
 	public CharacterController(NetworkInterface net, String login, String password, int serverId) {
 		this.net = net;
 		this.login = login;
 		this.password = password;
 		this.serverId = serverId;
+		this.isAccessible = false;
 	}
 	
 	public String getLogin() {
@@ -44,6 +46,24 @@ public class CharacterController {
 	
 	public int getServerId() {
 		return this.serverId;
+	}
+	
+	public synchronized void makeCharacterAccessible() {
+		this.isAccessible = true;
+		notify();
+	}
+	
+	public synchronized void makeCharacterInaccessible() {
+		this.isAccessible = false;
+	}
+	
+	public synchronized void waitCharacterAccessibility() {
+		if(!this.isAccessible)
+			try {
+				wait();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 	}
 	
 	public String getCharacterName() {
@@ -92,6 +112,8 @@ public class CharacterController {
 	}
 	
 	public void moveTo(int cellId) {
+		waitCharacterAccessibility();
+		
 		MapPoint src = MapPoint.fromCellId(this.currentCellId);
 		MapPoint dest = MapPoint.fromCellId(cellId);
 		
@@ -103,11 +125,6 @@ public class CharacterController {
 		GameMapMovementRequestMessage GMMRM = new GameMapMovementRequestMessage();
 		GMMRM.serialize(vector, this.currentMap.id);
 		net.sendMessage(GMMRM);
-		
-		Pathfinder.printPath();
-		for(int i : vector)
-			System.out.print(i + " ");
-		System.out.println("\n");
 		
 		try {
 			Thread.sleep(Pathfinder.getPathTime());
@@ -122,10 +139,30 @@ public class CharacterController {
 	}
 	
 	public void changeMap(int direction) {
+		waitCharacterAccessibility();
+		
 		moveTo(Pathfinder.getChangementMapCell(direction));
 		ChangeMapMessage CMM = new ChangeMapMessage();
 		CMM.serialize(this.currentMap.getNeighbourMapFromDirection(direction));
 		net.sendMessage(CMM);
+		
+		this.isAccessible = false; // on attend la fin du changement de map
+	}
+	
+	public void runPath(String pathName) {
+		Path path = PathsManager.getPathByName(pathName);
+		path.checkCurrentPos(this.currentMap.id); // vérifie si le perso est sur le trajet
+		this.currentPathName = pathName;
+		int nextMapId;
+		while((nextMapId = path.nextMap()) != -1)
+			changeMap(nextMapId);
+	}
+	
+	public void run() {
+		while(true) {
+			waitCharacterAccessibility();
+			runPath("test");
+		}
 	}
 	
 	public void launchFight(int position, double id) {
@@ -133,12 +170,5 @@ public class CharacterController {
 		GameRolePlayAttackMonsterRequestMessage GRPAMRM = new GameRolePlayAttackMonsterRequestMessage();
 		GRPAMRM.serialize(id);
 		net.sendMessage(GRPAMRM);
-	}
-	
-	public void runPath(String pathName) {
-		this.currentPathName = pathName;
-		if(PathsManager.getCurrentMapId(pathName) != this.currentMap.id)
-			throw new Error("Impossible to run this path, invalid character position.");
-		changeMap(PathsManager.nextMap(pathName));
 	}
 }

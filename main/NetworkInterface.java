@@ -8,7 +8,7 @@ import messages.Message;
 import utilities.ByteArray;
 import utilities.Log;
 
-public class NetworkInterface implements Runnable {
+public class NetworkInterface extends Thread {
 	private Reader reader;
 	private Connection serverCo;
 	private String gameServerIP;

@@ -1,9 +1,6 @@
 package messages.fight;
 
-import java.util.Vector;
-
 import messages.Message;
-import utilities.ByteArray;
 
 public class GameFightEndMessage extends Message{
 	/*

@@ -6,7 +6,6 @@ import frames.ConnectionFrame;
 import frames.Frame;
 import frames.RoleplayFrame;
 import frames.SynchronisationFrame;
-import roleplay.CharacterController;
 
 public class Instance {
 	private NetworkInterface net;
@@ -18,10 +17,12 @@ public class Instance {
 		net = new NetworkInterface(workingFrames);
 		CC = new CharacterController(net, login, password, serverId);
 		
+		// pour le moment, elles sont toutes actives
 		workingFrames.add(new ConnectionFrame(net, CC));
 		workingFrames.add(new SynchronisationFrame(net, CC));
 		workingFrames.add(new RoleplayFrame(net, CC));
 		
-		net.run();
+		net.start(); // pour l'instant, l'interface réseau communique directement avec les frames
+		CC.start();
 	}
 }

@@ -14,7 +14,9 @@ public class FightTeamInformations extends AbstractFightTeamInformations {
 		int nb = buffer.readShort();
 		for(int i = 0; i < nb; ++i) {
 			protocolId = buffer.readShort();
-			if(protocolId == 13)
+			if(protocolId == 6)
+				this.teamMembers.add(new FightTeamMemberMonsterInformations(buffer));
+			else if(protocolId == 13)
 				this.teamMembers.add(new FightTeamMemberCharacterInformations(buffer));
 			else if(protocolId == 44)
 				this.teamMembers.add(new FightTeamMemberInformations(buffer));

@@ -1,4 +1,4 @@
-package messages.gamestarting;
+package roleplay;
 
 //import java.util.Date;
 //import java.util.Vector;
