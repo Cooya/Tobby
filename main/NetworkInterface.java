@@ -11,12 +11,14 @@ public class NetworkInterface extends Thread {
 	private Reader reader;
 	private Connection serverCo;
 	private String gameServerIP;
+	protected Latency latency;
 	protected Sender sender; 
 	
 	public NetworkInterface(Instance instance) {
 		this.instance = instance;
 		this.reader = new Reader();
 		this.sender = new Sender();
+		this.latency = new Latency();
 	}
 	
 	public void run() {
@@ -47,6 +49,7 @@ public class NetworkInterface extends Thread {
 	public void processMsgStack(LinkedList<Message> msgStack) {
 		Message msg;
 		while((msg = msgStack.poll()) != null) {
+			latency.updateLatency();
 			Log.p("r", msg);
 			instance.inPush(msg);
 		}
@@ -61,6 +64,7 @@ public class NetworkInterface extends Thread {
 			Message msg;
 			while(true) {
 				if((msg = instance.outPull()) != null) {
+					latency.setLatestSent();
 					serverCo.send(msg.makeRaw());
 					Log.p("s", msg);
 				}

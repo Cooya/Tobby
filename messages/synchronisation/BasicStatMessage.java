@@ -4,7 +4,7 @@ import utilities.ByteArray;
 import messages.Message;
 
 public class BasicStatMessage extends Message {
-	private short statId = 81;
+	private short statId = 81; // ou 151...
 	
 	public BasicStatMessage() {
 		super();

@@ -61,10 +61,6 @@ public class Instance extends Thread {
 		}
 	}
 	
-	public void setGameServerIP(String gameServerIP) {
-		this.net.setGameServerIP(gameServerIP);
-	}
-	
 	public synchronized void run() {
 		Message msg;
 		while(true) {
@@ -78,5 +74,13 @@ public class Instance extends Thread {
 					e.printStackTrace();
 				}
 		}
+	}
+	
+	public void setGameServerIP(String gameServerIP) {
+		this.net.setGameServerIP(gameServerIP);
+	}
+	
+	public Latency getLatency() {
+		return net.latency;
 	}
 }
