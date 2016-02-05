@@ -4,7 +4,7 @@ import utilities.ByteArray;
 import messages.Message;
 
 public class SequenceNumberMessage extends Message {
-	private static int number = 1;
+	public static int number = 1;
 	
 	public SequenceNumberMessage() {
 		super();

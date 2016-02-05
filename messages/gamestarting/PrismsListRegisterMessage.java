@@ -4,7 +4,7 @@ import utilities.ByteArray;
 import messages.Message;
 
 public class PrismsListRegisterMessage extends Message {
-	private int listen;
+	public int listen;
 	
 	public PrismsListRegisterMessage() {
 		super();

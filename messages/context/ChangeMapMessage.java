@@ -1,4 +1,4 @@
-package messages.currentmap;
+package messages.context;
 
 import utilities.ByteArray;
 import messages.Message;

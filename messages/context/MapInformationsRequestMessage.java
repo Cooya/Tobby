@@ -1,10 +1,10 @@
-package messages.currentmap;
+package messages.context;
 
 import messages.Message;
 import utilities.ByteArray;
 
 public class MapInformationsRequestMessage extends Message {
-	private int mapId;
+	public int mapId;
 
 	public MapInformationsRequestMessage() {
 		super();

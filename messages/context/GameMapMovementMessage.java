@@ -1,4 +1,4 @@
-package messages.currentmap;
+package messages.context;
 
 import java.util.Vector;
 
@@ -11,7 +11,7 @@ public class GameMapMovementMessage extends Message{
 
 	public GameMapMovementMessage(Message msg) {
 		super(msg);
-		this.keyMovements = new  Vector<Integer>();
+		this.keyMovements = new Vector<Integer>();
 		deserialize();
 	}
 

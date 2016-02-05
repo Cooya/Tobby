@@ -4,14 +4,14 @@ import main.CharacterController;
 import main.Instance;
 import messages.EmptyMessage;
 import messages.Message;
-import messages.currentmap.CurrentMapMessage;
-import messages.currentmap.MapInformationsRequestMessage;
+import messages.context.CurrentMapMessage;
+import messages.context.MapComplementaryInformationsDataMessage;
+import messages.context.MapInformationsRequestMessage;
 import messages.gamestarting.ChannelEnablingMessage;
 import messages.gamestarting.ClientKeyMessage;
 import messages.gamestarting.PrismsListRegisterMessage;
 import roleplay.InterClientKeyManager;
 import roleplay.currentmap.EntityDispositionInformations;
-import roleplay.currentmap.MapComplementaryInformationsDataMessage;
 
 public class RoleplayFrame implements Frame {
 	private Instance instance;
@@ -51,7 +51,7 @@ public class RoleplayFrame implements Frame {
 				break;
 			case 220 :
 				CurrentMapMessage CMM = new CurrentMapMessage(msg);
-				CC.setCurrentMap(CMM.getMapId());
+				CC.setCurrentMap(CMM.mapId);
 				MapInformationsRequestMessage MIRM = new MapInformationsRequestMessage();
 				MIRM.serialize(CC.getCurrentMapId());
 				instance.outPush(MIRM);

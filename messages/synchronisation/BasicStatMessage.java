@@ -4,7 +4,7 @@ import utilities.ByteArray;
 import messages.Message;
 
 public class BasicStatMessage extends Message {
-	private short statId = 81; // ou 151...
+	public int statId = 81; // ou 151...
 	
 	public BasicStatMessage() {
 		super();
@@ -12,7 +12,7 @@ public class BasicStatMessage extends Message {
 
 	public void serialize() {
 		ByteArray buffer = new ByteArray();
-		buffer.writeShort(statId);
+		buffer.writeShort((short) statId);
 		
 		completeInfos(buffer);
 	}

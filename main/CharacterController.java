@@ -3,9 +3,9 @@ package main;
 import java.util.Vector;
 
 import messages.EmptyMessage;
-import messages.currentmap.ChangeMapMessage;
-import messages.currentmap.GameMapMovementRequestMessage;
-import messages.roleplay.GameRolePlayAttackMonsterRequestMessage;
+import messages.context.ChangeMapMessage;
+import messages.context.GameMapMovementRequestMessage;
+import messages.context.GameRolePlayAttackMonsterRequestMessage;
 import roleplay.movement.MapsCache;
 import roleplay.movement.Pathfinder;
 import roleplay.movement.ankama.Map;
@@ -28,6 +28,7 @@ public class CharacterController extends Thread {
 	private Map currentMap;
 	private String currentPathName;
 	private boolean isAccessible;
+	private RoleplayContext context;
 	
 	public CharacterController(Instance instance, String login, String password, int serverId) {
 		this.instance = instance;
@@ -47,24 +48,6 @@ public class CharacterController extends Thread {
 	
 	public int getServerId() {
 		return this.serverId;
-	}
-	
-	public synchronized void makeCharacterAccessible() {
-		this.isAccessible = true;
-		notify();
-	}
-	
-	public synchronized void makeCharacterInaccessible() {
-		this.isAccessible = false;
-	}
-	
-	public synchronized void waitCharacterAccessibility() {
-		if(!this.isAccessible)
-			try {
-				wait();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
 	}
 	
 	public String getCharacterName() {
@@ -116,6 +99,28 @@ public class CharacterController extends Thread {
 		this.currentPathName = pathName;
 	}
 	
+	public synchronized void makeCharacterAccessible() {
+		this.isAccessible = true;
+		notify();
+	}
+	
+	public synchronized void makeCharacterInaccessible() {
+		this.isAccessible = false;
+	}
+	
+	public synchronized void waitCharacterAccessibility() {
+		if(!this.isAccessible)
+			try {
+				wait();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+	}
+	
+	public RoleplayContext getContext() {
+		return this.context;
+	}
+	
 	public void moveTo(int cellId) {
 		waitCharacterAccessibility();
 		
@@ -156,18 +161,18 @@ public class CharacterController extends Thread {
 		this.isAccessible = false; // on attend la fin du changement de map
 	}
 	
-	public void run() {
-		while(true) {
-			waitCharacterAccessibility();
-			Path path = PathsManager.getPathByName("test");
-			//path.run(this);
-		}
-	}
-	
 	public void launchFight(int position, double id) {
 		moveTo(position);
 		GameRolePlayAttackMonsterRequestMessage GRPAMRM = new GameRolePlayAttackMonsterRequestMessage();
 		GRPAMRM.serialize(id);
 		instance.outPush(GRPAMRM);
+	}
+	
+	public void run() {
+		while(true) {
+			waitCharacterAccessibility();
+			Path path = PathsManager.getPathByName("test");
+			path.run(this);
+		}
 	}
 }

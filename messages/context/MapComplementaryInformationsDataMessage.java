@@ -1,7 +1,21 @@
-package roleplay.currentmap;
+package messages.context;
 
 import java.util.Vector;
 
+import roleplay.currentmap.EntityDispositionInformations;
+import roleplay.currentmap.FightCommonInformations;
+import roleplay.currentmap.GameRolePlayActorInformations;
+import roleplay.currentmap.GameRolePlayCharacterInformations;
+import roleplay.currentmap.GameRolePlayGroupMonsterInformations;
+import roleplay.currentmap.GameRolePlayNamedActorInformations;
+import roleplay.currentmap.GameRolePlayNpcInformations;
+import roleplay.currentmap.GameRolePlayNpcWithQuestInformations;
+import roleplay.currentmap.HouseInformations;
+import roleplay.currentmap.HouseInformationsExtended;
+import roleplay.currentmap.InteractiveElement;
+import roleplay.currentmap.InteractiveElementWithAgeBonus;
+import roleplay.currentmap.MapObstacle;
+import roleplay.currentmap.StatedElement;
 import utilities.ByteArray;
 import messages.Message;
 

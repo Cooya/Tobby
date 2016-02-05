@@ -1,4 +1,4 @@
-package messages.currentmap;
+package messages.context;
 
 import java.util.Vector;
 
