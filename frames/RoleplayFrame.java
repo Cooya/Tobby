@@ -5,13 +5,15 @@ import main.Instance;
 import messages.EmptyMessage;
 import messages.Message;
 import messages.context.CurrentMapMessage;
+import messages.context.GameContextRemoveElementMessage;
+import messages.context.GameMapMovementMessage;
+import messages.context.GameRolePlayShowActorMessage;
 import messages.context.MapComplementaryInformationsDataMessage;
 import messages.context.MapInformationsRequestMessage;
 import messages.gamestarting.ChannelEnablingMessage;
 import messages.gamestarting.ClientKeyMessage;
 import messages.gamestarting.PrismsListRegisterMessage;
 import roleplay.InterClientKeyManager;
-import roleplay.currentmap.EntityDispositionInformations;
 
 public class RoleplayFrame implements Frame {
 	private Instance instance;
@@ -58,22 +60,20 @@ public class RoleplayFrame implements Frame {
 				break;
 			case 226 :
 				MapComplementaryInformationsDataMessage MCIDM = new MapComplementaryInformationsDataMessage(msg);
-				double characterId = CC.getCharacterId();
-				String characterName = MCIDM.getCharacterName(characterId);
-				if(characterName != null)
-					CC.setCharacterName(characterName);
-				else
-					throw new Error("Invalid character id.");
-				EntityDispositionInformations dispo = MCIDM.getCharacterDisposition(characterId);
-				if(dispo != null) {
-					CC.setCurrentCellId(dispo.cellId);
-					CC.setCurrentDirection(dispo.direction);
-				}
-				else
-					throw new Error("Invalid character id.");
-				
-				CC.makeCharacterAccessible(); // on peut de nouveau bouger
-				
+				CC.getContext().newContextActors(MCIDM.actors);
+				CC.makeCharacterAccessible(); // on peut maintenant bouger
+				break;
+			case 5632 :
+				GameRolePlayShowActorMessage GRPSAM = new GameRolePlayShowActorMessage(msg);
+				CC.getContext().addContextActor(GRPSAM.informations);
+				break;
+			case 251 :
+				GameContextRemoveElementMessage GCREM = new GameContextRemoveElementMessage(msg);
+				CC.getContext().removeContextActor(GCREM.id);
+				break;
+			case 951 :
+				GameMapMovementMessage GMMM = new GameMapMovementMessage(msg);
+				CC.getContext().updateContextActorPosition(GMMM.actorId, GMMM.keyMovements.lastElement());
 				break;
 		}
 	}

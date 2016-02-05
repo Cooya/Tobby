@@ -2,12 +2,10 @@ package messages.context;
 
 import java.util.Vector;
 
-import roleplay.currentmap.EntityDispositionInformations;
 import roleplay.currentmap.FightCommonInformations;
 import roleplay.currentmap.GameRolePlayActorInformations;
 import roleplay.currentmap.GameRolePlayCharacterInformations;
 import roleplay.currentmap.GameRolePlayGroupMonsterInformations;
-import roleplay.currentmap.GameRolePlayNamedActorInformations;
 import roleplay.currentmap.GameRolePlayNpcInformations;
 import roleplay.currentmap.GameRolePlayNpcWithQuestInformations;
 import roleplay.currentmap.HouseInformations;
@@ -88,20 +86,5 @@ public class MapComplementaryInformationsDataMessage extends Message {
 		nb = buffer.readShort();
 		for(int i = 0; i < nb; ++i)
 			fights.add(new FightCommonInformations(buffer));
-	}
-	
-	public EntityDispositionInformations getCharacterDisposition(double characterId) {
-		for(GameRolePlayActorInformations actor : actors) {
-			if(actor.contextualId == characterId)
-				return actor.disposition;
-		}
-		return null;	
-	}
-	
-	public String getCharacterName(double characterId) {
-		for(GameRolePlayActorInformations actor : actors)
-			if(actor.contextualId == characterId)
-				return ((GameRolePlayNamedActorInformations) actor).name;
-		return null;
 	}
 }
