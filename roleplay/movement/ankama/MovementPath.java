@@ -148,4 +148,22 @@ public class MovementPath {
 	public void replaceEnd(MapPoint mp) {
 		this._oEnd = mp;
 	}
+	
+	public Vector<Integer> getServerMovement() {
+		compress();
+		int nb;
+		Vector<Integer> result = new Vector<Integer>();
+		PathElement pe = null;
+		int mpLength = getPath().size();
+		for(int i = 0; i < mpLength; ++i) {
+			pe = getPath().get(i);
+			nb = ((pe.getOrientation() & 7) << 12) | (pe.getStep().getCellId() & 4095);
+			result.add(nb);
+		}
+		if(pe != null) {
+			nb = ((pe.getOrientation() & 7) << 12) | (getEnd().getCellId() & 4095);
+			result.add(nb);
+		}
+		return result;
+	}
 }

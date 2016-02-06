@@ -9,7 +9,6 @@ import messages.context.GameRolePlayAttackMonsterRequestMessage;
 import roleplay.movement.MapsCache;
 import roleplay.movement.Pathfinder;
 import roleplay.movement.ankama.Map;
-import roleplay.movement.ankama.MapMovementAdapter;
 import roleplay.movement.ankama.MapPoint;
 import roleplay.movement.ankama.MovementPath;
 import roleplay.paths.Path;
@@ -121,17 +120,20 @@ public class CharacterController extends Thread {
 		return this.context;
 	}
 	
-	public void moveTo(int cellId) {
+	public void moveTo(int cellId, boolean changeMap) {
 		waitCharacterAccessibility();
 		
 		if(this.currentCellId == cellId) // déjà sur la cellule cible
 			return;
 		
+		if(changeMap && !Pathfinder.getCellFromId(cellId).allowsChangementMap())
+			throw new Error("Target cell does not allow changement of map.");
+		
 		MovementPath path = Pathfinder.compute(this.currentCellId, cellId);
 		path.setStart(MapPoint.fromCellId(this.currentCellId));
 		path.setEnd(MapPoint.fromCellId(cellId));
 		
-		Vector<Integer> vector = MapMovementAdapter.getServerMovement(path);
+		Vector<Integer> vector = path.getServerMovement();
 		GameMapMovementRequestMessage GMMRM = new GameMapMovementRequestMessage();
 		GMMRM.serialize(vector, this.currentMap.id);
 		instance.outPush(GMMRM);
@@ -153,7 +155,7 @@ public class CharacterController extends Thread {
 		
 		Log.p("Changing map : " + this.currentMap.id + " -> " + direction);
 		
-		moveTo(Pathfinder.getChangementMapCell(direction));
+		moveTo(Pathfinder.getChangementMapCell(direction), true);
 		ChangeMapMessage CMM = new ChangeMapMessage();
 		CMM.serialize(this.currentMap.getNeighbourMapFromDirection(direction));
 		instance.outPush(CMM);
@@ -162,7 +164,7 @@ public class CharacterController extends Thread {
 	}
 	
 	public void launchFight(int position, double id) {
-		moveTo(position);
+		moveTo(position, false);
 		GameRolePlayAttackMonsterRequestMessage GRPAMRM = new GameRolePlayAttackMonsterRequestMessage();
 		GRPAMRM.serialize(id);
 		instance.outPush(GRPAMRM);

@@ -17,10 +17,25 @@ public class Pathfinder {
 	public static final int UP_LEFT = 5;
 	public static final int UP = 6;
 	public static final int UP_RIGHT = 7;
+	private static int[] LEFT_CELL_IDS;
+	private static int[] RIGHT_CELL_IDS;
+	private static int[] UP_CELL_IDS;
+	private static int[] DOWN_CELL_IDS;
 	private static Cell[] cells = new Cell[Map.CELLS_COUNT];
 	private static Vector<PathNode> path;
 	private static PathNode currentNode;
 	private static Cell dest;
+	
+	static {
+		for(int i = 0, j = 0; i < 560; i += 14, j++)
+			LEFT_CELL_IDS[j] = i;
+		for(int i = 13, j = 0; i < 560; i += 14, j++)
+			RIGHT_CELL_IDS[j] = i;
+		for(int i = 0, j = 0; i < 28; i++, j++)
+			UP_CELL_IDS[j] = i;
+		for(int i = 532, j = 0; i < 560; i++, j++)
+			DOWN_CELL_IDS[j] = i;
+	}
 	
 	public static void initMap(Map map) {
     	for(int i = 0; i < Map.CELLS_COUNT; ++i)
@@ -87,12 +102,24 @@ public class Pathfinder {
 	
 	public static int getChangementMapCell(int direction) {
 		switch(direction) {
-			case RIGHT : return getNearestCellId(279, direction); // (Map.CELLS_COUNT - 1) / 2
-			case DOWN : return getNearestCellId(552, direction); // (Map.CELLS_COUNT - 1 - Map.WIDTH) + (Map.WIDTH / 2)
-			case LEFT : return getNearestCellId(280, direction); // Map.CELLS_COUNT * (Map.HEIGHT / 2)
-			case UP : return getNearestCellId(7, direction); // Map.WIDTH / 2
+			case RIGHT : return getNearestCellIdForMapChangement(279, direction); // (Map.CELLS_COUNT - 1) / 2
+			case DOWN : return getNearestCellIdForMapChangement(552, direction); // (Map.CELLS_COUNT - 1 - Map.WIDTH) + (Map.WIDTH / 2)
+			case LEFT : return getNearestCellIdForMapChangement(280, direction); // Map.CELLS_COUNT * (Map.HEIGHT / 2)
+			case UP : return getNearestCellIdForMapChangement(7, direction); // Map.WIDTH / 2
 			default : throw new Error("Invalid direction for changing map.");
 		}
+	}
+	
+	@SuppressWarnings("unused")
+	private static int getNearestCellIdForMapChangement(int cellId) {
+		Cell targetCell = getCellFromId(cellId);
+		if(targetCell.isAccessibleDuringRP() && targetCell.allowsChangementMap())
+			return cellId;
+		Vector<Cell> neighbours = getNeighboursCell(cellId);
+		for(Cell cell : neighbours)
+			if(cell.isAccessibleDuringRP() && cell.allowsChangementMap())
+				return cellId;
+		return -1;
 	}
 	
 	private static PathNode getNextCell() {
@@ -155,8 +182,13 @@ public class Pathfinder {
 		return null;
 	}
 	
-	private static int getNearestCellId(int cellId, int direction) {
-		if(getCellFromId(cellId).isAccessibleDuringRP())
+	/* 
+	 * Cette fonction parcourt toute la ligne de case de changement de map à partir de la celluele du milieu
+	 * jusqu'à trouver une case accessible.
+	 */
+	private static int getNearestCellIdForMapChangement(int cellId, int direction) {
+		Cell targetCell = getCellFromId(cellId);
+		if(targetCell.isAccessibleDuringRP() && targetCell.allowsChangementMap())
 			return cellId;
 		
 		int currentDirection;
@@ -167,7 +199,7 @@ public class Pathfinder {
 		
 		Cell cell = getNeighbourCellFromDirection(cellId, currentDirection);
 		while(cell != null) {
-			if(cell != null && cell.isAccessibleDuringRP())
+			if(cell != null && cell.isAccessibleDuringRP() && cell.allowsChangementMap())
 				return cell.id;
 			cell = getNeighbourCellFromDirection(cell, currentDirection);
 		}
@@ -179,7 +211,7 @@ public class Pathfinder {
 		
 		cell = getNeighbourCellFromDirection(cellId, currentDirection);
 		while(cell != null) {
-			if(cell != null && cell.isAccessibleDuringRP())
+			if(cell != null && cell.isAccessibleDuringRP() && cell.allowsChangementMap())
 				return cell.id;
 			cell = getNeighbourCellFromDirection(cell, currentDirection);
 		}
@@ -233,6 +265,15 @@ public class Pathfinder {
 	
 	private static Cell getNeighbourCellFromDirection(int direction) {
 		return getNeighbourCellFromDirection(currentNode.cell.id, direction);
+	}
+	
+	private static Vector<Cell> getNeighboursCell(int cellId) {
+		Vector<Cell> neighbours = new Vector<Cell>();
+		Cell cell;
+		for(int i = 0; i < 8; ++i)
+			if((cell = getNeighbourCellFromDirection(cellId, i)) != null)
+				neighbours.add(cell);
+		return neighbours;		
 	}
 	
 	private static int determineDirection(Cell src, Cell dest) {

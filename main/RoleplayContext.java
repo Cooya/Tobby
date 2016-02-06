@@ -3,6 +3,7 @@ package main;
 import java.util.Vector;
 
 import roleplay.currentmap.GameRolePlayActorInformations;
+import roleplay.currentmap.GameRolePlayGroupMonsterInformations;
 import roleplay.currentmap.GameRolePlayNamedActorInformations;
 
 public class RoleplayContext {
@@ -41,5 +42,13 @@ public class RoleplayContext {
 		for(GameRolePlayActorInformations actor : actors)
 			if(actor.contextualId == actorId)
 				actors.remove(actor);
+	}
+	
+	public Vector<Integer> getCellIdsTakenByMonsters() {
+		Vector<Integer> cellIds = new Vector<Integer>();
+		for(GameRolePlayActorInformations actor : actors)
+			if(actor instanceof GameRolePlayGroupMonsterInformations)
+				cellIds.add(actor.disposition.cellId);		
+		return cellIds;
 	}
 }
