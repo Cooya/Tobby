@@ -4,6 +4,7 @@ import java.util.Vector;
 
 import main.CharacterController;
 import roleplay.movement.Pathfinder;
+import utilities.Log;
 
 public class Path {
 	private String name;
@@ -49,6 +50,9 @@ public class Path {
 	}
 	
 	public void run(CharacterController CC) {
+		
+		Log.p("Running path named \"" + name + "\".");
+		
 		checkCurrentPos(CC.getCurrentMapId()); // vérifie si le perso est bien sur le trajet
 		CC.setCurrentPathName(this.name);
 		int nextMapId;

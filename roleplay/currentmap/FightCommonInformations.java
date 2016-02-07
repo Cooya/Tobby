@@ -2,6 +2,7 @@ package roleplay.currentmap;
 
 import java.util.Vector;
 
+import roleplay.ProtocolTypeManager;
 import utilities.ByteArray;
 
 public class FightCommonInformations {
@@ -18,15 +19,9 @@ public class FightCommonInformations {
 		
         this.fightId = buffer.readInt();
         this.fightType = buffer.readByte();
-        int protocolId;
         int nb = buffer.readShort();
-        for(int i = 0; i < nb; ++i) {
-        	protocolId = buffer.readShort();
-        	if(protocolId == 33)
-        		this.fightTeams.add(new FightTeamInformations(buffer));
-        	else
-        		throw new Error("Invalid or unhandled protocol id : " + protocolId + ".");
-        }
+        for(int i = 0; i < nb; ++i)
+        	this.fightTeams.add((FightTeamInformations) ProtocolTypeManager.getInstance(buffer.readShort(), buffer));
         nb = buffer.readShort();
         for(int i = 0; i < nb; ++i)
         	this.fightTeamsPositions.add(buffer.readVarShort());

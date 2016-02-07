@@ -1,5 +1,6 @@
 package roleplay.currentmap;
 
+import roleplay.ProtocolTypeManager;
 import utilities.ByteArray;
 
 public class GameRolePlayHumanoidInformations extends GameRolePlayNamedActorInformations {
@@ -8,11 +9,7 @@ public class GameRolePlayHumanoidInformations extends GameRolePlayNamedActorInfo
     
     public GameRolePlayHumanoidInformations(ByteArray buffer) {
     	super(buffer);
-    	int protocolId = buffer.readShort();
-    	if(protocolId == 157)
-    		this.humanoidInfo = new HumanInformations(buffer);
-    	else
-    		throw new Error("Invalid or unhandled protocol id : " + protocolId + ".");
+    	this.humanoidInfo = (HumanInformations) ProtocolTypeManager.getInstance(buffer.readShort(), buffer);
     	this.accountId = buffer.readInt();
     }
 }

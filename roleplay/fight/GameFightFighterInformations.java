@@ -2,6 +2,7 @@ package roleplay.fight;
 
 import java.util.Vector;
 
+import roleplay.ProtocolTypeManager;
 import roleplay.currentmap.EntityDispositionInformations;
 import roleplay.currentmap.EntityLook;
 import roleplay.currentmap.GameContextActorInformations;
@@ -31,11 +32,7 @@ public class GameFightFighterInformations extends GameContextActorInformations{
        int loc5 = 0;
        this.contextualId = buffer.readDouble();
        this.look = new EntityLook(buffer);
-       int protocolId = buffer.readShort();
-       if(protocolId == 60)
-       	this.disposition = new EntityDispositionInformations(buffer);
-       else
-       	throw new Error("Invalid or unhandled protocol id : " + protocolId + ".");
+       this.disposition = (EntityDispositionInformations) ProtocolTypeManager.getInstance(buffer.readShort(), buffer);
        
        this.teamId = buffer.readByte();
        if(this.teamId < 0)

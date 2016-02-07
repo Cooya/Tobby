@@ -14,6 +14,7 @@ import messages.gamestarting.ChannelEnablingMessage;
 import messages.gamestarting.ClientKeyMessage;
 import messages.gamestarting.PrismsListRegisterMessage;
 import roleplay.InterClientKeyManager;
+import utilities.Log;
 
 public class RoleplayFrame implements Frame {
 	private Instance instance;
@@ -61,6 +62,9 @@ public class RoleplayFrame implements Frame {
 			case 226 :
 				MapComplementaryInformationsDataMessage MCIDM = new MapComplementaryInformationsDataMessage(msg);
 				CC.getContext().newContextActors(MCIDM.actors);
+				
+				Log.p("Current map id : " + CC.getCurrentMapId() + ".\nCurrent cell id : " + CC.getCurrentCellId() + ".");
+				
 				CC.makeCharacterAccessible(); // on peut maintenant bouger
 				break;
 			case 5632 :
@@ -69,7 +73,8 @@ public class RoleplayFrame implements Frame {
 				break;
 			case 251 :
 				GameContextRemoveElementMessage GCREM = new GameContextRemoveElementMessage(msg);
-				CC.getContext().removeContextActor(GCREM.id);
+				//CC.getContext().removeContextActor(GCREM.id);
+				// problème d'accès concurrents
 				break;
 			case 951 :
 				GameMapMovementMessage GMMM = new GameMapMovementMessage(msg);

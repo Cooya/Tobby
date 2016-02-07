@@ -91,7 +91,7 @@ public class Emulation {
 	}
 	
 	public static ByteArray hashMessage(ByteArray msg) {
-		Log.p("Hashing message...");
+		//Log.p("Hashing message...");
 		ByteArray bytes = new ByteArray(msg.getSize() + 2);
 		bytes.writeInt(1 + msg.getSize());
 		bytes.writeByte((byte) 3); 

@@ -1,5 +1,6 @@
 package roleplay.currentmap;
 
+import roleplay.ProtocolTypeManager;
 import utilities.BooleanByteWrapper;
 import utilities.ByteArray;
 
@@ -19,11 +20,7 @@ public class GameRolePlayGroupMonsterInformations extends GameRolePlayActorInfor
         this.keyRingBonus = BooleanByteWrapper.getFlag(nb, 0);
         this.hasHardcoreDrop = BooleanByteWrapper.getFlag(nb, 1);
         this.hasAVARewardToken = BooleanByteWrapper.getFlag(nb, 2);
-        int protocolId = buffer.readShort();
-        if(protocolId == 140)
-        	this.staticInfos = new GroupMonsterStaticInformations(buffer);
-        else
-        	throw new Error("Invalid or unhandled protocol id : " + protocolId + ".");
+        this.staticInfos = (GroupMonsterStaticInformations) ProtocolTypeManager.getInstance(buffer.readShort(), buffer);
         this.creationTime = buffer.readDouble();
         this.ageBonusRate = buffer.readInt();
         this.lootShare = buffer.readByte();

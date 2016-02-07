@@ -98,6 +98,7 @@
 6078 FriendWarnOnLevelGainStateMessage
 6087 NotificationListMessage
 6100 QueueStatusMessage
+6103 NotificationByServerMessage
 6160 GuildMemberWarnOnConnectionStateMessage
 6162 InventoryContentAndPresetMessage
 6191 GameRolePlayAttackMonsterRequestMessage

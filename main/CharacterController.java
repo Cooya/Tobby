@@ -35,6 +35,7 @@ public class CharacterController extends Thread {
 		this.password = password;
 		this.serverId = serverId;
 		this.isAccessible = false;
+		this.context = new RoleplayContext(this);
 	}
 	
 	public String getLogin() {
@@ -153,7 +154,7 @@ public class CharacterController extends Thread {
 	public void changeMap(int direction) {
 		waitCharacterAccessibility();
 		
-		Log.p("Changing map : " + this.currentMap.id + " -> " + direction);
+		Log.p("Move to " + Pathfinder.directionToString(direction) + " map.");
 		
 		moveTo(Pathfinder.getChangementMapCell(direction), true);
 		ChangeMapMessage CMM = new ChangeMapMessage();
@@ -173,7 +174,7 @@ public class CharacterController extends Thread {
 	public void run() {
 		while(true) {
 			waitCharacterAccessibility();
-			Path path = PathsManager.getPathByName("test");
+			Path path = PathsManager.getPathByName("test2");
 			path.run(this);
 		}
 	}

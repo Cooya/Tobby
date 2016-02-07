@@ -7,6 +7,7 @@ import utilities.ByteArray;
 import utilities.Log;
 
 public class NetworkInterface extends Thread {
+	private static final boolean DEBUG = false;
 	private Instance instance;
 	private Reader reader;
 	private Connection serverCo;
@@ -28,7 +29,8 @@ public class NetworkInterface extends Thread {
 		Log.p("Connection to authentification server, waiting response...");
 		this.serverCo = new Connection.Client(Main.AUTH_SERVER_IP, Main.SERVER_PORT);
 		while((bytesReceived = this.serverCo.receive(buffer)) != -1) {
-			Log.p(bytesReceived + " bytes received from server.");
+			if(DEBUG)
+				Log.p(bytesReceived + " bytes received from server.");
 			processMsgStack(reader.processBuffer(new ByteArray(buffer, bytesReceived)));
 		}
 		this.serverCo.close();
@@ -38,7 +40,8 @@ public class NetworkInterface extends Thread {
 			Log.p("Connection to game server, waiting response...");
 			this.serverCo = new Connection.Client(gameServerIP, Main.SERVER_PORT);
 			while((bytesReceived = this.serverCo.receive(buffer)) != -1) {
-				Log.p(bytesReceived + " bytes received from server.");
+				if(DEBUG)
+					Log.p(bytesReceived + " bytes received from server.");
 				processMsgStack(reader.processBuffer(new ByteArray(buffer, bytesReceived)));
 			}
 			this.serverCo.close();

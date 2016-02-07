@@ -2,16 +2,11 @@ package messages.context;
 
 import java.util.Vector;
 
+import roleplay.ProtocolTypeManager;
 import roleplay.currentmap.FightCommonInformations;
 import roleplay.currentmap.GameRolePlayActorInformations;
-import roleplay.currentmap.GameRolePlayCharacterInformations;
-import roleplay.currentmap.GameRolePlayGroupMonsterInformations;
-import roleplay.currentmap.GameRolePlayNpcInformations;
-import roleplay.currentmap.GameRolePlayNpcWithQuestInformations;
 import roleplay.currentmap.HouseInformations;
-import roleplay.currentmap.HouseInformationsExtended;
 import roleplay.currentmap.InteractiveElement;
-import roleplay.currentmap.InteractiveElementWithAgeBonus;
 import roleplay.currentmap.MapObstacle;
 import roleplay.currentmap.StatedElement;
 import utilities.ByteArray;
@@ -42,41 +37,16 @@ public class MapComplementaryInformationsDataMessage extends Message {
 		ByteArray buffer = new ByteArray(this.content);
 		this.subAreaId = buffer.readVarShort();
 		this.mapId = buffer.readInt();
-		int protocolId;
+		
 		int nb = buffer.readShort();
-		for(int i = 0; i < nb; ++i) {
-			protocolId = buffer.readShort();
-			if(protocolId == 111)
-				houses.add(new HouseInformations(buffer));
-			else if(protocolId == 112)
-				houses.add(new HouseInformationsExtended(buffer));
-			else
-				throw new Error("Invalid or unhandled protocol id : " + protocolId + ".");
-		}
+		for(int i = 0; i < nb; ++i)
+			houses.add((HouseInformations) ProtocolTypeManager.getInstance(buffer.readShort(), buffer));
 		nb = buffer.readShort();
-		for(int i = 0; i < nb; ++i) {
-			protocolId = buffer.readShort();
-			if(protocolId == 36)
-				actors.add(new GameRolePlayCharacterInformations(buffer));
-			else if(protocolId == 156)
-				actors.add(new GameRolePlayNpcInformations(buffer));
-			else if(protocolId == 160)
-				actors.add(new GameRolePlayGroupMonsterInformations(buffer));
-			else if(protocolId == 383)
-				actors.add(new GameRolePlayNpcWithQuestInformations(buffer));
-			else
-				throw new Error("Invalid or unhandled protocol id : " + protocolId + ".");
-		}
+		for(int i = 0; i < nb; ++i)
+			actors.add((GameRolePlayActorInformations) ProtocolTypeManager.getInstance(buffer.readShort(), buffer));
 		nb = buffer.readShort();
-		for(int i = 0; i < nb; ++i) {
-			protocolId = buffer.readShort();
-			if(protocolId == 80)
-				interactiveElements.add(new InteractiveElement(buffer));
-			else if(protocolId == 398)
-				interactiveElements.add(new InteractiveElementWithAgeBonus(buffer));
-			else
-				throw new Error("Invalid or unhandled protocol id : " + protocolId + ".");
-		}
+		for(int i = 0; i < nb; ++i)
+			interactiveElements.add((InteractiveElement) ProtocolTypeManager.getInstance(buffer.readShort(), buffer));
 		nb = buffer.readShort();
 		for(int i = 0; i < nb; ++i)
 			statedElements.add(new StatedElement(buffer));

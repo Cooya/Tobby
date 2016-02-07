@@ -2,6 +2,7 @@ package roleplay.currentmap;
 
 import java.util.Vector;
 
+import roleplay.ProtocolTypeManager;
 import utilities.ByteArray;
 
 public class InteractiveElement {
@@ -16,22 +17,11 @@ public class InteractiveElement {
         
         this.elementId = buffer.readInt();
         this.elementTypeId = buffer.readInt();
-        int protocolId;
         int nb = buffer.readShort();
-        for(int i = 0; i < nb; ++i) {
-        	protocolId = buffer.readShort();
-        	if(protocolId == 219)
-        		this.enabledSkills.add(new InteractiveElementSkill(buffer));
-        	else
-        		throw new Error("Invalid or unhandled protocol id : " + protocolId + ".");
-        }
+        for(int i = 0; i < nb; ++i)
+        	this.enabledSkills.add((InteractiveElementSkill) ProtocolTypeManager.getInstance(buffer.readShort(), buffer));
         nb = buffer.readShort();
-        for(int i = 0; i < nb; ++i) {
-        	protocolId = buffer.readShort();
-        	if(protocolId == 219)
-        		this.disabledSkills.add(new InteractiveElementSkill(buffer));
-        	else
-        		throw new Error("Invalid or unhandled protocol id : " + protocolId + ".");
-        }
+        for(int i = 0; i < nb; ++i)
+        	this.disabledSkills.add((InteractiveElementSkill) ProtocolTypeManager.getInstance(buffer.readShort(), buffer));
 	}
 }

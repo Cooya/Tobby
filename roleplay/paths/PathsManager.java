@@ -37,7 +37,7 @@ public class PathsManager {
 				
 				path = new Path(splitLine[0], isLoop);
 				paths.put(splitLine[0], path);
-				while((line = buffer.readLine()) != null && line != "") {
+				while((line = buffer.readLine()) != null && !line.equals("")) {
 					line = line.trim();
 					splitLine = line.split("/");
 					

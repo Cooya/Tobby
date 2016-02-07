@@ -2,6 +2,7 @@ package roleplay.currentmap;
 
 import java.util.Vector;
 
+import roleplay.ProtocolTypeManager;
 import utilities.ByteArray;
 
 public class HumanInformations {
@@ -14,28 +15,8 @@ public class HumanInformations {
         
         this.restrictions = new ActorRestrictionsInformations(buffer);
         this.sex = buffer.readBoolean();
-        int protocolId;
         int nb = buffer.readShort();
-        for(int i = 0; i < nb; ++i) {
-        	protocolId = buffer.readShort();
-        	if(protocolId == 406)
-        		this.options.add(new HumanOption(buffer));
-        	else if(protocolId == 407)
-        		this.options.add(new HumanOptionEmote(buffer));
-        	else if(protocolId == 408)
-        		this.options.add(new HumanOptionTitle(buffer));
-        	else if(protocolId == 409)
-        		this.options.add(new HumanOptionGuild(buffer));
-        	else if(protocolId == 410)
-        		this.options.add(new HumanOptionFollowers(buffer));
-        	else if(protocolId == 411)
-        		this.options.add(new HumanOptionOrnament(buffer));
-        	else if(protocolId == 425)
-        		this.options.add(new HumanOptionAlliance(buffer));
-        	else if(protocolId == 495)
-        		this.options.add(new HumanOptionSkillUse(buffer));
-        	else
-        		throw new Error("Invalid or unhandled protocol id : " + protocolId + ".");
-        }
+        for(int i = 0; i < nb; ++i)
+        	this.options.add((HumanOption) ProtocolTypeManager.getInstance(buffer.readShort(), buffer));
 	}
 }
