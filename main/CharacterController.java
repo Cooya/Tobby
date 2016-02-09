@@ -6,6 +6,7 @@ import messages.EmptyMessage;
 import messages.context.ChangeMapMessage;
 import messages.context.GameMapMovementRequestMessage;
 import messages.context.GameRolePlayAttackMonsterRequestMessage;
+import roleplay.movement.MapsAnalyser;
 import roleplay.movement.MapsCache;
 import roleplay.movement.Pathfinder;
 import roleplay.movement.ankama.Map;
@@ -172,10 +173,13 @@ public class CharacterController extends Thread {
 	}
 	
 	public void run() {
-		while(true) {
+		//while(true) {
 			waitCharacterAccessibility();
-			Path path = PathsManager.getPathByName("test2");
-			path.run(this);
-		}
+			
+			MapsAnalyser.getZones(this.currentMap);
+			
+			//Path path = PathsManager.getPathByName("test2");
+			//path.run(this);
+		//}
 	}
 }

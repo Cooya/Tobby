@@ -39,12 +39,12 @@ public class Pathfinder {
     	closedList.add(currentNode);
     	Cell cell;
     	PathNode neighbourNode;
-		Vector<Cell> neighbours;
+		Cell[] neighbours;
 		
 		while(!currentNode.cell.equals(dest)) {
 			neighbours = getNeighboursCell(currentNode.cell.id);
 			for(int i = 0; i < 8; ++i) {
-				cell = neighbours.get(i);
+				cell = neighbours[i];
 				if(cell == null) // cellule inexistante (bords de map)
 					continue;
 				if(!cell.isAccessibleDuringRP()) // obstacle
@@ -98,11 +98,22 @@ public class Pathfinder {
 		return null;
 	}
 	
-	private static Vector<Cell> getNeighboursCell(int cellId) {
-		Vector<Cell> neighbours = new Vector<Cell>();
+	// attention, retourne tout le temps un tableau de 8 cellules (pour associer les directions)
+	public static Cell[] getNeighboursCell(int cellId) {
+		Cell[] neighbours = new Cell[8];
 		for(int i = 0; i < 8; ++i)
-			neighbours.add(getNeighbourCellFromDirection(cellId, i));
+			neighbours[i] = getNeighbourCellFromDirection(cellId, i);
 		return neighbours;		
+	}
+	
+	private static Cell getNewCellAfterChangementMap(int srcId, int direction) {
+		switch(direction) {
+			case RIGHT : return cells[srcId + 1 - (Map.WIDTH - 1)];
+			case LEFT : return cells[srcId - 1 + (Map.WIDTH - 1)];
+			case UP : return cells[(srcId - Map.WIDTH * 2) + 560];
+			case DOWN : return cells[(srcId + Map.WIDTH * 2) - 560];
+		}
+		throw new Error("Invalid direction for changing map.");
 	}
 	
 	private static Cell getNeighbourCellFromDirection(int srcId, int direction) {
@@ -111,11 +122,11 @@ public class Pathfinder {
 		else offsetId = 1;
 		switch(direction) {
 			case RIGHT :
-				if(srcId + 1 < Map.CELLS_COUNT)
+				if((srcId + 1) % Map.WIDTH != 0)
 					return cells[srcId + 1];
 				return null;
 			case DOWN_RIGHT :
-				if(srcId + Map.WIDTH + offsetId < Map.CELLS_COUNT)
+				if(srcId + Map.WIDTH + offsetId < Map.CELLS_COUNT && (srcId + 1) % Map.WIDTH != 0)
 					return cells[srcId + Map.WIDTH + offsetId];
 				return null;
 			case DOWN :
@@ -123,23 +134,23 @@ public class Pathfinder {
 					return cells[srcId + Map.WIDTH * 2];
 				return null;
 			case DOWN_LEFT :
-				if(srcId + Map.WIDTH - 1 + offsetId < Map.CELLS_COUNT)
+				if(srcId + Map.WIDTH - 1 + offsetId < Map.CELLS_COUNT && srcId % Map.WIDTH != 0)
 					return cells[srcId + Map.WIDTH - 1 + offsetId];
 				return null;
 			case LEFT :
-				if(srcId - 1 > 0)
+				if(srcId % Map.WIDTH != 0)
 					return cells[srcId - 1];
 				return null;
 			case UP_LEFT :
-				if(srcId - Map.WIDTH + offsetId > 0)
-					return cells[srcId - Map.WIDTH + offsetId];
+				if(srcId - Map.WIDTH - 1 + offsetId > 0 && srcId % Map.WIDTH != 0)
+					return cells[srcId - Map.WIDTH - 1 + offsetId];
 				return null;
 			case UP :
 				if(srcId - Map.WIDTH * 2 > 0)
 					return cells[srcId - Map.WIDTH * 2];
 				return null;
 			case UP_RIGHT :
-				if(srcId - Map.WIDTH + offsetId > 0)
+				if(srcId - Map.WIDTH + offsetId > 0 && (srcId + 1) % Map.WIDTH != 0)
 					return cells[srcId - Map.WIDTH + offsetId];
 				return null;
 		}
