@@ -8,10 +8,12 @@ import messages.context.GameMapMovementRequestMessage;
 import messages.context.GameRolePlayAttackMonsterRequestMessage;
 import roleplay.movement.MapsAnalyser;
 import roleplay.movement.MapsCache;
-import roleplay.movement.Pathfinder;
 import roleplay.movement.ankama.Map;
 import roleplay.movement.ankama.MapPoint;
 import roleplay.movement.ankama.MovementPath;
+import roleplay.movement.pathfinding.CellsPathfinder;
+import roleplay.movement.pathfinding.Pathfinder;
+import roleplay.movement.pathfinding.Pathfinder.PathNode;
 import roleplay.paths.Path;
 import roleplay.paths.PathsManager;
 import utilities.Log;
@@ -28,6 +30,7 @@ public class CharacterController extends Thread {
 	private Map currentMap;
 	private String currentPathName;
 	private boolean isAccessible;
+	private CellsPathfinder pathfinder;
 	private RoleplayContext context;
 	
 	public CharacterController(Instance instance, String login, String password, int serverId) {
@@ -89,7 +92,7 @@ public class CharacterController extends Thread {
 	
 	public void setCurrentMap(int mapId) {
 		this.currentMap = MapsCache.loadMap(mapId);
-		Pathfinder.initMap(this.currentMap);
+		this.pathfinder = new CellsPathfinder(this.currentMap);
 	}
 	
 	public String getCurrentPathName() {
@@ -128,10 +131,12 @@ public class CharacterController extends Thread {
 		if(this.currentCellId == cellId) // déjà sur la cellule cible
 			return;
 		
-		if(changeMap && !Pathfinder.getCellFromId(cellId).allowsChangementMap())
+		if(changeMap && !pathfinder.getCellFromId(cellId).allowsChangementMap())
 			throw new Error("Target cell does not allow changement of map.");
 		
-		MovementPath path = Pathfinder.compute(this.currentCellId, cellId);
+		pathfinder = new CellsPathfinder(this.currentMap);
+		Vector<PathNode> nodesVector = pathfinder.compute(this.currentCellId, cellId);
+		MovementPath path = CellsPathfinder.movementPathFromArray(nodesVector);
 		path.setStart(MapPoint.fromCellId(this.currentCellId));
 		path.setEnd(MapPoint.fromCellId(cellId));
 		
@@ -141,7 +146,7 @@ public class CharacterController extends Thread {
 		instance.outPush(GMMRM);
 		
 		try {
-			Thread.sleep(Pathfinder.getPathTime());
+			Thread.sleep(pathfinder.getPathTime());
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
@@ -157,7 +162,7 @@ public class CharacterController extends Thread {
 		
 		Log.p("Move to " + Pathfinder.directionToString(direction) + " map.");
 		
-		moveTo(Pathfinder.getChangementMapCell(direction), true);
+		moveTo(pathfinder.getChangementMapCell(direction), true);
 		ChangeMapMessage CMM = new ChangeMapMessage();
 		CMM.serialize(this.currentMap.getNeighbourMapFromDirection(direction));
 		instance.outPush(CMM);
@@ -173,13 +178,9 @@ public class CharacterController extends Thread {
 	}
 	
 	public void run() {
-		//while(true) {
-			waitCharacterAccessibility();
-			
-			MapsAnalyser.getZones(this.currentMap);
-			
-			//Path path = PathsManager.getPathByName("test2");
-			//path.run(this);
-		//}
+		waitCharacterAccessibility();
+		MapsAnalyser.getZones(this.currentMap);
+		Path path = PathsManager.getPathByName("test2");
+		path.run(this);
 	}
 }

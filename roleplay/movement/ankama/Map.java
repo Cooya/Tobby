@@ -3,7 +3,7 @@ package roleplay.movement.ankama;
 import java.util.Vector;
 
 import roleplay.movement.Cell;
-import roleplay.movement.Pathfinder;
+import roleplay.movement.pathfinding.Pathfinder;
 import utilities.ByteArray;
 
 public class Map {

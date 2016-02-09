@@ -3,7 +3,7 @@ package roleplay.paths;
 import java.util.Vector;
 
 import main.CharacterController;
-import roleplay.movement.Pathfinder;
+import roleplay.movement.pathfinding.Pathfinder;
 import utilities.Log;
 
 public class Path {
@@ -63,5 +63,22 @@ public class Path {
 	public String getName() {
 		return this.name;
 	}
-
+	
+	private class PathNode {
+		private int mapId;
+		private int direction;
+		
+		protected PathNode(int mapId, int direction) {
+			this.mapId = mapId;
+			this.direction = direction;
+		}
+		
+		protected int getMapId() {
+			return this.mapId;
+		}
+		
+		protected int getDirection() {
+			return this.direction;
+		}
+	}
 }

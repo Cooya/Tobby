@@ -3,15 +3,17 @@ package roleplay.movement;
 import java.util.Vector;
 
 import roleplay.movement.ankama.Map;
+import roleplay.movement.pathfinding.CellsPathfinder;
 
 public class MapsAnalyser {
 	public static Vector<Vector<Cell>> getZones(Map map) {
+		CellsPathfinder pathfinder = new CellsPathfinder(map);
 		Vector<Vector<Cell>> zones = new Vector<Vector<Cell>>();
 		@SuppressWarnings("unchecked")
 		Vector<Cell> cells = (Vector<Cell>) map.cells.clone();
 		Vector<Cell> buffer = new Vector<Cell>();
 		Cell currentCell;
-		Cell[] neighbours;
+		Vector<Cell> neighbours;
 		Vector<Cell> currentZone;
 		
 		// tant qu'il reste encore des cellules à traiter parmi toutes les cellules de la map
@@ -39,9 +41,9 @@ public class MapsAnalyser {
 				cells.remove(currentCell);
 				
 				// on ajoute les cellules voisines dans le buffer de cellules à traiter
-				neighbours = Pathfinder.getNeighboursCell(currentCell.id);
+				neighbours = pathfinder.getNeighboursCell(currentCell.id);
 				for(Cell neighbourCell : neighbours)
-					if(neighbourCell != null && !currentZone.contains(neighbourCell) && !buffer.contains(neighbourCell) && currentCell.isAccessibleDuringRP()) {
+					if(!currentZone.contains(neighbourCell) && !buffer.contains(neighbourCell) && neighbourCell.isAccessibleDuringRP()) {
 						buffer.add(neighbourCell);
 						//System.out.print(neighbourCell.id + " ");
 					}
