@@ -1,6 +1,5 @@
 package roleplay.movement.pathfinding;
 
-import java.util.Collections;
 import java.util.Vector;
 
 import roleplay.movement.Cell;
@@ -12,75 +11,26 @@ import roleplay.movement.ankama.PathElement;
 public class CellsPathfinder extends Pathfinder {
 	
 	public CellsPathfinder(Map map) {
-		super();
 		cells = new Cell[Map.CELLS_COUNT];
 		for(int i = 0; i < Map.CELLS_COUNT; ++i)
     		cells[i] = map.cells.get(i);
 	}
-
-	public Vector<PathNode> compute(int srcId, int destId) {
-    	currentNode = new CellNode(srcId);
-    	destNode = new CellNode(destId);
-    	openedList = new Vector<PathNode>();
-    	closedList = new Vector<PathNode>();
-    	closedList.add(currentNode);
-		Vector<PathNode> neighbours;
-		PathNode inListNode;
-		
-		while(!currentNode.equals(destNode)) {
-			neighbours = getNeighbourNodes(((CellNode) currentNode).cell.id);
-			for(PathNode neighbourNode : neighbours) {
-				if(!((CellNode) neighbourNode).cell.isAccessibleDuringRP()) // obstacle
-					continue;
-				if(nodeIsInList(neighbourNode, closedList) != null) // déjà traitée
-					continue;				
-				if((inListNode = nodeIsInList(neighbourNode, openedList)) != null) { // déjà une possibilité
-					if(currentNode.cost < inListNode.cost)
-						inListNode = (CellNode) currentNode; // modification de la référence dans la liste
-				}
-				else
-					openedList.add(neighbourNode);	
-			}
-			
-			currentNode = getBestNodeOfList(openedList);
-			if(currentNode == null)
-				throw new Error("None possible path found.");
-			openedList.remove(currentNode);
-			closedList.add(currentNode);
-		}
-		
-		//for(PathNode node : closedList)
-			//System.out.println(node.cell.id);
-		
-		path = new Vector<Pathfinder.PathNode>();
-		while(currentNode != null) {
-			path.add(currentNode);
-			currentNode = currentNode.parent;
-		}
-		
-		Collections.reverse(path);
-		
-		return path;
+	
+	protected PathNode getNodeFromId(int cellId) {
+		return new CellNode(cellId);
 	}
 	
-	protected Vector<PathNode> getNeighbourNodes(int cellId) {
+	protected Vector<PathNode> getNeighbourNodes(PathNode node) {
 		Vector<PathNode> neighbours = new Vector<PathNode>();
 		Cell cell;
 		for(int i = 0; i < 8; ++i) {
-			cell = getNeighbourCellFromDirection(cellId, i);
+			cell = getNeighbourCellFromDirection(node.getId(), i);
 			if(cell != null)
 				neighbours.add(new CellNode(cell, i, currentNode));
 		}
 		return neighbours;		
 	}
-	
-	protected PathNode getNeighbourNodeFromDirection(int srcId, int direction) {
-		Cell cell = getNeighbourCellFromDirection(srcId, direction);
-		if(cell != null)
-			return new CellNode(cell, direction, currentNode);
-		return null;
-	}
-	
+
 	protected PathNode nodeIsInList(PathNode node, Vector<PathNode> list) {
 		CellNode cn = (CellNode) node;
 		for(PathNode pn : list)
@@ -220,14 +170,14 @@ public class CellsPathfinder extends Pathfinder {
     	return mp;
     }
 	
-	public class CellNode extends PathNode {
+	private class CellNode extends PathNode {
     	private static final int WALK_DURATION = 500;
     	private static final int DIAGONAL_RUN_DURATION = 200;
     	private static final int STRAIGHT_RUN_DURATION = 333;
 		public Cell cell;
 		private Vector<Cell> checkedCells;
 		
-		protected CellNode(Cell cell, int direction, PathNode parent) {
+		private CellNode(Cell cell, int direction, PathNode parent) {
 			super(direction, parent);
 			this.cell = cell;
 			this.checkedCells = new Vector<Cell>();
@@ -239,24 +189,38 @@ public class CellsPathfinder extends Pathfinder {
     			this.cost = distanceTo(destNode);
 		}
 		
-    	protected CellNode(Cell cell) {
+    	private CellNode(Cell cell) {
     		this(cell, -1, null);
     	}
     	
-    	protected CellNode(int cellId) {
+    	private CellNode(int cellId) {
     		this(getCellFromId(cellId));
     	}
     	
-    	protected CellNode(int cellId, int direction, PathNode parent) {
+		private CellNode(int cellId, int direction, PathNode parent) {
     		this(getCellFromId(cellId), direction, parent);
     	}
     	
-    	protected boolean checkCell(Cell cell) {
+		@SuppressWarnings("unused")
+		private boolean checkCell(Cell cell) {
     		for(Cell checkedCell : this.checkedCells)
     			if(checkedCell.equals(cell))
     				return false;
     		this.checkedCells.add(cell);
     		return cell.isAccessibleDuringRP();
+    	}
+		
+    	private int getCrossingDuration(boolean mode) {
+    		if(!mode) // marche
+    			return WALK_DURATION;
+    		if(this.direction % 2 == 0)
+    			return STRAIGHT_RUN_DURATION;
+    		else
+    			return DIAGONAL_RUN_DURATION;
+    	}
+    	
+    	protected int getId() {
+    		return this.cell.id;
     	}
     	
     	protected boolean equals(PathNode node) {
@@ -266,20 +230,15 @@ public class CellsPathfinder extends Pathfinder {
     		return this.cell.equals(cn.cell);
     	}
     	
-    	public double distanceTo(PathNode node) {
+    	protected double distanceTo(PathNode node) {
     		if(!(node instanceof CellNode))
     			throw new Error("Invalid type.");
     		CellNode cn = (CellNode) node;
     		return Math.sqrt(Math.pow(this.cell.x - cn.cell.x, 2) + Math.pow(this.cell.y - cn.cell.y, 2));
     	}
     	
-    	protected int getCrossingDuration(boolean mode) {
-    		if(!mode) // marche
-    			return WALK_DURATION;
-    		if(this.direction % 2 == 0)
-    			return STRAIGHT_RUN_DURATION;
-    		else
-    			return DIAGONAL_RUN_DURATION;
+    	protected boolean isAccessible() {
+    		return this.cell.isAccessibleDuringRP();
     	}
 	}
 }

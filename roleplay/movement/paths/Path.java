@@ -1,4 +1,4 @@
-package roleplay.paths;
+package roleplay.movement.paths;
 
 import java.util.Vector;
 

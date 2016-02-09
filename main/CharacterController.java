@@ -14,8 +14,8 @@ import roleplay.movement.ankama.MovementPath;
 import roleplay.movement.pathfinding.CellsPathfinder;
 import roleplay.movement.pathfinding.Pathfinder;
 import roleplay.movement.pathfinding.Pathfinder.PathNode;
-import roleplay.paths.Path;
-import roleplay.paths.PathsManager;
+import roleplay.movement.paths.Path;
+import roleplay.movement.paths.PathsManager;
 import utilities.Log;
 
 public class CharacterController extends Thread {

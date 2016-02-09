@@ -1,4 +1,4 @@
-package roleplay.paths;
+package roleplay.movement.paths;
 
 import java.io.BufferedReader;
 import java.io.FileReader;

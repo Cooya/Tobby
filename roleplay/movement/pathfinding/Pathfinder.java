@@ -1,5 +1,6 @@
 package roleplay.movement.pathfinding;
 
+import java.util.Collections;
 import java.util.Vector;
 
 import roleplay.movement.Cell;
@@ -20,12 +21,54 @@ public abstract class Pathfinder {
 	protected Vector<PathNode> openedList;
 	protected Vector<PathNode> closedList;
 	
-	public Pathfinder() {}
-	
-	public abstract Vector<PathNode> compute(int srcId, int destId);
+	protected abstract PathNode getNodeFromId(int id);
 	protected abstract PathNode nodeIsInList(PathNode node, Vector<PathNode> list);
-	protected abstract Vector<PathNode> getNeighbourNodes(int id);
-	protected abstract PathNode getNeighbourNodeFromDirection(int srcId, int direction);
+	protected abstract Vector<PathNode> getNeighbourNodes(PathNode node);
+	
+	public Vector<PathNode> compute(int srcId, int destId) {
+    	currentNode = getNodeFromId(srcId);
+    	destNode = getNodeFromId(destId);
+    	openedList = new Vector<PathNode>();
+    	closedList = new Vector<PathNode>();
+    	closedList.add(currentNode);
+		Vector<PathNode> neighbours;
+		PathNode inListNode;
+		
+		while(!currentNode.equals(destNode)) {
+			neighbours = getNeighbourNodes(currentNode);
+			for(PathNode neighbourNode : neighbours) {
+				if(!neighbourNode.isAccessible()) // obstacle
+					continue;
+				if(nodeIsInList(neighbourNode, closedList) != null) // déjà traitée
+					continue;				
+				if((inListNode = nodeIsInList(neighbourNode, openedList)) != null) { // déjà une possibilité
+					if(currentNode.cost < inListNode.cost)
+						inListNode = currentNode; // modification de la référence dans la liste
+				}
+				else
+					openedList.add(neighbourNode);	
+			}
+			
+			currentNode = getBestNodeOfList(openedList);
+			if(currentNode == null)
+				throw new Error("None possible path found.");
+			openedList.remove(currentNode);
+			closedList.add(currentNode);
+		}
+		
+		//for(PathNode node : closedList)
+			//System.out.println(node.cell.id);
+		
+		path = new Vector<Pathfinder.PathNode>();
+		while(currentNode != null) {
+			path.add(currentNode);
+			currentNode = currentNode.parent;
+		}
+		
+		Collections.reverse(path);
+		
+		return path;
+	}
 	
 	protected static PathNode getBestNodeOfList(Vector<PathNode> list) {
 		if(list.size() == 0)
@@ -61,7 +104,9 @@ public abstract class Pathfinder {
     		this.direction = direction;
     	}
     	
+    	protected abstract int getId();
     	protected abstract boolean equals(PathNode node);
     	protected abstract double distanceTo(PathNode node);
+    	protected abstract boolean isAccessible();
     }
 }
