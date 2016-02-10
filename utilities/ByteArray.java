@@ -104,6 +104,8 @@ public class ByteArray {
 	
 	public static ByteArray fileToByteArray(String filepath) {
 		File file = new File(filepath);
+		if(!file.exists())
+			throw new Error("File '" + filepath + "' does not exist.");
 		byte[] bytes = new byte[(int) file.length()];
 		FileInputStream is;
 		try {
@@ -198,7 +200,7 @@ public class ByteArray {
 		printBytes(bytes(), format);
 	}
 
-	public int readByte() {
+	public int readByte() {	
 		int val = this.array[this.pos++] & 0xFF;
 		if(val < 0)
 			throw new Error("Negative byte.");

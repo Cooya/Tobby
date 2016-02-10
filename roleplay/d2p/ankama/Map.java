@@ -1,9 +1,9 @@
-package roleplay.movement.ankama;
+package roleplay.d2p.ankama;
 
 import java.util.Vector;
 
-import roleplay.movement.Cell;
-import roleplay.movement.pathfinding.Pathfinder;
+import roleplay.d2p.Cell;
+import roleplay.pathfinding.Pathfinder;
 import utilities.ByteArray;
 
 public class Map {
@@ -167,5 +167,20 @@ public class Map {
     		case Pathfinder.DOWN : return this.bottomNeighbourId;
     		default : throw new Error("Invalid direction for find neighbour map id");
     	}
+    }
+    
+    public static int getMapIdFromCoords(int worldId, int x, int y) {
+    	int var1 = 2 << 12;
+    	int var2 = 2 << 8;
+    	if(worldId > var1 || x > var2 || y > var2)
+    		return -1;
+    	int var3 = worldId & 4095;
+    	int var4 = Math.abs(x) & 0xFF;
+    	if(x < 0)
+    		var4 = var4 | 0x0100;
+    	int var5 = Math.abs(y) & 0xFF;
+    	if(y < 0)
+    		var5 = var5 | 0x0100;
+    	return (var3 << 18) | (var4 << 9) | var5;
     }
 }

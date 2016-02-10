@@ -1,17 +1,16 @@
-package roleplay.movement.pathfinding;
+package roleplay.pathfinding;
 
 import java.util.Vector;
 
-import roleplay.movement.Cell;
-import roleplay.movement.D2pReader;
-import roleplay.movement.MapsAnalyser;
-import roleplay.movement.ankama.Map;
+import roleplay.d2p.Cell;
+import roleplay.d2p.MapsCache;
+import roleplay.d2p.ankama.Map;
 
 public class MapsPathfinder extends Pathfinder {
-	private static int[] LEFT_CELL_IDS;
-	private static int[] RIGHT_CELL_IDS;
-	private static int[] UP_CELL_IDS;
-	private static int[] DOWN_CELL_IDS;
+	private static int[] LEFT_CELL_IDS = new int[40];
+	private static int[] RIGHT_CELL_IDS = new int[40];
+	private static int[] UP_CELL_IDS = new int[28];
+	private static int[] DOWN_CELL_IDS = new int[28];
 	private int currentCellId;
 	
 	static {
@@ -28,6 +27,7 @@ public class MapsPathfinder extends Pathfinder {
 	public MapsPathfinder(int currentCellId) {
 		this.currentCellId = currentCellId;
 	}
+	
 	
 	protected PathNode getNodeFromId(int mapId) {
 		return new MapNode(mapId);
@@ -60,7 +60,7 @@ public class MapsPathfinder extends Pathfinder {
 	}
 	
 	private Map getMapFromId(int mapId) {
-		return new Map(D2pReader.getBinaryMap(mapId));
+		return MapsCache.loadMap(mapId);
 	}
 	
 	private class MapNode extends PathNode {
@@ -72,11 +72,20 @@ public class MapsPathfinder extends Pathfinder {
 		private Vector<Vector<Cell>> zones;
 		
 		private MapNode(Map map, int direction, PathNode parent) {
-			super(direction, parent);
+			super(map.id, direction, parent);
 			this.map = map;
 			this.zones = MapsAnalyser.getZones(map);
 			setCoordsFromId(map.id);
 		}
+		
+		private MapNode(int mapId, int direction) { // version simple sans données de map
+			super(mapId, direction);
+			setCoordsFromId(map.id);
+		}
+		
+		private MapNode(int mapId, int direction, PathNode parent) {
+    		this(getMapFromId(mapId), direction, parent);
+    	}
 		
     	private MapNode(Map map) {
     		this(map, -1, null);
@@ -84,10 +93,6 @@ public class MapsPathfinder extends Pathfinder {
     	
     	private MapNode(int mapId) {
     		this(getMapFromId(mapId));
-    	}
-    	
-		private MapNode(int mapId, int direction, PathNode parent) {
-    		this(getMapFromId(mapId), direction, parent);
     	}
 		
 		private void setCoordsFromId(int mapId) {
@@ -98,10 +103,8 @@ public class MapsPathfinder extends Pathfinder {
 				this.x = -(this.x & 0xFF);
 			if((this.y & 0x0100) == 0x0100)
 				this.y = -(this.x & 0xFF);
-		}
-		
-		protected int getId() {
-			return this.map.id;
+			
+			this.y -= 22; // je ne sais pas pourquoi...
 		}
 
 		protected boolean equals(PathNode node) {
@@ -120,7 +123,7 @@ public class MapsPathfinder extends Pathfinder {
 		
 		protected boolean isAccessible() {
 			int[] directionCellIds;
-			switch(direction) {
+			switch(this.direction) {
 				case LEFT : directionCellIds = LEFT_CELL_IDS; break;
 				case RIGHT : directionCellIds = RIGHT_CELL_IDS; break; 
 				case UP : directionCellIds = UP_CELL_IDS; break;
@@ -132,16 +135,22 @@ public class MapsPathfinder extends Pathfinder {
 			for(Vector<Cell> zone : ((MapNode) currentNode).zones)
 				if(!found)
 					for(Cell cell : zone)
-						if(cell.id == currentCellId && cell.allowsChangementMap()) {
+						if(cell.id == currentCellId) {
 							currentZone = zone;
 							found = true;
 							break;
 						}
+			if(currentZone == null)
+				return false;
 			for(Cell cell : currentZone)
 				for(int i = 0; i < directionCellIds.length; ++i)
-					if(directionCellIds[i] == cell.id)
+					if(directionCellIds[i] == cell.id  && cell.allowsChangementMap())
 						return true;
 			return false;
 		}
+		
+    	protected int getCrossingDuration(boolean mode) { // fonction bidon
+    		return 0;
+    	}
 	}
 }

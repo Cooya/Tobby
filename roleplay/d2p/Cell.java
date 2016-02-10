@@ -1,6 +1,6 @@
-package roleplay.movement;
+package roleplay.d2p;
 
-import roleplay.movement.ankama.Map;
+import roleplay.d2p.ankama.Map;
 import utilities.ByteArray;
 
 public class Cell {

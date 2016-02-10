@@ -1,21 +1,18 @@
 package main;
 
-import java.util.Vector;
-
 import messages.EmptyMessage;
 import messages.context.ChangeMapMessage;
 import messages.context.GameMapMovementRequestMessage;
 import messages.context.GameRolePlayAttackMonsterRequestMessage;
-import roleplay.movement.MapsAnalyser;
-import roleplay.movement.MapsCache;
-import roleplay.movement.ankama.Map;
-import roleplay.movement.ankama.MapPoint;
-import roleplay.movement.ankama.MovementPath;
-import roleplay.movement.pathfinding.CellsPathfinder;
-import roleplay.movement.pathfinding.Pathfinder;
-import roleplay.movement.pathfinding.Pathfinder.PathNode;
-import roleplay.movement.paths.Path;
-import roleplay.movement.paths.PathsManager;
+import roleplay.d2p.MapsCache;
+import roleplay.d2p.ankama.Map;
+import roleplay.d2p.ankama.MapPoint;
+import roleplay.d2p.ankama.MovementPath;
+import roleplay.pathfinding.CellsPathfinder;
+import roleplay.pathfinding.MapsPathfinder;
+import roleplay.pathfinding.Path;
+import roleplay.pathfinding.Pathfinder;
+import roleplay.pathfinding.PathsManager;
 import utilities.Log;
 
 public class CharacterController extends Thread {
@@ -135,18 +132,17 @@ public class CharacterController extends Thread {
 			throw new Error("Target cell does not allow changement of map.");
 		
 		pathfinder = new CellsPathfinder(this.currentMap);
-		Vector<PathNode> nodesVector = pathfinder.compute(this.currentCellId, cellId);
-		MovementPath path = CellsPathfinder.movementPathFromArray(nodesVector);
-		path.setStart(MapPoint.fromCellId(this.currentCellId));
-		path.setEnd(MapPoint.fromCellId(cellId));
+		Path path = pathfinder.compute(this.currentCellId, cellId);
+		MovementPath mvPath = CellsPathfinder.movementPathFromArray(path.toVector());
+		mvPath.setStart(MapPoint.fromCellId(this.currentCellId));
+		mvPath.setEnd(MapPoint.fromCellId(cellId));
 		
-		Vector<Integer> vector = path.getServerMovement();
 		GameMapMovementRequestMessage GMMRM = new GameMapMovementRequestMessage();
-		GMMRM.serialize(vector, this.currentMap.id);
+		GMMRM.serialize(mvPath.getServerMovement(), this.currentMap.id);
 		instance.outPush(GMMRM);
 		
 		try {
-			Thread.sleep(pathfinder.getPathTime());
+			Thread.sleep(path.getCrossingDuration());
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
@@ -179,8 +175,7 @@ public class CharacterController extends Thread {
 	
 	public void run() {
 		waitCharacterAccessibility();
-		MapsAnalyser.getZones(this.currentMap);
-		Path path = PathsManager.getPathByName("test2");
-		path.run(this);
+		//Path path = PathsManager.getPathByName("test2");
+		//path.run(this);
 	}
 }

@@ -1,9 +1,9 @@
-package roleplay.movement;
+package roleplay.pathfinding;
 
 import java.util.Vector;
 
-import roleplay.movement.ankama.Map;
-import roleplay.movement.pathfinding.CellsPathfinder;
+import roleplay.d2p.Cell;
+import roleplay.d2p.ankama.Map;
 
 public class MapsAnalyser {
 	public static Vector<Vector<Cell>> getZones(Map map) {

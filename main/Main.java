@@ -1,5 +1,7 @@
 package main;
 
+import roleplay.d2o.GameDataFileAccessor;
+
 public class Main {
 	private static final boolean MODE = true; // sniffer = false
 	public static final String DLL_LOCATION = "Ressources/DLLInjector/No.Ankama.dll";
@@ -7,6 +9,7 @@ public class Main {
 	public static final String AUTH_SERVER_IP = "213.248.126.39";
 	public static final int SERVER_PORT = 5555;
 	
+	/*
 	public static void main(String[] args) {
 		if(MODE) {
 			Emulation.runASLauncher();
@@ -14,5 +17,9 @@ public class Main {
 		}
 		else
 			new Sniffer();
+	}*/
+	
+	public static void main(String[] args) {
+		GameDataFileAccessor.init("MapCoordinates");
 	}
 }

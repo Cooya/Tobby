@@ -1,10 +1,9 @@
-package roleplay.movement.paths;
+package roleplay.pathfinding;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.Hashtable;
 
-import roleplay.movement.pathfinding.Pathfinder;
 import utilities.Log;
 
 @SuppressWarnings("resource")

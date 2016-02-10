@@ -1,12 +1,12 @@
-package roleplay.movement.pathfinding;
+package roleplay.pathfinding;
 
 import java.util.Vector;
 
-import roleplay.movement.Cell;
-import roleplay.movement.ankama.Map;
-import roleplay.movement.ankama.MapPoint;
-import roleplay.movement.ankama.MovementPath;
-import roleplay.movement.ankama.PathElement;
+import roleplay.d2p.Cell;
+import roleplay.d2p.ankama.Map;
+import roleplay.d2p.ankama.MapPoint;
+import roleplay.d2p.ankama.MovementPath;
+import roleplay.d2p.ankama.PathElement;
 
 public class CellsPathfinder extends Pathfinder {
 	
@@ -24,7 +24,7 @@ public class CellsPathfinder extends Pathfinder {
 		Vector<PathNode> neighbours = new Vector<PathNode>();
 		Cell cell;
 		for(int i = 0; i < 8; ++i) {
-			cell = getNeighbourCellFromDirection(node.getId(), i);
+			cell = getNeighbourCellFromDirection(node.id, i);
 			if(cell != null)
 				neighbours.add(new CellNode(cell, i, currentNode));
 		}
@@ -117,18 +117,7 @@ public class CellsPathfinder extends Pathfinder {
 			throw new Error("Invalid cell id");
 		return cells[cellId];
 	}
-	
-	public int getPathTime() {
-		int pathLen = path.size();
-		int time = 0;
-		for(int i = 1; i < pathLen; ++i) // on saute la première cellule
-			if(pathLen > 3)
-				time += ((CellNode) path.get(i)).getCrossingDuration(true); // run
-			else
-				time += ((CellNode) path.get(i)).getCrossingDuration(false); // walk
-		return time;
-	}
-	
+
 	public Vector<Cell> getNeighboursCell(int cellId) {
 		Vector<Cell> neighbours = new Vector<Cell>();
 		Cell cell;
@@ -151,11 +140,11 @@ public class CellsPathfinder extends Pathfinder {
 	}
 	
 	// fonction traduite mais légèrement modifiée
-    public static MovementPath movementPathFromArray(Vector<PathNode> nPath) {
+    public static MovementPath movementPathFromArray(Vector<Integer> iPath) {
     	MovementPath mp = new MovementPath();
     	Vector<MapPoint> mpPath = new Vector<MapPoint>();
-    	for(PathNode node : nPath)
-    		mpPath.add(MapPoint.fromCellId(((CellNode) node).cell.id));
+    	for(Integer cellId : iPath)
+    		mpPath.add(MapPoint.fromCellId(cellId));
     	int vectorSize = mpPath.size();
     	PathElement pe;
     	for(int i = 0; i < vectorSize - 1; ++i) {
@@ -178,7 +167,7 @@ public class CellsPathfinder extends Pathfinder {
 		private Vector<Cell> checkedCells;
 		
 		private CellNode(Cell cell, int direction, PathNode parent) {
-			super(direction, parent);
+			super(cell.id, direction, parent);
 			this.cell = cell;
 			this.checkedCells = new Vector<Cell>();
     		if(destNode == null) // si on est en train de définir destNode lui-même
@@ -209,19 +198,6 @@ public class CellsPathfinder extends Pathfinder {
     		this.checkedCells.add(cell);
     		return cell.isAccessibleDuringRP();
     	}
-		
-    	private int getCrossingDuration(boolean mode) {
-    		if(!mode) // marche
-    			return WALK_DURATION;
-    		if(this.direction % 2 == 0)
-    			return STRAIGHT_RUN_DURATION;
-    		else
-    			return DIAGONAL_RUN_DURATION;
-    	}
-    	
-    	protected int getId() {
-    		return this.cell.id;
-    	}
     	
     	protected boolean equals(PathNode node) {
     		if(!(node instanceof CellNode))
@@ -239,6 +215,15 @@ public class CellsPathfinder extends Pathfinder {
     	
     	protected boolean isAccessible() {
     		return this.cell.isAccessibleDuringRP();
+    	}
+    	
+    	protected int getCrossingDuration(boolean mode) {
+    		if(!mode) // marche
+    			return WALK_DURATION;
+    		if(this.direction % 2 == 0)
+    			return STRAIGHT_RUN_DURATION;
+    		else
+    			return DIAGONAL_RUN_DURATION;
     	}
 	}
 }

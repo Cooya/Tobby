@@ -1,9 +1,8 @@
-package roleplay.movement.pathfinding;
+package roleplay.pathfinding;
 
-import java.util.Collections;
 import java.util.Vector;
 
-import roleplay.movement.Cell;
+import roleplay.d2p.Cell;
 
 public abstract class Pathfinder {
 	public static final int RIGHT = 0;
@@ -17,7 +16,7 @@ public abstract class Pathfinder {
 	protected Cell[] cells;
 	protected PathNode currentNode;
 	protected PathNode destNode;
-	protected Vector<PathNode> path;
+	protected Path path;
 	protected Vector<PathNode> openedList;
 	protected Vector<PathNode> closedList;
 	
@@ -25,7 +24,7 @@ public abstract class Pathfinder {
 	protected abstract PathNode nodeIsInList(PathNode node, Vector<PathNode> list);
 	protected abstract Vector<PathNode> getNeighbourNodes(PathNode node);
 	
-	public Vector<PathNode> compute(int srcId, int destId) {
+	public Path compute(int srcId, int destId) {
     	currentNode = getNodeFromId(srcId);
     	destNode = getNodeFromId(destId);
     	openedList = new Vector<PathNode>();
@@ -54,20 +53,31 @@ public abstract class Pathfinder {
 				throw new Error("None possible path found.");
 			openedList.remove(currentNode);
 			closedList.add(currentNode);
+			setCoordsFromId(currentNode.id);
 		}
 		
 		//for(PathNode node : closedList)
-			//System.out.println(node.cell.id);
+			//System.out.println(node.id);
 		
-		path = new Vector<Pathfinder.PathNode>();
+		path = new Path();
 		while(currentNode != null) {
-			path.add(currentNode);
+			path.addNode(currentNode);
 			currentNode = currentNode.parent;
 		}
-		
-		Collections.reverse(path);
-		
 		return path;
+	}
+	
+	private static void setCoordsFromId(int mapId) {
+		int worldId = (mapId & 0x3FFC0000) >> 18;
+		int x = (mapId >> 9) & 511;
+		int y = mapId & 511;
+		if((x & 0x0100) == 0x0100)
+			x = -(x & 0xFF);
+		if((y & 0x0100) == 0x0100)
+			y = -(x & 0xFF);
+		
+		y -= 22;
+		System.out.println(mapId + "[" + x + ", " + y + "]");
 	}
 	
 	protected static PathNode getBestNodeOfList(Vector<PathNode> list) {
@@ -93,20 +103,4 @@ public abstract class Pathfinder {
 			default : throw new Error("Invalid direction integer.");
 		}
 	}
-	
-    public abstract class PathNode {
-    	protected PathNode parent;
-    	protected double cost;
-    	protected int direction;
-    	
-    	protected PathNode(int direction, PathNode parent) {
-    		this.parent = parent;
-    		this.direction = direction;
-    	}
-    	
-    	protected abstract int getId();
-    	protected abstract boolean equals(PathNode node);
-    	protected abstract double distanceTo(PathNode node);
-    	protected abstract boolean isAccessible();
-    }
 }
