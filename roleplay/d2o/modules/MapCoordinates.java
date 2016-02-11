@@ -15,7 +15,7 @@ public class MapCoordinates {
     private Vector<MapPosition> _maps;
     
     public static MapCoordinates getMapCoordinatesByCompressedCoords(int i) {
-    	return GameData.getObject(MODULE, i);
+    	return (MapCoordinates) GameData.getObject(MODULE, i);
     }
     
     public static MapCoordinates getMapCoordinatesByCoords(int i1, int i2) {
