@@ -10,7 +10,7 @@ public class GameData {
     private static Hashtable<String, Hashtable<Integer, Integer>> _overrides = new Hashtable<String, Hashtable<Integer, Integer>>();
     
     public static void addOverride(String str, int i1, int i2) {
-    	if(!_overrides.contains(str))
+    	if(!_overrides.containsKey(str))
     		_overrides.put(str, new Hashtable<Integer, Integer>());
     	_overrides.get(str).put(i1, i2);
     }
@@ -18,10 +18,10 @@ public class GameData {
     public static Object getObject(String str, int i) {
     	//WeakReference wr;
     	Object o = null;
-    	if(_overrides.contains(str) && _overrides.get(str).contains(i))
+    	if(_overrides.containsKey(str) && _overrides.get(str).containsKey(i))
     		i = _overrides.get(str).get(i);
     	/*
-    	if(!_directObjectCaches.contains(str))
+    	if(!_directObjectCaches.containsKey(str))
     		_directObjectCaches.put(str, new Hashtable<Integer, WeakReference>());
     	else {
     		wr = _directObjectCaches.get(str).get(i);
@@ -31,15 +31,15 @@ public class GameData {
     				return o;
     		}
     	}
-    	if(!_objectCaches.contains(str))
-    		_objectCaches.put(str, new Cache(GameDataFileAccessor.getCount(str) * CACHE_SIZE_RATIO), new LruGarbageCollector());
+    	if(!_objectCaches.containsKey(str))
+    		_objectCaches.put(str, new Cache(GameDataFileAccessor.getInstance().getCount(str) * CACHE_SIZE_RATIO), new LruGarbageCollector());
     	else {
     		o = _objectCaches.get(str).peek(i);
     		if(o != null)
     			return o;
     	}
     	*/
-    	o = GameDataFileAccessor.getObject(str, i);
+    	o = GameDataFileAccessor.getInstance().getObject(str, i);
     	//_directObjectCaches.get(str).put(i, new WeakReference(o));
     	//_objectCaches.get(str).store(i, o);
     	return o;
@@ -48,13 +48,13 @@ public class GameData {
     public static Object[] getObjects(String str) {
     	Object[] array;
     	/*
-    	if(_objectsCaches.contains(str)) {
+    	if(_objectsCaches.containsKey(str)) {
     		array = _objectsCaches.get(str).getObject();
     		if(array != null)
     			return array;
     	}
     	*/
-    	array = GameDataFileAccessor.getObjects(str);
+    	array = GameDataFileAccessor.getInstance().getObjects(str);
     	//_objectsCaches.put(str, new SoftReference(array));
     	return array;
     }

@@ -3,10 +3,15 @@ package roleplay.d2o.modules;
 import java.util.Vector;
 
 import roleplay.d2o.GameData;
+import roleplay.d2o.GameDataFileAccessor;
 
 public class MapCoordinates {
 	public static final String MODULE = "MapCoordinates";
     private static final int UNDEFINED_COORD = Integer.MIN_VALUE; //-2147483648
+    
+    static {
+    	GameDataFileAccessor.getInstance().init(MODULE);
+    }
     
     public int compressedCoords;
     public Vector<Integer> mapIds;

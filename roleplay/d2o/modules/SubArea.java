@@ -2,6 +2,7 @@ package roleplay.d2o.modules;
 
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.util.Arrays;
 import java.util.Vector;
 
 import roleplay.d2o.GameData;
@@ -51,7 +52,8 @@ public class SubArea {
     public static SubArea[] getAllSubArea() {
     	if(_allSubAreas != null)
     		return _allSubAreas;
-    	_allSubAreas = (SubArea[]) GameData.getObjects(MODULE);
+    	Object[] objArray = GameData.getObjects(MODULE);
+    	_allSubAreas = Arrays.copyOf(objArray, objArray.length, SubArea[].class);
     	return _allSubAreas;
     }
     

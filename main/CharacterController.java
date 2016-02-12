@@ -128,9 +128,6 @@ public class CharacterController extends Thread {
 		if(this.currentCellId == cellId) // déjà sur la cellule cible
 			return;
 		
-		if(changeMap && !pathfinder.getCellFromId(cellId).allowsChangementMap())
-			throw new Error("Target cell does not allow changement of map.");
-		
 		pathfinder = new CellsPathfinder(this.currentMap);
 		Path path = pathfinder.compute(this.currentCellId, cellId);
 		MovementPath mvPath = CellsPathfinder.movementPathFromArray(path.toVector());

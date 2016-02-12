@@ -1,9 +1,11 @@
 package roleplay.d2o.modules;
 
+import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.Vector;
 
 import roleplay.d2o.GameData;
+import roleplay.d2o.GameDataFileAccessor;
 
 public class MapPosition {
 	public static final String MODULE = "MapPositions";
@@ -21,6 +23,10 @@ public class MapPosition {
     private static final int CAPABILITY_ALLOW_TELEPORT_EVERYWHERE = 0x0800;
     private static final int CAPABILITY_ALLOW_FIGHT_CHALLENGES = 0x1000;
     private static Hashtable<Integer, MapPosition> _mapPositions;
+    
+    static {
+    	GameDataFileAccessor.getInstance().init(MODULE);
+    }
     
     public int id;
     public int posX;
@@ -49,7 +55,8 @@ public class MapPosition {
     }
     
     public static MapPosition[] getMapPositions() {
-        return (MapPosition[]) GameData.getObjects(MODULE);
+    	Object[] objArray = GameData.getObjects(MODULE);
+        return Arrays.copyOf(objArray, objArray.length, MapPosition[].class);
     }
     
     public static Vector<Integer> getMapIdByCoord(int x, int y) {

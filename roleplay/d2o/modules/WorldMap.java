@@ -1,5 +1,6 @@
 package roleplay.d2o.modules;
 
+import java.util.Arrays;
 import java.util.Vector;
 
 import roleplay.d2o.GameData;
@@ -31,7 +32,8 @@ public class WorldMap {
     }
     
     public WorldMap[] getAllWorldMaps() {
-    	return (WorldMap[]) GameData.getObjects(MODULE);
+    	Object[] objArray = GameData.getObjects(MODULE);
+        return Arrays.copyOf(objArray, objArray.length, WorldMap[].class);
     }
     
     /*

@@ -50,10 +50,11 @@ public class GameDataField {
     @SuppressWarnings("unused")
 	private Object readVector(String str, ByteArray array, Integer index) throws Exception {
     	int nb = array.readInt();
-    	String str2 = this._innerTypeNames.get(index);
-    	Object o = Class.forName(str2).getConstructor(Integer.class, Boolean.class).newInstance(nb, true);
+    	String str2 = this._innerTypeNames.get(index); // debug utile
+    	Vector<Object> o = new Vector<Object>();
+    	this._innerReadMethods.get(index).setAccessible(true);
     	for(int j = 0; j < nb; ++j)
-    		o.getClass().getFields()[j].set(o, this._innerReadMethods.get(index).invoke(str2,  array, index + 1));
+    		o.add(this._innerReadMethods.get(index).invoke(this, str,  array, index + 1));
     	return o;
     }
     
@@ -62,7 +63,7 @@ public class GameDataField {
     	int nb = array.readInt();
     	if(nb == NULL_IDENTIFIER)
     		return null;
-    	GameDataClassDefinition classDef = GameDataFileAccessor.getClassDefinition(str, nb);
+    	GameDataClassDefinition classDef = GameDataFileAccessor.getInstance().getClassDefinition(str, nb);
     	return classDef.read(str, array);
     }
     

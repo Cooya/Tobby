@@ -9,6 +9,7 @@ import roleplay.d2p.ankama.MovementPath;
 import roleplay.d2p.ankama.PathElement;
 
 public class CellsPathfinder extends Pathfinder {
+	protected Cell[] cells;
 	
 	public CellsPathfinder(Map map) {
 		cells = new Cell[Map.CELLS_COUNT];
@@ -111,12 +112,6 @@ public class CellsPathfinder extends Pathfinder {
 		}
 		return -1;
 	}
-	
-	public Cell getCellFromId(int cellId) {
-		if(cellId < 0 || cellId > 559)
-			throw new Error("Invalid cell id");
-		return cells[cellId];
-	}
 
 	public Vector<Cell> getNeighboursCell(int cellId) {
 		Vector<Cell> neighbours = new Vector<Cell>();
@@ -158,12 +153,18 @@ public class CellsPathfinder extends Pathfinder {
     	mp.fill();
     	return mp;
     }
+    
+	private Cell getCellFromId(int cellId) {
+		if(cellId < 0 || cellId > 559)
+			throw new Error("Invalid cell id");
+		return cells[cellId];
+	}
 	
 	private class CellNode extends PathNode {
     	private static final int WALK_DURATION = 500;
     	private static final int DIAGONAL_RUN_DURATION = 200;
     	private static final int STRAIGHT_RUN_DURATION = 333;
-		public Cell cell;
+    	protected Cell cell;
 		private Vector<Cell> checkedCells;
 		
 		private CellNode(Cell cell, int direction, PathNode parent) {
@@ -224,6 +225,10 @@ public class CellsPathfinder extends Pathfinder {
     			return STRAIGHT_RUN_DURATION;
     		else
     			return DIAGONAL_RUN_DURATION;
+    	}
+    	
+    	public String toString() {
+    		return String.valueOf(this.id);
     	}
 	}
 }

@@ -8,7 +8,11 @@ import main.Main;
 public class Reflection {
 	private static final ProtectionDomain currentDomain = Main.class.getProtectionDomain();
 	
-	public static void displayAllFields(Object o, String gap) {
+	public static void explore(Object o) {
+		displayAllFields(o, "");
+	}
+	
+	private static void displayAllFields(Object o, String gap) {
 		Class<?> current = o.getClass();
 		while(current.getSuperclass() != null) {
 			Field[] fields = current.getDeclaredFields();
@@ -24,9 +28,5 @@ public class Reflection {
 			}
 		    current = current.getSuperclass();
 		}
-	}
-	
-	public static void displayAllFields(Object o) {
-		displayAllFields(o, "");
 	}
 }

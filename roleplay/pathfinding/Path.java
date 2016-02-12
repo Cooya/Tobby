@@ -122,5 +122,9 @@ public class Path {
 		protected int getCrossingDuration(boolean mode) {
 			throw new Error("Phony method !");
 		}
+		
+		public String toString() {
+			return String.valueOf(this.id);
+		}
 	}
 }

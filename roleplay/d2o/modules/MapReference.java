@@ -1,9 +1,16 @@
 package roleplay.d2o.modules;
 
+import java.util.Arrays;
+
 import roleplay.d2o.GameData;
+import roleplay.d2o.GameDataFileAccessor;
 
 public class MapReference {
     public static final String MODULE = "MapReferences";
+    
+    static {
+    	GameDataFileAccessor.getInstance().init(MODULE);
+    }
 
     public int id;
     public int mapId;
@@ -14,6 +21,7 @@ public class MapReference {
     }
     
     public static MapReference[] getAllMapReference() {
-    	return (MapReference[]) GameData.getObjects(MODULE);
+    	Object[] objArray = GameData.getObjects(MODULE);
+        return Arrays.copyOf(objArray, objArray.length, MapReference[].class);
     }
 }

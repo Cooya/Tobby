@@ -1,5 +1,6 @@
 package roleplay.d2o;
 
+import java.lang.reflect.Field;
 import java.util.Vector;
 
 import utilities.ByteArray;
@@ -10,7 +11,7 @@ public class GameDataClassDefinition {
 	
 	public GameDataClassDefinition(String str1, String str2) {
 		try {
-			this._class = Class.forName(getClass().getPackage().getName() + "." + str2);
+			this._class = Class.forName(getClass().getPackage().getName() + ".modules." + str2);
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
@@ -25,12 +26,16 @@ public class GameDataClassDefinition {
 		Object o = null;
 		try {
 			o = this._class.newInstance();
-			for(GameDataField field : this._fields)
-				o.getClass().getField(field.name).set(o, field.readData.invoke(str, array));
+			for(GameDataField field : this._fields) {
+				Field f = getField(o.getClass(), field.name);
+				field.readData.setAccessible(true);
+				f.set(o, field.readData.invoke(field, str, array, 0));
+			}
 			if(o instanceof IPostInit)
 				((IPostInit) o).postInit();
 		} catch(Exception e) {
 			e.printStackTrace();
+			System.exit(1);
 		}
 		return o;
 	}
@@ -39,5 +44,19 @@ public class GameDataClassDefinition {
 		GameDataField field = new GameDataField(str);
 		field.readType(array);
 		this._fields.add(field);
+	}
+	
+	// fonction perso
+	public Field getField(Class<?> c, String fieldName) {
+		try {
+			return c.getDeclaredField(fieldName);
+		} catch (Exception e) {
+			Class<?> superClass = c.getSuperclass();
+			if(superClass != null)
+				return getField(superClass, fieldName);
+			e.printStackTrace();
+			System.exit(1);
+		}
+		return null; // dead code
 	}
 }

@@ -2,8 +2,6 @@ package roleplay.pathfinding;
 
 import java.util.Vector;
 
-import roleplay.d2p.Cell;
-
 public abstract class Pathfinder {
 	public static final int RIGHT = 0;
 	public static final int DOWN_RIGHT = 1;
@@ -13,7 +11,6 @@ public abstract class Pathfinder {
 	public static final int UP_LEFT = 5;
 	public static final int UP = 6;
 	public static final int UP_RIGHT = 7;
-	protected Cell[] cells;
 	protected PathNode currentNode;
 	protected PathNode destNode;
 	protected Path path;
@@ -36,6 +33,7 @@ public abstract class Pathfinder {
 		while(!currentNode.equals(destNode)) {
 			neighbours = getNeighbourNodes(currentNode);
 			for(PathNode neighbourNode : neighbours) {
+				System.out.println(neighbourNode + " " + neighbourNode.isAccessible());
 				if(!neighbourNode.isAccessible()) // obstacle
 					continue;
 				if(nodeIsInList(neighbourNode, closedList) != null) // déjà traitée
@@ -47,13 +45,13 @@ public abstract class Pathfinder {
 				else
 					openedList.add(neighbourNode);	
 			}
-			
+			System.out.println(currentNode);
 			currentNode = getBestNodeOfList(openedList);
+			System.out.println(currentNode);
 			if(currentNode == null)
 				throw new Error("None possible path found.");
 			openedList.remove(currentNode);
 			closedList.add(currentNode);
-			setCoordsFromId(currentNode.id);
 		}
 		
 		//for(PathNode node : closedList)
@@ -64,29 +62,19 @@ public abstract class Pathfinder {
 			path.addNode(currentNode);
 			currentNode = currentNode.parent;
 		}
+		path.reverse();
 		return path;
-	}
-	
-	private static void setCoordsFromId(int mapId) {
-		int worldId = (mapId & 0x3FFC0000) >> 18;
-		int x = (mapId >> 9) & 511;
-		int y = mapId & 511;
-		if((x & 0x0100) == 0x0100)
-			x = -(x & 0xFF);
-		if((y & 0x0100) == 0x0100)
-			y = -(x & 0xFF);
-		
-		y -= 22;
-		System.out.println(mapId + "[" + x + ", " + y + "]");
 	}
 	
 	protected static PathNode getBestNodeOfList(Vector<PathNode> list) {
 		if(list.size() == 0)
 			return null;
 		PathNode currentNode = list.firstElement();
-		for(PathNode listNode : list)
+		for(PathNode listNode : list) {
+			System.out.println(listNode + " " + listNode.cost);
 			if(listNode.cost < currentNode.cost)
 				currentNode = listNode;
+		}
 		return currentNode;
 	}
 	

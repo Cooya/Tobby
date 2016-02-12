@@ -1,5 +1,7 @@
 package roleplay.d2o.modules;
 
+import java.util.Arrays;
+
 import roleplay.d2o.GameData;
 
 public class SuperArea {
@@ -20,7 +22,8 @@ public class SuperArea {
     public static SuperArea[] getAllSuperArea() {
     	if(_allSuperAreas != null)
     		return _allSuperAreas;
-    	_allSuperAreas = (SuperArea[]) GameData.getObjects(MODULE);
+    	Object[] objArray = GameData.getObjects(MODULE);
+    	_allSuperAreas = Arrays.copyOf(objArray, objArray.length, SuperArea[].class);
     	return _allSuperAreas;
     }
     

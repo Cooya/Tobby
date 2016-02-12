@@ -1,6 +1,7 @@
 package roleplay.d2o.modules;
 
 import java.awt.Rectangle;
+import java.util.Arrays;
 
 import roleplay.d2o.GameData;
 
@@ -32,7 +33,8 @@ public class Area {
     public static Area[] getAllArea() {
     	if(_allAreas != null)
     		return _allAreas;
-    	_allAreas = (Area[]) GameData.getObjects(MODULE);
+    	Object[] objArray = GameData.getObjects(MODULE);
+    	_allAreas = Arrays.copyOf(objArray, objArray.length, Area[].class);
     	return _allAreas;
     }
     
