@@ -24,10 +24,10 @@ public class CellsPathfinder extends Pathfinder {
 	protected Vector<PathNode> getNeighbourNodes(PathNode node) {
 		Vector<PathNode> neighbours = new Vector<PathNode>();
 		Cell cell;
-		for(int i = 0; i < 8; ++i) {
-			cell = getNeighbourCellFromDirection(node.id, i);
+		for(int direction = 0; direction < 8; ++direction) {
+			cell = getNeighbourCellFromDirection(node.id, direction);
 			if(cell != null)
-				neighbours.add(new CellNode(cell, i, currentNode));
+				neighbours.add(new CellNode(cell, direction, currentNode));
 		}
 		return neighbours;		
 	}
@@ -167,8 +167,8 @@ public class CellsPathfinder extends Pathfinder {
     	protected Cell cell;
 		private Vector<Cell> checkedCells;
 		
-		private CellNode(Cell cell, int direction, PathNode parent) {
-			super(cell.id, direction, parent);
+		private CellNode(Cell cell, int lastDirection, PathNode parent) {
+			super(cell.id, lastDirection, parent);
 			this.cell = cell;
 			this.checkedCells = new Vector<Cell>();
     		if(destNode == null) // si on est en train de définir destNode lui-même
@@ -187,8 +187,8 @@ public class CellsPathfinder extends Pathfinder {
     		this(getCellFromId(cellId));
     	}
     	
-		private CellNode(int cellId, int direction, PathNode parent) {
-    		this(getCellFromId(cellId), direction, parent);
+		private CellNode(int cellId, int lastDirection, PathNode parent) {
+    		this(getCellFromId(cellId), lastDirection, parent);
     	}
     	
 		@SuppressWarnings("unused")
@@ -221,13 +221,15 @@ public class CellsPathfinder extends Pathfinder {
     	protected int getCrossingDuration(boolean mode) {
     		if(!mode) // marche
     			return WALK_DURATION;
-    		if(this.direction % 2 == 0)
+    		if(this.lastDirection % 2 == 0)
     			return STRAIGHT_RUN_DURATION;
     		else
     			return DIAGONAL_RUN_DURATION;
     	}
     	
     	public String toString() {
+    		if(this.direction != -1)
+    			return String.valueOf(this.id) + " " + Pathfinder.directionToString(this.direction);
     		return String.valueOf(this.id);
     	}
 	}

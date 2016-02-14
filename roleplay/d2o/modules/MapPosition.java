@@ -66,6 +66,13 @@ public class MapPosition {
     	return null;
     }
     
+    public static Vector<MapPosition> getMapPositionByCoord(int x, int y) {
+    	MapCoordinates mc = MapCoordinates.getMapCoordinatesByCoords(x, y);
+    	if(mc != null)
+    		return mc.getMaps();
+    	return null;
+    }
+    
     /*
     public String getName() {
     	if(this._name == null)
@@ -130,5 +137,9 @@ public class MapPosition {
     
     public boolean allowFightChallenges() {
         return !((this.capabilities & CAPABILITY_ALLOW_FIGHT_CHALLENGES) == 0);
+    }
+    
+    public String toString() {
+    	return "MapPosition : " + this.id + " [" + this.posX + ", " + this.posY + "]";
     }
 }

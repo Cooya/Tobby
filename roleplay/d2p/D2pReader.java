@@ -8,7 +8,7 @@ import utilities.ByteArray;
 import utilities.Log;
 
 public class D2pReader {
-	private static final boolean DEBUG = true;
+	private static final boolean DEBUG = false;
 	private static final String d2pPath = "Ressources/Antibot/content/maps/maps0.d2p";
     private static Hashtable<String, Hashtable<String, Object[]>> indexes = new Hashtable<String, Hashtable<String, Object[]>>();
     private static Hashtable<String, Hashtable<String, String>> properties = new Hashtable<String, Hashtable<String, String>>();
@@ -18,10 +18,11 @@ public class D2pReader {
     }
     
 	public static ByteArray getBinaryMap(int mapId) {
-		Log.p("Retrieving binary data of map id " + mapId + "...");
+		if(DEBUG)
+			Log.p("Retrieving binary data of map id " + mapId + "...");
 		Object[] index = indexes.get(d2pPath).get(getMapUriFromId(mapId));
 		if(index == null)
-			throw new Error("Unknown map id.");
+			throw new Error("Unknown map id : " + mapId + ".");
 		ByteArray binaryMap = ((ByteArray) index[2]).clonePart((int) index[0], (int) index[1]);
 		decompressBinaryMap(binaryMap);
 		return binaryMap;
@@ -107,6 +108,7 @@ public class D2pReader {
 		inflater.setInput(binaryMap.bytes());
 		byte[] buffer = new byte[Main.BUFFER_DEFAULT_SIZE];
 		binaryMap.flushArray();
+		@SuppressWarnings("unused")
 		int bytesCounter = 0;
 		int bufferSize = 0;
 		while (!inflater.finished()) {

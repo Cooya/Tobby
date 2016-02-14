@@ -33,7 +33,7 @@ public abstract class Pathfinder {
 		while(!currentNode.equals(destNode)) {
 			neighbours = getNeighbourNodes(currentNode);
 			for(PathNode neighbourNode : neighbours) {
-				System.out.println(neighbourNode + " " + neighbourNode.isAccessible());
+				//System.out.println(neighbourNode + " " + neighbourNode.isAccessible());
 				if(!neighbourNode.isAccessible()) // obstacle
 					continue;
 				if(nodeIsInList(neighbourNode, closedList) != null) // déjà traitée
@@ -45,9 +45,9 @@ public abstract class Pathfinder {
 				else
 					openedList.add(neighbourNode);	
 			}
-			System.out.println(currentNode);
+			//System.out.println(currentNode);
 			currentNode = getBestNodeOfList(openedList);
-			System.out.println(currentNode);
+			//System.out.println(currentNode);
 			if(currentNode == null)
 				throw new Error("None possible path found.");
 			openedList.remove(currentNode);
@@ -56,9 +56,14 @@ public abstract class Pathfinder {
 		
 		//for(PathNode node : closedList)
 			//System.out.println(node.id);
+		//System.out.println();
 		
 		path = new Path();
+		int direction = -2;
 		while(currentNode != null) {
+			if(direction != -2) // le noeud d'arrivée n'a pas de direction
+				currentNode.direction = direction;
+			direction = currentNode.lastDirection;
 			path.addNode(currentNode);
 			currentNode = currentNode.parent;
 		}
@@ -66,12 +71,12 @@ public abstract class Pathfinder {
 		return path;
 	}
 	
-	protected static PathNode getBestNodeOfList(Vector<PathNode> list) {
+	private static PathNode getBestNodeOfList(Vector<PathNode> list) {
 		if(list.size() == 0)
 			return null;
 		PathNode currentNode = list.firstElement();
 		for(PathNode listNode : list) {
-			System.out.println(listNode + " " + listNode.cost);
+			//System.out.println(listNode + " " + listNode.cost);
 			if(listNode.cost < currentNode.cost)
 				currentNode = listNode;
 		}
@@ -90,5 +95,26 @@ public abstract class Pathfinder {
 			case 7 : return "top and right";
 			default : throw new Error("Invalid direction integer.");
 		}
+	}
+	
+	protected static abstract class PathNode {
+		protected int id;
+		protected PathNode parent;
+		protected double cost;
+		protected int lastDirection;
+		protected int direction;
+		
+		protected PathNode(int id, int lastDirection, PathNode parent) {
+			this.id = id;
+			this.parent = parent;
+			this.lastDirection = lastDirection;
+			this.direction = -1;
+		}
+
+		protected abstract boolean equals(PathNode node);
+		protected abstract double distanceTo(PathNode node);
+		protected abstract boolean isAccessible();
+		protected abstract int getCrossingDuration(boolean mode);
+		public abstract String toString();
 	}
 }

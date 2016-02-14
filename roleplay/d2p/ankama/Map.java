@@ -169,6 +169,7 @@ public class Map {
     	}
     }
     
+    /*
     public static int getMapIdFromCoords(int worldId, int x, int y) {
     	int var1 = 2 << 12;
     	int var2 = 2 << 8;
@@ -183,4 +184,5 @@ public class Map {
     		var5 = var5 | 0x0100;
     	return (var3 << 18) | (var4 << 9) | var5;
     }
+    */
 }

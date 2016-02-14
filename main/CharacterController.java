@@ -1,18 +1,19 @@
 package main;
 
+import java.util.Vector;
+
 import messages.EmptyMessage;
 import messages.context.ChangeMapMessage;
 import messages.context.GameMapMovementRequestMessage;
 import messages.context.GameRolePlayAttackMonsterRequestMessage;
+import roleplay.d2o.modules.MapPosition;
 import roleplay.d2p.MapsCache;
 import roleplay.d2p.ankama.Map;
 import roleplay.d2p.ankama.MapPoint;
 import roleplay.d2p.ankama.MovementPath;
 import roleplay.pathfinding.CellsPathfinder;
-import roleplay.pathfinding.MapsPathfinder;
 import roleplay.pathfinding.Path;
 import roleplay.pathfinding.Pathfinder;
-import roleplay.pathfinding.PathsManager;
 import utilities.Log;
 
 public class CharacterController extends Thread {
@@ -150,6 +151,13 @@ public class CharacterController extends Thread {
 		this.currentCellId = cellId;
 	}
 	
+	public void moveTo(int x, int y, boolean changeMap) {
+		Vector<Integer> mapIds = MapPosition.getMapIdByCoord(x, y);
+		if(mapIds.size() == 0)
+			throw new Error("Invalid map id");
+		moveTo(mapIds.get(0), changeMap);
+	}
+	
 	public void changeMap(int direction) {
 		waitCharacterAccessibility();
 		
@@ -172,7 +180,6 @@ public class CharacterController extends Thread {
 	
 	public void run() {
 		waitCharacterAccessibility();
-		//Path path = PathsManager.getPathByName("test2");
-		//path.run(this);
+		Path.buildPath(7, -18, -2, -26, this.currentCellId).run(this);
 	}
 }
