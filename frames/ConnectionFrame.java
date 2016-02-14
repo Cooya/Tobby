@@ -18,6 +18,7 @@ import messages.connection.IdentificationSuccessMessage;
 import messages.connection.RawDataMessage;
 import messages.connection.SelectedServerDataMessage;
 import messages.connection.ServerSelectionMessage;
+import messages.connection.ServerStatusUpdateMessage;
 import messages.connection.ServersListMessage;
 
 public class ConnectionFrame implements Frame {
@@ -86,6 +87,15 @@ public class ConnectionFrame implements Frame {
 				CharacterSelectionMessage CSM = new CharacterSelectionMessage();
 				CSM.serialize(CLM);
 				instance.outPush(CSM);
+				break;
+			case 50 :
+				ServerStatusUpdateMessage SSUM = new ServerStatusUpdateMessage(msg);
+				serverId = CC.getServerId();
+				if(SSUM.server.id == serverId && SSUM.server.isSelectable) {	
+					ServerSelectionMessage SSM = new ServerSelectionMessage();
+					SSM.serialize(serverId);
+					instance.outPush(SSM);
+				}
 				break;
 		}
 	}

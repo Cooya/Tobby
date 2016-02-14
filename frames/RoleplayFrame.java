@@ -14,6 +14,7 @@ import messages.gamestarting.ChannelEnablingMessage;
 import messages.gamestarting.ClientKeyMessage;
 import messages.gamestarting.PrismsListRegisterMessage;
 import roleplay.InterClientKeyManager;
+import roleplay.d2o.modules.MapPosition;
 import utilities.Log;
 
 public class RoleplayFrame implements Frame {
@@ -63,7 +64,7 @@ public class RoleplayFrame implements Frame {
 				MapComplementaryInformationsDataMessage MCIDM = new MapComplementaryInformationsDataMessage(msg);
 				CC.getContext().newContextActors(MCIDM.actors);
 				
-				Log.p("Current map id : " + CC.getCurrentMapId() + ".\nCurrent cell id : " + CC.getCurrentCellId() + ".");
+				Log.p("Current map : " + MapPosition.getMapPositionById(CC.getCurrentMapId()) + ".\nCurrent cell id : " + CC.getCurrentCellId() + ".");
 				
 				CC.makeCharacterAccessible(); // on peut maintenant bouger
 				break;

@@ -154,7 +154,7 @@ public class CharacterController extends Thread {
 	public void moveTo(int x, int y, boolean changeMap) {
 		Vector<Integer> mapIds = MapPosition.getMapIdByCoord(x, y);
 		if(mapIds.size() == 0)
-			throw new Error("Invalid map id");
+			throw new Error("Invalid map coords.");
 		moveTo(mapIds.get(0), changeMap);
 	}
 	
