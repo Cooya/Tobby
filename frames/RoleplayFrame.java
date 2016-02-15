@@ -26,7 +26,7 @@ public class RoleplayFrame implements Frame {
 		this.CC = CC;
 	}
 	
-	public void processMessage(Message msg) {
+	public boolean processMessage(Message msg) {
 		switch(msg.getId()) {
 			case 6471 :
 				InterClientKeyManager ICKM = InterClientKeyManager.getInstance();
@@ -52,14 +52,14 @@ public class RoleplayFrame implements Frame {
 				instance.outPush(EM6);
 				instance.outPush(PLRM);
 				instance.outPush(CEM);
-				break;
+				return true;
 			case 220 :
 				CurrentMapMessage CMM = new CurrentMapMessage(msg);
 				CC.setCurrentMap(CMM.mapId);
 				MapInformationsRequestMessage MIRM = new MapInformationsRequestMessage();
 				MIRM.serialize(CC.currentMap.id);
 				instance.outPush(MIRM);
-				break;
+				return true;
 			case 226 :
 				MapComplementaryInformationsDataMessage MCIDM = new MapComplementaryInformationsDataMessage(msg);
 				CC.context.newContextActors(MCIDM.actors);
@@ -67,25 +67,26 @@ public class RoleplayFrame implements Frame {
 				Log.p("Current map : " + MapPosition.getMapPositionById(CC.currentMap.id) + ".\nCurrent cell id : " + CC.currentCellId + ".");
 				
 				CC.makeCharacterAccessible(); // on peut maintenant bouger
-				break;
+				return true;
 			case 5632 :
 				GameRolePlayShowActorMessage GRPSAM = new GameRolePlayShowActorMessage(msg);
 				CC.context.addContextActor(GRPSAM.informations);
-				break;
+				return true;
 			case 251 :
 				GameContextRemoveElementMessage GCREM = new GameContextRemoveElementMessage(msg);
 				CC.context.removeContextActor(GCREM.id);
-				break;
+				return true;
 			case 951 :
 				GameMapMovementMessage GMMM = new GameMapMovementMessage(msg);
 				CC.context.updateContextActorPosition(GMMM.actorId, GMMM.keyMovements.lastElement());
-				break;
+				return true;
 			/*
 			case 3016 :
 				InventoryContentMessage ICM = new InventoryContentMessage(msg);
 				CC.kamasNumber = ICM.kamas;
-				break;
+				return true;
 			*/
 		}
+		return false;
 	}
 }

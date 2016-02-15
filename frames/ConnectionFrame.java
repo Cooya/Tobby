@@ -31,7 +31,7 @@ public class ConnectionFrame implements Frame {
 		this.CC = CC;
 	}
 	
-	public void processMessage(Message msg) {
+	public boolean processMessage(Message msg) {
 		switch(msg.getId()) {
 			case 3 :
 				HelloConnectMessage HCM = new HelloConnectMessage(msg);
@@ -39,15 +39,15 @@ public class ConnectionFrame implements Frame {
 				IdentificationMessage IM = new IdentificationMessage();
 				IM.serialize(HCM, CC.login, CC.password);
 				instance.outPush(IM);
-				break;
+				return true;
 			case 22 :
 				IdentificationSuccessMessage ISM = new IdentificationSuccessMessage(msg);
 				this.usefulInfos.put("ISM", ISM);
-				break;
+				return true;
 			case 20 :
 				IdentificationFailedMessage IFM = new IdentificationFailedMessage(msg); 
 				IFM.deserialize();
-				break;
+				return true;
 			case 30 :
 				ServersListMessage SLM = new ServersListMessage(msg);
 				int serverId = CC.serverId;
@@ -58,7 +58,7 @@ public class ConnectionFrame implements Frame {
 				}
 				else
 					Log.p("Backup in progress on the requested server.");
-				break;
+				return true;
 			case 50 :
 				ServerStatusUpdateMessage SSUM = new ServerStatusUpdateMessage(msg);
 				serverId = CC.serverId;
@@ -67,17 +67,17 @@ public class ConnectionFrame implements Frame {
 					SSM.serialize(serverId);
 					instance.outPush(SSM);
 				}
-				break;
+				return true;
 			case 42 : 
 				SelectedServerDataMessage SSDM = new SelectedServerDataMessage(msg);
 				this.usefulInfos.put("ticket", SSDM.ticket);
 				instance.setGameServerIP(SSDM.address);
-				break;
+				return true;
 			case 101 :
 				AuthenticationTicketMessage ATM = new AuthenticationTicketMessage();
 				ATM.serialize((int[]) this.usefulInfos.get("ticket"));
 				instance.outPush(ATM);
-				break;
+				return true;
 			case 6253 :
 				HCM = (HelloConnectMessage) this.usefulInfos.get("HCM");
 				ISM = (IdentificationSuccessMessage) this.usefulInfos.get("ISM");
@@ -85,11 +85,11 @@ public class ConnectionFrame implements Frame {
 				Emulation.sendCredentials();
 				Message CIM = Emulation.createServer(HCM, ISM, RDM);
 				instance.outPush(CIM);
-				break;
+				return true;
 			case 6267 :
 				CharactersListRequestMessage CLRM = new CharactersListRequestMessage();
 				instance.outPush(CLRM);
-				break;
+				return true;
 			case 151 :
 				CharactersListMessage CLM = new CharactersListMessage(msg);
 				CC.characterId = CLM.getCharacterId().toNumber();
@@ -98,7 +98,8 @@ public class ConnectionFrame implements Frame {
 				instance.outPush(CSM);
 				
 				this.instance.endOfConnection();
-				break;
+				return true;
 		}
+		return false;
 	}
 }

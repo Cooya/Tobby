@@ -3,7 +3,7 @@ package utilities;
 import messages.Message;
 
 public class Log {
-	private static final boolean DEBUG = false;
+	private static final boolean DEBUG = true;
 	
 	public synchronized static void p(String msgDirection, Message msg) {
 		int id = msg.getId();

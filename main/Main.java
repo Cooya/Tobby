@@ -11,7 +11,7 @@ public class Main {
 		if(MODE) {
 			Emulation.runASLauncher();
 			new Instance("maxlebgdu93", "represente", 11);
-			new Instance("maxlebgdu94", "represente", 11);
+			//new Instance("maxlebgdu94", "represente", 11);
 		}
 		else
 			new Sniffer();

@@ -25,8 +25,6 @@ public class Instance extends Thread {
 		this.input = new LinkedList<Message>();
 		
 		this.workingFrames.add(new ConnectionFrame(this, CC));
-		this.workingFrames.add(new SynchronisationFrame(this));
-		this.workingFrames.add(new RoleplayFrame(this, CC));
 		
 		waitForConnection(); // file d'attention pour la connexion des persos
 		
@@ -67,9 +65,11 @@ public class Instance extends Thread {
 	public synchronized void run() {
 		Message msg;
 		while(true) {
-			if((msg = inPull()) != null)
+			if((msg = inPull()) != null) {
 				for(Frame frame : workingFrames)
-					frame.processMessage(msg);
+					if(frame.processMessage(msg))
+						break;
+			}
 			else
 				try {
 					wait();
@@ -104,5 +104,8 @@ public class Instance extends Thread {
 			connectionInProcess = false;
 			Main.class.notify();
 		}
+		this.workingFrames.remove(0); // on retire la ConnectionFrame
+		this.workingFrames.add(new SynchronisationFrame(this));
+		this.workingFrames.add(new RoleplayFrame(this, CC));	
 	}
 }

@@ -18,31 +18,32 @@ public class SynchronisationFrame implements Frame {
 		this.basicNoOperationMsgCounter = 0;
 	}
 	
-	public void processMessage(Message msg) {
+	public boolean processMessage(Message msg) {
 		switch(msg.getId()) {
 			case 153 :
 				BasicStatMessage BSM = new BasicStatMessage();
 				BSM.serialize();
 				instance.outPush(BSM);
-				break;
+				return true;
 			case 5816 :
 				BasicLatencyStatsMessage BLSM = new BasicLatencyStatsMessage();
 				Latency latency = instance.getLatency();
 				BLSM.serialize(latency.latencyAvg(), latency.latencySamplesCount(), latency.latencySamplesMax());
 				instance.outPush(BLSM);
-				break;
+				return true;
 			case 6316 :
 				SequenceNumberMessage SNM = new SequenceNumberMessage();
 				SNM.serialize(this.sequenceNumber++);
 				instance.outPush(SNM);
-				break;
+				return true;
 			case 176 :
 				if(this.basicNoOperationMsgCounter++ % 10 == 0) {
 					BSM = new BasicStatMessage();
 					BSM.serialize();
 					instance.outPush(BSM);
 				}
-				break;
+				return true;
 		}
+		return false;
 	}
 }
