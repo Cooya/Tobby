@@ -10,7 +10,9 @@ import frames.RoleplayFrame;
 import frames.SynchronisationFrame;
 
 public class Instance extends Thread {
-	public static boolean connectionInProcess;
+	private static int instancesCounter = 0;
+	private static boolean connectionInProcess;
+	private int instanceId;
 	private NetworkInterface net;
 	private CharacterController CC;
 	private Vector<Frame> workingFrames;
@@ -18,6 +20,7 @@ public class Instance extends Thread {
 	private LinkedList<Message> input;
 	
 	public Instance(String login, String password, int serverId) {
+		this.instanceId = instancesCounter++;
 		this.net = new NetworkInterface(this);
 		this.CC = new CharacterController(this, login, password, serverId);
 		this.workingFrames = new Vector<Frame>();
@@ -32,6 +35,10 @@ public class Instance extends Thread {
 		this.net.start(); // réception
 		this.net.sender.start(); // envoi
 		this.CC.start(); // contrôleur
+	}
+	
+	public int getInstanceId() {
+		return this.instanceId;
 	}
 	
 	public synchronized void inPush(Message msg) {

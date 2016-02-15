@@ -83,7 +83,7 @@ public class ConnectionFrame implements Frame {
 				ISM = (IdentificationSuccessMessage) this.usefulInfos.get("ISM");
 				RawDataMessage RDM = new RawDataMessage(msg);
 				Emulation.sendCredentials();
-				Message CIM = Emulation.createServer(HCM, ISM, RDM);
+				Message CIM = Emulation.createServer(HCM, ISM, RDM, instance.getInstanceId());
 				instance.outPush(CIM);
 				return true;
 			case 6267 :

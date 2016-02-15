@@ -77,7 +77,7 @@ public class CharacterController extends Thread {
 		mvPath.setEnd(MapPoint.fromCellId(cellId));
 		
 		GameMapMovementRequestMessage GMMRM = new GameMapMovementRequestMessage();
-		GMMRM.serialize(mvPath.getServerMovement(), this.currentMap.id);
+		GMMRM.serialize(mvPath.getServerMovement(), this.currentMap.id, instance.getInstanceId());
 		instance.outPush(GMMRM);
 		
 		try {

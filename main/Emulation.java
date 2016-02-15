@@ -49,7 +49,7 @@ public class Emulation {
 		launcherCo.send(array.bytes());
 	}
 	
-	public static Message createServer(HelloConnectMessage HCM, IdentificationSuccessMessage ISM, RawDataMessage RDM) {
+	public static Message createServer(HelloConnectMessage HCM, IdentificationSuccessMessage ISM, RawDataMessage RDM, int instanceId) {
 		try {
 			clientDofusCo = new Connection.Server(serverPort);
 			Log.p("Running emulation server. Waiting Dofus client connection...");
@@ -76,8 +76,9 @@ public class Emulation {
 			Message CIM = processMsgStack(reader.processBuffer(new ByteArray(buffer, bytesReceived)));
 			
 			ByteArray array = new ByteArray();
-			array.writeInt(1);
+			array.writeInt(1 + 1);
 			array.writeByte((byte) 2);
+			array.writeByte((byte) instanceId);
 			Log.p("Asking hash function to AS launcher.");
 			launcherCo.send(array.bytes());
 			
@@ -90,11 +91,11 @@ public class Emulation {
 		return null;
 	}
 	
-	public static ByteArray hashMessage(ByteArray msg) {
-		//Log.p("Hashing message...");
+	public static ByteArray hashMessage(ByteArray msg, int instanceId) {
 		ByteArray bytes = new ByteArray(msg.getSize() + 2);
-		bytes.writeInt(1 + msg.getSize());
+		bytes.writeInt(1 + 1 + msg.getSize());
 		bytes.writeByte((byte) 3); 
+		bytes.writeByte((byte) instanceId);
 		bytes.writeBytes(msg);
 		launcherCo.send(bytes.bytes());
 		byte[] buffer = new byte[Main.BUFFER_DEFAULT_SIZE];

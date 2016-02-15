@@ -14,7 +14,7 @@ public class GameMapMovementRequestMessage extends Message {
 		super();
 	}
 	
-	public void serialize(Vector<Integer> keyMovements, int mapId) {
+	public void serialize(Vector<Integer> keyMovements, int mapId, int instanceId) {
 		this.keyMovements = keyMovements;
 		this.mapId = mapId;
 		
@@ -24,6 +24,6 @@ public class GameMapMovementRequestMessage extends Message {
 			buffer.writeShort((short) i);
 		buffer.writeInt(mapId);
 		
-		completeInfos(Emulation.hashMessage(buffer));
+		completeInfos(Emulation.hashMessage(buffer, instanceId));
 	}
 }

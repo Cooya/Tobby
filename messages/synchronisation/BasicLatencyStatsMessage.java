@@ -13,7 +13,7 @@ public class BasicLatencyStatsMessage extends Message {
     	super();
     }
     
-    public void serialize(int latency, int sampleCount, int max) {
+    public void serialize(int latency, int sampleCount, int max, int instanceId) {
     	this.latency = latency;
     	this.sampleCount = sampleCount;
     	this.max = max;
@@ -23,6 +23,6 @@ public class BasicLatencyStatsMessage extends Message {
     	buffer.writeVarShort(this.sampleCount);
     	buffer.writeVarShort(this.max);
     	
-    	completeInfos(Emulation.hashMessage(buffer));
+    	completeInfos(Emulation.hashMessage(buffer, instanceId));
     }
 }
