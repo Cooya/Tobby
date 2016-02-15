@@ -1,5 +1,6 @@
 package main;
 
+import java.util.Iterator;
 import java.util.Vector;
 
 import roleplay.currentmap.GameRolePlayActorInformations;
@@ -39,9 +40,10 @@ public class RoleplayContext {
 	}
 	
 	public void removeContextActor(double actorId) {
-		for(GameRolePlayActorInformations actor : actors)
-			if(actor.contextualId == actorId)
-				actors.remove(actor);
+		Iterator<GameRolePlayActorInformations> it = this.actors.iterator();
+		while(it.hasNext())
+			if(it.next().contextualId == actorId)
+				it.remove();
 	}
 	
 	public Vector<Integer> getCellIdsTakenByMonsters() {

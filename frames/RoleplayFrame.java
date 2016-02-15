@@ -75,8 +75,7 @@ public class RoleplayFrame implements Frame {
 				break;
 			case 251 :
 				GameContextRemoveElementMessage GCREM = new GameContextRemoveElementMessage(msg);
-				//CC.getContext().removeContextActor(GCREM.id);
-				// problème d'accès concurrents
+				CC.context.removeContextActor(GCREM.id);
 				break;
 			case 951 :
 				GameMapMovementMessage GMMM = new GameMapMovementMessage(msg);
