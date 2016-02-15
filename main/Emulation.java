@@ -11,7 +11,7 @@ import utilities.Log;
 import utilities.Processes;
 
 public class Emulation {
-	private static final String APP_PATH = System.getProperty("user.dir");
+	private static final String APP_PATH = System.getProperty("user.dir").replace('\\', '/');
 	private static final int launcherPort = 5554;
 	private static final int serverPort = 5555;
 	private static Connection.Client launcherCo;
@@ -22,11 +22,11 @@ public class Emulation {
 		if(!Processes.inProcess("adl.exe"))
 			try {
 				Log.p("Running AS launcher.");
-				String adlPath = "C:/PROGRA~2/AdobeAIRSDK/bin/adl.exe";
+				String adlPath = "C:/PROGRA~2/AIRDSK_Compiler/bin/adl.exe";
 				if(!Processes.fileExists(adlPath))
 					throw new Error("AIR debug launcher not found.");
 				else
-					Runtime.getRuntime().exec(adlPath + " " + APP_PATH + "/Ressources/Antibot/application.xml");
+					Runtime.getRuntime().exec(adlPath + " " + APP_PATH + "Ressources/Antibot/application.xml");
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -43,8 +43,8 @@ public class Emulation {
 		ByteArray array = new ByteArray();
 		array.writeInt(1 + 2 + 11 + 2 + 10);
 		array.writeByte((byte) 1);
-		array.writeUTF("maxlebgdu93");
-		array.writeUTF("represente");
+		array.writeUTF("florian949");
+		array.writeUTF("florian1994");
 		Log.p("Sending credentials to AS launcher.");
 		launcherCo.send(array.bytes());
 	}

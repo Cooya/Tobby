@@ -75,7 +75,7 @@ public class ConnectionFrame implements Frame {
 				return true;
 			case 101 :
 				AuthenticationTicketMessage ATM = new AuthenticationTicketMessage();
-				ATM.serialize((int[]) this.usefulInfos.get("ticket"));
+				ATM.serialize("fr", (int[]) this.usefulInfos.get("ticket"));
 				instance.outPush(ATM);
 				return true;
 			case 6253 :
@@ -92,7 +92,7 @@ public class ConnectionFrame implements Frame {
 				return true;
 			case 151 :
 				CharactersListMessage CLM = new CharactersListMessage(msg);
-				CC.characterId = CLM.getCharacterId().toNumber();
+				CC.characterId = CLM.id.toNumber();
 				CharacterSelectionMessage CSM = new CharacterSelectionMessage();
 				CSM.serialize(CLM);
 				instance.outPush(CSM);

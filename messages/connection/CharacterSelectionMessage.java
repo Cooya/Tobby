@@ -11,7 +11,7 @@ public class CharacterSelectionMessage extends Message {
 	
 	public void serialize(CharactersListMessage CLM) {
 		ByteArray buffer = new ByteArray();
-		buffer.writeVarLong(CLM.getCharacterId());
+		buffer.writeVarLong(CLM.id);
 		
 		completeInfos(buffer);
 	}

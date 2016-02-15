@@ -11,11 +11,6 @@ public class GameFightMonsterInformations extends GameFightAIInformations{
     public GameFightMonsterInformations(ByteArray buffer)
     {
        super(buffer);
-    }
-    
-    public void deserialize(ByteArray buffer)
-    {
-       super.deserialize(buffer);
        this.creatureGenericId = buffer.readVarShort();
        if(this.creatureGenericId < 0)
        {
@@ -26,5 +21,8 @@ public class GameFightMonsterInformations extends GameFightAIInformations{
        {
           throw new Error("Forbidden value (" + this.creatureGrade + ") on element of GameFightMonsterInformations.creatureGrade.");
        }
+       
     }
+    
+    
 }
