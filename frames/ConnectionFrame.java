@@ -37,7 +37,7 @@ public class ConnectionFrame implements Frame {
 				HelloConnectMessage HCM = new HelloConnectMessage(msg);
 				this.usefulInfos.put("HCM", HCM);
 				IdentificationMessage IM = new IdentificationMessage();
-				IM.serialize(HCM, CC.getLogin(), CC.getPassword());
+				IM.serialize(HCM, CC.login, CC.password);
 				instance.outPush(IM);
 				break;
 			case 22 :
@@ -50,7 +50,7 @@ public class ConnectionFrame implements Frame {
 				break;
 			case 30 :
 				ServersListMessage SLM = new ServersListMessage(msg);
-				int serverId = CC.getServerId();
+				int serverId = CC.serverId;
 				if(SLM.isSelectable(serverId)) {
 					ServerSelectionMessage SSM = new ServerSelectionMessage();
 					SSM.serialize(serverId);
@@ -83,14 +83,14 @@ public class ConnectionFrame implements Frame {
 				break;
 			case 151 :
 				CharactersListMessage CLM = new CharactersListMessage(msg);
-				CC.setCharacterId(CLM.getCharacterId().toNumber());
+				CC.characterId = CLM.getCharacterId().toNumber();
 				CharacterSelectionMessage CSM = new CharacterSelectionMessage();
 				CSM.serialize(CLM);
 				instance.outPush(CSM);
 				break;
 			case 50 :
 				ServerStatusUpdateMessage SSUM = new ServerStatusUpdateMessage(msg);
-				serverId = CC.getServerId();
+				serverId = CC.serverId;
 				if(SSUM.server.id == serverId && SSUM.server.isSelectable) {	
 					ServerSelectionMessage SSM = new ServerSelectionMessage();
 					SSM.serialize(serverId);

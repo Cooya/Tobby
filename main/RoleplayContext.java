@@ -17,14 +17,14 @@ public class RoleplayContext {
 	public void newContextActors(Vector<GameRolePlayActorInformations> actors) {
 		this.actors = actors;
 		
-		double characterId = CC.getCharacterId();
+		double characterId = CC.characterId;
 		for(GameRolePlayActorInformations actor : actors)
 			if(actor.contextualId == characterId)
-				CC.setCharacterName(((GameRolePlayNamedActorInformations) actor).name);
+				CC.characterName = ((GameRolePlayNamedActorInformations) actor).name;
 		for(GameRolePlayActorInformations actor : actors)
 			if(actor.contextualId == characterId) {
-				CC.setCurrentCellId(actor.disposition.cellId);
-				CC.setCurrentDirection(actor.disposition.direction);
+				CC.currentCellId = actor.disposition.cellId;
+				CC.currentDirection = actor.disposition.direction;
 			}
 	}
 	

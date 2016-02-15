@@ -4,6 +4,7 @@ import main.CharacterController;
 import main.Instance;
 import messages.EmptyMessage;
 import messages.Message;
+import messages.character.InventoryContentMessage;
 import messages.context.CurrentMapMessage;
 import messages.context.GameContextRemoveElementMessage;
 import messages.context.GameMapMovementMessage;
@@ -57,20 +58,20 @@ public class RoleplayFrame implements Frame {
 				CurrentMapMessage CMM = new CurrentMapMessage(msg);
 				CC.setCurrentMap(CMM.mapId);
 				MapInformationsRequestMessage MIRM = new MapInformationsRequestMessage();
-				MIRM.serialize(CC.getCurrentMapId());
+				MIRM.serialize(CC.currentMap.id);
 				instance.outPush(MIRM);
 				break;
 			case 226 :
 				MapComplementaryInformationsDataMessage MCIDM = new MapComplementaryInformationsDataMessage(msg);
-				CC.getContext().newContextActors(MCIDM.actors);
+				CC.context.newContextActors(MCIDM.actors);
 				
-				Log.p("Current map : " + MapPosition.getMapPositionById(CC.getCurrentMapId()) + ".\nCurrent cell id : " + CC.getCurrentCellId() + ".");
+				Log.p("Current map : " + MapPosition.getMapPositionById(CC.currentMap.id) + ".\nCurrent cell id : " + CC.currentCellId + ".");
 				
 				CC.makeCharacterAccessible(); // on peut maintenant bouger
 				break;
 			case 5632 :
 				GameRolePlayShowActorMessage GRPSAM = new GameRolePlayShowActorMessage(msg);
-				CC.getContext().addContextActor(GRPSAM.informations);
+				CC.context.addContextActor(GRPSAM.informations);
 				break;
 			case 251 :
 				GameContextRemoveElementMessage GCREM = new GameContextRemoveElementMessage(msg);
@@ -79,7 +80,11 @@ public class RoleplayFrame implements Frame {
 				break;
 			case 951 :
 				GameMapMovementMessage GMMM = new GameMapMovementMessage(msg);
-				CC.getContext().updateContextActorPosition(GMMM.actorId, GMMM.keyMovements.lastElement());
+				CC.context.updateContextActorPosition(GMMM.actorId, GMMM.keyMovements.lastElement());
+				break;
+			case 3016 :
+				InventoryContentMessage ICM = new InventoryContentMessage(msg);
+				CC.kamasNumber = ICM.kamas;
 				break;
 		}
 	}

@@ -18,18 +18,19 @@ import utilities.Log;
 
 public class CharacterController extends Thread {
 	private Instance instance;
-	private String login;
-	private String password;
-	private int serverId;
-	private String characterName;
-	private double characterId;
-	private int currentCellId;
-	private int currentDirection;
-	private Map currentMap;
-	private String currentPathName;
-	private boolean isAccessible;
-	private CellsPathfinder pathfinder;
-	private RoleplayContext context;
+	public String login;
+	public String password;
+	public int serverId;
+	public String characterName;
+	public double characterId;
+	public int currentCellId;
+	public int currentDirection;
+	public Map currentMap;
+	public String currentPathName;
+	public boolean isAccessible;
+	public CellsPathfinder pathfinder;
+	public RoleplayContext context;
+	public int kamasNumber;
 	
 	public CharacterController(Instance instance, String login, String password, int serverId) {
 		this.instance = instance;
@@ -40,65 +41,9 @@ public class CharacterController extends Thread {
 		this.context = new RoleplayContext(this);
 	}
 	
-	public String getLogin() {
-		return this.login;
-	}
-	
-	public String getPassword() {
-		return this.password;
-	}
-	
-	public int getServerId() {
-		return this.serverId;
-	}
-	
-	public String getCharacterName() {
-		return this.characterName;
-	}
-	
-	public void setCharacterName(String characterName) {
-		this.characterName = characterName;
-	}
-	
-	public double getCharacterId() {
-		return this.characterId;
-	}
-	
-	public void setCharacterId(double characterId) {
-		this.characterId = characterId;
-	}
-	
-	public int getCurrentCellId() {
-		return this.currentCellId;
-	}
-	
-	public void setCurrentCellId(int cellId) {
-		this.currentCellId = cellId;
-	}
-	
-	public int getCurrentDirection() {
-		return this.currentDirection;
-	}
-	
-	public void setCurrentDirection(int direction) {
-		this.currentDirection = direction;
-	}
-	
-	public int getCurrentMapId() {
-		return this.currentMap.id;
-	}
-	
 	public void setCurrentMap(int mapId) {
 		this.currentMap = MapsCache.loadMap(mapId);
 		this.pathfinder = new CellsPathfinder(this.currentMap);
-	}
-	
-	public String getCurrentPathName() {
-		return this.currentPathName;
-	}
-	
-	public void setCurrentPathName(String pathName) {
-		this.currentPathName = pathName;
 	}
 	
 	public synchronized void makeCharacterAccessible() {
@@ -117,10 +62,6 @@ public class CharacterController extends Thread {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-	}
-	
-	public RoleplayContext getContext() {
-		return this.context;
 	}
 	
 	public void moveTo(int cellId, boolean changeMap) {

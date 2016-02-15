@@ -33,8 +33,8 @@ public class Path {
 	}
 	
 	public static void moveTo(int mapId, CharacterController CC) {
-		Pathfinder pf = new MapsPathfinder(CC.getCurrentCellId());
-		Path path = pf.compute(CC.getCurrentMapId(), mapId);
+		Pathfinder pf = new MapsPathfinder(CC.currentCellId);
+		Path path = pf.compute(CC.currentMap.id, mapId);
 		path.run(CC);
 	}
 	
@@ -59,10 +59,10 @@ public class Path {
 	public void run(CharacterController CC) {
 		Log.p("Running path named \"" + name + "\".");
 		
-		if(!checkCurrentPos(CC.getCurrentMapId())) // si le perso n'est pas sur le trajet
+		if(!checkCurrentPos(CC.currentMap.id)) // si le perso n'est pas sur le trajet
 			moveTo(nodes.get(0).id, CC);
 
-		CC.setCurrentPathName(this.name);
+		CC.currentPathName = this.name;
 		int nextMapId;
 		while((nextMapId = nextMap()) != -1)
 			CC.changeMap(nextMapId);

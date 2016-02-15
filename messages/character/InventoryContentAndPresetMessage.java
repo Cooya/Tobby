@@ -35,8 +35,7 @@ public class InventoryContentAndPresetMessage extends Message {
 		System.out.println("Il y a "+loc2+" items");
 		while(loc3 < loc2)
 		{
-			obj = new ObjectItem();
-			obj.deserialize(buffer);
+			obj = new ObjectItem(buffer);
 			this.inventory.add(obj);
 			loc3++;
 		}
