@@ -99,6 +99,7 @@
 5683 EmotePlayMessage
 5684 LifePointsRegenBeginMessage
 5685 EmotePlayRequestMessage
+5686 LifePointsRegenEndMessage
 5689 EmoteListMessage
 5696 GameEntitiesDispositionMessage
 5708 InteractiveElementUpdatedMessage
