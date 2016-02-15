@@ -82,7 +82,7 @@ public class ConnectionFrame implements Frame {
 				HCM = (HelloConnectMessage) this.usefulInfos.get("HCM");
 				ISM = (IdentificationSuccessMessage) this.usefulInfos.get("ISM");
 				RawDataMessage RDM = new RawDataMessage(msg);
-				Emulation.sendCredentials();
+				Emulation.sendCredentials(CC.login, CC.password);
 				Message CIM = Emulation.createServer(HCM, ISM, RDM, instance.getInstanceId());
 				instance.outPush(CIM);
 				return true;

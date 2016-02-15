@@ -126,54 +126,55 @@ public class CharacterController extends Thread {
 	}
 	
 	public void run() {
-		
-		try {
-			Thread.sleep(2000);
-			waitCharacterAccessibility();
-			if(!context.fight){
-				Thread.sleep(5000);
-				int regen=context.lifeToRegen();
-				if(regen>0){
-					EmotePlayRequestMessage EPRM=new EmotePlayRequestMessage();
-					EPRM.serialize((byte) 1);
-					instance.outPush(EPRM);
-					Thread.sleep((regen/3)*1000);
-				}
-				System.out.println("Recherche de combat");
-				int nbMonsters=context.getMonsters().size();
-				if(nbMonsters!=0){
-					GameRolePlayGroupMonsterInformations actor=context.getMonsters().get((int)(Math.random()*nbMonsters));
-					launchFight(actor.disposition.cellId,actor.contextualId);
-					Thread.sleep(2000);
-					GameFightReadyMessage GFRM=new GameFightReadyMessage();
-					GFRM.serialize();
-					instance.outPush(GFRM);
-				}
-			}
-			else{
-				if(context.turn && !context.inAction){
-					if(context.selfInfo.stats.actionPoints<4 || context.skip==context.nbMonstersAlive){
-						GameFightTurnFinishMessage GFTFM=new GameFightTurnFinishMessage();
-						GFTFM.serialize();
-						instance.outPush(GFTFM);
-						context.skip=0;
+		while(true) {
+			try {
+				Thread.sleep(2000);
+				waitCharacterAccessibility();
+				if(!context.fight){
+					Thread.sleep(5000);
+					int regen=context.lifeToRegen();
+					if(regen>0){
+						EmotePlayRequestMessage EPRM=new EmotePlayRequestMessage();
+						EPRM.serialize((byte) 1);
+						instance.outPush(EPRM);
+						Thread.sleep((regen/3)*1000);
 					}
-					else{
-						System.out.println(context.nbMonstersAlive+"||"+context.skip);
-						GameFightFighterInformations fighter=context.getAliveMonsters().get(context.skip);
-						GameActionFightCastRequestMessage GAFCRM=new GameActionFightCastRequestMessage();
-						GAFCRM.serialize(161, (short) fighter.disposition.cellId);
-						instance.outPush(GAFCRM);
-						System.out.println("Début de l'action");
-						context.inAction=true;
-						Thread.sleep(3000);
-						context.inAction=false;
-						context.skip++;
+					System.out.println("Recherche de combat");
+					int nbMonsters=context.getMonsters().size();
+					if(nbMonsters!=0){
+						GameRolePlayGroupMonsterInformations actor=context.getMonsters().get((int)(Math.random()*nbMonsters));
+						launchFight(actor.disposition.cellId,actor.contextualId);
+						Thread.sleep(2000);
+						GameFightReadyMessage GFRM=new GameFightReadyMessage();
+						GFRM.serialize();
+						instance.outPush(GFRM);
 					}
 				}
+				else{
+					if(context.turn && !context.inAction){
+						if(context.selfInfo.stats.actionPoints<4 || context.skip==context.nbMonstersAlive){
+							GameFightTurnFinishMessage GFTFM=new GameFightTurnFinishMessage();
+							GFTFM.serialize();
+							instance.outPush(GFTFM);
+							context.skip=0;
+						}
+						else{
+							System.out.println(context.nbMonstersAlive+"||"+context.skip);
+							GameFightFighterInformations fighter=context.getAliveMonsters().get(context.skip);
+							GameActionFightCastRequestMessage GAFCRM=new GameActionFightCastRequestMessage();
+							GAFCRM.serialize(161, (short) fighter.disposition.cellId);
+							instance.outPush(GAFCRM);
+							System.out.println("Début de l'action");
+							context.inAction=true;
+							Thread.sleep(3000);
+							context.inAction=false;
+							context.skip++;
+						}
+					}
+				}
+			} catch (InterruptedException e) {
+				e.printStackTrace();
 			}
-		} catch (InterruptedException e) {
-			e.printStackTrace();
 		}
 	}
 }

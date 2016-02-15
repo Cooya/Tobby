@@ -11,7 +11,8 @@ import utilities.Log;
 import utilities.Processes;
 
 public class Emulation {
-	private static final String APP_PATH = System.getProperty("user.dir").replace('\\', '/');
+	private static final String ADL_PATH = "C:/PROGRA~2/AdobeAIRSDK/bin/adl.exe";
+	private static final String ANTIBOT_PATH = System.getProperty("user.dir") + "/Ressources/Antibot/application.xml";
 	private static final int launcherPort = 5554;
 	private static final int serverPort = 5555;
 	private static Connection.Client launcherCo;
@@ -22,29 +23,31 @@ public class Emulation {
 		if(!Processes.inProcess("adl.exe"))
 			try {
 				Log.p("Running AS launcher.");
-				String adlPath = "C:/PROGRA~2/AIRDSK_Compiler/bin/adl.exe";
-				if(!Processes.fileExists(adlPath))
-					throw new Error("AIR debug launcher not found.");
+				if(!Processes.fileExists(ADL_PATH))
+					throw new Error("AIR debug executable not found.");
+				if(!Processes.fileExists(ANTIBOT_PATH))
+					throw new Error("Antibot not found.");
 				else
-					Runtime.getRuntime().exec(adlPath + " " + APP_PATH + "Ressources/Antibot/application.xml");
+					Runtime.getRuntime().exec(ADL_PATH + " " + ANTIBOT_PATH);
 			} catch (Exception e) {
 				e.printStackTrace();
+				System.exit(1);
 			}
 		else
 			Log.p("AS launcher already in process.");
 	}
 	
-	public static void sendCredentials() {
+	public static void sendCredentials(String login, String password) {
 		launcherCo = new Connection.Client("127.0.0.1", launcherPort);
-		byte[] buffer = new byte[1]; // bool d'injection
+		byte[] buffer = new byte[1]; // booléen d'injection
 		launcherCo.receive(buffer);
 		if(buffer[0] == 0)
 			Processes.injectDLL(Main.DLL_LOCATION, "adl.exe");
 		ByteArray array = new ByteArray();
-		array.writeInt(1 + 2 + 11 + 2 + 10);
+		array.writeInt(1 + 2 + login.length() + 2 + password.length());
 		array.writeByte((byte) 1);
-		array.writeUTF("florian949");
-		array.writeUTF("florian1994");
+		array.writeUTF(login);
+		array.writeUTF(password);
 		Log.p("Sending credentials to AS launcher.");
 		launcherCo.send(array.bytes());
 	}

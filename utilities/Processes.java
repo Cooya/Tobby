@@ -8,8 +8,8 @@ import java.io.InputStreamReader;
 import main.Main;
 
 public class Processes {
-	private static final String APP_PATH = System.getProperty("user.dir").replace('\\', '/');
-	private static String injectorPath = APP_PATH + "Ressources/DLLInjector/Injector.exe";
+	private static final String APP_PATH = System.getProperty("user.dir");
+	private static String injectorPath = APP_PATH + "/Ressources/DLLInjector/Injector.exe";
 	
 	public static boolean inProcess(String processName) {
 		try {
