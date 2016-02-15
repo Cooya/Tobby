@@ -120,13 +120,27 @@ public class CharacterController extends Thread {
 		this.isAccessible = false; // on attend la fin du changement de map
 	}
 
-	public void launchFight(int position, double id) {
+	public boolean launchFight(int position, double id) {
 		moveTo(position, false);
-		GameRolePlayAttackMonsterRequestMessage GRPAMRM = new GameRolePlayAttackMonsterRequestMessage();
-		GRPAMRM.serialize(id);
-		instance.outPush(GRPAMRM);
+		if(checkCharacterOverMonster()){
+			GameRolePlayAttackMonsterRequestMessage GRPAMRM = new GameRolePlayAttackMonsterRequestMessage();
+			GRPAMRM.serialize(id);
+			instance.outPush(GRPAMRM);
+			return true;
+		}
+		return false;
 	}
 
+	private boolean checkCharacterOverMonster() {
+		for(int cell : rcontext.getCellIdsTakenByMonsters())
+			if(cell==this.currentCellId)
+				return true;
+		return false;
+	}
+
+	
+	
+	
 	public void run() {
 		while(true){
 			try {
@@ -176,15 +190,16 @@ public class CharacterController extends Thread {
 		int nbMonsters=rcontext.getMonsters().size();
 		if(nbMonsters!=0){
 			GameRolePlayGroupMonsterInformations actor=rcontext.getMonsters().get((int)(Math.random()*nbMonsters));
-			launchFight(actor.disposition.cellId,actor.contextualId);
-			try {
-				Thread.sleep(2000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
+			if(launchFight(actor.disposition.cellId,actor.contextualId)){
+				try {
+					Thread.sleep(2000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				GameFightReadyMessage GFRM=new GameFightReadyMessage();
+				GFRM.serialize();
+				instance.outPush(GFRM);
 			}
-			GameFightReadyMessage GFRM=new GameFightReadyMessage();
-			GFRM.serialize();
-			instance.outPush(GFRM);
 		}
 	}
 
@@ -206,7 +221,6 @@ public class CharacterController extends Thread {
 		try {
 			Thread.sleep(3000);
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		fcontext.inAction=false;
