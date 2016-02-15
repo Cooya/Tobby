@@ -14,7 +14,6 @@ public class AuthenticationTicketMessage extends Message {
 	
 	public void serialize(int[] ticket) {
 		this.ticket = new String(Encryption.decodeWithAES(ByteArray.toBytes(ticket)));
-		
 		ByteArray buffer = new ByteArray();
 	    buffer.writeUTF(lang);
 	    buffer.writeUTF(this.ticket);

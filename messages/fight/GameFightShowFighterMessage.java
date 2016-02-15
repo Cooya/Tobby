@@ -28,6 +28,5 @@ public class GameFightShowFighterMessage extends Message{
 			this.informations=new GameFightCharacterInformations(buffer);
 			break;
 		}
-		this.informations.deserialize(buffer);
 	}
 }

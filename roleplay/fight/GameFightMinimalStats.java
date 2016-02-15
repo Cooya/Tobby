@@ -79,11 +79,7 @@ public class GameFightMinimalStats {
     
     public int invisibilityState = 0;
     
-    public GameFightMinimalStats()
-    {
-    }
-
-    public void deserialize(ByteArray buffer) 
+    public GameFightMinimalStats(ByteArray buffer)
     {
        this.lifePoints = buffer.readVarInt();
        if(this.lifePoints < 0)
@@ -120,11 +116,11 @@ public class GameFightMinimalStats {
           throw new Error("Forbidden value (" + this.summoner + ") on element of GameFightMinimalStats.summoner.");
        }
        this.summoned = buffer.readBoolean();
-       this.neutralElementResistPercent = buffer.readVarShort();
-       this.earthElementResistPercent = buffer.readVarShort();
-       this.waterElementResistPercent = buffer.readVarShort();
-       this.airElementResistPercent = buffer.readVarShort();
-       this.fireElementResistPercent = buffer.readVarShort();
+       this.neutralElementResistPercent = buffer.readVarInt();
+       this.earthElementResistPercent = buffer.readVarInt();
+       this.waterElementResistPercent = buffer.readVarInt();
+       this.airElementResistPercent = buffer.readVarInt();          
+       this.fireElementResistPercent = buffer.readVarInt();
        this.neutralElementReduction = buffer.readVarShort();
        this.earthElementReduction = buffer.readVarShort();
        this.waterElementReduction = buffer.readVarShort();

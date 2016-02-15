@@ -8,7 +8,7 @@ import utilities.ByteArray;
 import utilities.Log;
 
 public class Message {
-	private static final String messagesFilePath = "Ressources/messages.txt";
+	private static final String messagesFilePath = "tobby/Ressources/messages.txt";
 	private static final BiMap<Integer, String> map = new BiMap<Integer, String>(Integer.class, String.class);
 	
 	static  {

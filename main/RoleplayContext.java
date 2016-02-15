@@ -6,10 +6,23 @@ import java.util.Vector;
 import roleplay.currentmap.GameRolePlayActorInformations;
 import roleplay.currentmap.GameRolePlayGroupMonsterInformations;
 import roleplay.currentmap.GameRolePlayNamedActorInformations;
+import roleplay.fight.GameFightFighterInformations;
+import roleplay.fight.GameFightMonsterInformations;
 
 public class RoleplayContext {
 	private CharacterController CC;
 	private Vector<GameRolePlayActorInformations> actors;
+	
+	
+	
+	private static Vector<GameFightFighterInformations> FightersInformations;
+	public boolean fight=false;
+	public boolean turn=false;
+	public boolean inAction=false;
+	public GameFightFighterInformations selfInfo;
+	public int nbMonstersAlive;
+	public int skip;
+	public boolean moveMonsters;
 	
 	public RoleplayContext(CharacterController CC) {
 		this.CC = CC;
@@ -53,4 +66,52 @@ public class RoleplayContext {
 				cellIds.add(actor.disposition.cellId);		
 		return cellIds;
 	}
+	
+	/////Push Flo
+	
+	public Vector<GameFightFighterInformations> getFighters(){
+		return FightersInformations;
+	}
+	
+	public void newContextFightersInformations(Vector<GameFightFighterInformations> infos){
+		FightersInformations=infos;
+		for(GameFightFighterInformations info: FightersInformations)
+			if(info.contextualId==CC.characterId)
+				selfInfo=info;
+	}
+	
+	public Vector<GameRolePlayGroupMonsterInformations> getMonsters() {
+		Vector<GameRolePlayGroupMonsterInformations> monsters = new Vector<GameRolePlayGroupMonsterInformations>();
+		for(GameRolePlayActorInformations actor : actors)
+			if(actor instanceof GameRolePlayGroupMonsterInformations)
+				monsters.add((GameRolePlayGroupMonsterInformations) actor);	
+		return monsters;
+	}
+	
+	public Vector<GameFightFighterInformations> getAliveMonsters() {
+		Vector<GameFightFighterInformations> monsters = new Vector<GameFightFighterInformations>();
+		for(GameFightFighterInformations fighter : FightersInformations){
+			if(fighter instanceof GameFightMonsterInformations && fighter.alive)
+				monsters.add(fighter);		
+		}
+		return monsters;
+	}
+	
+	public GameRolePlayActorInformations getActorById(double id){
+		for(GameRolePlayActorInformations actor : actors)
+			if(actor.contextualId==id){
+				return actor;
+			}
+		return null;
+	}
+	
+	
+	public int lifeToRegen(){
+		if(selfInfo==null)
+			return 0;
+		return selfInfo.stats.baseMaxLifePoints - selfInfo.stats.lifePoints;
+	}
+	
+	
+	
 }

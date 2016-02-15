@@ -4,7 +4,7 @@ import messages.Message;
 import utilities.ByteArray;
 
 public class GameContextRemoveElementMessage extends Message {
-	public double id = 0;
+	public double id = 251;
 	
 	public GameContextRemoveElementMessage(Message msg) {
 		super(msg);

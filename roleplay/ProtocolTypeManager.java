@@ -38,6 +38,7 @@ import roleplay.currentmap.HumanOptionTitle;
 import roleplay.currentmap.InteractiveElement;
 import roleplay.currentmap.InteractiveElementSkill;
 import roleplay.currentmap.InteractiveElementWithAgeBonus;
+import roleplay.fight.FightEntityDispositionInformations;
 import roleplay.fight.GameFightAIInformations;
 import roleplay.fight.GameFightCharacterInformations;
 import roleplay.fight.GameFightFighterInformations;
@@ -141,7 +142,7 @@ public class ProtocolTypeManager {
 		//types[211] = FightTemporaryBoostWeaponDamagesEffect.class;
 		//types[214] = FightTemporaryBoostStateEffect.class;
 		//types[216] = FightResultMutantListEntry.class;
-		//types[217] = FightEntityDispositionInformations.class;
+		types.put(217,FightEntityDispositionInformations.class);
 		types.put(219, InteractiveElementSkill.class);
         //types[220] = InteractiveElementNamedSkill.class;
 		//types[356] = UpdateMountBoost.class;

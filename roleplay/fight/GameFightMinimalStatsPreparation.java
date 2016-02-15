@@ -5,19 +5,14 @@ import utilities.ByteArray;
 public class GameFightMinimalStatsPreparation extends GameFightMinimalStats {
     public int initiative = 0;
     
-    public GameFightMinimalStatsPreparation()
+    public GameFightMinimalStatsPreparation(ByteArray buffer)
     {
-       super();
-    }
-    
-
-    public void deserializeAs_GameFightMinimalStatsPreparation(ByteArray buffer)
-    {
-       super.deserialize(buffer);
+       super(buffer);
        this.initiative = buffer.readVarInt();
        if(this.initiative < 0)
        {
           throw new Error("Forbidden value (" + this.initiative + ") on element of GameFightMinimalStatsPreparation.initiative.");
        }
     }
+
 }

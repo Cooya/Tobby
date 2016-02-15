@@ -38,10 +38,13 @@
 301 GameRolePlayShowChallengeMessage
 500 CharacterStatsListMessage
 700 GameFightStartingMessage
+708 GameFightReadyMessage
 711 GameFightRemoveTeamMemberMessage
 713 GameFightTurnListMessage
 715 GameFightTurnReadyRequestMessage
 716 GameFightTurnReadyMessage
+718 GameFightTurnFinishMessage
+719 GameFightTurnEndMessage
 780 TextInformationMessage
 801 ChatSmileyMessage
 851 ChatClientPrivateMessage
@@ -58,6 +61,10 @@
 952 GameMapMovementConfirmMessage
 953 GameMapMovementCancelMessage
 954 GameMapNoMovementMessage
+956 SequenceEndMessage
+957 GameActionAcknowledgementMessage
+1005 GameActionFightCastRequestMessage
+1030 GameActionFightPointsVariationMessage
 1200 SpellListMessage
 1301 StartupActionsListMessage
 3009 InventoryWeightMessage
@@ -79,6 +86,7 @@
 5676 IgnoredGetListMessage
 5683 EmotePlayMessage
 5684 LifePointsRegenBeginMessage
+5685 EmotePlayRequestMessage
 5689 EmoteListMessage
 5708 InteractiveElementUpdatedMessage
 5709 StatedElementUpdatedMessage
@@ -91,6 +99,7 @@
 5834 SpellForgottenMessage
 5836 CharacterSelectedErrorMessage
 5864 GameFightShowFighterMessage
+5921 GameFightSynchronizeMessage
 5927 GameFightOptionStateUpdateMessage
 5968 MountSetMessage
 5970 MountXpRatioMessage
