@@ -118,6 +118,7 @@
 5968 MountSetMessage
 5970 MountXpRatioMessage
 6058 AlignmentRankUpdateMessage
+6068 CharacterSelectedForceMessage
 6070 GameActionFightDispellableEffectMessage
 6078 FriendWarnOnLevelGainStateMessage
 6087 NotificationListMessage
@@ -160,6 +161,7 @@
 6465 GameFightTurnStartPlayingMessage
 6469 SelectedServerDataExtendedMessage
 6471 CharacterLoadingCompleteMessage
+6475 BasicCharactersListMessage
 6513 WarnOnPermaDeathStateMessage
 6525 CurrentServerStatusUpdateMessage
 6530 BasicStatMessage

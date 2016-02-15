@@ -8,8 +8,7 @@ import java.io.InputStreamReader;
 import main.Main;
 
 public class Processes {
-	private static final String APP_PATH = System.getProperty("user.dir");
-	private static String injectorPath = APP_PATH + "/Ressources/DLLInjector/Injector.exe";
+	private static String INJECTOR_PATH = System.getProperty("user.dir") + "/Ressources/DLLInjector/Injector.exe";
 	
 	public static boolean inProcess(String processName) {
 		try {
@@ -28,7 +27,7 @@ public class Processes {
 	
 	public static void injectDLL(String dllName, String exeName) {
 		try {
-			Process p = Runtime.getRuntime().exec(injectorPath + " " + dllName + " " + exeName);
+			Process p = Runtime.getRuntime().exec(INJECTOR_PATH + " " + dllName + " " + exeName);
 			InputStream in = p.getInputStream();
 			byte[] bytes = new byte[Main.BUFFER_DEFAULT_SIZE];
 			in.read(bytes);

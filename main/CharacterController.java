@@ -35,7 +35,8 @@ public class CharacterController extends Thread {
 	public String currentPathName;
 	public boolean isAccessible;
 	public CellsPathfinder pathfinder;
-	public RoleplayContext context;
+	public RoleplayContext rcontext;
+	public FightContext fcontext;
 	public int kamasNumber;
 	
 	public CharacterController(Instance instance, String login, String password, int serverId) {
@@ -44,7 +45,8 @@ public class CharacterController extends Thread {
 		this.password = password;
 		this.serverId = serverId;
 		this.isAccessible = false;
-		this.context = new RoleplayContext(this);
+		this.rcontext = new RoleplayContext(this);
+		this.fcontext = new FightContext(this);
 	}
 	
 	public void setCurrentMap(int mapId) {
@@ -130,9 +132,9 @@ public class CharacterController extends Thread {
 			try {
 				Thread.sleep(2000);
 				waitCharacterAccessibility();
-				if(!context.fight){
+				if(!fcontext.fight){
 					Thread.sleep(5000);
-					int regen=context.lifeToRegen();
+					int regen=fcontext.lifeToRegen();
 					if(regen>0){
 						EmotePlayRequestMessage EPRM=new EmotePlayRequestMessage();
 						EPRM.serialize((byte) 1);
@@ -140,9 +142,9 @@ public class CharacterController extends Thread {
 						Thread.sleep((regen/3)*1000);
 					}
 					System.out.println("Recherche de combat");
-					int nbMonsters=context.getMonsters().size();
+					int nbMonsters=rcontext.getMonsters().size();
 					if(nbMonsters!=0){
-						GameRolePlayGroupMonsterInformations actor=context.getMonsters().get((int)(Math.random()*nbMonsters));
+						GameRolePlayGroupMonsterInformations actor=rcontext.getMonsters().get((int)(Math.random()*nbMonsters));
 						launchFight(actor.disposition.cellId,actor.contextualId);
 						Thread.sleep(2000);
 						GameFightReadyMessage GFRM=new GameFightReadyMessage();
@@ -150,25 +152,25 @@ public class CharacterController extends Thread {
 						instance.outPush(GFRM);
 					}
 				}
-				else{
-					if(context.turn && !context.inAction){
-						if(context.selfInfo.stats.actionPoints<4 || context.skip==context.nbMonstersAlive){
+				else {
+					if(fcontext.turn && !fcontext.inAction){
+						if(fcontext.selfInfo.stats.actionPoints<4 || fcontext.skip==fcontext.nbMonstersAlive){
 							GameFightTurnFinishMessage GFTFM=new GameFightTurnFinishMessage();
 							GFTFM.serialize();
 							instance.outPush(GFTFM);
-							context.skip=0;
+							fcontext.skip=0;
 						}
 						else{
-							System.out.println(context.nbMonstersAlive+"||"+context.skip);
-							GameFightFighterInformations fighter=context.getAliveMonsters().get(context.skip);
+							System.out.println(fcontext.nbMonstersAlive+"||"+fcontext.skip);
+							GameFightFighterInformations fighter=fcontext.getAliveMonsters().get(fcontext.skip);
 							GameActionFightCastRequestMessage GAFCRM=new GameActionFightCastRequestMessage();
 							GAFCRM.serialize(161, (short) fighter.disposition.cellId);
 							instance.outPush(GAFCRM);
 							System.out.println("Début de l'action");
-							context.inAction=true;
+							fcontext.inAction=true;
 							Thread.sleep(3000);
-							context.inAction=false;
-							context.skip++;
+							fcontext.inAction=false;
+							fcontext.skip++;
 						}
 					}
 				}
