@@ -4,15 +4,18 @@ import main.Instance;
 import main.Latency;
 import messages.Message;
 import messages.synchronisation.BasicLatencyStatsMessage;
-import messages.synchronisation.BasicNoOperationMessage;
 import messages.synchronisation.BasicStatMessage;
 import messages.synchronisation.SequenceNumberMessage;
 
 public class SynchronisationFrame implements Frame {
 	private Instance instance;
+	private int sequenceNumber;
+	private int basicNoOperationMsgCounter;
 	
 	public SynchronisationFrame(Instance instance) {
 		this.instance = instance;
+		this.sequenceNumber = 1;
+		this.basicNoOperationMsgCounter = 0;
 	}
 	
 	public void processMessage(Message msg) {
@@ -30,12 +33,11 @@ public class SynchronisationFrame implements Frame {
 				break;
 			case 6316 :
 				SequenceNumberMessage SNM = new SequenceNumberMessage();
-				SNM.serialize();
+				SNM.serialize(this.sequenceNumber++);
 				instance.outPush(SNM);
 				break;
 			case 176 :
-				new BasicNoOperationMessage(msg);
-				if(BasicNoOperationMessage.getCounter() % 10 == 0) {
+				if(this.basicNoOperationMsgCounter++ % 10 == 0) {
 					BSM = new BasicStatMessage();
 					BSM.serialize();
 					instance.outPush(BSM);

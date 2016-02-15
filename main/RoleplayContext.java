@@ -53,4 +53,11 @@ public class RoleplayContext {
 				cellIds.add(actor.disposition.cellId);		
 		return cellIds;
 	}
+	
+	public double getActorIdByName(String name) {
+		for(GameRolePlayActorInformations actor : actors)
+			if(actor instanceof GameRolePlayNamedActorInformations && ((GameRolePlayNamedActorInformations) actor).name == name)
+				return actor.contextualId;
+		return -1;
+	}
 }

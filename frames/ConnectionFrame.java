@@ -59,6 +59,15 @@ public class ConnectionFrame implements Frame {
 				else
 					Log.p("Backup in progress on the requested server.");
 				break;
+			case 50 :
+				ServerStatusUpdateMessage SSUM = new ServerStatusUpdateMessage(msg);
+				serverId = CC.serverId;
+				if(SSUM.server.id == serverId && SSUM.server.isSelectable) {	
+					ServerSelectionMessage SSM = new ServerSelectionMessage();
+					SSM.serialize(serverId);
+					instance.outPush(SSM);
+				}
+				break;
 			case 42 : 
 				SelectedServerDataMessage SSDM = new SelectedServerDataMessage(msg);
 				this.usefulInfos.put("ticket", SSDM.ticket);
@@ -87,15 +96,8 @@ public class ConnectionFrame implements Frame {
 				CharacterSelectionMessage CSM = new CharacterSelectionMessage();
 				CSM.serialize(CLM);
 				instance.outPush(CSM);
-				break;
-			case 50 :
-				ServerStatusUpdateMessage SSUM = new ServerStatusUpdateMessage(msg);
-				serverId = CC.serverId;
-				if(SSUM.server.id == serverId && SSUM.server.isSelectable) {	
-					ServerSelectionMessage SSM = new ServerSelectionMessage();
-					SSM.serialize(serverId);
-					instance.outPush(SSM);
-				}
+				
+				this.instance.endOfConnection();
 				break;
 		}
 	}

@@ -10,6 +10,7 @@ import frames.RoleplayFrame;
 import frames.SynchronisationFrame;
 
 public class Instance extends Thread {
+	public static boolean connectionInProcess;
 	private NetworkInterface net;
 	private CharacterController CC;
 	private Vector<Frame> workingFrames;
@@ -27,10 +28,12 @@ public class Instance extends Thread {
 		this.workingFrames.add(new SynchronisationFrame(this));
 		this.workingFrames.add(new RoleplayFrame(this, CC));
 		
-		start();
-		this.net.start();
-		this.net.sender.start();
-		this.CC.start();
+		waitForConnection(); // file d'attention pour la connexion des persos
+		
+		start(); // gestion des frames
+		this.net.start(); // réception
+		this.net.sender.start(); // envoi
+		this.CC.start(); // contrôleur
 	}
 	
 	public synchronized void inPush(Message msg) {
@@ -82,5 +85,24 @@ public class Instance extends Thread {
 	
 	public Latency getLatency() {
 		return net.latency;
+	}
+	
+	public void waitForConnection() {
+		synchronized(Main.class) {
+			while(connectionInProcess)
+				try {
+					Main.class.wait();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			connectionInProcess = true;
+		}
+	}
+	
+	public void endOfConnection() {
+		synchronized(Main.class) {
+			connectionInProcess = false;
+			Main.class.notify();
+		}
 	}
 }

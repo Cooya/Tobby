@@ -4,7 +4,6 @@ import main.CharacterController;
 import main.Instance;
 import messages.EmptyMessage;
 import messages.Message;
-import messages.character.InventoryContentMessage;
 import messages.context.CurrentMapMessage;
 import messages.context.GameContextRemoveElementMessage;
 import messages.context.GameMapMovementMessage;
@@ -81,10 +80,12 @@ public class RoleplayFrame implements Frame {
 				GameMapMovementMessage GMMM = new GameMapMovementMessage(msg);
 				CC.context.updateContextActorPosition(GMMM.actorId, GMMM.keyMovements.lastElement());
 				break;
+			/*
 			case 3016 :
 				InventoryContentMessage ICM = new InventoryContentMessage(msg);
 				CC.kamasNumber = ICM.kamas;
 				break;
+			*/
 		}
 	}
 }

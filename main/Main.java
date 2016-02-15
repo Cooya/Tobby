@@ -10,7 +10,8 @@ public class Main {
 	public static void main(String[] args) {
 		if(MODE) {
 			Emulation.runASLauncher();
-			new Instance("maxlebgdu93", "represente", 11); // pour le moment, on en gère qu'un seul
+			new Instance("maxlebgdu93", "represente", 11);
+			new Instance("maxlebgdu94", "represente", 11);
 		}
 		else
 			new Sniffer();

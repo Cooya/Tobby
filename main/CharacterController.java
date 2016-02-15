@@ -121,6 +121,6 @@ public class CharacterController extends Thread {
 	
 	public void run() {
 		waitCharacterAccessibility();
-		Path.buildPath(7, -18, -2, -26, this.currentCellId).run(this);
+		//Path.buildPath(7, -18, -2, -26, this.currentCellId).run(this);
 	}
 }

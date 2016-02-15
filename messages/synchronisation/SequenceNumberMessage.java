@@ -4,15 +4,14 @@ import utilities.ByteArray;
 import messages.Message;
 
 public class SequenceNumberMessage extends Message {
-	public static int number = 1;
 	
 	public SequenceNumberMessage() {
 		super();
 	}
 	
-	public void serialize() {
+	public void serialize(int sequenceNumber) {
 		ByteArray buffer = new ByteArray();
-		buffer.writeShort((short) number++);
+		buffer.writeShort((short) sequenceNumber);
 		
 		completeInfos(buffer);
 	}
