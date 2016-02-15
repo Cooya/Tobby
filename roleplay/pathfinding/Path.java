@@ -3,7 +3,6 @@ package roleplay.pathfinding;
 import java.util.Collections;
 import java.util.Vector;
 
-import roleplay.d2o.modules.MapPosition;
 import roleplay.pathfinding.Pathfinder.PathNode;
 import main.CharacterController;
 import utilities.Log;
@@ -13,6 +12,7 @@ public class Path {
 	private Vector<PathNode> nodes;
 	private int currentPos;
 	private boolean isLoop;
+	protected int startCellId = -1; // uniquement pour les paths de maps
 	
 	protected Path(Vector<PathNode> nodes) {
 		this.name = "anonymous";
@@ -32,35 +32,8 @@ public class Path {
 		this("anonymous", false);
 	}
 	
-	public static void moveTo(int mapId, CharacterController CC) {
-		Pathfinder pf = new MapsPathfinder(CC.currentCellId);
-		Path path = pf.compute(CC.currentMap.id, mapId);
-		path.run(CC);
-	}
-	
-	public static void moveTo(int x, int y, CharacterController CC) {
-		moveTo(selectBestMapId(x, y), CC);
-	}
-	
-	public static Path buildPath(int x1, int y1, int x2, int y2, int currentCellId) {
-		Pathfinder pf = new MapsPathfinder(currentCellId);
-		return pf.compute(selectBestMapId(x1, y1), selectBestMapId(x2, y2));
-	}
-	
-	public static Path buildPath(int srcMapId, int destMapId, int currentCellId) {
-		Pathfinder pf = new MapsPathfinder(currentCellId);
-		return pf.compute(srcMapId, destMapId);
-	}
-	
-	public void resetPositionPath() {
-		this.currentPos = 0;
-	}
-	
 	public void run(CharacterController CC) {
 		Log.p("Running path named \"" + name + "\".");
-		
-		if(!checkCurrentPos(CC.currentMap.id)) // si le perso n'est pas sur le trajet
-			moveTo(nodes.get(0).id, CC);
 
 		CC.currentPathName = this.name;
 		int nextMapId;
@@ -72,7 +45,19 @@ public class Path {
 		return this.name;
 	}
 	
-	public int getCrossingDuration() {
+	public PathNode getFirstNode() {
+		return this.nodes.firstElement();
+	}
+	
+	public PathNode getLastNode() {
+		return this.nodes.lastElement();
+	}
+	
+	public void resetPosition() {
+		this.currentPos = 0;
+	}
+	
+	public int getCrossingDuration() { // uniquement pour les paths de cellules
 		int pathLen = nodes.size();
 		int time = 0;
 		for(int i = 1; i < pathLen; ++i) // on saute la première cellule
@@ -121,7 +106,8 @@ public class Path {
 		Collections.reverse(nodes);
 	}
 	
-	private boolean checkCurrentPos(int currentMapId) {
+	@SuppressWarnings("unused")
+	private boolean onPath(int currentMapId) {
 		int vectorSize = nodes.size();
 		for(int i = 0; i < vectorSize; ++i)
 			if(nodes.get(i).id == currentMapId) {
@@ -129,19 +115,6 @@ public class Path {
 				return true;
 			}
 		return false;
-	}
-
-	private static int selectBestMapId(int x, int y) {
-		Vector<MapPosition> vector = MapPosition.getMapPositionByCoord(x, y);
-		int vectorSize = vector.size();
-		if(vectorSize == 0)
-			throw new Error("Invalid map coords : [" + x + ", " + y +"].");
-		if(vectorSize == 1)
-			return vector.get(0).id;
-		for(MapPosition mp : vector)
-			if(mp.worldMap == 1)
-				return mp.id;
-		throw new Error("An error to fix, Nico !");
 	}
 	
 	private class SimplePathNode extends PathNode {

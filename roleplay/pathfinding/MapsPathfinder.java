@@ -59,6 +59,11 @@ public class MapsPathfinder extends Pathfinder {
 		return MapsCache.loadMap(mapId);
 	}
 	
+	public boolean inSameZone(int mapId, int cellId1, int cellId2) {
+		MapNode node = new MapNode(mapId, -1, null);
+		return node.getCurrentZone(cellId1) == node.getCurrentZone(cellId2);		
+	}
+	
 	private class MapNode extends PathNode {
 		private Map map;
 		@SuppressWarnings("unused")
@@ -141,7 +146,7 @@ public class MapsPathfinder extends Pathfinder {
 			throw new Error("Map without available cell ! Impossible !");
 		}
 		
-		private Vector<Cell> getCurrentZone() {
+		private Vector<Cell> getCurrentZone(int cellId) {
 			//System.out.println("currentMap : " + MapPosition.getMapPositionById(currentNode.id));
 			//System.out.println("currrentCell : " + ((MapNode) currentNode).cell.id);
 			Vector<Cell> currentZone = null;
@@ -149,12 +154,16 @@ public class MapsPathfinder extends Pathfinder {
 			for(Vector<Cell> zone : ((MapNode) currentNode).zones)
 				if(!found)
 					for(Cell cell : zone)
-						if(cell.id == ((MapNode) currentNode).cell.id) {
+						if(cell.id == cellId) {
 							currentZone = zone;
 							found = true;
 							break;
 						}
 			return currentZone;
+		}
+		
+		private Vector<Cell> getCurrentZone() {
+			return getCurrentZone(((MapNode) currentNode).cell.id);
 		}
 		
 		private Cell getNewCellAfterMapChangement(int srcId, int direction) {
