@@ -299,7 +299,7 @@ public class CharacterController extends Thread {
 		instance.outPush(GFTFM);
 		this.inGameTurn.state = false;
 	}
-
+	
 	public void run() {
 		waitState(0);
 		
