@@ -10,8 +10,14 @@ public class Main {
 	public static void main(String[] args) {
 		if(MODE) {
 			Emulation.runASLauncher();
-			new Instance("maxlebgdu94", "represente", 11);
+			new Instance("maxlebgdu9", "represente", 11);
+			//new Instance("maxlebgdu93", "represente", 11);
 			//new Instance("maxlebgdu94", "represente", 11);
+			//new Instance("maxlebgdu96", "represente", 11);
+			//new Instance("maxlebgdu97", "represente", 11);
+			//new Instance("maxlebgdu98", "represente", 11);
+			//new Instance("maxlebgdu99", "represente", 11);
+			//new Instance("maxlebgdu100", "represente", 11);
 		}
 		else
 			new Sniffer();

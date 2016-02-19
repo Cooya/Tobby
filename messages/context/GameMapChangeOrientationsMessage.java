@@ -1,8 +1,9 @@
 package messages.context;
 
+import game.currentmap.ActorOrientation;
+
 import java.util.Vector;
 
-import roleplay.currentmap.ActorOrientation;
 import utilities.ByteArray;
 import messages.Message;
 

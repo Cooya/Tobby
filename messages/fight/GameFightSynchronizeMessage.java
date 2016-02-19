@@ -1,11 +1,12 @@
 package messages.fight;
 
+import game.fight.GameFightCharacterInformations;
+import game.fight.GameFightFighterInformations;
+import game.fight.GameFightMonsterInformations;
+
 import java.util.Vector;
 
 import messages.Message;
-import roleplay.fight.GameFightCharacterInformations;
-import roleplay.fight.GameFightFighterInformations;
-import roleplay.fight.GameFightMonsterInformations;
 import utilities.ByteArray;
 
 public class GameFightSynchronizeMessage extends Message{
@@ -31,7 +32,6 @@ public class GameFightSynchronizeMessage extends Message{
 		while(loc3 < loc2)
 		{
 			loc4 = buffer.readShort();
-			System.out.println(loc4);
 			switch(loc4){
 			case 29: 
 				loc5=new GameFightMonsterInformations(buffer);

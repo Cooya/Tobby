@@ -1,182 +1,320 @@
 package main;
 
+import game.currentmap.GameRolePlayGroupMonsterInformations;
+import game.d2o.modules.MapPosition;
+import game.d2p.MapsCache;
+import game.d2p.ankama.MapPoint;
+import game.d2p.ankama.MovementPath;
+import game.fight.GameFightMonsterInformations;
+import game.pathfinding.AreaRover;
+import game.pathfinding.CellsPathfinder;
+import game.pathfinding.Path;
+import game.pathfinding.Pathfinder;
+import informations.CharacterInformations;
+import informations.FightContext;
+import informations.RoleplayContext;
+
 import java.util.Vector;
 
 import messages.EmptyMessage;
-import messages.character.EmotePlayRequestMessage;
 import messages.context.ChangeMapMessage;
 import messages.context.GameMapMovementRequestMessage;
 import messages.context.GameRolePlayAttackMonsterRequestMessage;
 import messages.fight.GameActionFightCastRequestMessage;
 import messages.fight.GameFightReadyMessage;
 import messages.fight.GameFightTurnFinishMessage;
-import roleplay.currentmap.GameRolePlayGroupMonsterInformations;
-import roleplay.d2o.modules.MapPosition;
-import roleplay.d2p.MapsCache;
-import roleplay.d2p.ankama.Map;
-import roleplay.d2p.ankama.MapPoint;
-import roleplay.d2p.ankama.MovementPath;
-import roleplay.fight.GameFightFighterInformations;
-import roleplay.pathfinding.CellsPathfinder;
-import roleplay.pathfinding.Path;
-import roleplay.pathfinding.Pathfinder;
 import utilities.Log;
 
 public class CharacterController extends Thread {
+	private static final boolean DEBUG = true;
 	private Instance instance;
-	public String login;
-	public String password;
-	public int serverId;
-	public String characterName;
-	public double characterId;
-	public int currentCellId;
-	public int currentDirection;
-	public Map currentMap;
+	public CharacterInformations infos;
+	public RoleplayContext roleplayContext;
+	public FightContext fightContext;
 	public String currentPathName;
-	public boolean isAccessible;
 	public CellsPathfinder pathfinder;
-	public RoleplayContext rcontext;
-	public FightContext fcontext;
-	public int kamasNumber;
+	private int fightsCounter;
+	
+	private class State {
+		private boolean state;
+		
+		public State(boolean state) {
+			this.state = state;
+		}
+	}
+
+	private State isLoaded; // entrée en jeu et changement de map
+	private State inMovement;
+	private State inFight;
+	private State inGameTurn;
+	private State inRegeneration;
 	
 	public CharacterController(Instance instance, String login, String password, int serverId) {
 		this.instance = instance;
-		this.login = login;
-		this.password = password;
-		this.serverId = serverId;
-		this.isAccessible = false;
-		this.rcontext = new RoleplayContext(this);
-		this.fcontext = new FightContext(this);
+		this.infos = new CharacterInformations(login, password, serverId);
+		this.roleplayContext = new RoleplayContext(this);
+		this.fightContext = new FightContext(this);
+		
+		this.isLoaded = new State(false); // début du jeu et à chaque changement de map
+		this.inMovement = new State(false); 
+		this.inFight = new State(false); 
+		this.inGameTurn = new State(false); 
+		this.inRegeneration = new State(false); 
 	}
-	
+
 	public void setCurrentMap(int mapId) {
-		this.currentMap = MapsCache.loadMap(mapId);
-		this.pathfinder = new CellsPathfinder(this.currentMap);
+		this.infos.currentMap = MapsCache.loadMap(mapId);
+		this.pathfinder = new CellsPathfinder(this.infos.currentMap);
 	}
 	
-	public synchronized void makeCharacterAccessible() {
-		this.isAccessible = true;
+	private boolean isFree() {
+		return this.isLoaded.state && !this.inMovement.state && !this.inFight.state && !this.inRegeneration.state;
+	}
+	
+	// seul le thread principal entre ici
+	public synchronized void emit(Event event) {
+		if(DEBUG)
+			Log.p("Event emitted : " + event);
+		switchEvent(event);
 		notify();
 	}
 	
-	public synchronized void makeCharacterInaccessible() {
-		this.isAccessible = false;
+	private void switchEvent(Event event) {
+		switch(event) {
+			case CHARACTER_LOADED : this.isLoaded.state = true; break;
+			case FIGHT_START : this.inFight.state = true; break;
+			case FIGHT_END : this.inFight.state = false; break;
+			case GAME_TURN_START : this.inGameTurn.state = true; break;
+			case MONSTER_GROUP_RESPAWN : break; // juste une stimulation
+			default : new FatalError("Unexpected event caught : " + event); break;
+		}
 	}
 	
-	public synchronized void waitCharacterAccessibility() {
-		if(!this.isAccessible)
+	// seul le CC entre ici
+	private synchronized boolean waitSpecificState(State condition, boolean expectedState, int timeout) {
+		long startTime = System.currentTimeMillis();
+		long currentTime;
+		while(condition.state != expectedState && (currentTime = System.currentTimeMillis() - startTime) < timeout) {
 			try {
-				wait();
+				wait(timeout - currentTime);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+		}
+		if(condition.state == expectedState)
+			return true;
+		Log.p("TIMEOUT");
+		return false; // si on ne l'a pas reçu à temps
 	}
 	
-	public void moveTo(int cellId, boolean changeMap) {
-		waitCharacterAccessibility();
-		
-		if(this.currentCellId == cellId) // déjà sur la cellule cible
-			return;
-		
-		pathfinder = new CellsPathfinder(this.currentMap);
-		Path path = pathfinder.compute(this.currentCellId, cellId);
-		MovementPath mvPath = CellsPathfinder.movementPathFromArray(path.toVector());
-		mvPath.setStart(MapPoint.fromCellId(this.currentCellId));
-		mvPath.setEnd(MapPoint.fromCellId(cellId));
-		
-		GameMapMovementRequestMessage GMMRM = new GameMapMovementRequestMessage();
-		GMMRM.serialize(mvPath.getServerMovement(), this.currentMap.id, instance.getInstanceId());
-		instance.outPush(GMMRM);
-		
+	// seul le CC entre ici
+	private synchronized void waitAnyEvent() {
 		try {
-			Thread.sleep(path.getCrossingDuration());
+			wait();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void waitState(int stateId) {
+		switch(stateId) {
+			case 0 : // free
+				if(DEBUG)
+					Log.p("Waiting for character to be free.");
+				while(!isFree())
+					waitAnyEvent();
+				return;
+			case 1 : // start fight
+				if(DEBUG)
+					Log.p("Waiting for fight beginning.");
+				while(!this.inFight.state)
+					if(!waitSpecificState(this.inFight, true, 2000))
+						return;
+				return;
+			case 2 : // start game turn
+				if(DEBUG)
+					Log.p("Waiting for my game turn.");
+				while(!this.inGameTurn.state && this.inFight.state)
+					waitAnyEvent();	
+				return;
+			case 3 : // monster group respawn
+				if(DEBUG)
+					Log.p("Waiting for monster group respawn.");
+				waitAnyEvent();	
+				return;
+		}
+	}
+
+	public void moveTo(int cellId, boolean changeMap) {
+		waitState(0);
+
+		if(this.infos.currentCellId == cellId) { // déjà sur la cellule cible
+			Log.p("Already on the target cell id.");
+			return;
+		}
+		
+		Log.p("Moving from " + this.infos.currentCellId + " to " + cellId + ".");
+
+		pathfinder = new CellsPathfinder(this.infos.currentMap);
+		Path path = pathfinder.compute(this.infos.currentCellId, cellId);
+		MovementPath mvPath = CellsPathfinder.movementPathFromArray(path.toVector());
+		mvPath.setStart(MapPoint.fromCellId(this.infos.currentCellId));
+		mvPath.setEnd(MapPoint.fromCellId(cellId));
+
+		GameMapMovementRequestMessage GMMRM = new GameMapMovementRequestMessage();
+		GMMRM.serialize(mvPath.getServerMovement(), this.infos.currentMap.id, instance.getInstanceId());
+		instance.outPush(GMMRM);
+		this.inMovement.state = true;
+
+		try {
+			Thread.sleep(path.getCrossingDuration()); // on attend d'arriver à destination
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
-		
+
 		EmptyMessage EM = new EmptyMessage("GameMapMovementConfirmMessage");
 		instance.outPush(EM);
-		
-		this.currentCellId = cellId;
+		this.inMovement.state = false;
 	}
-	
+
 	public void moveTo(int x, int y, boolean changeMap) {
 		Vector<Integer> mapIds = MapPosition.getMapIdByCoord(x, y);
 		if(mapIds.size() == 0)
 			throw new Error("Invalid map coords.");
 		moveTo(mapIds.get(0), changeMap);
 	}
-	
+
 	public void changeMap(int direction) {
-		waitCharacterAccessibility();
-		
-		Log.p("Move to " + Pathfinder.directionToString(direction) + " map.");
-		
+		waitState(0);
+
+		Log.p("Moving to " + Pathfinder.directionToString(direction) + " map.");
+
 		moveTo(pathfinder.getChangementMapCell(direction), true);
 		ChangeMapMessage CMM = new ChangeMapMessage();
-		CMM.serialize(this.currentMap.getNeighbourMapFromDirection(direction));
+		CMM.serialize(this.infos.currentMap.getNeighbourMapFromDirection(direction));
 		instance.outPush(CMM);
+
+		this.isLoaded.state = false; // on attend la fin du changement de map
+	}
+
+	public void regenerateLife() {
+		waitState(0);
 		
-		this.isAccessible = false; // on attend la fin du changement de map
-	}
-	
-	public void launchFight(int position, double id) {
-		moveTo(position, false);
-		GameRolePlayAttackMonsterRequestMessage GRPAMRM = new GameRolePlayAttackMonsterRequestMessage();
-		GRPAMRM.serialize(id);
-		instance.outPush(GRPAMRM);
-	}
-	
-	public void run() {
-		while(true) {
+		if(this.infos.missingLife > 0) {
+			this.inRegeneration.state = true;
+			Log.p("Break for life regeneration.");
+			//EmotePlayRequestMessage EPRM = new EmotePlayRequestMessage();
+			//EPRM.serialize((byte) 1);
+			//instance.outPush(EPRM);
 			try {
-				Thread.sleep(2000);
-				waitCharacterAccessibility();
-				if(!fcontext.fight){
-					Thread.sleep(5000);
-					int regen=fcontext.lifeToRegen();
-					if(regen>0){
-						EmotePlayRequestMessage EPRM=new EmotePlayRequestMessage();
-						EPRM.serialize((byte) 1);
-						instance.outPush(EPRM);
-						Thread.sleep((regen/3)*1000);
-					}
-					System.out.println("Recherche de combat");
-					int nbMonsters=rcontext.getMonsters().size();
-					if(nbMonsters!=0){
-						GameRolePlayGroupMonsterInformations actor=rcontext.getMonsters().get((int)(Math.random()*nbMonsters));
-						launchFight(actor.disposition.cellId,actor.contextualId);
-						Thread.sleep(2000);
-						GameFightReadyMessage GFRM=new GameFightReadyMessage();
-						GFRM.serialize();
-						instance.outPush(GFRM);
-					}
-				}
-				else {
-					if(fcontext.turn && !fcontext.inAction){
-						if(fcontext.selfInfo.stats.actionPoints<4 || fcontext.skip==fcontext.nbMonstersAlive){
-							GameFightTurnFinishMessage GFTFM=new GameFightTurnFinishMessage();
-							GFTFM.serialize();
-							instance.outPush(GFTFM);
-							fcontext.skip=0;
-						}
-						else{
-							System.out.println(fcontext.nbMonstersAlive+"||"+fcontext.skip);
-							GameFightFighterInformations fighter=fcontext.getAliveMonsters().get(fcontext.skip);
-							GameActionFightCastRequestMessage GAFCRM=new GameActionFightCastRequestMessage();
-							GAFCRM.serialize(161, (short) fighter.disposition.cellId);
-							instance.outPush(GAFCRM);
-							System.out.println("Début de l'action");
-							fcontext.inAction=true;
-							Thread.sleep(3000);
-							fcontext.inAction=false;
-							fcontext.skip++;
-						}
-					}
-				}
+				Thread.sleep(this.infos.regenRate * 100 * this.infos.missingLife); // on attend de récupérer toute sa vie
+			} catch(Exception e) {
+				e.printStackTrace();
+			}
+			this.infos.missingLife = 0;
+			this.inRegeneration.state = false;
+		}
+	}
+	
+	public boolean lookForFight() {
+		//waitState(3);
+		
+		Log.p("Searching for monster groups to fight.");
+		Vector<GameRolePlayGroupMonsterInformations> monsterGroups;
+		int monsterGroupsSize;
+		while(true) {
+			monsterGroups = this.roleplayContext.getMonsterGroups();
+			monsterGroupsSize = monsterGroups.size();
+			if(monsterGroupsSize > 0) {
+				GameRolePlayGroupMonsterInformations monsterGroup = this.roleplayContext.getMonsterGroups().get((int) Math.random() * monsterGroupsSize);
+				Log.p("Monster group on cell id " + monsterGroup.disposition.cellId + ".");
+				if(launchFight(monsterGroup))
+					return true;
+			}
+			else {
+				Log.p("None monster group available on the map.");
+				return false;
+			}
+		}
+	}
+	
+	public boolean launchFight(GameRolePlayGroupMonsterInformations monsterGroup) {
+		waitState(0);
+		
+		Log.p("Trying to take this monster group.");
+		moveTo(monsterGroup.disposition.cellId, false);
+		if(this.roleplayContext.getMonsterGroupCellId(monsterGroup) == this.infos.currentCellId) {
+			Log.p("Monster group taken.");
+			GameRolePlayAttackMonsterRequestMessage GRPAMRM = new GameRolePlayAttackMonsterRequestMessage();
+			GRPAMRM.serialize(monsterGroup.contextualId);
+			instance.outPush(GRPAMRM);
+			return true;
+		}
+		return false;
+	}
+	
+	public void fight() {
+		this.instance.startFight(); // lancement de la FightFrame (à mettre en premier)
+		waitState(1);
+		
+		try {
+			Thread.sleep(1000); // pour paraître plus naturel lors du lancement du combat
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+		GameFightReadyMessage GFRM = new GameFightReadyMessage();
+		GFRM.serialize();
+		this.instance.outPush(GFRM);
+		while(this.inFight.state) {
+			waitState(2); // attente du début du prochain tour ou de la fin du combat
+			if(!this.inFight.state)
+				break;
+			launchSpell();
+			concludeGameTurn();
+		}
+		Log.p("Number of fights done : " + ++this.fightsCounter);
+	}
+
+	public void launchSpell() {
+		Vector<GameFightMonsterInformations> aliveMonsters = this.fightContext.getAliveMonsters();
+		for(GameFightMonsterInformations aliveMonster : aliveMonsters) {
+			if(this.fightContext.self.stats.actionPoints >= 4) {
+				Log.p("Launching a spell.");
+				GameActionFightCastRequestMessage GAFCRM = new GameActionFightCastRequestMessage();
+				GAFCRM.serialize(161, (short) aliveMonster.disposition.cellId);
+				instance.outPush(GAFCRM);	
+			}
+			else
+				break;
+			try {
+				Thread.sleep(1000); // ???
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
+		}
+	}
+	
+	public void concludeGameTurn() {
+		GameFightTurnFinishMessage GFTFM = new GameFightTurnFinishMessage();
+		GFTFM.serialize();
+		instance.outPush(GFTFM);
+		this.inGameTurn.state = false;
+	}
+
+	public void run() {
+		waitState(0);
+		
+		AreaRover areaRover = new AreaRover(this);
+		
+		while(true) {
+			regenerateLife();
+			if(lookForFight()) {
+				waitState(1);
+				if(inFight.state) // on vérifie si le combat a bien été lancé
+					fight();
+			}
+			else
+				changeMap(areaRover.nextMap(this));
 		}
 	}
 }

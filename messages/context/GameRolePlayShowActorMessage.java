@@ -1,8 +1,8 @@
 package messages.context;
 
+import game.ProtocolTypeManager;
+import game.currentmap.GameRolePlayActorInformations;
 import messages.Message;
-import roleplay.ProtocolTypeManager;
-import roleplay.currentmap.GameRolePlayActorInformations;
 import utilities.ByteArray;
 
 public class GameRolePlayShowActorMessage extends Message {

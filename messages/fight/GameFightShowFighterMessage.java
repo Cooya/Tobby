@@ -1,9 +1,9 @@
 package messages.fight;
 
+import game.fight.GameFightCharacterInformations;
+import game.fight.GameFightFighterInformations;
+import game.fight.GameFightMonsterInformations;
 import messages.Message;
-import roleplay.fight.GameFightCharacterInformations;
-import roleplay.fight.GameFightFighterInformations;
-import roleplay.fight.GameFightMonsterInformations;
 import utilities.ByteArray;
 
 public class GameFightShowFighterMessage extends Message{

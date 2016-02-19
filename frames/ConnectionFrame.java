@@ -21,7 +21,7 @@ import messages.connection.ServerSelectionMessage;
 import messages.connection.ServerStatusUpdateMessage;
 import messages.connection.ServersListMessage;
 
-public class ConnectionFrame implements Frame {
+public class ConnectionFrame implements IFrame {
 	private Instance instance;
 	private CharacterController CC;
 	private Hashtable<String, Object> usefulInfos = new Hashtable<String, Object>();
@@ -37,7 +37,7 @@ public class ConnectionFrame implements Frame {
 				HelloConnectMessage HCM = new HelloConnectMessage(msg);
 				this.usefulInfos.put("HCM", HCM);
 				IdentificationMessage IM = new IdentificationMessage();
-				IM.serialize(HCM, CC.login, CC.password);
+				IM.serialize(HCM, CC.infos.login, CC.infos.password);
 				instance.outPush(IM);
 				return true;
 			case 22 :
@@ -50,7 +50,7 @@ public class ConnectionFrame implements Frame {
 				return true;
 			case 30 :
 				ServersListMessage SLM = new ServersListMessage(msg);
-				int serverId = CC.serverId;
+				int serverId = CC.infos.serverId;
 				if(SLM.isSelectable(serverId)) {
 					ServerSelectionMessage SSM = new ServerSelectionMessage();
 					SSM.serialize(serverId);
@@ -61,7 +61,7 @@ public class ConnectionFrame implements Frame {
 				return true;
 			case 50 :
 				ServerStatusUpdateMessage SSUM = new ServerStatusUpdateMessage(msg);
-				serverId = CC.serverId;
+				serverId = CC.infos.serverId;
 				if(SSUM.server.id == serverId && SSUM.server.isSelectable) {	
 					ServerSelectionMessage SSM = new ServerSelectionMessage();
 					SSM.serialize(serverId);
@@ -82,7 +82,7 @@ public class ConnectionFrame implements Frame {
 				HCM = (HelloConnectMessage) this.usefulInfos.get("HCM");
 				ISM = (IdentificationSuccessMessage) this.usefulInfos.get("ISM");
 				RawDataMessage RDM = new RawDataMessage(msg);
-				Emulation.sendCredentials(CC.login, CC.password);
+				Emulation.sendCredentials(CC.infos.login, CC.infos.password);
 				Message CIM = Emulation.createServer(HCM, ISM, RDM, instance.getInstanceId());
 				instance.outPush(CIM);
 				return true;
@@ -90,9 +90,10 @@ public class ConnectionFrame implements Frame {
 				CharactersListRequestMessage CLRM = new CharactersListRequestMessage();
 				instance.outPush(CLRM);
 				return true;
-			case 151 :
+			case 151 : // CharactersListMessage
+			case 6475 : // BasicCharactersListMessage
 				CharactersListMessage CLM = new CharactersListMessage(msg);
-				CC.characterId = CLM.id.toNumber();
+				CC.infos.characterId = CLM.id.toNumber();
 				CharacterSelectionMessage CSM = new CharacterSelectionMessage();
 				CSM.serialize(CLM);
 				instance.outPush(CSM);

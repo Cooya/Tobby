@@ -7,7 +7,7 @@ import messages.synchronisation.BasicLatencyStatsMessage;
 import messages.synchronisation.BasicStatMessage;
 import messages.synchronisation.SequenceNumberMessage;
 
-public class SynchronisationFrame implements Frame {
+public class SynchronisationFrame implements IFrame {
 	private Instance instance;
 	private int sequenceNumber;
 	private int basicNoOperationMsgCounter;

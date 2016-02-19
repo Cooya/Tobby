@@ -1,8 +1,9 @@
 package messages.connection;
 
+import game.server.GameServerInformations;
+
 import java.util.Vector;
 
-import roleplay.GameServerInformations;
 import messages.Message;
 import utilities.ByteArray;
 

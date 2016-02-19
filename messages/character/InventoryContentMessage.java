@@ -1,9 +1,10 @@
 package messages.character;
 
+import game.inventory.ObjectItem;
+
 import java.util.Vector;
 
 import messages.Message;
-import roleplay.inventory.ObjectItem;
 import utilities.ByteArray;
 
 public class InventoryContentMessage extends Message {

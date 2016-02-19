@@ -1,6 +1,6 @@
 package messages.connection;
 
-import roleplay.GameServerInformations;
+import game.server.GameServerInformations;
 import utilities.ByteArray;
 import messages.Message;
 

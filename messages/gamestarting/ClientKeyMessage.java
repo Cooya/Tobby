@@ -1,6 +1,6 @@
 package messages.gamestarting;
 
-import roleplay.InterClientKeyManager;
+import game.InterClientKeyManager;
 import utilities.ByteArray;
 import messages.Message;
 

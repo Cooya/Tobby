@@ -1,11 +1,12 @@
 package messages.character;
 
+import game.inventory.IdolsPreset;
+import game.inventory.ObjectItem;
+import game.inventory.Preset;
+
 import java.util.Vector;
 
 import messages.Message;
-import roleplay.inventory.IdolsPreset;
-import roleplay.inventory.ObjectItem;
-import roleplay.inventory.Preset;
 import utilities.ByteArray;
 
 public class InventoryContentAndPresetMessage extends Message {
@@ -32,7 +33,6 @@ public class InventoryContentAndPresetMessage extends Message {
 		ObjectItem obj = null;
 		int loc2 = buffer.readShort();
 		int loc3 = 0;
-		System.out.println("Il y a "+loc2+" items");
 		while(loc3 < loc2)
 		{
 			obj = new ObjectItem(buffer);

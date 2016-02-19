@@ -1,6 +1,6 @@
 package messages.context;
 
-import roleplay.currentmap.FightTeamInformations;
+import game.currentmap.FightTeamInformations;
 import utilities.ByteArray;
 import messages.Message;
 

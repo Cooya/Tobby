@@ -1,14 +1,15 @@
 package messages.context;
 
+import game.ProtocolTypeManager;
+import game.currentmap.FightCommonInformations;
+import game.currentmap.GameRolePlayActorInformations;
+import game.currentmap.HouseInformations;
+import game.currentmap.InteractiveElement;
+import game.currentmap.MapObstacle;
+import game.currentmap.StatedElement;
+
 import java.util.Vector;
 
-import roleplay.ProtocolTypeManager;
-import roleplay.currentmap.FightCommonInformations;
-import roleplay.currentmap.GameRolePlayActorInformations;
-import roleplay.currentmap.HouseInformations;
-import roleplay.currentmap.InteractiveElement;
-import roleplay.currentmap.MapObstacle;
-import roleplay.currentmap.StatedElement;
 import utilities.ByteArray;
 import messages.Message;
 

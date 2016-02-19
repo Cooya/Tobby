@@ -21,7 +21,7 @@ public interface Connection {
 				this.inputStream = this.client.getInputStream();
 				this.outputStream = this.client.getOutputStream();
 			} catch (Exception e) {
-				e.printStackTrace();
+				new FatalError(e);
 			}
 		}
 		
@@ -31,7 +31,7 @@ public interface Connection {
 				this.inputStream = this.client.getInputStream();
 				this.outputStream = this.client.getOutputStream();
 			} catch (Exception e) {
-				e.printStackTrace();
+				new FatalError(e);
 			}
 		}
 		
@@ -40,8 +40,7 @@ public interface Connection {
 				this.outputStream.write(bytes);
 				this.outputStream.flush();
 			} catch (Exception e) {
-				e.printStackTrace();
-				System.exit(1);
+				new FatalError(e);
 			}
 		}
 		
@@ -50,7 +49,6 @@ public interface Connection {
 			try {
 				bytesReceived = this.inputStream.read(buffer);
 			} catch (Exception e) {
-				//e.printStackTrace();
 				return bytesReceived;
 			}
 			return bytesReceived;
@@ -62,7 +60,7 @@ public interface Connection {
 				this.outputStream.close();
 				this.client.close();
 			} catch (Exception e) {
-				e.printStackTrace();
+				new FatalError(e);
 			}
 		}
 		
@@ -79,7 +77,7 @@ public interface Connection {
 			try {
 				this.server = new ServerSocket(port);
 			} catch (Exception e) {
-				e.printStackTrace();
+				new FatalError(e);
 			}
 		}
 		
@@ -96,7 +94,7 @@ public interface Connection {
 				this.client.close();
 				this.server.close();
 			} catch (Exception e) {
-				e.printStackTrace();
+				new FatalError(e);
 			}
 		}
 		
@@ -104,7 +102,7 @@ public interface Connection {
 			try {
 				this.client.close();
 			} catch (Exception e) {
-				e.printStackTrace();
+				new FatalError(e);
 			}
 		}
 		
@@ -112,7 +110,7 @@ public interface Connection {
 			try {
 				this.client = new Client(server.accept());
 			} catch (Exception e) {
-				e.printStackTrace();
+				new FatalError(e);
 			}
 		}
 		

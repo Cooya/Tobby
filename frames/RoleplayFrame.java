@@ -1,9 +1,13 @@
 package frames;
 
+import game.InterClientKeyManager;
+import game.d2o.modules.MapPosition;
 import main.CharacterController;
+import main.Event;
 import main.Instance;
 import messages.EmptyMessage;
 import messages.Message;
+import messages.character.LifePointsRegenBeginMessage;
 import messages.context.CurrentMapMessage;
 import messages.context.GameContextRemoveElementMessage;
 import messages.context.GameMapMovementMessage;
@@ -13,11 +17,9 @@ import messages.context.MapInformationsRequestMessage;
 import messages.gamestarting.ChannelEnablingMessage;
 import messages.gamestarting.ClientKeyMessage;
 import messages.gamestarting.PrismsListRegisterMessage;
-import roleplay.InterClientKeyManager;
-import roleplay.d2o.modules.MapPosition;
 import utilities.Log;
 
-public class RoleplayFrame implements Frame {
+public class RoleplayFrame implements IFrame {
 	private Instance instance;
 	private CharacterController CC;
 
@@ -57,32 +59,45 @@ public class RoleplayFrame implements Frame {
 				CurrentMapMessage CMM = new CurrentMapMessage(msg);
 				CC.setCurrentMap(CMM.mapId);
 				MapInformationsRequestMessage MIRM = new MapInformationsRequestMessage();
-				MIRM.serialize(CC.currentMap.id);
+				MIRM.serialize(CC.infos.currentMap.id);
 				instance.outPush(MIRM);
 				return true;
 			case 226 :
 				MapComplementaryInformationsDataMessage MCIDM = new MapComplementaryInformationsDataMessage(msg);
-				CC.rcontext.newContextActors(MCIDM.actors);
+				CC.roleplayContext.newContextActors(MCIDM.actors);
 				
-				Log.p("Current map : " + MapPosition.getMapPositionById(CC.currentMap.id) + ".\nCurrent cell id : " + CC.currentCellId + ".");
+				Log.p("Current map : " + MapPosition.getMapPositionById(CC.infos.currentMap.id) + ".\nCurrent cell id : " + CC.infos.currentCellId + ".\nCurrent area id : " + CC.infos.currentMap.subareaId + ".");
 				
-				CC.makeCharacterAccessible(); // on peut maintenant bouger
+				CC.emit(Event.CHARACTER_LOADED);
 				return true;
 			case 5632 :
 				GameRolePlayShowActorMessage GRPSAM = new GameRolePlayShowActorMessage(msg);
-				CC.rcontext.addContextActor(GRPSAM.informations);
+				CC.roleplayContext.addContextActor(GRPSAM.informations);
 				return true;
 			case 251 :
 				GameContextRemoveElementMessage GCREM = new GameContextRemoveElementMessage(msg);
-				CC.rcontext.removeContextActor(GCREM.id);
+				CC.roleplayContext.removeContextActor(GCREM.id);
 				return true;
 			case 951 :
 				GameMapMovementMessage GMMM = new GameMapMovementMessage(msg);
-				CC.rcontext.updateContextActorPosition(GMMM.actorId, GMMM.keyMovements.lastElement());
+				int position = GMMM.keyMovements.lastElement();
+				CC.roleplayContext.updateContextActorPosition(GMMM.actorId, position);
+				if(GMMM.actorId == this.CC.infos.characterId) {
+					this.CC.infos.currentCellId = position;
+					Log.p("Current cell id updated : " + position + ".");
+				}
 				return true;
 			case 3016 :
 				/*InventoryContentMessage ICM = new InventoryContentMessage(msg);
 				CC.kamasNumber = ICM.kamas;*/
+				return true;
+			case 5684 : // LifePointsRegenBeginMessage
+				LifePointsRegenBeginMessage LPRBM = new LifePointsRegenBeginMessage(msg);
+				this.CC.infos.regenRate = LPRBM.regenRate;
+				return true;
+			case 700 : // début d'un combat
+				Log.p("Starting fight.");
+				this.CC.emit(Event.FIGHT_START);
 				return true;
 		}
 		return false;
