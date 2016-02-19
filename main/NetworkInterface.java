@@ -4,7 +4,6 @@ import java.util.LinkedList;
 
 import messages.Message;
 import utilities.ByteArray;
-import utilities.Log;
 
 public class NetworkInterface extends Thread {
 	private static final boolean DEBUG = false;
@@ -26,26 +25,26 @@ public class NetworkInterface extends Thread {
 		byte[] buffer = new byte[Main.BUFFER_DEFAULT_SIZE];
 		int bytesReceived = 0;
 		
-		Log.p("Connection to authentification server, waiting response...");
+		this.instance.log.p("Connection to authentification server, waiting response...");
 		this.serverCo = new Connection.Client(Main.AUTH_SERVER_IP, Main.SERVER_PORT);
 		while((bytesReceived = this.serverCo.receive(buffer)) != -1) {
 			if(DEBUG)
-				Log.p(bytesReceived + " bytes received from server.");
+				this.instance.log.p(bytesReceived + " bytes received from server.");
 			processMsgStack(reader.processBuffer(new ByteArray(buffer, bytesReceived)));
 		}
 		this.serverCo.close();
-		Log.p("Deconnected from authentification server.");
+		this.instance.log.p("Deconnected from authentification server.");
 		
 		if(gameServerIP != null) {
-			Log.p("Connection to game server, waiting response...");
+			this.instance.log.p("Connection to game server, waiting response...");
 			this.serverCo = new Connection.Client(gameServerIP, Main.SERVER_PORT);
 			while((bytesReceived = this.serverCo.receive(buffer)) != -1) {
 				if(DEBUG)
-					Log.p(bytesReceived + " bytes received from server.");
+					this.instance.log.p(bytesReceived + " bytes received from server.");
 				processMsgStack(reader.processBuffer(new ByteArray(buffer, bytesReceived)));
 			}
 			this.serverCo.close();
-			Log.p("Deconnected from game server.");
+			this.instance.log.p("Deconnected from game server.");
 		}
 	}
 	
@@ -53,7 +52,7 @@ public class NetworkInterface extends Thread {
 		Message msg;
 		while((msg = msgStack.poll()) != null) {
 			latency.updateLatency();
-			Log.p("r", msg);
+			this.instance.log.p("r", msg);
 			instance.inPush(msg);
 		}
 	}
@@ -69,7 +68,7 @@ public class NetworkInterface extends Thread {
 				if((msg = instance.outPull()) != null) {
 					latency.setLatestSent();
 					serverCo.send(msg.makeRaw());
-					Log.p("s", msg);
+					instance.log.p("s", msg);
 				}
 				else
 					try {

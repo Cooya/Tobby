@@ -23,7 +23,6 @@ import messages.context.GameRolePlayAttackMonsterRequestMessage;
 import messages.fight.GameActionFightCastRequestMessage;
 import messages.fight.GameFightReadyMessage;
 import messages.fight.GameFightTurnFinishMessage;
-import utilities.Log;
 
 public class CharacterController extends Thread {
 	private static final boolean DEBUG = true;
@@ -74,7 +73,7 @@ public class CharacterController extends Thread {
 	// seul le thread principal entre ici
 	public synchronized void emit(Event event) {
 		if(DEBUG)
-			Log.p("Event emitted : " + event);
+			this.instance.log.p("Event emitted : " + event);
 		switchEvent(event);
 		notify();
 	}
@@ -103,7 +102,7 @@ public class CharacterController extends Thread {
 		}
 		if(condition.state == expectedState)
 			return true;
-		Log.p("TIMEOUT");
+		this.instance.log.p("TIMEOUT");
 		return false; // si on ne l'a pas reçu à temps
 	}
 	
@@ -120,26 +119,26 @@ public class CharacterController extends Thread {
 		switch(stateId) {
 			case 0 : // free
 				if(DEBUG)
-					Log.p("Waiting for character to be free.");
+					this.instance.log.p("Waiting for character to be free.");
 				while(!isFree())
 					waitAnyEvent();
 				return;
 			case 1 : // start fight
 				if(DEBUG)
-					Log.p("Waiting for fight beginning.");
+					this.instance.log.p("Waiting for fight beginning.");
 				while(!this.inFight.state)
 					if(!waitSpecificState(this.inFight, true, 2000))
 						return;
 				return;
 			case 2 : // start game turn
 				if(DEBUG)
-					Log.p("Waiting for my game turn.");
+					this.instance.log.p("Waiting for my game turn.");
 				while(!this.inGameTurn.state && this.inFight.state)
 					waitAnyEvent();	
 				return;
 			case 3 : // monster group respawn
 				if(DEBUG)
-					Log.p("Waiting for monster group respawn.");
+					this.instance.log.p("Waiting for monster group respawn.");
 				waitAnyEvent();	
 				return;
 		}
@@ -149,11 +148,11 @@ public class CharacterController extends Thread {
 		waitState(0);
 
 		if(this.infos.currentCellId == cellId) { // déjà sur la cellule cible
-			Log.p("Already on the target cell id.");
+			this.instance.log.p("Already on the target cell id.");
 			return;
 		}
 		
-		Log.p("Moving from " + this.infos.currentCellId + " to " + cellId + ".");
+		this.instance.log.p("Moving from " + this.infos.currentCellId + " to " + cellId + ".");
 
 		pathfinder = new CellsPathfinder(this.infos.currentMap);
 		Path path = pathfinder.compute(this.infos.currentCellId, cellId);
@@ -162,7 +161,7 @@ public class CharacterController extends Thread {
 		mvPath.setEnd(MapPoint.fromCellId(cellId));
 
 		GameMapMovementRequestMessage GMMRM = new GameMapMovementRequestMessage();
-		GMMRM.serialize(mvPath.getServerMovement(), this.infos.currentMap.id, instance.getInstanceId());
+		GMMRM.serialize(mvPath.getServerMovement(), this.infos.currentMap.id, instance.id);
 		instance.outPush(GMMRM);
 		this.inMovement.state = true;
 
@@ -187,7 +186,7 @@ public class CharacterController extends Thread {
 	public void changeMap(int direction) {
 		waitState(0);
 
-		Log.p("Moving to " + Pathfinder.directionToString(direction) + " map.");
+		this.instance.log.p("Moving to " + Pathfinder.directionToString(direction) + " map.");
 
 		moveTo(pathfinder.getChangementMapCell(direction), true);
 		ChangeMapMessage CMM = new ChangeMapMessage();
@@ -202,7 +201,7 @@ public class CharacterController extends Thread {
 		
 		if(this.infos.missingLife > 0) {
 			this.inRegeneration.state = true;
-			Log.p("Break for life regeneration.");
+			this.instance.log.p("Break for life regeneration.");
 			//EmotePlayRequestMessage EPRM = new EmotePlayRequestMessage();
 			//EPRM.serialize((byte) 1);
 			//instance.outPush(EPRM);
@@ -219,7 +218,7 @@ public class CharacterController extends Thread {
 	public boolean lookForFight() {
 		//waitState(3);
 		
-		Log.p("Searching for monster groups to fight.");
+		this.instance.log.p("Searching for monster group to fight.");
 		Vector<GameRolePlayGroupMonsterInformations> monsterGroups;
 		int monsterGroupsSize;
 		while(true) {
@@ -227,12 +226,12 @@ public class CharacterController extends Thread {
 			monsterGroupsSize = monsterGroups.size();
 			if(monsterGroupsSize > 0) {
 				GameRolePlayGroupMonsterInformations monsterGroup = this.roleplayContext.getMonsterGroups().get((int) Math.random() * monsterGroupsSize);
-				Log.p("Monster group on cell id " + monsterGroup.disposition.cellId + ".");
+				this.instance.log.p("Monster group on cell id " + monsterGroup.disposition.cellId + ".");
 				if(launchFight(monsterGroup))
 					return true;
 			}
 			else {
-				Log.p("None monster group available on the map.");
+				this.instance.log.p("None monster group available on the map.");
 				return false;
 			}
 		}
@@ -241,10 +240,10 @@ public class CharacterController extends Thread {
 	public boolean launchFight(GameRolePlayGroupMonsterInformations monsterGroup) {
 		waitState(0);
 		
-		Log.p("Trying to take this monster group.");
+		this.instance.log.p("Trying to take this monster group.");
 		moveTo(monsterGroup.disposition.cellId, false);
 		if(this.roleplayContext.getMonsterGroupCellId(monsterGroup) == this.infos.currentCellId) {
-			Log.p("Monster group taken.");
+			this.instance.log.p("Monster group taken.");
 			GameRolePlayAttackMonsterRequestMessage GRPAMRM = new GameRolePlayAttackMonsterRequestMessage();
 			GRPAMRM.serialize(monsterGroup.contextualId);
 			instance.outPush(GRPAMRM);
@@ -272,14 +271,14 @@ public class CharacterController extends Thread {
 			launchSpell();
 			concludeGameTurn();
 		}
-		Log.p("Number of fights done : " + ++this.fightsCounter);
+		this.instance.log.p("Number of fights done : " + ++this.fightsCounter);
 	}
 
 	public void launchSpell() {
 		Vector<GameFightMonsterInformations> aliveMonsters = this.fightContext.getAliveMonsters();
 		for(GameFightMonsterInformations aliveMonster : aliveMonsters) {
 			if(this.fightContext.self.stats.actionPoints >= 4) {
-				Log.p("Launching a spell.");
+				this.instance.log.p("Launching a spell.");
 				GameActionFightCastRequestMessage GAFCRM = new GameActionFightCastRequestMessage();
 				GAFCRM.serialize(161, (short) aliveMonster.disposition.cellId);
 				instance.outPush(GAFCRM);	
@@ -287,7 +286,7 @@ public class CharacterController extends Thread {
 			else
 				break;
 			try {
-				Thread.sleep(1000); // ???
+				Thread.sleep(1000); // important pour le moment sinon bug
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -306,12 +305,14 @@ public class CharacterController extends Thread {
 		
 		AreaRover areaRover = new AreaRover(this);
 		
-		while(true) {
+		while(true) { 
 			regenerateLife();
 			if(lookForFight()) {
 				waitState(1);
 				if(inFight.state) // on vérifie si le combat a bien été lancé
 					fight();
+				else
+					changeMap(areaRover.nextMap(this));
 			}
 			else
 				changeMap(areaRover.nextMap(this));

@@ -6,19 +6,19 @@ import messages.Message;
 
 public class Log {
 	private static final boolean DEBUG = false;
-	private static String LOG_PATH = System.getProperty("user.dir") + "/Ressources/log.txt";
+	private static String LOG_PATH = System.getProperty("user.dir") + "/Ressources/";
 	private static String EOL = System.getProperty("line.separator");
-	private static PrintWriter writer;
+	private PrintWriter writer;
 	
-	static {
+	public Log(String characterName) {
 		try {
-			writer = new PrintWriter(LOG_PATH, "UTF-8");
-		} catch (Exception e) {
+			writer = new PrintWriter(LOG_PATH + characterName + "_log.txt", "UTF-8");
+		} catch(Exception e) {
 			e.printStackTrace();
 		}
 	}
 	
-	public synchronized static void p(String msgDirection, Message msg) {
+	public synchronized void p(String msgDirection, Message msg) {
 		String str = "";
 		int id = msg.getId();
 		String name = Message.get(id);
@@ -42,7 +42,7 @@ public class Log {
 		writer.flush();
 	}
 	
-	public synchronized static void p(String str) {
+	public synchronized void p(String str) {
 		if(DEBUG)
 			System.out.println(str + EOL);
 		else

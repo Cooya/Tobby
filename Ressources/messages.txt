@@ -84,6 +84,8 @@
 4001 FriendsGetListMessage
 4002 FriendsListMessage
 5503 SetUpdateMessage
+5540 GameActionFightMarkCellsMessage
+5570 GameActionFightUnmarkCellsMessage
 5572 GameFightUpdateTeamMessage
 5607 ClientKeyMessage
 5613 ChallengeTargetsListMessage
@@ -108,10 +110,12 @@
 5709 StatedElementUpdatedMessage
 5726 OnConnectionEventMessage
 5734 HousePropertiesMessage
+5741 GameActionFightTriggerGlyphTrapMessage
 5745 InteractiveUsedMessage
 5747 JobMultiCraftAvailableSkillsMessage
 5809 JobExperienceMultiUpdateMessage
 5816 BasicLatencyStatsRequestMessage
+5825 GameActionFightSummonMessage
 5828 GameActionFightDodgePointLossMessage
 5834 SpellForgottenMessage
 5836 CharacterSelectedErrorMessage
@@ -126,6 +130,7 @@
 6067 GameFightResumeMessage
 6068 CharacterSelectedForceMessage
 6070 GameActionFightDispellableEffectMessage
+6076 CharacterLevelUpInformationMessage
 6078 FriendWarnOnLevelGainStateMessage
 6087 NotificationListMessage
 6100 QueueStatusMessage
@@ -165,6 +170,7 @@
 6367 TitlesAndOrnamentsListMessage
 6372 CheckIntegrityMessage
 6383 FriendGuildWarnOnAchievementCompleteStateMessage
+6386 PlayerStatusUpdateMessage
 6434 ServerSessionConstantsMessage
 6440 PrismsListMessage
 6441 PrismsListRegisterMessage

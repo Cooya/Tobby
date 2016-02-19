@@ -28,7 +28,7 @@ public class SynchronisationFrame implements IFrame {
 			case 5816 :
 				BasicLatencyStatsMessage BLSM = new BasicLatencyStatsMessage();
 				Latency latency = instance.getLatency();
-				BLSM.serialize(latency.latencyAvg(), latency.latencySamplesCount(), latency.latencySamplesMax(), instance.getInstanceId());
+				BLSM.serialize(latency.latencyAvg(), latency.latencySamplesCount(), latency.latencySamplesMax(), instance.id);
 				instance.outPush(BLSM);
 				return true;
 			case 6316 :

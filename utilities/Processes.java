@@ -31,7 +31,7 @@ public class Processes {
 			InputStream in = p.getInputStream();
 			byte[] bytes = new byte[Main.BUFFER_DEFAULT_SIZE];
 			in.read(bytes);
-			Log.p("DLL Injection.\n" + new String(bytes));
+			//System.out.println(("DLL Injection.\n" + new String(bytes)));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

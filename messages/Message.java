@@ -3,9 +3,9 @@ package messages;
 import java.io.BufferedReader;
 import java.io.FileReader;
 
+import main.Instance;
 import utilities.BiMap;
 import utilities.ByteArray;
-import utilities.Log;
 
 public class Message {
 	private static final String messagesFilePath = "Ressources/messages.txt";
@@ -13,7 +13,7 @@ public class Message {
 	
 	static  {
 		try {
-			Log.p("Loading informations from messages file.");
+			Instance.log("Loading informations from messages file.");
 			BufferedReader buffer = new BufferedReader(new FileReader(messagesFilePath));
 			String[] splitLine;
 			String line = buffer.readLine();

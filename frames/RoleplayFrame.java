@@ -17,7 +17,6 @@ import messages.context.MapInformationsRequestMessage;
 import messages.gamestarting.ChannelEnablingMessage;
 import messages.gamestarting.ClientKeyMessage;
 import messages.gamestarting.PrismsListRegisterMessage;
-import utilities.Log;
 
 public class RoleplayFrame implements IFrame {
 	private Instance instance;
@@ -66,9 +65,10 @@ public class RoleplayFrame implements IFrame {
 				MapComplementaryInformationsDataMessage MCIDM = new MapComplementaryInformationsDataMessage(msg);
 				CC.roleplayContext.newContextActors(MCIDM.actors);
 				
-				Log.p("Current map : " + MapPosition.getMapPositionById(CC.infos.currentMap.id) + ".\nCurrent cell id : " + CC.infos.currentCellId + ".\nCurrent area id : " + CC.infos.currentMap.subareaId + ".");
+				this.instance.log.p("Current map : " + MapPosition.getMapPositionById(CC.infos.currentMap.id) + ".\nCurrent cell id : " + CC.infos.currentCellId + ".\nCurrent area id : " + CC.infos.currentMap.subareaId + ".");
 				
-				CC.emit(Event.CHARACTER_LOADED);
+				this.CC.emit(Event.CHARACTER_LOADED);
+				this.CC.emit(Event.FIGHT_END);
 				return true;
 			case 5632 :
 				GameRolePlayShowActorMessage GRPSAM = new GameRolePlayShowActorMessage(msg);
@@ -84,7 +84,7 @@ public class RoleplayFrame implements IFrame {
 				CC.roleplayContext.updateContextActorPosition(GMMM.actorId, position);
 				if(GMMM.actorId == this.CC.infos.characterId) {
 					this.CC.infos.currentCellId = position;
-					Log.p("Current cell id updated : " + position + ".");
+					this.instance.log.p("Current cell id updated : " + position + ".");
 				}
 				return true;
 			case 3016 :
@@ -96,7 +96,7 @@ public class RoleplayFrame implements IFrame {
 				this.CC.infos.regenRate = LPRBM.regenRate;
 				return true;
 			case 700 : // début d'un combat
-				Log.p("Starting fight.");
+				this.instance.log.p("Starting fight.");
 				this.CC.emit(Event.FIGHT_START);
 				return true;
 		}

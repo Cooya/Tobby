@@ -9,7 +9,7 @@ import java.util.Vector;
 
 import main.CharacterController;
 import main.Event;
-import utilities.Log;
+import main.Instance;
 
 public class RoleplayContext {
 	private CharacterController CC;
@@ -37,7 +37,7 @@ public class RoleplayContext {
 		for(GameRolePlayActorInformations actor : actors)
 			if(actor.contextualId == actorId) {
 				if(actor instanceof GameRolePlayGroupMonsterInformations)
-					Log.p("Monster group is moving from cell id " + actor.disposition.cellId + " to " + position + ".");
+					Instance.log("Monster group is moving from cell id " + actor.disposition.cellId + " to " + position + ".");
 				actor.disposition.cellId = position;
 			}
 	} 

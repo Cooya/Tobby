@@ -1,6 +1,5 @@
 package frames;
 
-import utilities.Log;
 import main.CharacterController;
 import main.Event;
 import main.Instance;
@@ -27,28 +26,29 @@ public class FightFrame implements IFrame {
 				GameFightTurnReadyMessage GFTRM = new GameFightTurnReadyMessage(true);
 				GFTRM.serialize();
 				instance.outPush(GFTRM);
+				this.instance.log.p("Next turn.");
 				return true;
 			case 6465 : // début du tour
-				Log.p("Begin of my game turn.");
+				this.instance.log.p("Begin of my game turn.");
 				this.CC.emit(Event.GAME_TURN_START);
 				return true;
 			case 719 : // fin du tour
 				GameFightTurnEndMessage GFTEM = new GameFightTurnEndMessage(msg);
 				GFTEM.deserialize();
 				if(GFTEM.fighterId == this.CC.infos.characterId)
-					Log.p("End of my game turn.");
+					this.instance.log.p("End of my game turn.");
 				return true;
 			case 5921 : // synchronisation avec le serveur
 				GameFightSynchronizeMessage GFSM = new GameFightSynchronizeMessage(msg);
 				GFSM.deserialize();
 				this.CC.fightContext.setFightContext(GFSM.fighters);
-				Log.p("Fight context set.");
+				this.instance.log.p("Fight context set.");
+				this.instance.log.p("Life points : " + this.CC.fightContext.self.stats.lifePoints + "/" + this.CC.fightContext.self.stats.maxLifePoints + ".");
 				return true;
 			case 720 : // fin du combat
-				Log.p("End of fight.");
+				this.instance.log.p("End of fight.");
 				this.instance.quitFight();
-				this.CC.infos.missingLife = this.CC.fightContext.missingLife();
-				this.CC.emit(Event.FIGHT_END);
+				this.CC.infos.missingLife = this.CC.fightContext.missingLifePoints();
 				return true;
 			case 956 : // action terminée
 				SequenceEndMessage SEM = new SequenceEndMessage(msg);

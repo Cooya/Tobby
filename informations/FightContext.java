@@ -31,7 +31,7 @@ public class FightContext {
 		return monsters;
 	}
 	
-	public int missingLife() {
+	public int missingLifePoints() {
 		if(this.self == null)
 			return -1;
 		return this.self.stats.baseMaxLifePoints - this.self.stats.lifePoints;

@@ -2,9 +2,9 @@ package messages.connection;
 
 import java.io.FileOutputStream;
 
+import main.Instance;
 import messages.Message;
 import utilities.ByteArray;
-import utilities.Log;
 
 public class RawDataMessage extends Message {
 	
@@ -19,7 +19,7 @@ public class RawDataMessage extends Message {
 			FileOutputStream fs = new FileOutputStream("./RDM.swf");
 			fs.write(buffer.readBytes(buffer.readVarInt()));
 			fs.close();
-			Log.p("SWF file created.");
+			Instance.log("SWF file created.");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

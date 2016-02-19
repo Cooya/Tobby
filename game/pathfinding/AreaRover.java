@@ -10,7 +10,7 @@ import java.util.Random;
 
 import main.CharacterController;
 import main.FatalError;
-import utilities.Log;
+import main.Instance;
 
 public class AreaRover {
 	private int areaId;
@@ -40,7 +40,7 @@ public class AreaRover {
 			if(map != null && map.subareaId == CC.infos.currentMap.subareaId)
 				return randomDirection;
 			else {
-				Log.p("Direction to " + Pathfinder.directionToString(randomDirection) + " impossible.");
+				Instance.log("Direction to " + Pathfinder.directionToString(randomDirection) + " impossible.");
 				neighbours.remove(randomDirection);
 			}
 		}

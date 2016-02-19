@@ -4,7 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.Hashtable;
 
-import utilities.Log;
+import main.Instance;
 
 @SuppressWarnings("resource")
 public class PathsManager {
@@ -14,7 +14,7 @@ public class PathsManager {
 	static {
 		BufferedReader buffer = null;
 		try {
-			Log.p("Loading paths from paths file...");
+			Instance.log("Loading paths from paths file...");
 			buffer = new BufferedReader(new FileReader(pathsFilePath));
 			Path path;
 			boolean isLoop;
@@ -63,7 +63,7 @@ public class PathsManager {
 	}
 	
 	public static Path createPath(String name, boolean isLoop) {
-		Log.p("Creation of a path named \"" + name + "\".");
+		Instance.log("Creation of a path named \"" + name + "\".");
 		Path path = new Path(name, isLoop);
 		paths.put(name, path);
 		return path;

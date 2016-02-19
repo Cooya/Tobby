@@ -12,10 +12,11 @@ import frames.RoleplayFrame;
 import frames.SynchronisationFrame;
 
 public class Instance extends Thread {
-	private Thread[] threads;
-	private static int instancesCounter = 0;
+	private static Vector<Instance> instances = new Vector<Instance>();
 	private static boolean connectionInProcess;
-	private int instanceId;
+	public Thread[] threads;
+	public int id;
+	public Log log;
 	private NetworkInterface net;
 	private CharacterController CC;
 	private Vector<IFrame> workingFrames;
@@ -25,7 +26,9 @@ public class Instance extends Thread {
 	private LinkedList<Message> input;
 	
 	public Instance(String login, String password, int serverId) {
-		this.instanceId = instancesCounter++;
+		this.id = instances.size();
+		instances.add(this);
+		this.log = new Log(login);
 		this.net = new NetworkInterface(this);
 		this.CC = new CharacterController(this, login, password, serverId);
 		this.workingFrames = new Vector<IFrame>();
@@ -40,12 +43,11 @@ public class Instance extends Thread {
 		
 		waitForConnection(); // file d'attention pour la connexion des persos
 		
-		threads = new Thread[4];
-		threads[0] = this.net;
-		threads[1] = this.net.sender;
-		threads[2] = this.CC;
-		threads[3] = this;
-		FatalError.newInstance(threads);
+		this.threads = new Thread[4];
+		this.threads[0] = this.net;
+		this.threads[1] = this.net.sender;
+		this.threads[2] = this.CC;
+		this.threads[3] = this;
 		
 		this.start(); // gestion des frames
 		this.net.start(); // réception
@@ -53,8 +55,20 @@ public class Instance extends Thread {
 		this.CC.start(); // contrôleur
 	}
 	
-	public int getInstanceId() {
-		return this.instanceId;
+	public static void log(String msg) {
+		Log log = getLog();
+		if(log != null)
+			log.p(msg);
+		else
+			System.out.println(msg);
+	}
+	
+	public static void log(String direction, Message msg) {
+		Log log = getLog();
+		if(log != null)
+			log.p(direction, msg);
+		else
+			throw new Error("Invalid thread.");
 	}
 	
 	public synchronized void inPush(Message msg) {
@@ -136,7 +150,7 @@ public class Instance extends Thread {
 	}
 	
 	public void startFight() {
-		Log.p("Fight frame running.");
+		this.log.p("Fight frame running.");
 		this.frameUpdates.get(0).add(new FightFrame(this, CC));
 		this.workingFramesUpdates = true;
 	}
@@ -144,7 +158,7 @@ public class Instance extends Thread {
 	public void quitFight() {
 		for(IFrame frame : this.workingFrames)
 			if(frame instanceof FightFrame) {
-				Log.p("Fight frame stopping.");
+				this.log.p("Fight frame stopping.");
 				this.frameUpdates.get(1).add(frame);
 				this.workingFramesUpdates = true;
 				return;
@@ -157,5 +171,14 @@ public class Instance extends Thread {
 		for(IFrame frame : this.frameUpdates.get(1))
 			this.workingFrames.remove(frame);
 		this.workingFramesUpdates = false;
+	}
+	
+	private static Log getLog() {
+		Thread currentThread = currentThread();
+		for(Instance instance : instances)
+			for(Thread thread : instance.threads)
+				if(thread == currentThread)
+					return instance.log;
+		return null;
 	}
 }

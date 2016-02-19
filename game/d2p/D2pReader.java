@@ -3,9 +3,9 @@ package game.d2p;
 import java.util.Hashtable;
 import java.util.zip.Inflater;
 
+import main.Instance;
 import main.Main;
 import utilities.ByteArray;
-import utilities.Log;
 
 public class D2pReader {
 	private static final boolean DEBUG = false;
@@ -19,10 +19,10 @@ public class D2pReader {
     
 	public static ByteArray getBinaryMap(int mapId) {
 		if(DEBUG)
-			Log.p("Retrieving binary data of map id " + mapId + "...");
+			Instance.log("Retrieving binary data of map id " + mapId + "...");
 		Object[] index = indexes.get(d2pPath).get(getMapUriFromId(mapId));
 		if(index == null) {
-			Log.p("Unknown map id : " + mapId + ".");
+			Instance.log("Unknown map id : " + mapId + ".");
 			return null;
 		}
 		ByteArray binaryMap = ((ByteArray) index[2]).clonePart((int) index[0], (int) index[1]);
@@ -32,7 +32,7 @@ public class D2pReader {
 	
 	private static void readD2pFiles(String filepath) {
 		if(DEBUG)
-			Log.p("Reading d2p files...");
+			Instance.log("Reading d2p files...");
 		ByteArray buffer;
 		int propertiesPos;
 		int propertiesSize;
@@ -105,7 +105,7 @@ public class D2pReader {
 			return;
 		}
 		if(DEBUG)
-			Log.p("Decompressing binary data...");
+			Instance.log("Decompressing binary data...");
 		Inflater inflater = new Inflater();
 		inflater.setInput(binaryMap.bytes());
 		byte[] buffer = new byte[Main.BUFFER_DEFAULT_SIZE];
@@ -123,7 +123,7 @@ public class D2pReader {
 			binaryMap.writeBytes(buffer, bufferSize);
 		}
 		if(DEBUG)
-			Log.p(bytesCounter + " bytes resulting of decompression.");
+			Instance.log(bytesCounter + " bytes resulting of decompression.");
 		binaryMap.setPos(0);
 		if(binaryMap.readByte() != 77)
 			throw new Error("Invalid binary map header.");

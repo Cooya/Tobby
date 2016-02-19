@@ -6,7 +6,7 @@ import java.util.Collections;
 import java.util.Vector;
 
 import main.CharacterController;
-import utilities.Log;
+import main.Instance;
 
 public class Path {
 	private String name;
@@ -34,7 +34,7 @@ public class Path {
 	}
 	
 	public void run(CharacterController CC) {
-		Log.p("Running path named \"" + name + "\".");
+		Instance.log("Running path named \"" + name + "\".");
 
 		CC.currentPathName = this.name;
 		int nextMapId;

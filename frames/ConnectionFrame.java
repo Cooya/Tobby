@@ -2,7 +2,6 @@ package frames;
 
 import java.util.Hashtable;
 
-import utilities.Log;
 import main.CharacterController;
 import main.Emulation;
 import main.Instance;
@@ -46,7 +45,7 @@ public class ConnectionFrame implements IFrame {
 				return true;
 			case 20 :
 				IdentificationFailedMessage IFM = new IdentificationFailedMessage(msg); 
-				IFM.deserialize();
+				this.instance.log.p("Authentification failed for reason " + IFM.reason);
 				return true;
 			case 30 :
 				ServersListMessage SLM = new ServersListMessage(msg);
@@ -57,7 +56,7 @@ public class ConnectionFrame implements IFrame {
 					instance.outPush(SSM);
 				}
 				else
-					Log.p("Backup in progress on the requested server.");
+					this.instance.log.p("Backup in progress on the requested server.");
 				return true;
 			case 50 :
 				ServerStatusUpdateMessage SSUM = new ServerStatusUpdateMessage(msg);
@@ -83,7 +82,7 @@ public class ConnectionFrame implements IFrame {
 				ISM = (IdentificationSuccessMessage) this.usefulInfos.get("ISM");
 				RawDataMessage RDM = new RawDataMessage(msg);
 				Emulation.sendCredentials(CC.infos.login, CC.infos.password);
-				Message CIM = Emulation.createServer(HCM, ISM, RDM, instance.getInstanceId());
+				Message CIM = Emulation.createServer(HCM, ISM, RDM, instance.id);
 				instance.outPush(CIM);
 				return true;
 			case 6267 :

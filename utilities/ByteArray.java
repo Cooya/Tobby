@@ -244,10 +244,10 @@ public class ByteArray {
 		return new String(utf);
 	}
 
-	public void writeByte(byte b) {
+	public void writeByte(int b) {
 		if(this.size == this.array.length)
 			extendArray();
-		this.array[this.pos++] = b;
+		this.array[this.pos++] = (byte) b;
 		this.size++;
 	}
 	
@@ -270,7 +270,7 @@ public class ByteArray {
 		writeBytes(bytes, bytes.length);
 	}
 
-	public void writeShort(short s) {
+	public void writeShort(int s) {
 		writeByte((byte) (s >> 8));
 		writeByte((byte) (s & 0xff));
 	}

@@ -15,13 +15,15 @@ public class Sniffer extends Thread {
 	private static Connection.Server clientCo;
 	private static Connection.Client serverCo;
 	private static boolean mustDeconnectClient = false;
+	private static Log log;
 	
 	public Sniffer() {
 		launch();
+		log = new Log("Sniffer");
 	}
 	
 	private void launch() {
-		Log.p("Waiting for " + dofusExe +" process...");
+		log.p("Waiting for " + dofusExe +" process...");
 		while(!Processes.inProcess(dofusExe))
 			try {
 				Thread.sleep(1000);
@@ -31,11 +33,11 @@ public class Sniffer extends Thread {
 		Processes.injectDLL(Main.DLL_LOCATION, dofusExe);
 		
 		clientCo = new Connection.Server(Main.SERVER_PORT);
-		Log.p("Running sniffer server. Waiting Dofus client connection...");
+		log.p("Running sniffer server. Waiting Dofus client connection...");
 		clientCo.waitClient();
-		Log.p("Dofus client connected.");
+		log.p("Dofus client connected.");
 		serverCo = new Connection.Client(Main.AUTH_SERVER_IP, Main.SERVER_PORT);
-		Log.p("Running sniffer client. Connection to Dofus server.");
+		log.p("Running sniffer client. Connection to Dofus server.");
 		
 		start();
 		
@@ -47,15 +49,15 @@ public class Sniffer extends Thread {
 			serverCo.send(ByteArray.trimBuffer(buffer, bytesReceived));
 		}
 		
-		Log.p("Waiting client reconnection...");
+		log.p("Waiting client reconnection...");
 		clientCo.waitClient();
-		Log.p("Dofus client reconnected.");
+		log.p("Dofus client reconnected.");
 		
 		while((bytesReceived = clientCo.receive(buffer)) != -1) {
 			processMsgStack(reader.processBuffer(new ByteArray(buffer, bytesReceived)), "s");
 			serverCo.send(ByteArray.trimBuffer(buffer, bytesReceived));
 		}
-		Log.p("Dofus client deconnected from sniffer server.");
+		log.p("Dofus client deconnected from sniffer server.");
 		clientCo.close();
 	}
 	
@@ -70,26 +72,26 @@ public class Sniffer extends Thread {
 				break;
 		}
 		clientCo.closeClient();
-		Log.p("Deconnection from Dofus client.");
+		log.p("Deconnection from Dofus client.");
 		serverCo.close();
-		Log.p("Deconnected from authentification server.");
+		log.p("Deconnected from authentification server.");
 		
 		if(gameServerAddress != null) {
-			Log.p("Connecting to game server, waiting response...");
+			log.p("Connecting to game server, waiting response...");
 			serverCo = new Connection.Client(gameServerAddress, Main.SERVER_PORT);
 			while((bytesReceived = serverCo.receive(buffer)) != -1) {
 				processMsgStack(reader.processBuffer(new ByteArray(buffer, bytesReceived)), "r");
 				clientCo.send(ByteArray.trimBuffer(buffer, bytesReceived));
 			}
 			serverCo.close();
-			Log.p("Deconnected from game server.");
+			log.p("Deconnected from game server.");
 		}
 	}
 	
 	public static boolean processMsgStack(LinkedList<Message> msgStack, String direction) {
 		Message msg;
 		while((msg = msgStack.poll()) != null) {
-			Log.p(direction, msg);
+			log.p(direction, msg);
 			if(direction == "r" && msg.getId() == 42) {
 				SelectedServerDataMessage SSDM = new SelectedServerDataMessage(msg);
 				gameServerAddress = SSDM.address;

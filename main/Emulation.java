@@ -7,7 +7,6 @@ import messages.connection.HelloConnectMessage;
 import messages.connection.IdentificationSuccessMessage;
 import messages.connection.RawDataMessage;
 import utilities.ByteArray;
-import utilities.Log;
 import utilities.Processes;
 
 public class Emulation {
@@ -22,7 +21,7 @@ public class Emulation {
 	public static void runASLauncher() {
 		if(!Processes.inProcess("adl.exe"))
 			try {
-				Log.p("Running AS launcher.");
+				Instance.log("Running AS launcher.");
 				if(!Processes.fileExists(ADL_PATH))
 					throw new Error("AIR debug executable not found.");
 				if(!Processes.fileExists(ANTIBOT_PATH))
@@ -34,7 +33,7 @@ public class Emulation {
 				System.exit(1);
 			}
 		else
-			Log.p("AS launcher already in process.");
+			Instance.log("AS launcher already in process.");
 	}
 	
 	public static void sendCredentials(String login, String password) {
@@ -48,44 +47,44 @@ public class Emulation {
 		array.writeByte((byte) 1);
 		array.writeUTF(login);
 		array.writeUTF(password);
-		Log.p("Sending credentials to AS launcher.");
+		Instance.log("Sending credentials to AS launcher.");
 		launcherCo.send(array.bytes());
 	}
 	
 	public static Message createServer(HelloConnectMessage HCM, IdentificationSuccessMessage ISM, RawDataMessage RDM, int instanceId) {
 		try {
 			clientDofusCo = new Connection.Server(serverPort);
-			Log.p("Running emulation server. Waiting Dofus client connection...");
+			Instance.log("Running emulation server. Waiting Dofus client connection...");
 			
 			clientDofusCo.waitClient();
-			Log.p("Dofus client connected.");
+			Instance.log("Dofus client connected.");
 			
 			clientDofusCo.send(HCM.makeRaw());
-			Log.p("HCM sent to Dofus client");
+			Instance.log("HCM sent to Dofus client");
 			
 			byte[] buffer = new byte[Main.BUFFER_DEFAULT_SIZE];
 			int bytesReceived = 0;
 			bytesReceived = clientDofusCo.receive(buffer);
-			Log.p(bytesReceived + " bytes received from Dofus client.");
+			Instance.log(bytesReceived + " bytes received from Dofus client.");
 			processMsgStack(reader.processBuffer(new ByteArray(buffer, bytesReceived)));
 			
 			clientDofusCo.send(ISM.makeRaw());
-			Log.p("ISM sent to Dofus client");
+			Instance.log("ISM sent to Dofus client");
 			clientDofusCo.send(RDM.makeRaw());
-			Log.p("RDM sent to Dofus client");
+			Instance.log("RDM sent to Dofus client");
 			
 			bytesReceived = clientDofusCo.receive(buffer);
-			Log.p(bytesReceived + " bytes received from Dofus client.");
+			Instance.log(bytesReceived + " bytes received from Dofus client.");
 			Message CIM = processMsgStack(reader.processBuffer(new ByteArray(buffer, bytesReceived)));
 			
 			ByteArray array = new ByteArray();
 			array.writeInt(1 + 1);
 			array.writeByte((byte) 2);
 			array.writeByte((byte) instanceId);
-			Log.p("Asking hash function to AS launcher.");
+			Instance.log("Asking hash function to AS launcher.");
 			launcherCo.send(array.bytes());
 			
-			Log.p("Deconnection from Dofus client.");
+			Instance.log("Deconnection from Dofus client.");
 			clientDofusCo.close();
 			return CIM;
 		} catch (Exception e) {
@@ -109,7 +108,7 @@ public class Emulation {
 	public static Message processMsgStack(LinkedList<Message> msgStack) {
 		Message msg;
 		while((msg = msgStack.poll()) != null) {
-			Log.p("r", msg);
+			Instance.log("r", msg);
 			if(msg.getId() == 6372)
 				return msg;
 		}
