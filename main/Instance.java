@@ -10,6 +10,7 @@ import frames.FightFrame;
 import frames.IFrame;
 import frames.RoleplayFrame;
 import frames.SynchronisationFrame;
+import gui.CharacterFrame;
 
 public class Instance extends Thread {
 	private static Vector<Instance> instances = new Vector<Instance>();
@@ -17,6 +18,7 @@ public class Instance extends Thread {
 	public Thread[] threads;
 	public int id;
 	public Log log;
+	//private CharacterFrame graphicalFrame;
 	private NetworkInterface net;
 	private CharacterController CC;
 	private Vector<IFrame> workingFrames;
@@ -25,10 +27,11 @@ public class Instance extends Thread {
 	private LinkedList<Message> output;
 	private LinkedList<Message> input;
 	
-	public Instance(String login, String password, int serverId) {
+	public Instance(String login, String password, int serverId, CharacterFrame graphicalFrame) {
 		this.id = instances.size();
 		instances.add(this);
-		this.log = new Log(login);
+		this.log = new Log(login, graphicalFrame);
+		//this.graphicalFrame = graphicalFrame;
 		this.net = new NetworkInterface(this);
 		this.CC = new CharacterController(this, login, password, serverId);
 		this.workingFrames = new Vector<IFrame>();
@@ -48,7 +51,6 @@ public class Instance extends Thread {
 		this.threads[1] = this.net.sender;
 		this.threads[2] = this.CC;
 		this.threads[3] = this;
-		
 		this.start(); // gestion des frames
 		this.net.start(); // réception
 		this.net.sender.start(); // envoi

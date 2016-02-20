@@ -1,5 +1,7 @@
 package main;
 
+import gui.CharacterFrame;
+
 import java.util.LinkedList;
 
 import messages.Message;
@@ -17,9 +19,9 @@ public class Sniffer extends Thread {
 	private static boolean mustDeconnectClient = false;
 	private static Log log;
 	
-	public Sniffer() {
+	public Sniffer(CharacterFrame graphicalFrame) {
 		launch();
-		log = new Log("Sniffer");
+		log = new Log("Sniffer", graphicalFrame);
 	}
 	
 	private void launch() {

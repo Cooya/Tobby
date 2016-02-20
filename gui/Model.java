@@ -1,13 +1,13 @@
 package gui;
 
-import java.util.Vector;
+import java.util.Hashtable;
 
 import main.Instance;
 
 public class Model {
-	public Vector<Instance> instances;
+	protected Hashtable<Integer, Instance> instances;
 	
-	public Model(){
-		instances=new Vector<Instance>();
+	protected Model() {
+		this.instances = new Hashtable<Integer, Instance>();
 	}
 }

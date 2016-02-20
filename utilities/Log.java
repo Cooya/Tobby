@@ -1,5 +1,7 @@
 package utilities;
 
+import gui.CharacterFrame;
+
 import java.io.PrintWriter;
 
 import messages.Message;
@@ -9,13 +11,15 @@ public class Log {
 	private static String LOG_PATH = System.getProperty("user.dir") + "/Ressources/";
 	private static String EOL = System.getProperty("line.separator");
 	private PrintWriter writer;
+	private CharacterFrame graphicalFrame;
 	
-	public Log(String characterName) {
+	public Log(String characterName, CharacterFrame graphicalFrame) {
 		try {
 			writer = new PrintWriter(LOG_PATH + characterName + "_log.txt", "UTF-8");
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
+		this.graphicalFrame = graphicalFrame;
 	}
 	
 	public synchronized void p(String msgDirection, Message msg) {
@@ -37,16 +41,16 @@ public class Log {
 		else
 			str += "Size : " + size + " byte" + EOL;
 		if(name == null || DEBUG)
-			System.out.println(str);
+			graphicalFrame.appendText(str);
 		writer.println(str);
 		writer.flush();
 	}
 	
 	public synchronized void p(String str) {
 		if(DEBUG)
-			System.out.println(str + EOL);
+			graphicalFrame.appendText(str + EOL);
 		else
-			System.out.println(str);
+			graphicalFrame.appendText(str);
 		writer.println(str + EOL);
 		writer.flush();
 	}

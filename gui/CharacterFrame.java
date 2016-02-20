@@ -1,29 +1,31 @@
 package gui;
 
 import javax.swing.JInternalFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JProgressBar;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.text.DefaultCaret;
 
-public class CharacterFrame extends JInternalFrame{
-	
-	public int idInstance;
-	
+public class CharacterFrame extends JInternalFrame {
+	private static final long serialVersionUID = 2448473860592287858L;
+	private static String EOL = System.getProperty("line.separator");
 
-	public JPanel podPanel;
-	public JLabel actualPod;
-	public JLabel maxPod;
-	public JProgressBar podBar;
+	private JTextArea textArea;
+	//public JPanel podPanel;
+	//public JLabel actualPod;
+	//public JLabel maxPod;
+	//public JProgressBar podBar;
 	
-	
-	
-	
-	public CharacterFrame(String name,int id){
-		super(name,true,true,true,true);
-		this.setSize(300, 300);
-		idInstance=id;
-		
+	public CharacterFrame(String name) {
+		super(name, true, true, true, true);
+		setSize(400, 400);
+		this.textArea = new JTextArea(5, 20);
+		this.textArea.setEditable(false); 
+		DefaultCaret caret = (DefaultCaret) textArea.getCaret();
+		caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
+		add(new JScrollPane(textArea));
 	}
-
 	
+	public void appendText(String text) {
+		textArea.append(text + EOL);
+	}
 }
