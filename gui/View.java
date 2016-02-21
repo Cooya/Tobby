@@ -1,6 +1,7 @@
 package gui;
 
 import java.util.Hashtable;
+import java.util.Vector;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -18,15 +19,21 @@ public class View {
 	protected JFrame frame;
 	protected JDesktopPane desktopPane;
 	protected JMenuItem menuItem;
+	protected Vector<JMenuItem> accountsListItems;
+	protected JMenu accountsMenu; 
 	protected LoginPanel loginPanel;
 	private JMenuBar menuBar;
 
 	protected View() {
 		menuItem = new JMenuItem("Charger compte");
+		accountsMenu= new JMenu("Liste des comptes");
+		accountsListItems=new Vector<JMenuItem>();
 		JMenu menu = new JMenu("Commencer");
 		menu.add(menuItem);
+		menu.add(accountsMenu);
 		menuBar = new JMenuBar();
 		menuBar.add(menu);
+		
 		
 		desktopPane = new JDesktopPane();
 		desktopPane.setDragMode(JDesktopPane.OUTLINE_DRAG_MODE);
