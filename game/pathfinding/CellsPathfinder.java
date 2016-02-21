@@ -161,9 +161,12 @@ public class CellsPathfinder extends Pathfinder {
 	}
 	
 	private class CellNode extends PathNode {
-    	private static final int WALK_DURATION = 500;
-    	private static final int DIAGONAL_RUN_DURATION = 200;
-    	private static final int STRAIGHT_RUN_DURATION = 333;
+    	private static final int HORIZONTAL_WALK_DURATION = 510;
+    	private static final int VERTICAL_WALK_DURATION = 425;
+    	private static final int DIAGONAL_WALK_DURATION = 480;
+    	private static final int HORIZONTAL_RUN_DURATION = 255;
+    	private static final int VERTICAL_RUN_DURATION = 150;
+    	private static final int DIAGONAL_RUN_DURATION = 170;
     	protected Cell cell;
 		private Vector<Cell> checkedCells;
 		
@@ -219,12 +222,26 @@ public class CellsPathfinder extends Pathfinder {
     	}
     	
     	protected int getCrossingDuration(boolean mode) {
-    		if(!mode) // marche
-    			return WALK_DURATION;
-    		if(this.lastDirection % 2 == 0)
-    			return STRAIGHT_RUN_DURATION;
-    		else
-    			return DIAGONAL_RUN_DURATION;
+    		if(!mode) { // walk
+    			if(this.lastDirection % 2 == 0) {
+    				if(this.lastDirection % 4 == 0) // left or right
+    					return HORIZONTAL_WALK_DURATION;
+    				else // top or down
+    					return VERTICAL_WALK_DURATION;
+    			}
+    			else // other directions
+    				return DIAGONAL_WALK_DURATION;
+    		}
+    		else { // run
+    			if(this.lastDirection % 2 == 0) {
+    				if(this.lastDirection % 4 == 0) // left or right
+    					return HORIZONTAL_RUN_DURATION;
+    				else // top or down
+    					return VERTICAL_RUN_DURATION;
+    			}
+    			else // other directions
+    				return DIAGONAL_RUN_DURATION;
+    		}
     	}
     	
     	public String toString() {

@@ -64,7 +64,7 @@ public class NetworkInterface extends Thread {
 	class Sender extends Thread {
 		public synchronized void run() {
 			Message msg;
-			while(true) {
+			while (!isInterrupted()) {
 				if((msg = instance.outPull()) != null) {
 					latency.setLatestSent();
 					serverCo.send(msg.makeRaw());
@@ -74,7 +74,7 @@ public class NetworkInterface extends Thread {
 					try {
 						wait();
 					} catch(Exception e) {
-						e.printStackTrace();
+						Thread.currentThread().interrupt();
 					}
 			}
 		}

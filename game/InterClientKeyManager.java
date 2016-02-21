@@ -11,7 +11,7 @@ public class InterClientKeyManager {
 	private static final String CONNECTION_NAME= "_dofusClient_RELEASE#";
 	*/
 	private static InterClientKeyManager instance;
-	private static String uidKey = "E4jtiFC4zf5lIQAPrB";
+	private static String uidKey = "lfbtPgniZWNU4QZXE6";
 	
     //private var _sendingLc:LocalConnection;
     //private var _receivingLc:LocalConnection;

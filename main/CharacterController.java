@@ -16,6 +16,7 @@ import informations.RoleplayContext;
 
 import java.util.Vector;
 
+import utilities.Log;
 import messages.EmptyMessage;
 import messages.context.ChangeMapMessage;
 import messages.context.GameMapMovementRequestMessage;
@@ -47,6 +48,7 @@ public class CharacterController extends Thread {
 	private State inFight;
 	private State inGameTurn;
 	private State inRegeneration;
+	private State dying;
 	
 	public CharacterController(Instance instance, String login, String password, int serverId) {
 		this.instance = instance;
@@ -59,6 +61,7 @@ public class CharacterController extends Thread {
 		this.inFight = new State(false); 
 		this.inGameTurn = new State(false); 
 		this.inRegeneration = new State(false); 
+		this.dying = new State(false);
 	}
 
 	public void setCurrentMap(int mapId) {
@@ -97,7 +100,8 @@ public class CharacterController extends Thread {
 			try {
 				wait(timeout - currentTime);
 			} catch (Exception e) {
-				e.printStackTrace();
+				this.dying.state = true;
+				return false;
 			}
 		}
 		if(condition.state == expectedState)
@@ -110,8 +114,8 @@ public class CharacterController extends Thread {
 	private synchronized void waitAnyEvent() {
 		try {
 			wait();
-		} catch (Exception e) {
-			e.printStackTrace();
+		} catch(Exception e) {
+			this.dying.state = true;
 		}
 	}
 
@@ -120,27 +124,29 @@ public class CharacterController extends Thread {
 			case 0 : // free
 				if(DEBUG)
 					this.instance.log.p("Waiting for character to be free.");
-				while(!isFree())
+				while(!this.dying.state && !isFree())
 					waitAnyEvent();
 				return;
 			case 1 : // start fight
 				if(DEBUG)
 					this.instance.log.p("Waiting for fight beginning.");
-				while(!this.inFight.state)
+				while(!this.dying.state && !this.inFight.state)
 					if(!waitSpecificState(this.inFight, true, 2000))
 						return;
 				return;
 			case 2 : // start game turn
 				if(DEBUG)
 					this.instance.log.p("Waiting for my game turn.");
-				while(!this.inGameTurn.state && this.inFight.state)
+				while(!this.dying.state && !this.inGameTurn.state && this.inFight.state)
 					waitAnyEvent();	
 				return;
+			/*
 			case 3 : // monster group respawn
 				if(DEBUG)
 					this.instance.log.p("Waiting for monster group respawn.");
 				waitAnyEvent();	
 				return;
+			*/
 		}
 	}
 
@@ -159,17 +165,24 @@ public class CharacterController extends Thread {
 		MovementPath mvPath = CellsPathfinder.movementPathFromArray(path.toVector());
 		mvPath.setStart(MapPoint.fromCellId(this.infos.currentCellId));
 		mvPath.setEnd(MapPoint.fromCellId(cellId));
-
+		
+		this.instance.log.p("Sending movement request.");
+	
 		GameMapMovementRequestMessage GMMRM = new GameMapMovementRequestMessage();
 		GMMRM.serialize(mvPath.getServerMovement(), this.infos.currentMap.id, instance.id);
 		instance.outPush(GMMRM);
 		this.inMovement.state = true;
+		
+		int duration = path.getCrossingDuration();
 
 		try {
-			Thread.sleep(path.getCrossingDuration()); // on attend d'arriver à destination
+			Thread.sleep((long) (duration + (duration * 0.3))); // on attend d'arriver à destination
 		} catch(Exception e) {
-			e.printStackTrace();
+			this.dying.state = true;
+			return;
 		}
+		
+		this.instance.log.p("Target cell reached.");
 
 		EmptyMessage EM = new EmptyMessage("GameMapMovementConfirmMessage");
 		instance.outPush(EM);
@@ -189,6 +202,10 @@ public class CharacterController extends Thread {
 		this.instance.log.p("Moving to " + Pathfinder.directionToString(direction) + " map.");
 
 		moveTo(pathfinder.getChangementMapCell(direction), true);
+		
+		if(this.dying.state)
+			return;
+		
 		ChangeMapMessage CMM = new ChangeMapMessage();
 		CMM.serialize(this.infos.currentMap.getNeighbourMapFromDirection(direction));
 		instance.outPush(CMM);
@@ -199,18 +216,17 @@ public class CharacterController extends Thread {
 	public void regenerateLife() {
 		waitState(0);
 		
-		if(this.infos.missingLife > 0) {
+		int missingLife = this.infos.missingLife();
+		this.instance.log.p("Missing life : " + missingLife + " life points.");
+		if(missingLife > 0) {
 			this.inRegeneration.state = true;
 			this.instance.log.p("Break for life regeneration.");
-			//EmotePlayRequestMessage EPRM = new EmotePlayRequestMessage();
-			//EPRM.serialize((byte) 1);
-			//instance.outPush(EPRM);
 			try {
-				Thread.sleep(this.infos.regenRate * 100 * this.infos.missingLife); // on attend de récupérer toute sa vie
+				Thread.sleep(this.infos.regenRate * 100 * missingLife); // on attend de récupérer toute sa vie
 			} catch(Exception e) {
-				e.printStackTrace();
+				this.dying.state = true;
+				return;
 			}
-			this.infos.missingLife = 0;
 			this.inRegeneration.state = false;
 		}
 	}
@@ -229,6 +245,9 @@ public class CharacterController extends Thread {
 				this.instance.log.p("Monster group on cell id " + monsterGroup.disposition.cellId + ".");
 				if(launchFight(monsterGroup))
 					return true;
+				
+				if(this.dying.state)
+					return false;
 			}
 			else {
 				this.instance.log.p("None monster group available on the map.");
@@ -242,6 +261,10 @@ public class CharacterController extends Thread {
 		
 		this.instance.log.p("Trying to take this monster group.");
 		moveTo(monsterGroup.disposition.cellId, false);
+		
+		if(this.dying.state)
+			return false;
+		
 		if(this.roleplayContext.getMonsterGroupCellId(monsterGroup) == this.infos.currentCellId) {
 			this.instance.log.p("Monster group taken.");
 			GameRolePlayAttackMonsterRequestMessage GRPAMRM = new GameRolePlayAttackMonsterRequestMessage();
@@ -259,16 +282,21 @@ public class CharacterController extends Thread {
 		try {
 			Thread.sleep(1000); // pour paraître plus naturel lors du lancement du combat
 		} catch(Exception e) {
-			e.printStackTrace();
+			this.dying.state = true;
+			return;
 		}
 		GameFightReadyMessage GFRM = new GameFightReadyMessage();
 		GFRM.serialize();
 		this.instance.outPush(GFRM);
-		while(this.inFight.state) {
+		while(!this.dying.state && this.inFight.state) {
 			waitState(2); // attente du début du prochain tour ou de la fin du combat
 			if(!this.inFight.state)
 				break;
 			launchSpell();
+			
+			if(this.dying.state)
+				return;
+			
 			concludeGameTurn();
 		}
 		this.instance.log.p("Number of fights done : " + ++this.fightsCounter);
@@ -280,15 +308,16 @@ public class CharacterController extends Thread {
 			if(this.fightContext.self.stats.actionPoints >= 4) {
 				this.instance.log.p("Launching a spell.");
 				GameActionFightCastRequestMessage GAFCRM = new GameActionFightCastRequestMessage();
-				GAFCRM.serialize(161, (short) aliveMonster.disposition.cellId);
+				GAFCRM.serialize(161, (short) aliveMonster.disposition.cellId, this.instance.id);
 				instance.outPush(GAFCRM);	
 			}
 			else
 				break;
 			try {
 				Thread.sleep(1000); // important pour le moment sinon bug
-			} catch (InterruptedException e) {
-				e.printStackTrace();
+			} catch(InterruptedException e) {
+				this.dying.state = true;
+				return;
 			}
 		}
 	}
@@ -305,17 +334,30 @@ public class CharacterController extends Thread {
 		
 		AreaRover areaRover = new AreaRover(this);
 		
-		while(true) { 
+		while(!this.dying.state) { 
 			regenerateLife();
+			
+			if(this.dying.state)
+				break;
+			
 			if(lookForFight()) {
 				waitState(1);
+				
+				if(this.dying.state)
+					break;
+				
 				if(inFight.state) // on vérifie si le combat a bien été lancé
 					fight();
 				else
 					changeMap(areaRover.nextMap(this));
 			}
-			else
+			else {
+				if(this.dying.state)
+					break;
+				
 				changeMap(areaRover.nextMap(this));
+			}
 		}
+		Instance.log(Log.Status.CONSOLE, "Instance terminated.");
 	}
 }

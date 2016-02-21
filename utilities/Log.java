@@ -3,6 +3,8 @@ package utilities;
 import gui.CharacterFrame;
 
 import java.io.PrintWriter;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import messages.Message;
 
@@ -12,6 +14,7 @@ public class Log {
 	private static String EOL = System.getProperty("line.separator");
 	private PrintWriter writer;
 	private CharacterFrame graphicalFrame;
+    private static SimpleDateFormat date = new SimpleDateFormat("HH:mm:ss:SSS");
 	
 	public Log(String characterName, CharacterFrame graphicalFrame) {
 		try {
@@ -41,17 +44,39 @@ public class Log {
 		else
 			str += "Size : " + size + " byte" + EOL;
 		if(name == null || DEBUG)
-			graphicalFrame.appendText(str);
-		writer.println(str);
+			graphicalFrame.appendText("[" + date.format(new Date()) + "]" + str);
+		writer.println("[" + date.format(new Date()) + "]" + str);
 		writer.flush();
 	}
 	
 	public synchronized void p(String str) {
 		if(DEBUG)
-			graphicalFrame.appendText(str + EOL);
+			graphicalFrame.appendText("[" + date.format(new Date()) + "]" + str + EOL);
 		else
-			graphicalFrame.appendText(str);
-		writer.println(str + EOL);
+			graphicalFrame.appendText("[" + date.format(new Date()) + "]" + str);
+		writer.println("[" + date.format(new Date()) + "]" + str + EOL);
 		writer.flush();
+	}
+	
+	public synchronized void p(Status status, String str) {
+		/*
+		switch(status) {
+			case INFO : break;
+			case WARNING : str = ANSI_YELLOW + str + ANSI_RESET; break;
+			case ERROR : str = ANSI_RED + str + ANSI_RESET; break;
+			default : throw new Error("Invalid log status.");
+		}
+		*/
+		if(status == Status.CONSOLE)
+			System.out.println(str);
+		else
+			p(str);
+	}
+	
+	public enum Status {
+		INFO,
+		WARNING,
+		ERROR,
+		CONSOLE
 	}
 }

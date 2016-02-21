@@ -93,7 +93,7 @@ public class Emulation {
 		return null;
 	}
 	
-	public static ByteArray hashMessage(ByteArray msg, int instanceId) {
+	public static synchronized ByteArray hashMessage(ByteArray msg, int instanceId) {
 		ByteArray bytes = new ByteArray(msg.getSize() + 2);
 		bytes.writeInt(1 + 1 + msg.getSize());
 		bytes.writeByte((byte) 3); 
@@ -101,8 +101,24 @@ public class Emulation {
 		bytes.writeBytes(msg);
 		launcherCo.send(bytes.bytes());
 		byte[] buffer = new byte[Main.BUFFER_DEFAULT_SIZE];
-		int size = launcherCo.receive(buffer);
-		return new ByteArray(buffer, size);
+		int size;
+		ByteArray array;
+		while(true) {
+			try {
+				Instance.log("Asking to hash message.");
+				size = launcherCo.receive(buffer, 1000);
+				if(size <= 0)
+					throw new Error("Invalid response from launcher.");
+				array = new ByteArray(buffer, size);
+				if(size - 2 != array.readShort())
+					throw new Error("Missing bytes !");
+				break;
+			} catch(Exception e) {
+				Instance.log("Timeout for launcher response.");
+			}
+		}
+		Instance.log("Message hashed, " + size + " bytes received.");
+		return new ByteArray(array.bytesFromPos());
 	}
 	
 	public static Message processMsgStack(LinkedList<Message> msgStack) {

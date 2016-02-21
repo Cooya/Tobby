@@ -109,6 +109,7 @@
 5708 InteractiveElementUpdatedMessage
 5709 StatedElementUpdatedMessage
 5726 OnConnectionEventMessage
+5733 GameRolePlayPlayerFightFriendlyAnsweredMessage
 5734 HousePropertiesMessage
 5741 GameActionFightTriggerGlyphTrapMessage
 5745 InteractiveUsedMessage
@@ -121,7 +122,9 @@
 5836 CharacterSelectedErrorMessage
 5864 GameFightShowFighterMessage
 5921 GameFightSynchronizeMessage
+5925 ObjectGroundListAddedMessage
 5927 GameFightOptionStateUpdateMessage
+5937 GameRolePlayPlayerFightFriendlyRequestedMessage
 5968 MountSetMessage
 5970 MountXpRatioMessage
 6019 ChallengeResultMessage

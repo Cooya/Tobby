@@ -11,6 +11,7 @@ import game.currentmap.FightTeamInformations;
 import game.currentmap.FightTeamMemberCharacterInformations;
 import game.currentmap.FightTeamMemberInformations;
 import game.currentmap.FightTeamMemberMonsterInformations;
+import game.currentmap.FightTeamMemberWithAllianceCharacterInformations;
 import game.currentmap.GameContextActorInformations;
 import game.currentmap.GameRolePlayActorInformations;
 import game.currentmap.GameRolePlayCharacterInformations;
@@ -189,7 +190,7 @@ public class ProtocolTypeManager {
         //types[423] = GuildInsiderFactSheetInformations.class;
         //types[424] = GuildFactSheetInformations.class;
         types.put(425, HumanOptionAlliance.class);
-        //types[426] = FightTeamMemberWithAllianceCharacterInformations.class;
+        types.put(426, FightTeamMemberWithAllianceCharacterInformations.class);
         //types[427] = AlliancePrismInformation.class;
         //types[428] = PrismInformation.class;
         //types[429] = ServerSessionConstantLong.class;

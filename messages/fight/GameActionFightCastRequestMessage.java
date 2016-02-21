@@ -1,5 +1,6 @@
 package messages.fight;
 
+import main.Emulation;
 import messages.Message;
 import utilities.ByteArray;
 
@@ -16,7 +17,7 @@ public class GameActionFightCastRequestMessage extends Message{
 		super();
 	}
 
-	public void serialize(int spell,short cell)
+	public void serialize(int spell, short cell, int instanceId)
 	{
 		ByteArray buffer=new ByteArray();
 		
@@ -30,7 +31,7 @@ public class GameActionFightCastRequestMessage extends Message{
 			throw new Error("Forbidden value (" + this.cellId + ") on element cellId.");
 		}
 		buffer.writeShort(cell);
-		completeInfos(buffer);
+		completeInfos(Emulation.hashMessage(buffer, instanceId));
 	}
 
 }

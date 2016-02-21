@@ -40,6 +40,7 @@ package {
 		}
 
 		private function clientConnectionHandler(e:ServerSocketConnectEvent) : void {
+			trace("New client connected.");
 			client = e.socket;
 			client.writeBoolean(this.injected);
 			client.flush();
@@ -62,20 +63,24 @@ package {
         	var hashFunctionId:int;
         	var id:int = socket.readByte();
         	if(id == 1) { // demande de simulation d'une authentification à partir du client officiel
+        		trace("Simulating authentification on official client.");
         		var username:String = socket.readUTF();
         		var password:String = socket.readUTF();
 				login(username, password);
         	}
         	else if(id == 2) { // demande de récupération de la fonction de hachage
         		hashFunctionId = socket.readByte();
+        		trace("Retrieving hash function for client with id = " + hashFunctionId + ".");
         		hashFunctionsArray[hashFunctionId] = getHashFunction();
         	}
         	else if(id == 3) { // demande d'utilisation de la fonction de hachage sur un paquet
         		var msg:ByteArray = new ByteArray();
         		hashFunctionId = socket.readByte();
+        		trace("Hashing message for client with id = " + hashFunctionId + ".");
         		socket.readBytes(msg, 0);
         		hashFunctionsArray[hashFunctionId].call(null, msg);
         		msg.position = 0;
+        		socket.writeShort(msg.length);
         		socket.writeBytes(msg, 0);
         		socket.flush();
         	}
@@ -103,6 +108,7 @@ package {
 
 		private function getHashFunction() : Function {
 			var NetworkMessage:Class = getDefinitionByName("com.ankamagames.jerakine.network.NetworkMessage") as Class;
+			trace(NetworkMessage.HASH_FUNCTION);
 			return NetworkMessage.HASH_FUNCTION;
 		}
 

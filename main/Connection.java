@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 
 public interface Connection {
 	void send(byte[] bytes);
@@ -48,10 +49,17 @@ public interface Connection {
 			int bytesReceived = -1;
 			try {
 				bytesReceived = this.inputStream.read(buffer);
-			} catch (Exception e) {
+			} catch(Exception e) {
 				return bytesReceived;
 			}
 			return bytesReceived;
+		}
+		
+		public int receive(byte[] buffer, int timeout) throws SocketException {
+			this.client.setSoTimeout(timeout);
+			int bytes = receive(buffer);
+			this.client.setSoTimeout(0);
+			return bytes;
 		}
 		
 		public void close() {

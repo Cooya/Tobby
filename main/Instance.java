@@ -14,7 +14,8 @@ import gui.CharacterFrame;
 
 public class Instance extends Thread {
 	private static Vector<Instance> instances = new Vector<Instance>();
-	private static boolean connectionInProcess;
+	private static int instancesId = 0; // important lors des déconnexions (car instances.size() devient faux)
+	private static boolean connectionInProcess = false;
 	public Thread[] threads;
 	public int id;
 	public Log log;
@@ -28,7 +29,7 @@ public class Instance extends Thread {
 	private LinkedList<Message> input;
 	
 	public Instance(String login, String password, int serverId, CharacterFrame graphicalFrame) {
-		this.id = instances.size();
+		this.id = instancesId++;
 		instances.add(this);
 		this.log = new Log(login, graphicalFrame);
 		//this.graphicalFrame = graphicalFrame;
@@ -44,8 +45,6 @@ public class Instance extends Thread {
 		
 		this.workingFrames.add(new ConnectionFrame(this, CC));
 		
-		waitForConnection(); // file d'attention pour la connexion des persos
-		
 		this.threads = new Thread[4];
 		this.threads[0] = this.net;
 		this.threads[1] = this.net.sender;
@@ -55,14 +54,20 @@ public class Instance extends Thread {
 		this.net.start(); // réception
 		this.net.sender.start(); // envoi
 		this.CC.start(); // contrôleur
+		
+		Instance.log("Instance with id = " + this.id + " started.");
+	}
+	
+	public static void log(Log.Status status, String msg) {
+		Log log = getLog();
+		if(log != null)
+			log.p(status, msg);
+		else
+			System.out.println(msg);
 	}
 	
 	public static void log(String msg) {
-		Log log = getLog();
-		if(log != null)
-			log.p(msg);
-		else
-			System.out.println(msg);
+		log(Log.Status.INFO, msg);
 	}
 	
 	public static void log(String direction, Message msg) {
@@ -102,8 +107,10 @@ public class Instance extends Thread {
 	}
 	
 	public synchronized void run() {
+		waitForConnection(); // attente de fin de connexion de l'instance précédente
+		
 		Message msg;
-		while(true) {
+		while(!isInterrupted()) {
 			if((msg = inPull()) != null) {
 				for(IFrame frame : this.workingFrames)
 					if(frame.processMessage(msg))
@@ -115,7 +122,7 @@ public class Instance extends Thread {
 				try {
 					wait();
 				} catch(Exception e) {
-					e.printStackTrace();
+					Thread.currentThread().interrupt();
 				}
 		}
 	}
@@ -130,12 +137,14 @@ public class Instance extends Thread {
 	
 	public void waitForConnection() {
 		synchronized(Main.class) {
-			while(connectionInProcess)
+			while(!isInterrupted() && connectionInProcess) {
+				this.log.p("Waiting for connection.");
 				try {
 					Main.class.wait();
 				} catch (Exception e) {
-					e.printStackTrace();
+					Thread.currentThread().interrupt();
 				}
+			}
 			connectionInProcess = true;
 		}
 	}
