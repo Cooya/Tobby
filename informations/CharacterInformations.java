@@ -16,12 +16,14 @@ public class CharacterInformations {
 	public int weight;
 	public int weightMax;
 	public int level;
+	public int element;
 	public CharacterCharacteristicsInformations stats;
 	
-	public CharacterInformations(String login, String password, int serverId) {
+	public CharacterInformations(String login, String password, int serverId, int element) {
 		this.login = login;
 		this.password = password;
 		this.serverId = serverId;
+		this.element = element;
 	}
 	
 	public int missingLife() {

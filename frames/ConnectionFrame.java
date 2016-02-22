@@ -33,22 +33,22 @@ public class ConnectionFrame implements IFrame {
 	
 	public boolean processMessage(Message msg) {
 		switch(msg.getId()) {
-			case 3 :
+			case 3 : // HelloConnectMessage
 				HelloConnectMessage HCM = new HelloConnectMessage(msg);
 				this.usefulInfos.put("HCM", HCM);
 				IdentificationMessage IM = new IdentificationMessage();
 				IM.serialize(HCM, CC.infos.login, CC.infos.password);
 				instance.outPush(IM);
 				return true;
-			case 22 :
+			case 22 : // IdentificationSuccessMessage
 				IdentificationSuccessMessage ISM = new IdentificationSuccessMessage(msg);
 				this.usefulInfos.put("ISM", ISM);
 				return true;
-			case 20 :
+			case 20 : // IdentificationFailedMessage
 				IdentificationFailedMessage IFM = new IdentificationFailedMessage(msg); 
 				this.instance.log.p("Authentification failed for reason " + IFM.reason);
 				return true;
-			case 30 :
+			case 30 : // ServersListMessage
 				ServersListMessage SLM = new ServersListMessage(msg);
 				int serverId = CC.infos.serverId;
 				if(SLM.isSelectable(serverId)) {
@@ -59,7 +59,7 @@ public class ConnectionFrame implements IFrame {
 				else
 					this.instance.log.p("Backup in progress on the requested server.");
 				return true;
-			case 50 :
+			case 50 : // ServerStatusUpdateMessage
 				ServerStatusUpdateMessage SSUM = new ServerStatusUpdateMessage(msg);
 				serverId = CC.infos.serverId;
 				if(SSUM.server.id == serverId && SSUM.server.isSelectable) {	
@@ -68,17 +68,17 @@ public class ConnectionFrame implements IFrame {
 					instance.outPush(SSM);
 				}
 				return true;
-			case 42 : 
+			case 42 : // SelectedServerDataMessage
 				SelectedServerDataMessage SSDM = new SelectedServerDataMessage(msg);
 				this.usefulInfos.put("ticket", SSDM.ticket);
 				instance.setGameServerIP(SSDM.address);
 				return true;
-			case 101 :
+			case 101 : // HelloGameMessage
 				AuthenticationTicketMessage ATM = new AuthenticationTicketMessage();
 				ATM.serialize("fr", (int[]) this.usefulInfos.get("ticket"));
 				instance.outPush(ATM);
 				return true;
-			case 6253 :
+			case 6253 : // RawDataMessage
 				HCM = (HelloConnectMessage) this.usefulInfos.get("HCM");
 				ISM = (IdentificationSuccessMessage) this.usefulInfos.get("ISM");
 				RawDataMessage RDM = new RawDataMessage(msg);
@@ -86,7 +86,7 @@ public class ConnectionFrame implements IFrame {
 				Message CIM = Emulation.createServer(HCM, ISM, RDM, instance.id);
 				instance.outPush(CIM);
 				return true;
-			case 6267 :
+			case 6267 : // TrustStatusMessage
 				CharactersListRequestMessage CLRM = new CharactersListRequestMessage();
 				instance.outPush(CLRM);
 				return true;

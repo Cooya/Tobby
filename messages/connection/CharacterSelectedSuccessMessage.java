@@ -1,5 +1,6 @@
 package messages.connection;
 
+import game.character.CharacterBaseInformations;
 import messages.Message;
 import utilities.ByteArray;
 

@@ -35,10 +35,6 @@ public class CharacterController extends Thread {
 	private int fightsCounter;
 	private AreaRover areaRover;
 	public CharacterInformations infos;
-	
-	//Augmentation de stats
-	private int element=Elements.intelligence;
-	
 	public RoleplayContext roleplayContext;
 	public FightContext fightContext;
 	public String currentPathName;
@@ -60,10 +56,9 @@ public class CharacterController extends Thread {
 	private State needToEmptyInventory;
 	private State levelUp;
 	
-	
 	public CharacterController(Instance instance, String login, String password, int serverId) {
 		this.instance = instance;
-		this.infos = new CharacterInformations(login, password, serverId);
+		this.infos = new CharacterInformations(login, password, serverId, Elements.intelligence);
 		this.roleplayContext = new RoleplayContext(this);
 		this.fightContext = new FightContext(this);
 		
@@ -254,16 +249,14 @@ public class CharacterController extends Thread {
 	private void upgradeStats() {
 		waitState(0);
 		
-		if(this.levelUp.state){
-			StatsUpgradeRequestMessage SURM=new StatsUpgradeRequestMessage();
-			SURM.serialize(this.element, this.infos.stats.statsPoints);
+		if(this.levelUp.state) {
+			StatsUpgradeRequestMessage SURM = new StatsUpgradeRequestMessage();
+			SURM.serialize(this.infos.element, this.infos.stats.statsPoints);
 			instance.outPush(SURM);
 			levelUp.state = false;
-			this.instance.log.p("Increase stat:"+Elements.intelligence+" of "+this.infos.stats.statsPoints+" points.");
+			this.instance.log.p("Increase stat : " + Elements.intelligence + " of " + this.infos.stats.statsPoints + " points.");
 		}
-		
 	}
-	
 	
 	public boolean lookForFight() {
 		waitState(0);
@@ -372,9 +365,8 @@ public class CharacterController extends Thread {
 	}
 	
 	private void selectAreaRoverDependingOnLevel() { // à terminer
-		//this.areaRover = new AreaRover(95, this); // piou d'astrub
-		this.areaRover = new AreaRover(445, this); // bouftous d'incarnam
-		
+		//this.areaRover = new AreaRover(95, this); // pious d'Astrub
+		this.areaRover = new AreaRover(445, this); // bouftous d'Incarnam
 	}
 	
 	public void run() {
@@ -391,6 +383,8 @@ public class CharacterController extends Thread {
 				if(isInterrupted())
 					break;
 				upgradeStats();
+				if(isInterrupted())
+					break;
 				regenerateLife();
 				if(isInterrupted())
 					break;
@@ -419,6 +413,4 @@ public class CharacterController extends Thread {
 		
 		this.instance.log.p(Log.Status.CONSOLE, "Thread controller of instance with id = " + this.instance.id + " terminated.");
 	}
-
-
 }
