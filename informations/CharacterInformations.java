@@ -15,6 +15,7 @@ public class CharacterInformations {
 	public int regenRate;
 	public int weight;
 	public int weightMax;
+	public int level;
 	public CharacterCharacteristicsInformations stats;
 	
 	public CharacterInformations(String login, String password, int serverId) {

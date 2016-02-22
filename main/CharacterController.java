@@ -37,7 +37,6 @@ public class CharacterController extends Thread {
 	public CharacterInformations infos;
 	
 	//Augmentation de stats
-	private int lvl;
 	private int element=Elements.intelligence;
 	
 	public RoleplayContext roleplayContext;
@@ -59,7 +58,7 @@ public class CharacterController extends Thread {
 	private State inGameTurn;
 	private State inRegeneration;
 	private State needToEmptyInventory;
-	private State lvlUp;
+	private State levelUp;
 	
 	
 	public CharacterController(Instance instance, String login, String password, int serverId) {
@@ -74,16 +73,12 @@ public class CharacterController extends Thread {
 		this.inGameTurn = new State(false); 
 		this.inRegeneration = new State(false); 
 		this.needToEmptyInventory = new State(false);
-		this.lvlUp = new State(false);
+		this.levelUp = new State(false);
 	}
 
 	public void setCurrentMap(int mapId) {
 		this.infos.currentMap = MapsCache.loadMap(mapId);
 		this.pathfinder = new CellsPathfinder(this.infos.currentMap);
-	}
-	
-	public void changeLvl(int lvl){
-		this.lvl=lvl;
 	}
 	
 	private boolean isFree() {
@@ -106,7 +101,7 @@ public class CharacterController extends Thread {
 			case GAME_TURN_START : this.inGameTurn.state = true; break;
 			case WEIGHT_MAX : this.needToEmptyInventory.state = true; break;
 			case MONSTER_GROUP_RESPAWN : break; // juste une stimulation
-			case LVL_UP: this.lvlUp.state = true; break;
+			case LEVEL_UP: this.levelUp.state = true; break;
 			default : new FatalError("Unexpected event caught : " + event); break;
 		}
 	}
@@ -259,11 +254,11 @@ public class CharacterController extends Thread {
 	private void upgradeStats() {
 		waitState(0);
 		
-		if(this.lvlUp.state){
+		if(this.levelUp.state){
 			StatsUpgradeRequestMessage SURM=new StatsUpgradeRequestMessage();
 			SURM.serialize(this.element, this.infos.stats.statsPoints);
 			instance.outPush(SURM);
-			lvlUp.state=false;
+			levelUp.state = false;
 			this.instance.log.p("Increase stat:"+Elements.intelligence+" of "+this.infos.stats.statsPoints+" points.");
 		}
 		

@@ -7,6 +7,7 @@ import main.Emulation;
 import main.Instance;
 import messages.Message;
 import messages.connection.AuthenticationTicketMessage;
+import messages.connection.CharacterSelectedSuccessMessage;
 import messages.connection.CharacterSelectionMessage;
 import messages.connection.CharactersListMessage;
 import messages.connection.CharactersListRequestMessage;
@@ -98,6 +99,10 @@ public class ConnectionFrame implements IFrame {
 				instance.outPush(CSM);
 				
 				this.instance.endOfConnection();
+				return true;
+			case 153: // CharacterSelectedSuccessMessage
+				CharacterSelectedSuccessMessage CSSM = new CharacterSelectedSuccessMessage(msg);
+				this.CC.infos.level = CSSM.infos.level;
 				return true;
 		}
 		return false;
