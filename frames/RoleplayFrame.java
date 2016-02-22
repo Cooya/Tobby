@@ -9,6 +9,7 @@ import main.Instance;
 import messages.EmptyMessage;
 import messages.Message;
 import messages.character.CharacterStatsListMessage;
+import messages.character.InventoryWeightMessage;
 import messages.character.LifePointsRegenBeginMessage;
 import messages.context.CurrentMapMessage;
 import messages.context.GameContextRemoveElementMessage;
@@ -108,7 +109,13 @@ public class RoleplayFrame implements IFrame {
 			case 954 : // GameMapNoMovementMessage
 				this.instance.log.p(Log.Status.ERROR, "Movement refused by server.");
 				return true;
-				
+			case 3009 : // InventoryWeightMessage
+				InventoryWeightMessage IWM = new InventoryWeightMessage(msg);
+				this.CC.infos.weight = IWM.weight;
+				this.CC.infos.weightMax = IWM.weightMax;
+				if(this.CC.infos.weightMaxAlmostReached())
+					this.CC.emit(Event.WEIGHT_MAX);
+				return true;		
 		}
 		return false;
 	}

@@ -40,6 +40,7 @@
 700 GameFightStartingMessage
 702 GameFightJoinMessage
 703 GameFightPlacementPossiblePositionsMessage
+707 GameFightOptionToggleMessage
 708 GameFightReadyMessage
 711 GameFightRemoveTeamMemberMessage
 712 GameFightStartMessage
@@ -174,6 +175,7 @@
 6372 CheckIntegrityMessage
 6383 FriendGuildWarnOnAchievementCompleteStateMessage
 6386 PlayerStatusUpdateMessage
+6387 PlayerStatusUpdateRequestMessage
 6434 ServerSessionConstantsMessage
 6440 PrismsListMessage
 6441 PrismsListRegisterMessage

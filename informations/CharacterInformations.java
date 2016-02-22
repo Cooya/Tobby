@@ -13,6 +13,8 @@ public class CharacterInformations {
 	public int currentDirection;
 	public Map currentMap;
 	public int regenRate;
+	public int weight;
+	public int weightMax;
 	public CharacterCharacteristicsInformations stats;
 	
 	public CharacterInformations(String login, String password, int serverId) {
@@ -25,5 +27,11 @@ public class CharacterInformations {
 		if(stats == null)
 			return -1;
 		return this.stats.maxLifePoints - this.stats.lifePoints;
+	}
+
+	public boolean weightMaxAlmostReached() {
+		if(this.weightMax - this.weight < this.weight * 0.05) // moins de 5% restant
+			return true;
+		return false;
 	}
 }

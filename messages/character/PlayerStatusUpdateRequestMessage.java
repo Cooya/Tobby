@@ -14,6 +14,7 @@ public class PlayerStatusUpdateRequestMessage extends Message {
 	public void serialize(int statusId) {
 		ByteArray buffer = new ByteArray();
 		buffer.writeShort((short) 415);
+		this.status = new PlayerStatus();
 		this.status.serialize(buffer, statusId);
 		completeInfos(buffer);
 	}

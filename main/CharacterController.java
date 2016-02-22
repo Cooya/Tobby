@@ -30,12 +30,13 @@ import messages.fight.GameFightTurnFinishMessage;
 public class CharacterController extends Thread {
 	private static final boolean DEBUG = true;
 	private Instance instance;
+	private int fightsCounter;
+	private AreaRover areaRover;
 	public CharacterInformations infos;
 	public RoleplayContext roleplayContext;
 	public FightContext fightContext;
 	public String currentPathName;
 	public CellsPathfinder pathfinder;
-	private int fightsCounter;
 	
 	private class State {
 		private boolean state;
@@ -50,7 +51,7 @@ public class CharacterController extends Thread {
 	private State inFight;
 	private State inGameTurn;
 	private State inRegeneration;
-	private State dying;
+	private State needToEmptyInventory;
 	
 	public CharacterController(Instance instance, String login, String password, int serverId) {
 		this.instance = instance;
@@ -63,7 +64,7 @@ public class CharacterController extends Thread {
 		this.inFight = new State(false); 
 		this.inGameTurn = new State(false); 
 		this.inRegeneration = new State(false); 
-		this.dying = new State(false);
+		this.needToEmptyInventory = new State(false);
 	}
 
 	public void setCurrentMap(int mapId) {
@@ -89,6 +90,7 @@ public class CharacterController extends Thread {
 			case FIGHT_START : this.inFight.state = true; break;
 			case FIGHT_END : this.inFight.state = false; break;
 			case GAME_TURN_START : this.inGameTurn.state = true; break;
+			case WEIGHT_MAX : this.needToEmptyInventory.state = true; break;
 			case MONSTER_GROUP_RESPAWN : break; // juste une stimulation
 			default : new FatalError("Unexpected event caught : " + event); break;
 		}
@@ -102,7 +104,7 @@ public class CharacterController extends Thread {
 			try {
 				wait(timeout - currentTime);
 			} catch (Exception e) {
-				this.dying.state = true;
+				interrupt();
 				return false;
 			}
 		}
@@ -117,7 +119,7 @@ public class CharacterController extends Thread {
 		try {
 			wait();
 		} catch(Exception e) {
-			this.dying.state = true;
+			interrupt();
 		}
 	}
 
@@ -126,20 +128,20 @@ public class CharacterController extends Thread {
 			case 0 : // free
 				if(DEBUG)
 					this.instance.log.p("Waiting for character to be free.");
-				while(!this.dying.state && !isFree())
+				while(!isInterrupted() && !isFree())
 					waitAnyEvent();
 				return;
 			case 1 : // start fight
 				if(DEBUG)
 					this.instance.log.p("Waiting for fight beginning.");
-				while(!this.dying.state && !this.inFight.state)
+				while(!isInterrupted() && !this.inFight.state)
 					if(!waitSpecificState(this.inFight, true, 2000))
 						return;
 				return;
 			case 2 : // start game turn
 				if(DEBUG)
 					this.instance.log.p("Waiting for my game turn.");
-				while(!this.dying.state && !this.inGameTurn.state && this.inFight.state)
+				while(!isInterrupted() && !this.inGameTurn.state && this.inFight.state)
 					waitAnyEvent();	
 				return;
 			/*
@@ -164,6 +166,9 @@ public class CharacterController extends Thread {
 
 		pathfinder = new CellsPathfinder(this.infos.currentMap);
 		Path path = pathfinder.compute(this.infos.currentCellId, cellId);
+		
+		this.instance.log.p(path.toString());
+		
 		MovementPath mvPath = CellsPathfinder.movementPathFromArray(path.toVector());
 		mvPath.setStart(MapPoint.fromCellId(this.infos.currentCellId));
 		mvPath.setEnd(MapPoint.fromCellId(cellId));
@@ -176,11 +181,12 @@ public class CharacterController extends Thread {
 		this.inMovement.state = true;
 		
 		int duration = path.getCrossingDuration();
+		this.instance.log.p("Movement duration : " + duration + " ms.");
 
 		try {
-			Thread.sleep((long) (duration + (duration * 0.4))); // on attend d'arriver à destination
-		} catch(Exception e) {
-			this.dying.state = true;
+			sleep((long) (duration + (duration * 0.3))); // on attend d'arriver à destination
+		} catch(InterruptedException e) {
+			interrupt();
 			return;
 		}
 		
@@ -205,9 +211,10 @@ public class CharacterController extends Thread {
 
 		moveTo(pathfinder.getChangementMapCell(direction), true);
 		
-		if(this.dying.state)
+		if(isInterrupted())
 			return;
 		
+		this.instance.log.p("Sending map changement request.");
 		ChangeMapMessage CMM = new ChangeMapMessage();
 		CMM.serialize(this.infos.currentMap.getNeighbourMapFromDirection(direction));
 		instance.outPush(CMM);
@@ -224,9 +231,9 @@ public class CharacterController extends Thread {
 			this.inRegeneration.state = true;
 			this.instance.log.p("Break for life regeneration.");
 			try {
-				Thread.sleep(this.infos.regenRate * 100 * missingLife); // on attend de récupérer toute sa vie
+				sleep(this.infos.regenRate * 100 * missingLife); // on attend de récupérer toute sa vie
 			} catch(Exception e) {
-				this.dying.state = true;
+				interrupt();
 				return;
 			}
 			this.inRegeneration.state = false;
@@ -234,7 +241,7 @@ public class CharacterController extends Thread {
 	}
 	
 	public boolean lookForFight() {
-		//waitState(3);
+		waitState(0);
 		
 		this.instance.log.p("Searching for monster group to fight.");
 		Vector<GameRolePlayGroupMonsterInformations> monsterGroups;
@@ -248,7 +255,7 @@ public class CharacterController extends Thread {
 				if(launchFight(monsterGroup))
 					return true;
 				
-				if(this.dying.state)
+				if(isInterrupted())
 					return false;
 			}
 			else {
@@ -264,7 +271,7 @@ public class CharacterController extends Thread {
 		this.instance.log.p("Trying to take this monster group.");
 		moveTo(monsterGroup.disposition.cellId, false);
 		
-		if(this.dying.state)
+		if(isInterrupted())
 			return false;
 		
 		if(this.roleplayContext.getMonsterGroupCellId(monsterGroup) == this.infos.currentCellId) {
@@ -282,22 +289,22 @@ public class CharacterController extends Thread {
 		waitState(1);
 		if(!fightRecovery) { // si c'est un combat tout frais
 			try {
-				Thread.sleep(1000); // pour paraître plus naturel lors du lancement du combat
+				sleep(1000); // pour paraître plus naturel lors du lancement du combat
 			} catch(Exception e) {
-				this.dying.state = true;
+				interrupt();
 				return;
 			}
 			GameFightReadyMessage GFRM = new GameFightReadyMessage();
 			GFRM.serialize();
 			this.instance.outPush(GFRM);
 		}
-		while(!this.dying.state && this.inFight.state) {
+		while(!isInterrupted() && this.inFight.state) {
 			waitState(2); // attente du début du prochain tour ou de la fin du combat
 			if(!this.inFight.state)
 				break;
 			launchSpell();
 			
-			if(this.dying.state)
+			if(isInterrupted())
 				return;
 			
 			concludeGameTurn();
@@ -317,9 +324,9 @@ public class CharacterController extends Thread {
 			else
 				break;
 			try {
-				Thread.sleep(1000); // important pour le moment sinon bug
+				sleep(1000); // important pour le moment sinon bug
 			} catch(InterruptedException e) {
-				this.dying.state = true;
+				interrupt();
 				return;
 			}
 		}
@@ -339,6 +346,10 @@ public class CharacterController extends Thread {
 		this.instance.log.p("Passing in away mode.");
 	}
 	
+	private void selectAreaRoverDependingOnLevel() { // à terminer
+		this.areaRover = new AreaRover(445, this); // bouftous d'incarnam
+	}
+	
 	public void run() {
 		waitState(0);
 		
@@ -347,34 +358,37 @@ public class CharacterController extends Thread {
 		if(this.inFight.state) // reprise de combat à la reconnexion
 			fight(true);
 		
-		AreaRover areaRover = null;
-		if(!this.dying.state)
-			areaRover = new AreaRover(445, this); // bouftous d'incarnam
-		
-		while(!this.dying.state) { 
-			regenerateLife();
-			
-			if(this.dying.state)
-				break;
-			
-			if(lookForFight()) {
-				waitState(1);
-				
-				if(this.dying.state)
+		while(!isInterrupted()) { // boucle principale 
+			while(!isInterrupted() && !this.needToEmptyInventory.state) { // boucle recherche & combat
+				selectAreaRoverDependingOnLevel();
+				if(isInterrupted())
+					break;
+				regenerateLife();
+				if(isInterrupted())
 					break;
 				
-				if(this.inFight.state) // on vérifie si le combat a bien été lancé
-					fight(false);
-				else
-					changeMap(areaRover.nextMap(this));
+				if(lookForFight()) {
+					waitState(1);
+					
+					if(isInterrupted())
+						break;
+					
+					if(this.inFight.state) // on vérifie si le combat a bien été lancé
+						fight(false);
+					else
+						changeMap(this.areaRover.nextMap(this));
+				}
+				else {
+					if(isInterrupted())
+						break;
+					
+					changeMap(this.areaRover.nextMap(this));
+				}
 			}
-			else {
-				if(this.dying.state)
-					break;
-				
-				changeMap(areaRover.nextMap(this));
-			}
+			
+			// go to empty inventory
 		}
+		
 		this.instance.log.p(Log.Status.CONSOLE, "Thread controller of instance with id = " + this.instance.id + " terminated.");
 	}
 }

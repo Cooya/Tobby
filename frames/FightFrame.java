@@ -67,13 +67,15 @@ public class FightFrame implements IFrame {
 				return true;
 			case 5927 : // GameFightOptionStateUpdateMessage
 				GameFightOptionStateUpdateMessage GFOSUM = new GameFightOptionStateUpdateMessage(msg);
-				if(GFOSUM.option == 2 && !GFOSUM.state)
-					this.instance.log.p("Fight already locked.");
-				else {
-					GameFightOptionToggleMessage GFOTM = new GameFightOptionToggleMessage();
-					GFOTM.serialize(2); // lock (0 pour interdire les spectateurs)
-					this.instance.outPush(GFOTM);
-					this.instance.log.p("Fight locked.");
+				if(GFOSUM.option == 2) {
+					if(!GFOSUM.state)
+						this.instance.log.p("Fight already locked.");
+					else {
+						GameFightOptionToggleMessage GFOTM = new GameFightOptionToggleMessage();
+						GFOTM.serialize(2); // lock (0 pour interdire les spectateurs)
+						this.instance.outPush(GFOTM);
+						this.instance.log.p("Fight locked.");
+					}
 				}
 				return true;
 		}

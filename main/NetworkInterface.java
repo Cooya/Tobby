@@ -14,6 +14,7 @@ public class NetworkInterface extends Thread {
 	private Reader reader;
 	private Connection.Client serverCo;
 	private String gameServerIP;
+	private boolean alreadyPing;
 	protected Latency latency;
 	protected Sender sender; 
 	
@@ -22,12 +23,15 @@ public class NetworkInterface extends Thread {
 		this.reader = new Reader();
 		this.sender = new Sender();
 		this.latency = new Latency();
+		this.alreadyPing = false;
 	}
 	
 	public void run() {
 		this.instance.log.p("Connection to authentification server, waiting response...");
 		connectionToServer(Main.AUTH_SERVER_IP, Main.SERVER_PORT);
 		this.instance.log.p("Deconnected from authentification server.");
+		
+		this.alreadyPing = false;
 		
 		if(!isInterrupted() && gameServerIP != null) {
 			this.instance.log.p("Connection to game server, waiting response...");
@@ -46,10 +50,13 @@ public class NetworkInterface extends Thread {
 				if((bytesReceived = this.serverCo.receive(buffer)) == -1)
 					break;
 			} catch(SocketTimeoutException e) {
-				BasicPingMessage ping = new BasicPingMessage();
-				ping.serialize(true);
-				instance.outPush(ping);
-				this.instance.log.p("Sending a ping request to server.");
+				if(!this.alreadyPing) {
+					BasicPingMessage ping = new BasicPingMessage();
+					ping.serialize(true);
+					instance.outPush(ping);
+					this.instance.log.p("Sending a ping request to server.");
+					this.alreadyPing = true;
+				}
 				continue;
 			} catch(Exception e) {
 				break;
