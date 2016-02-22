@@ -39,10 +39,10 @@ public class CharacterController extends Thread {
 	public FightContext fightContext;
 	public String currentPathName;
 	public CellsPathfinder pathfinder;
-	
+
 	private class State {
 		private boolean state;
-		
+
 		public State(boolean state) {
 			this.state = state;
 		}
@@ -55,13 +55,13 @@ public class CharacterController extends Thread {
 	private State inRegeneration;
 	private State needToEmptyInventory;
 	private State levelUp;
-	
+
 	public CharacterController(Instance instance, String login, String password, int serverId) {
 		this.instance = instance;
 		this.infos = new CharacterInformations(login, password, serverId, Elements.intelligence);
 		this.roleplayContext = new RoleplayContext(this);
 		this.fightContext = new FightContext(this);
-		
+
 		this.isLoaded = new State(false); // début du jeu et à chaque changement de map
 		this.inMovement = new State(false); 
 		this.inFight = new State(false); 
@@ -75,11 +75,11 @@ public class CharacterController extends Thread {
 		this.infos.currentMap = MapsCache.loadMap(mapId);
 		this.pathfinder = new CellsPathfinder(this.infos.currentMap);
 	}
-	
+
 	private boolean isFree() {
 		return this.isLoaded.state && !this.inMovement.state && !this.inFight.state && !this.inRegeneration.state;
 	}
-	
+
 	// seul le thread principal entre ici
 	public synchronized void emit(Event event) {
 		if(DEBUG)
@@ -87,20 +87,20 @@ public class CharacterController extends Thread {
 		switchEvent(event);
 		notify();
 	}
-	
+
 	private void switchEvent(Event event) {
 		switch(event) {
-			case CHARACTER_LOADED : this.isLoaded.state = true; break;
-			case FIGHT_START : this.inFight.state = true; break;
-			case FIGHT_END : this.inFight.state = false; break;
-			case GAME_TURN_START : this.inGameTurn.state = true; break;
-			case WEIGHT_MAX : this.needToEmptyInventory.state = true; break;
-			case MONSTER_GROUP_RESPAWN : break; // juste une stimulation
-			case LEVEL_UP: this.levelUp.state = true; break;
-			default : new FatalError("Unexpected event caught : " + event); break;
+		case CHARACTER_LOADED : this.isLoaded.state = true; break;
+		case FIGHT_START : this.inFight.state = true; break;
+		case FIGHT_END : this.inFight.state = false; break;
+		case GAME_TURN_START : this.inGameTurn.state = true; break;
+		case WEIGHT_MAX : this.needToEmptyInventory.state = true; break;
+		case MONSTER_GROUP_RESPAWN : break; // juste une stimulation
+		case LEVEL_UP: this.levelUp.state = true; break;
+		default : new FatalError("Unexpected event caught : " + event); break;
 		}
 	}
-	
+
 	// seul le CC entre ici
 	private synchronized boolean waitSpecificState(State condition, boolean expectedState, int timeout) {
 		long startTime = System.currentTimeMillis();
@@ -118,7 +118,7 @@ public class CharacterController extends Thread {
 		this.instance.log.p("TIMEOUT");
 		return false; // si on ne l'a pas reçu à temps
 	}
-	
+
 	// seul le CC entre ici
 	private synchronized void waitAnyEvent() {
 		try {
@@ -130,32 +130,32 @@ public class CharacterController extends Thread {
 
 	private void waitState(int stateId) {
 		switch(stateId) {
-			case 0 : // free
-				if(DEBUG)
-					this.instance.log.p("Waiting for character to be free.");
-				while(!isInterrupted() && !isFree())
-					waitAnyEvent();
-				return;
-			case 1 : // start fight
-				if(DEBUG)
-					this.instance.log.p("Waiting for fight beginning.");
-				while(!isInterrupted() && !this.inFight.state)
-					if(!waitSpecificState(this.inFight, true, 2000))
-						return;
-				return;
-			case 2 : // start game turn
-				if(DEBUG)
-					this.instance.log.p("Waiting for my game turn.");
-				while(!isInterrupted() && !this.inGameTurn.state && this.inFight.state)
-					waitAnyEvent();	
-				return;
+		case 0 : // free
+			if(DEBUG)
+				this.instance.log.p("Waiting for character to be free.");
+			while(!isInterrupted() && !isFree())
+				waitAnyEvent();
+			return;
+		case 1 : // start fight
+			if(DEBUG)
+				this.instance.log.p("Waiting for fight beginning.");
+			while(!isInterrupted() && !this.inFight.state)
+				if(!waitSpecificState(this.inFight, true, 2000))
+					return;
+			return;
+		case 2 : // start game turn
+			if(DEBUG)
+				this.instance.log.p("Waiting for my game turn.");
+			while(!isInterrupted() && !this.inGameTurn.state && this.inFight.state)
+				waitAnyEvent();	
+			return;
 			/*
 			case 3 : // monster group respawn
 				if(DEBUG)
 					this.instance.log.p("Waiting for monster group respawn.");
 				waitAnyEvent();	
 				return;
-			*/
+			 */
 		}
 	}
 
@@ -166,25 +166,25 @@ public class CharacterController extends Thread {
 			this.instance.log.p("Already on the target cell id.");
 			return;
 		}
-		
+
 		this.instance.log.p("Moving from " + this.infos.currentCellId + " to " + cellId + ".");
 
 		pathfinder = new CellsPathfinder(this.infos.currentMap);
 		Path path = pathfinder.compute(this.infos.currentCellId, cellId);
-		
+
 		this.instance.log.p(path.toString());
-		
+
 		MovementPath mvPath = CellsPathfinder.movementPathFromArray(path.toVector());
 		mvPath.setStart(MapPoint.fromCellId(this.infos.currentCellId));
 		mvPath.setEnd(MapPoint.fromCellId(cellId));
-		
+
 		this.instance.log.p("Sending movement request.");
-	
+
 		GameMapMovementRequestMessage GMMRM = new GameMapMovementRequestMessage();
 		GMMRM.serialize(mvPath.getServerMovement(), this.infos.currentMap.id, instance.id);
 		instance.outPush(GMMRM);
 		this.inMovement.state = true;
-		
+
 		int duration = path.getCrossingDuration();
 		this.instance.log.p("Movement duration : " + duration + " ms.");
 
@@ -194,7 +194,7 @@ public class CharacterController extends Thread {
 			interrupt();
 			return;
 		}
-		
+
 		this.instance.log.p("Target cell reached.");
 
 		EmptyMessage EM = new EmptyMessage("GameMapMovementConfirmMessage");
@@ -209,17 +209,17 @@ public class CharacterController extends Thread {
 		moveTo(mapIds.get(0), changeMap);
 	}
 
-	
+
 	public void changeMap(int direction) {
 		waitState(0);
 
 		this.instance.log.p("Moving to " + Pathfinder.directionToString(direction) + " map.");
 
 		moveTo(pathfinder.getChangementMapCell(direction), true);
-		
+
 		if(isInterrupted())
 			return;
-		
+
 		this.instance.log.p("Sending map changement request.");
 		ChangeMapMessage CMM = new ChangeMapMessage();
 		CMM.serialize(this.infos.currentMap.getNeighbourMapFromDirection(direction));
@@ -230,7 +230,7 @@ public class CharacterController extends Thread {
 
 	public void regenerateLife() {
 		waitState(0);
-		
+
 		int missingLife = this.infos.missingLife();
 		this.instance.log.p("Missing life : " + missingLife + " life points.");
 		if(missingLife > 0) {
@@ -245,22 +245,38 @@ public class CharacterController extends Thread {
 			this.inRegeneration.state = false;
 		}
 	}
-	
+
 	private void upgradeStats() {
 		waitState(0);
-		
 		if(this.levelUp.state) {
 			StatsUpgradeRequestMessage SURM = new StatsUpgradeRequestMessage();
-			SURM.serialize(this.infos.element, this.infos.stats.statsPoints);
+			SURM.serialize(this.infos.element, calculateMaxStatsPoints());
 			instance.outPush(SURM);
 			levelUp.state = false;
 			this.instance.log.p("Increase stat : " + Elements.intelligence + " of " + this.infos.stats.statsPoints + " points.");
 		}
 	}
-	
+
+
+
+	private int calculateMaxStatsPoints() {
+		int stage=(getElementInfoById()/100)+1;
+		return infos.stats.statsPoints-(infos.stats.statsPoints%stage);
+	}
+
+	private int getElementInfoById() {
+		switch(infos.element){
+		case 10: return infos.stats.strength.base;
+		case 13: return infos.stats.chance.base ;
+		case 14: return infos.stats.agility.base;
+		case 15: return infos.stats.intelligence.base;
+		}
+		return 0;
+	}
+
 	public boolean lookForFight() {
 		waitState(0);
-		
+
 		this.instance.log.p("Searching for monster group to fight.");
 		Vector<GameRolePlayGroupMonsterInformations> monsterGroups;
 		int monsterGroupsSize;
@@ -272,7 +288,7 @@ public class CharacterController extends Thread {
 				this.instance.log.p("Monster group on cell id " + monsterGroup.disposition.cellId + ".");
 				if(launchFight(monsterGroup))
 					return true;
-				
+
 				if(isInterrupted())
 					return false;
 			}
@@ -282,16 +298,16 @@ public class CharacterController extends Thread {
 			}
 		}
 	}
-	
+
 	public boolean launchFight(GameRolePlayGroupMonsterInformations monsterGroup) {
 		waitState(0);
-		
+
 		this.instance.log.p("Trying to take this monster group.");
 		moveTo(monsterGroup.disposition.cellId, false);
-		
+
 		if(isInterrupted())
 			return false;
-		
+
 		if(this.roleplayContext.getMonsterGroupCellId(monsterGroup) == this.infos.currentCellId) {
 			this.instance.log.p("Monster group taken.");
 			GameRolePlayAttackMonsterRequestMessage GRPAMRM = new GameRolePlayAttackMonsterRequestMessage();
@@ -301,7 +317,7 @@ public class CharacterController extends Thread {
 		}
 		return false;
 	}
-	
+
 	public void fight(boolean fightRecovery) {
 		this.instance.startFight(); // lancement de la FightFrame (à mettre en premier)
 		waitState(1);
@@ -321,10 +337,10 @@ public class CharacterController extends Thread {
 			if(!this.inFight.state)
 				break;
 			launchSpell();
-			
+
 			if(isInterrupted())
 				return;
-			
+
 			concludeGameTurn();
 		}
 		this.instance.log.p("Number of fights done : " + ++this.fightsCounter);
@@ -349,34 +365,34 @@ public class CharacterController extends Thread {
 			}
 		}
 	}
-	
+
 	public void concludeGameTurn() {
 		GameFightTurnFinishMessage GFTFM = new GameFightTurnFinishMessage();
 		GFTFM.serialize();
 		this.instance.outPush(GFTFM);
 		this.inGameTurn.state = false;
 	}
-	
+
 	private void changePlayerStatus() {
 		PlayerStatusUpdateRequestMessage PSURM = new PlayerStatusUpdateRequestMessage();
 		PSURM.serialize(PlayerStatusEnum.PLAYER_STATUS_AFK);
 		this.instance.outPush(PSURM);
 		this.instance.log.p("Passing in away mode.");
 	}
-	
+
 	private void selectAreaRoverDependingOnLevel() { // à terminer
 		//this.areaRover = new AreaRover(95, this); // pious d'Astrub
 		this.areaRover = new AreaRover(445, this); // bouftous d'Incarnam
 	}
-	
+
 	public void run() {
 		waitState(0);
-		
+
 		changePlayerStatus();
-		
+
 		if(this.inFight.state) // reprise de combat à la reconnexion
 			fight(true);
-		
+
 		while(!isInterrupted()) { // boucle principale 
 			while(!isInterrupted() && !this.needToEmptyInventory.state) { // boucle recherche & combat
 				selectAreaRoverDependingOnLevel();
@@ -388,13 +404,13 @@ public class CharacterController extends Thread {
 				regenerateLife();
 				if(isInterrupted())
 					break;
-				
+
 				if(lookForFight()) {
 					waitState(1);
-					
+
 					if(isInterrupted())
 						break;
-					
+
 					if(this.inFight.state) // on vérifie si le combat a bien été lancé
 						fight(false);
 					else
@@ -403,14 +419,14 @@ public class CharacterController extends Thread {
 				else {
 					if(isInterrupted())
 						break;
-					
+
 					changeMap(this.areaRover.nextMap(this));
 				}
 			}
-			
+
 			// go to empty inventory
 		}
-		
+
 		this.instance.log.p(Log.Status.CONSOLE, "Thread controller of instance with id = " + this.instance.id + " terminated.");
 	}
 }
