@@ -1,5 +1,6 @@
 package main;
 
+import game.character.Elements;
 import game.character.PlayerStatusEnum;
 import game.currentmap.GameRolePlayGroupMonsterInformations;
 import game.d2o.modules.MapPosition;
@@ -20,6 +21,7 @@ import java.util.Vector;
 import utilities.Log;
 import messages.EmptyMessage;
 import messages.character.PlayerStatusUpdateRequestMessage;
+import messages.character.StatsUpgradeRequestMessage;
 import messages.context.ChangeMapMessage;
 import messages.context.GameMapMovementRequestMessage;
 import messages.context.GameRolePlayAttackMonsterRequestMessage;
@@ -33,6 +35,11 @@ public class CharacterController extends Thread {
 	private int fightsCounter;
 	private AreaRover areaRover;
 	public CharacterInformations infos;
+	
+	//Augmentation de stats
+	private int lvl;
+	private int element=Elements.intelligence;
+	
 	public RoleplayContext roleplayContext;
 	public FightContext fightContext;
 	public String currentPathName;
@@ -52,6 +59,8 @@ public class CharacterController extends Thread {
 	private State inGameTurn;
 	private State inRegeneration;
 	private State needToEmptyInventory;
+	private State lvlUp;
+	
 	
 	public CharacterController(Instance instance, String login, String password, int serverId) {
 		this.instance = instance;
@@ -65,11 +74,16 @@ public class CharacterController extends Thread {
 		this.inGameTurn = new State(false); 
 		this.inRegeneration = new State(false); 
 		this.needToEmptyInventory = new State(false);
+		this.lvlUp = new State(false);
 	}
 
 	public void setCurrentMap(int mapId) {
 		this.infos.currentMap = MapsCache.loadMap(mapId);
 		this.pathfinder = new CellsPathfinder(this.infos.currentMap);
+	}
+	
+	public void changeLvl(int lvl){
+		this.lvl=lvl;
 	}
 	
 	private boolean isFree() {
@@ -92,6 +106,7 @@ public class CharacterController extends Thread {
 			case GAME_TURN_START : this.inGameTurn.state = true; break;
 			case WEIGHT_MAX : this.needToEmptyInventory.state = true; break;
 			case MONSTER_GROUP_RESPAWN : break; // juste une stimulation
+			case LVL_UP: this.lvlUp.state = true; break;
 			default : new FatalError("Unexpected event caught : " + event); break;
 		}
 	}
@@ -204,6 +219,7 @@ public class CharacterController extends Thread {
 		moveTo(mapIds.get(0), changeMap);
 	}
 
+	
 	public void changeMap(int direction) {
 		waitState(0);
 
@@ -239,6 +255,20 @@ public class CharacterController extends Thread {
 			this.inRegeneration.state = false;
 		}
 	}
+	
+	private void upgradeStats() {
+		waitState(0);
+		
+		if(this.lvlUp.state){
+			StatsUpgradeRequestMessage SURM=new StatsUpgradeRequestMessage();
+			SURM.serialize(this.element, this.infos.stats.statsPoints);
+			instance.outPush(SURM);
+			lvlUp.state=false;
+			this.instance.log.p("Increase stat:"+Elements.intelligence+" of "+this.infos.stats.statsPoints+" points.");
+		}
+		
+	}
+	
 	
 	public boolean lookForFight() {
 		waitState(0);
@@ -347,7 +377,9 @@ public class CharacterController extends Thread {
 	}
 	
 	private void selectAreaRoverDependingOnLevel() { // à terminer
+		//this.areaRover = new AreaRover(95, this); // piou d'astrub
 		this.areaRover = new AreaRover(445, this); // bouftous d'incarnam
+		
 	}
 	
 	public void run() {
@@ -363,6 +395,7 @@ public class CharacterController extends Thread {
 				selectAreaRoverDependingOnLevel();
 				if(isInterrupted())
 					break;
+				upgradeStats();
 				regenerateLife();
 				if(isInterrupted())
 					break;
@@ -391,4 +424,6 @@ public class CharacterController extends Thread {
 		
 		this.instance.log.p(Log.Status.CONSOLE, "Thread controller of instance with id = " + this.instance.id + " terminated.");
 	}
+
+
 }
