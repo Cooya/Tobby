@@ -89,6 +89,7 @@
 5570 GameActionFightUnmarkCellsMessage
 5572 GameFightUpdateTeamMessage
 5607 ClientKeyMessage
+5610 StatsUpgradeRequestMessage
 5613 ChallengeTargetsListMessage
 5623 QuestListRequestMessage
 5626 QuestListMessage
