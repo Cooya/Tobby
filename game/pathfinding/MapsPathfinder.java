@@ -47,15 +47,19 @@ public class MapsPathfinder extends Pathfinder {
 
 	protected Vector<PathNode> getNeighbourNodes(PathNode node) {
 		Vector<PathNode> neighbours = new Vector<PathNode>();
-		for(int direction = 0; direction < 8; direction += 2)
-			neighbours.add(new MapNode(((MapNode) node).map.getNeighbourMapFromDirection(direction), direction, node));
+		Map map;
+		for(int direction = 0; direction < 8; direction += 2) {
+			map = getMapFromId(((MapNode) node).map.getNeighbourMapFromDirection(direction));
+			if(map != null)
+				neighbours.add(new MapNode(map, direction, node));
+		}
 		return neighbours;	
 	}
 	
 	private Map getMapFromId(int mapId) {
 		MapPosition mp = MapPosition.getMapPositionById(mapId);
 		if(mp == null)
-			throw new Error("Unknown map id : " + mapId + ".");
+			return null;
 		return MapsCache.loadMap(mapId);
 	}
 	
@@ -190,8 +194,8 @@ public class MapsPathfinder extends Pathfinder {
     		return Math.sqrt(Math.pow(this.x - mn.x, 2) + Math.pow(this.y - mn.y, 2));
 		}
 		
-    	protected int getCrossingDuration(boolean mode) { // fonction bidon
-    		return 0;
+    	protected int getCrossingDuration(boolean mode) {
+    		return 1;
     	}
     	
     	public String toString() {

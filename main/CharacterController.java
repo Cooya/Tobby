@@ -1,5 +1,6 @@
 package main;
 
+import game.character.PlayerStatusEnum;
 import game.currentmap.GameRolePlayGroupMonsterInformations;
 import game.d2o.modules.MapPosition;
 import game.d2p.MapsCache;
@@ -18,6 +19,7 @@ import java.util.Vector;
 
 import utilities.Log;
 import messages.EmptyMessage;
+import messages.character.PlayerStatusUpdateRequestMessage;
 import messages.context.ChangeMapMessage;
 import messages.context.GameMapMovementRequestMessage;
 import messages.context.GameRolePlayAttackMonsterRequestMessage;
@@ -176,7 +178,7 @@ public class CharacterController extends Thread {
 		int duration = path.getCrossingDuration();
 
 		try {
-			Thread.sleep((long) (duration + (duration * 0.3))); // on attend d'arriver à destination
+			Thread.sleep((long) (duration + (duration * 0.4))); // on attend d'arriver à destination
 		} catch(Exception e) {
 			this.dying.state = true;
 			return;
@@ -275,19 +277,20 @@ public class CharacterController extends Thread {
 		return false;
 	}
 	
-	public void fight() {
+	public void fight(boolean fightRecovery) {
 		this.instance.startFight(); // lancement de la FightFrame (à mettre en premier)
 		waitState(1);
-		
-		try {
-			Thread.sleep(1000); // pour paraître plus naturel lors du lancement du combat
-		} catch(Exception e) {
-			this.dying.state = true;
-			return;
+		if(!fightRecovery) { // si c'est un combat tout frais
+			try {
+				Thread.sleep(1000); // pour paraître plus naturel lors du lancement du combat
+			} catch(Exception e) {
+				this.dying.state = true;
+				return;
+			}
+			GameFightReadyMessage GFRM = new GameFightReadyMessage();
+			GFRM.serialize();
+			this.instance.outPush(GFRM);
 		}
-		GameFightReadyMessage GFRM = new GameFightReadyMessage();
-		GFRM.serialize();
-		this.instance.outPush(GFRM);
 		while(!this.dying.state && this.inFight.state) {
 			waitState(2); // attente du début du prochain tour ou de la fin du combat
 			if(!this.inFight.state)
@@ -325,14 +328,28 @@ public class CharacterController extends Thread {
 	public void concludeGameTurn() {
 		GameFightTurnFinishMessage GFTFM = new GameFightTurnFinishMessage();
 		GFTFM.serialize();
-		instance.outPush(GFTFM);
+		this.instance.outPush(GFTFM);
 		this.inGameTurn.state = false;
+	}
+	
+	private void changePlayerStatus() {
+		PlayerStatusUpdateRequestMessage PSURM = new PlayerStatusUpdateRequestMessage();
+		PSURM.serialize(PlayerStatusEnum.PLAYER_STATUS_AFK);
+		this.instance.outPush(PSURM);
+		this.instance.log.p("Passing in away mode.");
 	}
 	
 	public void run() {
 		waitState(0);
 		
-		AreaRover areaRover = new AreaRover(this);
+		changePlayerStatus();
+		
+		if(this.inFight.state) // reprise de combat à la reconnexion
+			fight(true);
+		
+		AreaRover areaRover = null;
+		if(!this.dying.state)
+			areaRover = new AreaRover(445, this); // bouftous d'incarnam
 		
 		while(!this.dying.state) { 
 			regenerateLife();
@@ -346,8 +363,8 @@ public class CharacterController extends Thread {
 				if(this.dying.state)
 					break;
 				
-				if(inFight.state) // on vérifie si le combat a bien été lancé
-					fight();
+				if(this.inFight.state) // on vérifie si le combat a bien été lancé
+					fight(false);
 				else
 					changeMap(areaRover.nextMap(this));
 			}
@@ -358,6 +375,6 @@ public class CharacterController extends Thread {
 				changeMap(areaRover.nextMap(this));
 			}
 		}
-		Instance.log(Log.Status.CONSOLE, "Instance terminated.");
+		this.instance.log.p(Log.Status.CONSOLE, "Thread controller of instance with id = " + this.instance.id + " terminated.");
 	}
 }

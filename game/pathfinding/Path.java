@@ -1,6 +1,8 @@
 package game.pathfinding;
 
+import game.d2o.modules.MapPosition;
 import game.pathfinding.Pathfinder.PathNode;
+import informations.CharacterInformations;
 
 import java.util.Collections;
 import java.util.Vector;
@@ -14,6 +16,35 @@ public class Path {
 	private int currentPos;
 	private boolean isLoop;
 	protected int startCellId = -1; // uniquement pour les paths de maps
+	
+	public static Path getPathToArea(int areaId, CharacterInformations infos) {
+		MapPosition[] mapPositions = MapPosition.getMapPositions();
+		Vector<MapPosition> mapPositionsInArea = new Vector<MapPosition>();
+		for(MapPosition mapPosition : mapPositions)
+			if(mapPosition.subAreaId == areaId)
+				mapPositionsInArea.add(mapPosition);
+		if(mapPositionsInArea.size() == 0)
+			throw new Error("Invalid area id.");
+		Instance.log(mapPositionsInArea.size() + " maps in the area with id = " + areaId + ".");
+		Pathfinder pathfinder = new MapsPathfinder(infos.currentCellId);
+		Path bestPath = null;
+		Path tmpPath;
+		int shortestDistance = 999999;
+		int tmpDistance;
+		for(MapPosition mapPosition : mapPositionsInArea) {
+			if(mapPosition.worldMap < 1)
+				continue;
+			tmpPath = pathfinder.compute(infos.currentMap.id, mapPosition.id);
+			if(tmpPath == null)
+				continue;
+			tmpDistance = tmpPath.getCrossingDuration(); // c'est en fait la distance
+			if(tmpDistance < shortestDistance) {
+				shortestDistance = tmpDistance;
+				bestPath = tmpPath;
+			}
+		}
+		return bestPath;
+	}
 	
 	protected Path(Vector<PathNode> nodes) {
 		this.name = "anonymous";
@@ -58,7 +89,7 @@ public class Path {
 		this.currentPos = 0;
 	}
 	
-	public int getCrossingDuration() { // uniquement pour les paths de cellules
+	public int getCrossingDuration() {
 		int pathLen = nodes.size();
 		int time = 0;
 		for(int i = 1; i < pathLen; ++i) // on saute la première cellule

@@ -1,6 +1,7 @@
 package game.d2o.modules;
 
 import game.d2o.GameData;
+import game.d2o.GameDataFileAccessor;
 
 import java.util.Arrays;
 
@@ -14,6 +15,10 @@ public class SuperArea {
     public boolean hasWorldMap;
     //private String _name;
     private WorldMap _worldmap;
+    
+    static {
+    	GameDataFileAccessor.getInstance().init(MODULE);
+    }
     
     public static SuperArea getSuperAreaById(int id) {
     	return (SuperArea) GameData.getObject(MODULE, id);

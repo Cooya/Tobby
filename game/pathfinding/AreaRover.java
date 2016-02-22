@@ -9,23 +9,24 @@ import java.util.List;
 import java.util.Random;
 
 import main.CharacterController;
-import main.FatalError;
 import main.Instance;
 
 public class AreaRover {
 	private int areaId;
 	
-	public AreaRover(int areaId) {
+	public AreaRover(int areaId, CharacterController CC) {
 		this.areaId = areaId;
+		if(CC.infos.currentMap.subareaId != this.areaId) {
+			Instance.log("Going to area with id = " + this.areaId + ".");
+			Path.getPathToArea(areaId, CC.infos).run(CC);
+		}
 	}
-	
-	public AreaRover(CharacterController CC) {
-		this.areaId = CC.infos.currentMap.subareaId;
-	}
-	
+
 	public int nextMap(CharacterController CC) {
-		if(CC.infos.currentMap.subareaId != this.areaId)
-			new FatalError("Character is not in the good area.");
+		if(CC.infos.currentMap.subareaId != this.areaId) {
+			Instance.log("Going to area with id = " + this.areaId + ".");
+			Path.getPathToArea(areaId, CC.infos).run(CC);
+		}
 		Hashtable<Integer, Integer> neighbours  = new Hashtable<Integer, Integer>();
 		for(int direction = 0; direction < 8; direction += 2)
 			neighbours.put(direction, CC.infos.currentMap.getNeighbourMapFromDirection(direction));

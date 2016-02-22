@@ -125,6 +125,7 @@ public class Instance extends Thread {
 					Thread.currentThread().interrupt();
 				}
 		}
+		this.log.p(Log.Status.CONSOLE, "Thread process of instance with id = " + this.id + " terminated.");
 	}
 	
 	public void setGameServerIP(String gameServerIP) {

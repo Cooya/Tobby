@@ -20,18 +20,18 @@ import javax.swing.event.InternalFrameListener;
 import main.Instance;
 
 public class Controller {
-	private String accountsFilePath="Ressources/accounts.txt";
+	private String accountsFilePath = "Ressources/accounts.txt";
 	private View view;
 	private Model model;
 
 	public Controller() {
 		this.view = new View();
 		this.model = new Model();
-		loadingAccountsList();
+		loadAccountsList();
 		new StartListener(this.view.menuItem);
 	}
 
-	private void loadingAccountsList() {
+	private void loadAccountsList() {
 		try {
 			BufferedReader buffer = new BufferedReader(new FileReader(accountsFilePath));
 			String[] splitLine;
@@ -40,19 +40,17 @@ public class Controller {
 			while(line != null) {
 				splitLine = line.split(" ");
 				model.accounts.put(splitLine[0], line);
-				JMenuItem account=new JMenuItem(splitLine[0]);
+				JMenuItem account = new JMenuItem(splitLine[0]);
 				view.accountsListItems.add(account);
 				view.accountsMenu.add(account);
 				new AccountItemListener(account);
 				line = buffer.readLine();
 			}
 			buffer.close();
-		} catch (IOException e) {
+		} catch(Exception e) {
 			e.printStackTrace();
 		}
 	}
-
-
 
 	private void killInstance(JInternalFrame graphicalFrame) {
 		int instanceId = this.view.instancesId.get(graphicalFrame);
@@ -141,8 +139,8 @@ public class Controller {
 		public void internalFrameOpened(InternalFrameEvent arg0) {}
 	}
 
-	private class AccountItemListener implements ActionListener{
-		public JMenuItem accountItem;
+	private class AccountItemListener implements ActionListener {
+		private JMenuItem accountItem;
 
 		private AccountItemListener(JMenuItem item) {
 			this.accountItem=item;
@@ -160,9 +158,4 @@ public class Controller {
 			frame.setVisible(true);
 		}
 	}
-
-
-
-
-
 }

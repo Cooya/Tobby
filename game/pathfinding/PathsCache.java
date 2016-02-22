@@ -48,7 +48,7 @@ public class PathsCache {
 		if(vectorSize == 1)
 			return vector.get(0).id;
 		for(MapPosition mp : vector)
-			if(mp.worldMap == 1)
+			if(mp.worldMap > 0)
 				return mp.id;
 		throw new Error("An error to fix, Nico !");
 	}

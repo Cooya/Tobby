@@ -34,7 +34,6 @@ public class View {
 		menuBar = new JMenuBar();
 		menuBar.add(menu);
 		
-		
 		desktopPane = new JDesktopPane();
 		desktopPane.setDragMode(JDesktopPane.OUTLINE_DRAG_MODE);
 		

@@ -1,6 +1,7 @@
 package game.d2o.modules;
 
 import game.d2o.GameData;
+import game.d2o.GameDataFileAccessor;
 
 import java.util.Arrays;
 import java.util.Vector;
@@ -26,6 +27,10 @@ public class WorldMap {
     public int totalHeight;
     public Vector<String> zoom;
     //private String _name;
+    
+    static {
+    	GameDataFileAccessor.getInstance().init(MODULE);
+    }
     
     public static WorldMap getWorldMapById(int id) {
     	return (WorldMap) GameData.getObject(MODULE, id);

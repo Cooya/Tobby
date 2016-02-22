@@ -4,11 +4,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.SocketException;
 
 public interface Connection {
 	void send(byte[] bytes);
-	int receive(byte[] bytes);
+	int receive(byte[] bytes) throws Exception;
 	void close();
 
 	public class Client implements Connection {
@@ -21,7 +20,7 @@ public interface Connection {
 				this.client = new Socket(serverIP, port);
 				this.inputStream = this.client.getInputStream();
 				this.outputStream = this.client.getOutputStream();
-			} catch (Exception e) {
+			} catch(Exception e) {
 				new FatalError(e);
 			}
 		}
@@ -31,7 +30,7 @@ public interface Connection {
 				this.client = client;
 				this.inputStream = this.client.getInputStream();
 				this.outputStream = this.client.getOutputStream();
-			} catch (Exception e) {
+			} catch(Exception e) {
 				new FatalError(e);
 			}
 		}
@@ -40,22 +39,16 @@ public interface Connection {
 			try {
 				this.outputStream.write(bytes);
 				this.outputStream.flush();
-			} catch (Exception e) {
+			} catch(Exception e) {
 				new FatalError(e);
 			}
 		}
 		
-		public int receive(byte[] buffer) {
-			int bytesReceived = -1;
-			try {
-				bytesReceived = this.inputStream.read(buffer);
-			} catch(Exception e) {
-				return bytesReceived;
-			}
-			return bytesReceived;
+		public int receive(byte[] buffer) throws Exception {
+			return this.inputStream.read(buffer);
 		}
 		
-		public int receive(byte[] buffer, int timeout) throws SocketException {
+		public int receive(byte[] buffer, int timeout) throws Exception {
 			this.client.setSoTimeout(timeout);
 			int bytes = receive(buffer);
 			this.client.setSoTimeout(0);
@@ -67,7 +60,7 @@ public interface Connection {
 				this.inputStream.close();
 				this.outputStream.close();
 				this.client.close();
-			} catch (Exception e) {
+			} catch(Exception e) {
 				new FatalError(e);
 			}
 		}
@@ -84,7 +77,7 @@ public interface Connection {
 		public Server(int port) {
 			try {
 				this.server = new ServerSocket(port);
-			} catch (Exception e) {
+			} catch(Exception e) {
 				new FatalError(e);
 			}
 		}
@@ -93,7 +86,7 @@ public interface Connection {
 			this.client.send(bytes);
 		}
 
-		public int receive(byte[] bytes) {
+		public int receive(byte[] bytes) throws Exception {
 			return this.client.receive(bytes);
 		}
 
@@ -101,7 +94,7 @@ public interface Connection {
 			try {
 				this.client.close();
 				this.server.close();
-			} catch (Exception e) {
+			} catch(Exception e) {
 				new FatalError(e);
 			}
 		}
@@ -109,7 +102,7 @@ public interface Connection {
 		public void closeClient() {
 			try {
 				this.client.close();
-			} catch (Exception e) {
+			} catch(Exception e) {
 				new FatalError(e);
 			}
 		}

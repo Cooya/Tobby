@@ -1,9 +1,9 @@
 package game.d2o.modules;
 
 import game.d2o.GameData;
+import game.d2o.GameDataFileAccessor;
 
 import java.awt.Point;
-import java.awt.Rectangle;
 import java.util.Arrays;
 import java.util.Vector;
 
@@ -34,6 +34,10 @@ public class SubArea {
     private Area _area;
     private WorldMap _worldMap;
     private Point _center;
+    
+    static {
+    	GameDataFileAccessor.getInstance().init(MODULE);
+    }
     
     public static SubArea getSubAreaById(int id) {
     	SubArea sa = (SubArea) GameData.getObject(MODULE, id);

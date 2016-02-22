@@ -1,5 +1,6 @@
 package main;
 
+import java.net.SocketTimeoutException;
 import java.util.LinkedList;
 
 import messages.Message;
@@ -39,7 +40,11 @@ public class Emulation {
 	public static void sendCredentials(String login, String password) {
 		launcherCo = new Connection.Client("127.0.0.1", launcherPort);
 		byte[] buffer = new byte[1]; // booléen d'injection
-		launcherCo.receive(buffer);
+		try {
+			launcherCo.receive(buffer);
+		} catch(Exception e) {
+			throw new Error(e);
+		}
 		if(buffer[0] == 0)
 			Processes.injectDLL(Main.DLL_LOCATION, "adl.exe");
 		ByteArray array = new ByteArray();
@@ -87,10 +92,9 @@ public class Emulation {
 			Instance.log("Deconnection from Dofus client.");
 			clientDofusCo.close();
 			return CIM;
-		} catch (Exception e) {
-			e.printStackTrace();
+		} catch(Exception e) {
+			throw new Error(e);
 		}
-		return null;
 	}
 	
 	public static synchronized ByteArray hashMessage(ByteArray msg, int instanceId) {
@@ -113,8 +117,10 @@ public class Emulation {
 				if(size - 2 != array.readShort())
 					throw new Error("Missing bytes !");
 				break;
-			} catch(Exception e) {
+			} catch(SocketTimeoutException e) {
 				Instance.log("Timeout for launcher response.");
+			} catch(Exception e) {
+				throw new Error(e);
 			}
 		}
 		Instance.log("Message hashed, " + size + " bytes received.");

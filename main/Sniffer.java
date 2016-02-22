@@ -19,12 +19,12 @@ public class Sniffer extends Thread {
 	private static boolean mustDeconnectClient = false;
 	private static Log log;
 	
-	public Sniffer(CharacterFrame graphicalFrame) {
+	public Sniffer(CharacterFrame graphicalFrame) throws Exception {
 		launch();
 		log = new Log("Sniffer", graphicalFrame);
 	}
 	
-	private void launch() {
+	private void launch() throws Exception {
 		log.p("Waiting for " + dofusExe +" process...");
 		while(!Processes.inProcess(dofusExe))
 			try {
@@ -67,11 +67,15 @@ public class Sniffer extends Thread {
 		byte[] buffer = new byte[Main.BUFFER_DEFAULT_SIZE];
 		int bytesReceived = 0;
 		
-		while((bytesReceived = serverCo.receive(buffer)) != -1) {
-			if(processMsgStack(reader.processBuffer(new ByteArray(buffer, bytesReceived)), "r"))
-				clientCo.send(ByteArray.trimBuffer(buffer, bytesReceived));
-			if(mustDeconnectClient)
-				break;
+		try {
+			while((bytesReceived = serverCo.receive(buffer)) != -1) {
+				if(processMsgStack(reader.processBuffer(new ByteArray(buffer, bytesReceived)), "r"))
+					clientCo.send(ByteArray.trimBuffer(buffer, bytesReceived));
+				if(mustDeconnectClient)
+					break;
+			}
+		} catch (Exception e) {
+			throw new Error(e);
 		}
 		clientCo.closeClient();
 		log.p("Deconnection from Dofus client.");
@@ -81,9 +85,13 @@ public class Sniffer extends Thread {
 		if(gameServerAddress != null) {
 			log.p("Connecting to game server, waiting response...");
 			serverCo = new Connection.Client(gameServerAddress, Main.SERVER_PORT);
-			while((bytesReceived = serverCo.receive(buffer)) != -1) {
-				processMsgStack(reader.processBuffer(new ByteArray(buffer, bytesReceived)), "r");
-				clientCo.send(ByteArray.trimBuffer(buffer, bytesReceived));
+			try {
+				while((bytesReceived = serverCo.receive(buffer)) != -1) {
+					processMsgStack(reader.processBuffer(new ByteArray(buffer, bytesReceived)), "r");
+					clientCo.send(ByteArray.trimBuffer(buffer, bytesReceived));
+				}
+			} catch (Exception e) {
+				throw new Error(e);
 			}
 			serverCo.close();
 			log.p("Deconnected from game server.");

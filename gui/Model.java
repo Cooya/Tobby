@@ -1,7 +1,6 @@
 package gui;
 
 import java.util.Hashtable;
-import java.util.Vector;
 
 import main.Instance;
 
@@ -11,6 +10,6 @@ public class Model {
 	
 	protected Model() {
 		this.instances = new Hashtable<Integer, Instance>();
-		this.accounts= new Hashtable<String, String>();
+		this.accounts = new Hashtable<String, String>();
 	}
 }

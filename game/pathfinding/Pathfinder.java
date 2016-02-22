@@ -23,7 +23,11 @@ public abstract class Pathfinder {
 	
 	public Path compute(int srcId, int destId) {
     	currentNode = getNodeFromId(srcId);
+    	if(currentNode == null)
+    		throw new Error("Invalid current node id.");
     	destNode = getNodeFromId(destId);
+    	if(destNode == null)
+    		throw new Error("Invalid destination node id.");
     	openedList = new Vector<PathNode>();
     	closedList = new Vector<PathNode>();
     	closedList.add(currentNode);

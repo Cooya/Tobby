@@ -1,15 +1,18 @@
 package main;
 
+import java.net.SocketTimeoutException;
 import java.util.LinkedList;
 
 import messages.Message;
+import messages.synchronisation.BasicPingMessage;
 import utilities.ByteArray;
+import utilities.Log;
 
 public class NetworkInterface extends Thread {
 	private static final boolean DEBUG = false;
 	private Instance instance;
 	private Reader reader;
-	private Connection serverCo;
+	private Connection.Client serverCo;
 	private String gameServerIP;
 	protected Latency latency;
 	protected Sender sender; 
@@ -22,30 +25,40 @@ public class NetworkInterface extends Thread {
 	}
 	
 	public void run() {
+		this.instance.log.p("Connection to authentification server, waiting response...");
+		connectionToServer(Main.AUTH_SERVER_IP, Main.SERVER_PORT);
+		this.instance.log.p("Deconnected from authentification server.");
+		
+		if(!isInterrupted() && gameServerIP != null) {
+			this.instance.log.p("Connection to game server, waiting response...");
+			connectionToServer(gameServerIP, Main.SERVER_PORT);
+			this.instance.log.p("Deconnected from game server.");
+		}
+		instance.log.p(Log.Status.CONSOLE, "Thread receiver of instance with id = " + instance.id + " terminated.");
+	}
+	
+	private void connectionToServer(String IP, int port) {
 		byte[] buffer = new byte[Main.BUFFER_DEFAULT_SIZE];
 		int bytesReceived = 0;
-		
-		this.instance.log.p("Connection to authentification server, waiting response...");
-		this.serverCo = new Connection.Client(Main.AUTH_SERVER_IP, Main.SERVER_PORT);
-		while((bytesReceived = this.serverCo.receive(buffer)) != -1) {
+		this.serverCo = new Connection.Client(IP, port);
+		while(!isInterrupted()) {
+			try {
+				if((bytesReceived = this.serverCo.receive(buffer)) == -1)
+					break;
+			} catch(SocketTimeoutException e) {
+				BasicPingMessage ping = new BasicPingMessage();
+				ping.serialize(true);
+				instance.outPush(ping);
+				this.instance.log.p("Sending a ping request to server.");
+				continue;
+			} catch(Exception e) {
+				break;
+			}
 			if(DEBUG)
 				this.instance.log.p(bytesReceived + " bytes received from server.");
 			processMsgStack(reader.processBuffer(new ByteArray(buffer, bytesReceived)));
 		}
 		this.serverCo.close();
-		this.instance.log.p("Deconnected from authentification server.");
-		
-		if(gameServerIP != null) {
-			this.instance.log.p("Connection to game server, waiting response...");
-			this.serverCo = new Connection.Client(gameServerIP, Main.SERVER_PORT);
-			while((bytesReceived = this.serverCo.receive(buffer)) != -1) {
-				if(DEBUG)
-					this.instance.log.p(bytesReceived + " bytes received from server.");
-				processMsgStack(reader.processBuffer(new ByteArray(buffer, bytesReceived)));
-			}
-			this.serverCo.close();
-			this.instance.log.p("Deconnected from game server.");
-		}
 	}
 	
 	public void processMsgStack(LinkedList<Message> msgStack) {
@@ -77,6 +90,7 @@ public class NetworkInterface extends Thread {
 						Thread.currentThread().interrupt();
 					}
 			}
+			instance.log.p(Log.Status.CONSOLE, "Thread sender of instance with id = " + instance.id + " terminated.");
 		}
 		
 		public synchronized void wakeUp() {

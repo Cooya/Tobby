@@ -1,5 +1,7 @@
 package gui;
 
+import java.awt.Color;
+
 import javax.swing.JInternalFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -17,7 +19,7 @@ public class CharacterFrame extends JInternalFrame {
 	
 	public CharacterFrame(String name) {
 		super(name, true, true, true, true);
-		setSize(400, 400);
+		setSize(400, 400);	
 		this.textArea = new JTextArea(5, 20);
 		this.textArea.setEditable(false); 
 		DefaultCaret caret = (DefaultCaret) textArea.getCaret();
@@ -25,7 +27,7 @@ public class CharacterFrame extends JInternalFrame {
 		add(new JScrollPane(textArea));
 	}
 	
-	public void appendText(String text) {
+	public void appendText(String text, Color color) {
 		textArea.append(text + EOL);
 	}
 }
