@@ -57,6 +57,7 @@ public class Controller {
 		}
 	}
 
+	// pour le moment, l'instance n'est pas supprimée du vecteur d'instances
 	private void killInstance(JInternalFrame graphicalFrame) {
 		int instanceId = this.view.instancesId.get(graphicalFrame);
 		Instance instance = this.model.instances.get(instanceId);

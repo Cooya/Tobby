@@ -85,6 +85,10 @@
 4001 FriendsGetListMessage
 4002 FriendsListMessage
 5503 SetUpdateMessage
+5508 ExchangeAcceptMessage
+5509 ExchangeIsReadyMessage
+5511 ExchangeReadyMessage
+5523 ExchangeRequestedTradeMessage
 5540 GameActionFightMarkCellsMessage
 5570 GameActionFightUnmarkCellsMessage
 5572 GameFightUpdateTeamMessage
@@ -93,6 +97,7 @@
 5613 ChallengeTargetsListMessage
 5623 QuestListRequestMessage
 5626 QuestListMessage
+5628 ExchangeLeaveMessage
 5630 FriendWarnOnConnectionStateMessage
 5632 GameRolePlayShowActorMessage
 5637 GameContextRefreshEntityLookMessage
@@ -116,6 +121,7 @@
 5741 GameActionFightTriggerGlyphTrapMessage
 5745 InteractiveUsedMessage
 5747 JobMultiCraftAvailableSkillsMessage
+5773 ExchangePlayerRequestMessage
 5809 JobExperienceMultiUpdateMessage
 5816 BasicLatencyStatsRequestMessage
 5825 GameActionFightSummonMessage
@@ -141,10 +147,12 @@
 6100 QueueStatusMessage
 6103 NotificationByServerMessage
 6123 ChallengeTargetUpdateMessage
+6129 ExchangeStartedWithPodsMessage
 6132 GameActionFightNoSpellCastMessage
 6160 GuildMemberWarnOnConnectionStateMessage
 6162 InventoryContentAndPresetMessage
 6174 IdentificationFailedBannedMessage
+6184 ExchangeObjectTransfertAllFromInvMessage
 6191 GameRolePlayAttackMonsterRequestMessage
 6205 AchievementListMessage
 6216 AccountCapabilitiesMessage

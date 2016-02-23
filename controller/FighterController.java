@@ -8,8 +8,7 @@ import java.util.Vector;
 
 import controller.informations.FightContext;
 import controller.pathfinding.AreaRover;
-import controller.pathfinding.MapsPathfinder;
-import controller.pathfinding.Path;
+import controller.pathfinding.PathsCache;
 import main.Instance;
 import main.Log;
 import messages.EmptyMessage;
@@ -34,12 +33,12 @@ public class FighterController extends CharacterController {
 	}
 	
 	public void regenerateLife() {
-		waitState(0);
+		waitState(CharacterState.IS_FREE);
 		
 		int missingLife = this.infos.missingLife();
 		this.instance.log.p("Missing life : " + missingLife + " life points.");
 		if(missingLife > 0) {
-			this.inRegeneration.state = true;
+			this.states.put(CharacterState.IN_REGENERATION, true);
 			this.instance.log.p("Break for life regeneration.");
 			try {
 				sleep(this.infos.regenRate * 100 * missingLife); // on attend de récupérer toute sa vie
@@ -47,18 +46,18 @@ public class FighterController extends CharacterController {
 				interrupt();
 				return;
 			}
-			this.inRegeneration.state = false;
+			this.states.put(CharacterState.IN_REGENERATION, false);
 		}
 	}
 	
 	private void upgradeStats() {
-		waitState(0);
+		waitState(CharacterState.IS_FREE);
 		
-		if(this.levelUp.state) {
+		if(this.states.get(CharacterState.LEVEL_UP)) {
 			StatsUpgradeRequestMessage SURM = new StatsUpgradeRequestMessage();
 			SURM.serialize(this.infos.element, calculateMaxStatsPoints());
 			instance.outPush(SURM);
-			levelUp.state = false;
+			this.states.put(CharacterState.LEVEL_UP, false);
 			this.instance.log.p("Increase stat : " + Elements.intelligence + " of " + this.infos.stats.statsPoints + " points.");
 		}
 	}
@@ -79,7 +78,7 @@ public class FighterController extends CharacterController {
 	}
 	
 	private boolean lookForFight() {
-		waitState(0);
+		waitState(CharacterState.IS_FREE);
 		
 		this.instance.log.p("Searching for monster group to fight.");
 		Vector<GameRolePlayGroupMonsterInformations> monsterGroups;
@@ -104,7 +103,7 @@ public class FighterController extends CharacterController {
 	}
 	
 	private boolean launchFight(GameRolePlayGroupMonsterInformations monsterGroup) {
-		waitState(0);
+		waitState(CharacterState.IS_FREE);
 		
 		this.instance.log.p("Trying to take this monster group.");
 		moveTo(monsterGroup.disposition.cellId, false);
@@ -124,7 +123,6 @@ public class FighterController extends CharacterController {
 	
 	private void fight(boolean fightRecovery) {
 		this.instance.startFight(); // lancement de la FightFrame (à mettre en premier)
-		waitState(1);
 		if(!fightRecovery) { // si c'est un combat tout frais
 			try {
 				sleep(1000); // pour paraître plus naturel lors du lancement du combat
@@ -136,9 +134,9 @@ public class FighterController extends CharacterController {
 			GFRM.serialize();
 			this.instance.outPush(GFRM);
 		}
-		while(!isInterrupted() && this.inFight.state) {
-			waitState(2); // attente du début du prochain tour ou de la fin du combat
-			if(!this.inFight.state)
+		while(!isInterrupted() && this.states.get(CharacterState.IN_FIGHT)) {
+			waitState(CharacterState.IN_GAME_TURN); // attente du début du prochain tour ou de la fin du combat
+			if(!this.states.get(CharacterState.IN_FIGHT))
 				break;
 			launchSpell();
 			
@@ -174,7 +172,7 @@ public class FighterController extends CharacterController {
 		GameFightTurnFinishMessage GFTFM = new GameFightTurnFinishMessage();
 		GFTFM.serialize();
 		this.instance.outPush(GFTFM);
-		this.inGameTurn.state = false;
+		this.states.put(CharacterState.IN_GAME_TURN, false);
 	}
 	
 	private void selectAreaRoverDependingOnLevel() { // à terminer
@@ -183,20 +181,17 @@ public class FighterController extends CharacterController {
 	}
 	
 	private void goToExchangeWithMule(boolean giveKamas) {
-		if(this.infos.currentMap.id != this.mule.waitingMapId) {
-			MapsPathfinder pathfinder = new MapsPathfinder(this.infos.currentCellId);
-			Path path = pathfinder.compute(this.infos.currentMap.id, this.mule.waitingMapId);
-			path.run(this);
-		}
+		if(this.infos.currentMap.id != this.mule.waitingMapId)
+			PathsCache.moveTo(this.mule.waitingMapId, this);
 		while(!isInterrupted() && !this.roleplayContext.actorIsOnMap(this.mule.infos.characterId))
-			waitState(5); // attendre que la mule revienne sur la map
+			waitState(CharacterState.NEW_ACTOR_ON_MAP); // attendre que la mule revienne sur la map
 		if(isInterrupted())
 			return;
 		
 		ExchangePlayerRequestMessage EPRM = new ExchangePlayerRequestMessage(); // demande d'échange
 		EPRM.serialize(this.mule.infos.characterId, 1);
 		this.instance.outPush(EPRM);
-		waitState(4); // attendre l'acceptation de l'échange
+		waitState(CharacterState.IN_EXCHANGE); // attendre l'acceptation de l'échange
 		if(isInterrupted())
 			return;
 		
@@ -223,22 +218,22 @@ public class FighterController extends CharacterController {
 		ERM.serialize(true, 1);
 		this.instance.outPush(ERM); // on valide de notre côté
 		
-		waitState(6);
+		waitState(CharacterState.IS_FREE);
 	}
 	
 	public void run() {
-		waitState(0);
+		waitState(CharacterState.IS_FREE);
 		
 		changePlayerStatus();
 		
-		if(this.inFight.state) // reprise de combat à la reconnexion
+		if(this.states.get(CharacterState.IN_FIGHT)) // reprise de combat à la reconnexion
 			fight(true);
 		
 		if(!isInterrupted())
 			selectAreaRoverDependingOnLevel(); // se rend à l'aire de combat
 		
 		while(!isInterrupted()) { // boucle principale 
-			while(!isInterrupted() && !this.needToEmptyInventory.state) { // boucle recherche & combat
+			while(!isInterrupted() && !this.states.get(CharacterState.NEED_TO_EMPTY_INVENTORY)) { // boucle recherche & combat
 				upgradeStats();
 				if(isInterrupted())
 					break;
@@ -248,12 +243,12 @@ public class FighterController extends CharacterController {
 					break;
 				
 				if(lookForFight()) {
-					waitState(1);
+					waitState(CharacterState.IN_FIGHT); // avec timeout
 					
 					if(isInterrupted())
 						break;
 					
-					if(this.inFight.state) // on vérifie si le combat a bien été lancé
+					if(this.states.get(CharacterState.IN_FIGHT)) // on vérifie si le combat a bien été lancé
 						fight(false);
 					else
 						changeMap(this.areaRover.nextMap(this));

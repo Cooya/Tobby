@@ -1,20 +1,17 @@
 package controller;
 
+import java.util.Hashtable;
+
 import gamedata.character.Elements;
 import gamedata.character.PlayerStatusEnum;
-import gamedata.d2o.modules.MapPosition;
 import gamedata.d2p.MapsCache;
 import gamedata.d2p.ankama.MapPoint;
 import gamedata.d2p.ankama.MovementPath;
-
-import java.util.Vector;
-
 import controller.informations.CharacterInformations;
 import controller.informations.RoleplayContext;
 import controller.pathfinding.CellsPathfinder;
 import controller.pathfinding.Path;
 import controller.pathfinding.Pathfinder;
-import main.FatalError;
 import main.Instance;
 import messages.EmptyMessage;
 import messages.character.PlayerStatusUpdateRequestMessage;
@@ -24,46 +21,20 @@ import messages.context.GameMapMovementRequestMessage;
 public abstract class CharacterController extends Thread {
 	private static final boolean DEBUG = true;
 	protected Instance instance;
+	protected Hashtable<CharacterState, Boolean> states;
 	public CharacterInformations infos;
 	public RoleplayContext roleplayContext;
 	public String currentPathName;
 	public CellsPathfinder pathfinder;
 	
-	protected class State {
-		protected boolean state;
-		
-		public State(boolean state) {
-			this.state = state;
-		}
-	}
-
-	protected State isLoaded; // entrée en jeu et changement de map
-	protected State inMovement;
-	protected State inFight;
-	protected State inGameTurn;
-	protected State inRegeneration;
-	protected State needToEmptyInventory;
-	protected State levelUp;
-	protected State inExchange;
-	protected State exchangeValidated;
-	protected State newActorOnMap;
-	
 	public CharacterController(Instance instance, String login, String password, int serverId) {
+		this.states = new Hashtable<CharacterState, Boolean>();
 		this.instance = instance;
 		this.infos = new CharacterInformations(login, password, serverId, Elements.intelligence);
 		this.roleplayContext = new RoleplayContext(this);
 		
-		// états du personnage
-		this.isLoaded = new State(false); // début du jeu et à chaque changement de map
-		this.inMovement = new State(false); 
-		this.inFight = new State(false); 
-		this.inGameTurn = new State(false); 
-		this.inRegeneration = new State(false); 
-		this.needToEmptyInventory = new State(false);
-		this.levelUp = new State(false);
-		this.inExchange = new State(false);
-		this.exchangeValidated = new State(false);
-		this.newActorOnMap = new State(false);
+		for(CharacterState state : CharacterState.values())
+			this.states.put(state, false);
 	}
 
 	public void setCurrentMap(int mapId) {
@@ -72,39 +43,25 @@ public abstract class CharacterController extends Thread {
 	}
 	
 	private boolean isFree() {
-		return this.isLoaded.state && !this.inMovement.state && !this.inFight.state && !this.inRegeneration.state && !this.inExchange.state;
+		return this.states.get(CharacterState.IS_LOADED)
+			&& !this.states.get(CharacterState.IN_MOVEMENT)
+			&& !this.states.get(CharacterState.IN_FIGHT)
+			&& !this.states.get(CharacterState.IN_REGENERATION)
+			&& !this.states.get(CharacterState.IN_EXCHANGE);
 	}
 	
 	// seul le thread principal entre ici
-	public synchronized void emit(Event event) {
+	public synchronized void updateState(CharacterState state, boolean newState) {
 		if(DEBUG)
-			this.instance.log.p("Event emitted : " + event);
-		switchEvent(event);
+			this.instance.log.p("State updated : " + state + " = " + newState + ".");
+		this.states.put(state, newState);
 		notify();
 	}
 	
-	private void switchEvent(Event event) {
-		switch(event) {
-			case CHARACTER_LOADED : this.isLoaded.state = true; break;
-			case FIGHT_START : this.inFight.state = true; break;
-			case FIGHT_END : this.inFight.state = false; break;
-			case GAME_TURN_START : this.inGameTurn.state = true; break;
-			case WEIGHT_MAX : this.needToEmptyInventory.state = true; break;
-			case LEVEL_UP : this.levelUp.state = true; break;
-			case EXCHANGE_DEMAND : this.inExchange.state = true; break;
-			case EXCHANGE_VALIDATION : this.exchangeValidated.state = true; break;
-			case EXCHANGE_LEAVE : this.inExchange.state = false; break;
-			case EXCHANGE_START : this.inExchange.state = true; break;
-			case NEW_ACTOR : this.newActorOnMap.state = true; break;
-			default : new FatalError("Unexpected event caught : " + event); break;
-		}
-	}
-	
-	// seul le contrôleur entre ici
-	protected synchronized boolean waitSpecificState(State condition, boolean expectedState, int timeout) {
+	protected synchronized boolean waitSpecificState(CharacterState condition, boolean expectedState, int timeout) {
 		long startTime = System.currentTimeMillis();
 		long currentTime;
-		while(condition.state != expectedState && (currentTime = System.currentTimeMillis() - startTime) < timeout) {
+		while(this.states.get(condition) != expectedState && (currentTime = System.currentTimeMillis() - startTime) < timeout) {
 			try {
 				wait(timeout - currentTime);
 			} catch (Exception e) {
@@ -112,12 +69,12 @@ public abstract class CharacterController extends Thread {
 				return false;
 			}
 		}
-		if(condition.state == expectedState)
+		if(this.states.get(condition) == expectedState)
 			return true;
 		this.instance.log.p("TIMEOUT");
 		return false; // si on ne l'a pas reçu à temps
 	}
-
+	
 	private synchronized void waitAnyEvent() {
 		try {
 			wait();
@@ -127,56 +84,51 @@ public abstract class CharacterController extends Thread {
 	}
 	
 	// seul le contrôleur entre ici
-	protected void waitState(int stateId) {
-		switch(stateId) {
-			case 0 : // free
+	protected void waitState(CharacterState state) {
+		switch(state) {
+			case IS_FREE:
 				if(DEBUG)
 					this.instance.log.p("Waiting for character to be free.");
 				while(!isInterrupted() && !isFree())
 					waitAnyEvent();
 				return;
-			case 1 : // start fight
+			case IN_FIGHT :
 				if(DEBUG)
 					this.instance.log.p("Waiting for fight beginning.");
-				while(!isInterrupted() && !this.inFight.state)
-					if(!waitSpecificState(this.inFight, true, 2000))
+				while(!isInterrupted() && !this.states.get(CharacterState.IN_FIGHT))
+					if(!waitSpecificState(CharacterState.IN_FIGHT, true, 2000))
 						return;
 				return;
-			case 2 : // start game turn
+			case IN_GAME_TURN :
 				if(DEBUG)
 					this.instance.log.p("Waiting for my game turn.");
-				while(!isInterrupted() && !this.inGameTurn.state && this.inFight.state)
+				while(!isInterrupted() && this.states.get(CharacterState.IN_FIGHT) && !this.states.get(CharacterState.IN_GAME_TURN))
 					waitAnyEvent();	
 				return;
-			case 3 : // exchange demand
+			case PENDING_DEMAND :
 				if(DEBUG)
 					this.instance.log.p("Waiting for exchange demand.");
-				while(!isInterrupted() && !this.inExchange.state)
+				while(!isInterrupted() && !this.states.get(CharacterState.IN_EXCHANGE))
 					waitAnyEvent();
 				return;
-			case 4 : // exchange acceptation
+			case IN_EXCHANGE :
 				if(DEBUG)
 					this.instance.log.p("Waiting for exchange acceptance.");
-				while(!isInterrupted() && !this.inExchange.state)
+				while(!isInterrupted() && !this.states.get(CharacterState.IN_EXCHANGE))
 					waitAnyEvent();
 				return;
-			case 5 : // new actor on the map
+			case NEW_ACTOR_ON_MAP :
 				if(DEBUG)
 					this.instance.log.p("Waiting for new actor on the map.");
-				while(!isInterrupted() && !this.newActorOnMap.state)
+				while(!isInterrupted() && !this.states.get(CharacterState.NEW_ACTOR_ON_MAP))
 					waitAnyEvent();
 				return;
-			case 6 : // leave exchange
-				if(DEBUG)
-					this.instance.log.p("Waiting for leaving exchange.");
-				while(!isInterrupted() && this.inExchange.state)
-					waitAnyEvent();
-				return;
+			default : new Error("Unexpected state waiting : " + state + "."); break;
 		}
 	}
 
 	public void moveTo(int cellId, boolean changeMap) {
-		waitState(0);
+		waitState(CharacterState.IS_FREE);
 		if(isInterrupted())
 			return;
 
@@ -201,13 +153,13 @@ public abstract class CharacterController extends Thread {
 		GameMapMovementRequestMessage GMMRM = new GameMapMovementRequestMessage();
 		GMMRM.serialize(mvPath.getServerMovement(), this.infos.currentMap.id, instance.id);
 		instance.outPush(GMMRM);
-		this.inMovement.state = true;
+		this.states.put(CharacterState.IN_MOVEMENT, true);
 		
 		int duration = path.getCrossingDuration();
 		this.instance.log.p("Movement duration : " + duration + " ms.");
 
 		try {
-			sleep((long) (duration + (duration * 0.3))); // on attend d'arriver à destination
+			sleep(duration); // on attend d'arriver à destination
 		} catch(InterruptedException e) {
 			interrupt();
 			return;
@@ -217,18 +169,11 @@ public abstract class CharacterController extends Thread {
 
 		EmptyMessage EM = new EmptyMessage("GameMapMovementConfirmMessage");
 		instance.outPush(EM);
-		this.inMovement.state = false;
-	}
-
-	public void moveTo(int x, int y, boolean changeMap) {
-		Vector<Integer> mapIds = MapPosition.getMapIdByCoord(x, y);
-		if(mapIds.size() == 0)
-			throw new Error("Invalid map coords.");
-		moveTo(mapIds.get(0), changeMap); // pas terrible ça
+		this.states.put(CharacterState.IN_MOVEMENT, false);
 	}
 
 	public void changeMap(int direction) {
-		waitState(0);
+		waitState(CharacterState.IS_FREE);
 		if(isInterrupted())
 			return;
 
@@ -243,8 +188,8 @@ public abstract class CharacterController extends Thread {
 		ChangeMapMessage CMM = new ChangeMapMessage();
 		CMM.serialize(this.infos.currentMap.getNeighbourMapFromDirection(direction));
 		instance.outPush(CMM);
-
-		this.isLoaded.state = false; // on attend la fin du changement de map
+			
+		this.states.put(CharacterState.IS_LOADED, false); // on attend la fin du changement de map
 	}
 	
 	protected void changePlayerStatus() {

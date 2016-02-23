@@ -1,7 +1,7 @@
 package frames;
 
 import controller.CharacterController;
-import controller.Event;
+import controller.CharacterState;
 import gamedata.d2o.modules.MapPosition;
 import main.Instance;
 import main.InterClientKeyManager;
@@ -77,21 +77,20 @@ public class RoleplayFrame implements IFrame {
 		case 5670 : // CharacterLevelUpMessage
 			CharacterLevelUpMessage CLUM = new CharacterLevelUpMessage(msg);
 			this.CC.infos.level = CLUM.newLevel;
-			this.CC.emit(Event.LEVEL_UP);
+			this.CC.updateState(CharacterState.LEVEL_UP, true);
 			return true;
 		case 226 : // MapComplementaryInformationsDataMessage
 			MapComplementaryInformationsDataMessage MCIDM = new MapComplementaryInformationsDataMessage(msg);
 			CC.roleplayContext.newContextActors(MCIDM.actors);
 
 			this.instance.log.p("Current map : " + MapPosition.getMapPositionById(CC.infos.currentMap.id) + ".\nCurrent cell id : " + CC.infos.currentCellId + ".\nCurrent area id : " + CC.infos.currentMap.subareaId + ".");
-
-			this.CC.emit(Event.CHARACTER_LOADED);
-			this.CC.emit(Event.FIGHT_END);
+			
+			this.CC.updateState(CharacterState.IS_LOADED, true);
 			return true;
 		case 5632 : // GameRolePlayShowActorMessage
 			GameRolePlayShowActorMessage GRPSAM = new GameRolePlayShowActorMessage(msg);
 			CC.roleplayContext.addContextActor(GRPSAM.informations);
-			this.CC.emit(Event.NEW_ACTOR);
+			this.CC.updateState(CharacterState.NEW_ACTOR_ON_MAP, true);
 			return true;
 		case 251 : // GameContextRemoveElementMessage
 			GameContextRemoveElementMessage GCREM = new GameContextRemoveElementMessage(msg);
@@ -112,7 +111,7 @@ public class RoleplayFrame implements IFrame {
 			return true;
 		case 700 : // GameFightStartingMessage
 			this.instance.log.p("Starting fight.");
-			this.CC.emit(Event.FIGHT_START);
+			this.CC.updateState(CharacterState.IN_FIGHT, true);
 			return true;
 		case 954 : // GameMapNoMovementMessage
 			this.instance.log.p(Log.Status.ERROR, "Movement refused by server.");
@@ -122,25 +121,25 @@ public class RoleplayFrame implements IFrame {
 			this.CC.infos.weight = IWM.weight;
 			this.CC.infos.weightMax = IWM.weightMax;
 			if(this.CC.infos.weightMaxAlmostReached()) {
-				this.CC.emit(Event.WEIGHT_MAX);
+				this.CC.updateState(CharacterState.NEED_TO_EMPTY_INVENTORY, true);
 				this.instance.log.p("Inventory weight maximum almost reached, need to empty.");
 			}
 			return true;
 		case 5523 : // ExchangeRequestedTradeMessage
 			//ExchangeRequestedTradeMessage ERTM = new ExchangeRequestedTradeMessage(msg);
-			this.CC.emit(Event.EXCHANGE_DEMAND);
+			this.CC.updateState(CharacterState.PENDING_DEMAND, true);
 			return true;
 		case 5628 : // ExchangeLeaveMessage
 			//ExchangeLeaveMessage ELM = new ExchangeLeaveMessage(msg);
-			this.CC.emit(Event.EXCHANGE_LEAVE);
+			this.CC.updateState(CharacterState.IN_EXCHANGE, false);
 			return true;
 		case 6129 : // ExchangeStartedWithPodsMessage
-			this.CC.emit(Event.EXCHANGE_START);
+			this.CC.updateState(CharacterState.IN_EXCHANGE, true);
 			return true;
 		case 5509 : // ExchangeIsReadyMessage 
 			ExchangeIsReadyMessage EIRM = new ExchangeIsReadyMessage(msg);
 			if(EIRM.id != this.CC.infos.characterId)
-				this.CC.emit(Event.EXCHANGE_VALIDATION);
+				this.CC.updateState(CharacterState.EXCHANGE_VALIDATED, true);
 			return true;
 		}
 		return false;

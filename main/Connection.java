@@ -21,7 +21,7 @@ public interface Connection {
 				this.inputStream = this.client.getInputStream();
 				this.outputStream = this.client.getOutputStream();
 			} catch(Exception e) {
-				new FatalError(e);
+				Instance.fatalError(e);
 			}
 		}
 		
@@ -31,7 +31,7 @@ public interface Connection {
 				this.inputStream = this.client.getInputStream();
 				this.outputStream = this.client.getOutputStream();
 			} catch(Exception e) {
-				new FatalError(e);
+				Instance.fatalError(e);
 			}
 		}
 		
@@ -40,7 +40,7 @@ public interface Connection {
 				this.outputStream.write(bytes);
 				this.outputStream.flush();
 			} catch(Exception e) {
-				new FatalError(e);
+				Instance.fatalError(e);
 			}
 		}
 		
@@ -61,7 +61,7 @@ public interface Connection {
 				this.outputStream.close();
 				this.client.close();
 			} catch(Exception e) {
-				new FatalError(e);
+				Instance.fatalError(e);
 			}
 		}
 		
@@ -78,7 +78,7 @@ public interface Connection {
 			try {
 				this.server = new ServerSocket(port);
 			} catch(Exception e) {
-				new FatalError(e);
+				Instance.fatalError(e);
 			}
 		}
 		
@@ -95,7 +95,7 @@ public interface Connection {
 				this.client.close();
 				this.server.close();
 			} catch(Exception e) {
-				new FatalError(e);
+				Instance.fatalError(e);
 			}
 		}
 		
@@ -103,7 +103,7 @@ public interface Connection {
 			try {
 				this.client.close();
 			} catch(Exception e) {
-				new FatalError(e);
+				Instance.fatalError(e);
 			}
 		}
 		
@@ -111,7 +111,7 @@ public interface Connection {
 			try {
 				this.client = new Client(server.accept());
 			} catch (Exception e) {
-				new FatalError(e);
+				Instance.fatalError(e);
 			}
 		}
 		

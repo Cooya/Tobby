@@ -60,6 +60,30 @@ public class Instance extends Thread {
 		Instance.log("Instance with id = " + this.id + " started.");
 	}
 	
+	public static void fatalError(String str) {
+		new Exception(str).printStackTrace();
+		Instance.killCurrentInstance();
+	}
+	
+	public static void fatalError(Exception e) {
+		e.printStackTrace();
+		Instance.killCurrentInstance();
+	}
+	
+	public static void killCurrentInstance() {
+		Thread currentThread = Thread.currentThread();
+		Instance currentInstance = null;
+		for(Instance instance : instances)
+			for(Thread thread : instance.threads)
+				if(currentThread == thread)
+					currentInstance = instance;
+		if(currentInstance != null) {
+			instances.remove(currentInstance);
+			for(Thread thread : currentInstance.threads)
+				thread.interrupt();
+		}
+	}
+	
 	public static void log(Log.Status status, String msg) {
 		Log log = getLog();
 		if(log != null)

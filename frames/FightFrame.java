@@ -1,6 +1,6 @@
 package frames;
 
-import controller.Event;
+import controller.CharacterState;
 import controller.FighterController;
 import main.Instance;
 import messages.Message;
@@ -32,7 +32,7 @@ public class FightFrame implements IFrame {
 				return true;
 			case 6465 : // début du tour
 				this.instance.log.p("Begin of my game turn.");
-				this.fighter.emit(Event.GAME_TURN_START);
+				this.fighter.updateState(CharacterState.IN_GAME_TURN, true);
 				return true;
 			case 719 : // fin du tour
 				GameFightTurnEndMessage GFTEM = new GameFightTurnEndMessage(msg);

@@ -1,7 +1,6 @@
 package controller;
 
-import controller.pathfinding.MapsPathfinder;
-import controller.pathfinding.Path;
+import controller.pathfinding.PathsCache;
 import main.Instance;
 import main.Log;
 import messages.EmptyMessage;
@@ -18,27 +17,25 @@ public class MuleController extends CharacterController {
 	private void goToWaitingPosition() {
 		if(this.infos.currentMap.id == this.waitingMapId)
 			return;
-		MapsPathfinder pathfinder = new MapsPathfinder(this.infos.currentCellId);
-		Path path = pathfinder.compute(this.infos.currentMap.id, this.waitingMapId);
-		path.run(this);
+		PathsCache.moveTo(this.waitingMapId, this);
 	}
 	
 	private void processExchange() {
 		EmptyMessage EM = new EmptyMessage("ExchangeAcceptMessage"); // accepter l'échange
 		this.instance.outPush(EM);
-		this.inExchange.state = false;
-		waitState(4); // attendre que l'échange soit validé
+		updateState(CharacterState.IN_EXCHANGE, true);
+		waitState(CharacterState.EXCHANGE_VALIDATED); // attendre que l'échange soit validé
 		if(isInterrupted())
 			return;
 		ExchangeReadyMessage ERM = new ExchangeReadyMessage();
 		ERM.serialize(true, 2);
 		this.instance.outPush(ERM); // on valide de notre côté
-		this.exchangeValidated.state = false;
+		updateState(CharacterState.EXCHANGE_VALIDATED, false);
 	}
 	/*
 	public void run() {
 		goToWaitingPosition();
-		waitState(3); // on attend qu'un combattant lance un échange
+		waitState(CharacterState.PENDING_DEMAND); // on attend qu'un combattant lance un échange
 		if(isInterrupted())
 			return;
 		processExchange();

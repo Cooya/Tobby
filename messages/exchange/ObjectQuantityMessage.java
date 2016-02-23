@@ -3,22 +3,17 @@ package messages.exchange;
 import messages.Message;
 import utilities.ByteArray;
 
-public class ObjectQuantityMessage extends Message{
-
-	public static final int protocolId = 3023;
-
+public class ObjectQuantityMessage extends Message {
 	public int objectUID = 0;
-
 	public int quantity = 0;
 
-	public ObjectQuantityMessage(Message msg)
-	{
+	public ObjectQuantityMessage(Message msg) {
 		super(msg);
+		deserialize();
 	}
 
-	public void deserialize()
-	{
-		ByteArray buffer=new ByteArray(content);
+	private void deserialize() {
+		ByteArray buffer = new ByteArray(this.content);
 		this.objectUID = buffer.readVarInt();
 		this.quantity = buffer.readVarInt();
 	}

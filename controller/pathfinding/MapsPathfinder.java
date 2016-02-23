@@ -25,11 +25,11 @@ public class MapsPathfinder extends Pathfinder {
 			DOWN_CELL_IDS[j] = i;
 	}
 	
-	public MapsPathfinder(int startCellId) {
+	protected MapsPathfinder(int startCellId) {
 		this.startCellId = startCellId;
 	}
 	
-	public MapsPathfinder() {
+	protected MapsPathfinder() {
 		this.startCellId = -1;
 	}
 	
@@ -63,7 +63,7 @@ public class MapsPathfinder extends Pathfinder {
 		return MapsCache.loadMap(mapId);
 	}
 	
-	public boolean inSameZone(int mapId, int cellId1, int cellId2) {
+	protected boolean inSameZone(int mapId, int cellId1, int cellId2) {
 		MapNode node = new MapNode(mapId, -1, null);
 		return node.getCurrentZone(cellId1) == node.getCurrentZone(cellId2);		
 	}
