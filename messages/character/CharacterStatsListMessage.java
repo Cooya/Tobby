@@ -1,6 +1,6 @@
 package messages.character;
 
-import game.character.CharacterCharacteristicsInformations;
+import gamedata.character.CharacterCharacteristicsInformations;
 import utilities.ByteArray;
 import messages.Message;
 

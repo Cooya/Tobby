@@ -1,7 +1,7 @@
 package frames;
 
-import main.CharacterController;
-import main.Event;
+import controller.Event;
+import controller.FighterController;
 import main.Instance;
 import messages.Message;
 import messages.fight.GameActionAcknowledgementMessage;
@@ -15,11 +15,11 @@ import messages.fight.SequenceEndMessage;
 
 public class FightFrame implements IFrame {
 	private Instance instance;
-	private CharacterController CC;
+	private FighterController fighter;
 
-	public FightFrame(Instance instance, CharacterController CC) {
+	public FightFrame(Instance instance, FighterController fighter) {
 		this.instance = instance;
-		this.CC = CC;
+		this.fighter = fighter;
 	}
 
 	public boolean processMessage(Message msg) {
@@ -32,20 +32,20 @@ public class FightFrame implements IFrame {
 				return true;
 			case 6465 : // début du tour
 				this.instance.log.p("Begin of my game turn.");
-				this.CC.emit(Event.GAME_TURN_START);
+				this.fighter.emit(Event.GAME_TURN_START);
 				return true;
 			case 719 : // fin du tour
 				GameFightTurnEndMessage GFTEM = new GameFightTurnEndMessage(msg);
 				GFTEM.deserialize();
-				if(GFTEM.fighterId == this.CC.infos.characterId)
+				if(GFTEM.fighterId == this.fighter.infos.characterId)
 					this.instance.log.p("End of my game turn.");
 				return true;
 			case 5921 : // synchronisation avec le serveur
 				GameFightSynchronizeMessage GFSM = new GameFightSynchronizeMessage(msg);
 				GFSM.deserialize();
-				this.CC.fightContext.setFightContext(GFSM.fighters);
+				this.fighter.fightContext.setFightContext(GFSM.fighters);
 				this.instance.log.p("Fight context set.");
-				this.instance.log.p("Life points : " + this.CC.fightContext.self.stats.lifePoints + "/" + this.CC.fightContext.self.stats.maxLifePoints + ".");
+				this.instance.log.p("Life points : " + this.fighter.fightContext.self.stats.lifePoints + "/" + this.fighter.fightContext.self.stats.maxLifePoints + ".");
 				return true;
 			case 720 : // fin du combat
 				this.instance.log.p("End of fight.");
@@ -54,7 +54,7 @@ public class FightFrame implements IFrame {
 			case 956 : // action terminée
 				SequenceEndMessage SEM = new SequenceEndMessage(msg);
 				SEM.deserialize();
-				if(SEM.authorId == CC.infos.characterId) {
+				if(SEM.authorId == this.fighter.infos.characterId) {
 					GameActionAcknowledgementMessage GAAM = new GameActionAcknowledgementMessage(true, SEM.actionId);
 					GAAM.serialize();
 					instance.outPush(GAAM);
@@ -63,7 +63,7 @@ public class FightFrame implements IFrame {
 			case 1030 : // variation des points d'action
 				GameActionFightPointsVariationMessage GAFPVM = new GameActionFightPointsVariationMessage(msg);
 				GAFPVM.deserialize();
-				CC.fightContext.self.stats.actionPoints -= GAFPVM.delta;
+				this.fighter.fightContext.self.stats.actionPoints -= GAFPVM.delta;
 				return true;
 			case 5927 : // GameFightOptionStateUpdateMessage
 				GameFightOptionStateUpdateMessage GFOSUM = new GameFightOptionStateUpdateMessage(msg);

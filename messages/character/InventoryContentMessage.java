@@ -1,6 +1,6 @@
 package messages.character;
 
-import game.inventory.ObjectItem;
+import gamedata.inventory.ObjectItem;
 
 import java.util.Vector;
 

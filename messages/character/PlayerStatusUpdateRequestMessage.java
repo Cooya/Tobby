@@ -1,6 +1,6 @@
 package messages.character;
 
-import game.character.PlayerStatus;
+import gamedata.character.PlayerStatus;
 import utilities.ByteArray;
 import messages.Message;
 

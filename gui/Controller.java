@@ -17,16 +17,21 @@ import javax.swing.JOptionPane;
 import javax.swing.event.InternalFrameEvent;
 import javax.swing.event.InternalFrameListener;
 
+import controller.MuleController;
 import main.Instance;
 
 public class Controller {
 	private String accountsFilePath = "Ressources/accounts.txt";
 	private View view;
 	private Model model;
+	private MuleController mule; // juste pour tester
 
 	public Controller() {
 		this.view = new View();
 		this.model = new Model();
+		
+		this.mule = new MuleController(null, null, null, -1);
+		
 		loadAccountsList();
 		new StartListener(this.view.menuItem);
 	}
@@ -85,7 +90,7 @@ public class Controller {
 				JOptionPane.showMessageDialog(null, "Missing informations.", "Erreur", JOptionPane.ERROR_MESSAGE);
 			else {
 				CharacterFrame frame = new CharacterFrame(login);
-				Instance instance = new Instance(login, password, serverId, frame);
+				Instance instance = new Instance(login, password, serverId, frame, null);
 				model.instances.put(instance.id, instance);
 				view.desktopPane.add(frame);
 				view.instancesId.put(frame, instance.id);
@@ -143,14 +148,14 @@ public class Controller {
 		private JMenuItem accountItem;
 
 		private AccountItemListener(JMenuItem item) {
-			this.accountItem=item;
-			accountItem.addActionListener(this);
+			this.accountItem = item;
+			this.accountItem.addActionListener(this);
 		}
 
 		public void actionPerformed(ActionEvent e) {
 			String[] connectionInfos = model.accounts.get(this.accountItem.getText()).split(" ");
 			CharacterFrame frame = new CharacterFrame(connectionInfos[0]);
-			Instance instance = new Instance(connectionInfos[0], connectionInfos[1], Integer.parseInt(connectionInfos[2]), frame);
+			Instance instance = new Instance(connectionInfos[0], connectionInfos[1], Integer.parseInt(connectionInfos[2]), frame, mule);
 			model.instances.put(instance.id, instance);
 			view.desktopPane.add(frame);
 			view.instancesId.put(frame, instance.id);

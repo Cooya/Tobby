@@ -1,8 +1,8 @@
 package messages.fight;
 
-import game.fight.GameFightCharacterInformations;
-import game.fight.GameFightFighterInformations;
-import game.fight.GameFightMonsterInformations;
+import gamedata.fight.GameFightCharacterInformations;
+import gamedata.fight.GameFightFighterInformations;
+import gamedata.fight.GameFightMonsterInformations;
 
 import java.util.Vector;
 

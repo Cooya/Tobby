@@ -7,7 +7,6 @@ import java.util.LinkedList;
 import messages.Message;
 import messages.connection.SelectedServerDataMessage;
 import utilities.ByteArray;
-import utilities.Log;
 import utilities.Processes;
 
 public class Sniffer extends Thread {

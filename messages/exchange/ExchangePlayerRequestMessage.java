@@ -1,27 +1,19 @@
 package messages.exchange;
 
-import messages.Message;
 import utilities.ByteArray;
 import utilities.Int64;
 
-public class ExchangePlayerRequestMessage extends Message{
-	public static final int protocolId = 5773;
-
+public class ExchangePlayerRequestMessage extends ExchangeRequestMessage {
 	public double target;
-	
-	public int type = 1;
 
-	public ExchangePlayerRequestMessage()
-	{
+	public ExchangePlayerRequestMessage() {
 		super();
 	}
 
-	public void serialize(double target) 
-	{
-		ByteArray buffer=new ByteArray();
-		buffer.writeByte((byte) this.type);
+	public void serialize(double target, int exchangeType) {
+		ByteArray buffer = new ByteArray();
+		super.serialize(buffer, exchangeType);
 		buffer.writeVarLong(Int64.fromNumber(target));
 		completeInfos(buffer);
 	}
-
 }

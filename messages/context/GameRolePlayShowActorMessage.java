@@ -1,7 +1,7 @@
 package messages.context;
 
-import game.ProtocolTypeManager;
-import game.currentmap.GameRolePlayActorInformations;
+import gamedata.ProtocolTypeManager;
+import gamedata.currentmap.GameRolePlayActorInformations;
 import messages.Message;
 import utilities.ByteArray;
 

@@ -1,6 +1,6 @@
 package messages.connection;
 
-import game.server.GameServerInformations;
+import gamedata.server.GameServerInformations;
 
 import java.util.Vector;
 

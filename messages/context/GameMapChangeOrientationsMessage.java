@@ -1,6 +1,6 @@
 package messages.context;
 
-import game.currentmap.ActorOrientation;
+import gamedata.currentmap.ActorOrientation;
 
 import java.util.Vector;
 

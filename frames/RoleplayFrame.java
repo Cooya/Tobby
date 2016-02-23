@@ -1,11 +1,11 @@
 package frames;
 
-import utilities.Log;
-import game.InterClientKeyManager;
-import game.d2o.modules.MapPosition;
-import main.CharacterController;
-import main.Event;
+import controller.CharacterController;
+import controller.Event;
+import gamedata.d2o.modules.MapPosition;
 import main.Instance;
+import main.InterClientKeyManager;
+import main.Log;
 import messages.EmptyMessage;
 import messages.Message;
 import messages.character.CharacterLevelUpMessage;
@@ -18,6 +18,7 @@ import messages.context.GameMapMovementMessage;
 import messages.context.GameRolePlayShowActorMessage;
 import messages.context.MapComplementaryInformationsDataMessage;
 import messages.context.MapInformationsRequestMessage;
+import messages.exchange.ExchangeIsReadyMessage;
 import messages.gamestarting.ChannelEnablingMessage;
 import messages.gamestarting.ClientKeyMessage;
 import messages.gamestarting.PrismsListRegisterMessage;
@@ -90,6 +91,7 @@ public class RoleplayFrame implements IFrame {
 		case 5632 : // GameRolePlayShowActorMessage
 			GameRolePlayShowActorMessage GRPSAM = new GameRolePlayShowActorMessage(msg);
 			CC.roleplayContext.addContextActor(GRPSAM.informations);
+			this.CC.emit(Event.NEW_ACTOR);
 			return true;
 		case 251 : // GameContextRemoveElementMessage
 			GameContextRemoveElementMessage GCREM = new GameContextRemoveElementMessage(msg);
@@ -119,9 +121,27 @@ public class RoleplayFrame implements IFrame {
 			InventoryWeightMessage IWM = new InventoryWeightMessage(msg);
 			this.CC.infos.weight = IWM.weight;
 			this.CC.infos.weightMax = IWM.weightMax;
-			if(this.CC.infos.weightMaxAlmostReached())
+			if(this.CC.infos.weightMaxAlmostReached()) {
 				this.CC.emit(Event.WEIGHT_MAX);
-			return true;		
+				this.instance.log.p("Inventory weight maximum almost reached, need to empty.");
+			}
+			return true;
+		case 5523 : // ExchangeRequestedTradeMessage
+			//ExchangeRequestedTradeMessage ERTM = new ExchangeRequestedTradeMessage(msg);
+			this.CC.emit(Event.EXCHANGE_DEMAND);
+			return true;
+		case 5628 : // ExchangeLeaveMessage
+			//ExchangeLeaveMessage ELM = new ExchangeLeaveMessage(msg);
+			this.CC.emit(Event.EXCHANGE_LEAVE);
+			return true;
+		case 6129 : // ExchangeStartedWithPodsMessage
+			this.CC.emit(Event.EXCHANGE_START);
+			return true;
+		case 5509 : // ExchangeIsReadyMessage 
+			ExchangeIsReadyMessage EIRM = new ExchangeIsReadyMessage(msg);
+			if(EIRM.id != this.CC.infos.characterId)
+				this.CC.emit(Event.EXCHANGE_VALIDATION);
+			return true;
 		}
 		return false;
 	}

@@ -3,7 +3,9 @@ package main;
 import java.util.LinkedList;
 import java.util.Vector;
 
-import utilities.Log;
+import controller.CharacterController;
+import controller.FighterController;
+import controller.MuleController;
 import messages.Message;
 import frames.ConnectionFrame;
 import frames.FightFrame;
@@ -15,26 +17,26 @@ import gui.CharacterFrame;
 public class Instance extends Thread {
 	private static Vector<Instance> instances = new Vector<Instance>();
 	private static int instancesId = 0; // important lors des déconnexions (car instances.size() devient faux)
-	private static boolean connectionInProcess = false;
+	private static Instance instanceInConnection;
 	public Thread[] threads;
 	public int id;
 	public Log log;
 	//private CharacterFrame graphicalFrame;
 	private NetworkInterface net;
-	private CharacterController CC;
+	private CharacterController character;
 	private Vector<IFrame> workingFrames;
 	private Vector<Vector<IFrame>> frameUpdates; // résolution d'accès concurrents lors de l'ajout ou de la suppression de frames
 	private boolean workingFramesUpdates;
 	private LinkedList<Message> output;
 	private LinkedList<Message> input;
 	
-	public Instance(String login, String password, int serverId, CharacterFrame graphicalFrame) {
+	public Instance(String login, String password, int serverId, CharacterFrame graphicalFrame, MuleController mule) {
 		this.id = instancesId++;
 		instances.add(this);
 		this.log = new Log(login, graphicalFrame);
 		//this.graphicalFrame = graphicalFrame;
 		this.net = new NetworkInterface(this);
-		this.CC = new CharacterController(this, login, password, serverId);
+		this.character = new FighterController(this, login, password, serverId, mule);
 		this.workingFrames = new Vector<IFrame>();
 		this.frameUpdates = new Vector<Vector<IFrame>>();
 		this.frameUpdates.add(new Vector<IFrame>()); // add
@@ -43,17 +45,17 @@ public class Instance extends Thread {
 		this.output = new LinkedList<Message>();
 		this.input = new LinkedList<Message>();
 		
-		this.workingFrames.add(new ConnectionFrame(this, CC));
+		this.workingFrames.add(new ConnectionFrame(this, character));
 		
 		this.threads = new Thread[4];
 		this.threads[0] = this.net;
 		this.threads[1] = this.net.sender;
-		this.threads[2] = this.CC;
+		this.threads[2] = this.character;
 		this.threads[3] = this;
 		this.start(); // gestion des frames
 		this.net.start(); // réception
 		this.net.sender.start(); // envoi
-		this.CC.start(); // contrôleur
+		this.character.start(); // contrôleur
 		
 		Instance.log("Instance with id = " + this.id + " started.");
 	}
@@ -125,6 +127,12 @@ public class Instance extends Thread {
 					Thread.currentThread().interrupt();
 				}
 		}
+		if(instanceInConnection == this) { // on libère le launcher
+			synchronized(Main.class) {
+				instanceInConnection = null;
+				Main.class.notify();
+			}
+		}
 		this.log.p(Log.Status.CONSOLE, "Thread process of instance with id = " + this.id + " terminated.");
 	}
 	
@@ -138,7 +146,7 @@ public class Instance extends Thread {
 	
 	public void waitForConnection() {
 		synchronized(Main.class) {
-			while(!isInterrupted() && connectionInProcess) {
+			while(!isInterrupted() && instanceInConnection != null) {
 				this.log.p("Waiting for connection.");
 				try {
 					Main.class.wait();
@@ -146,24 +154,24 @@ public class Instance extends Thread {
 					Thread.currentThread().interrupt();
 				}
 			}
-			connectionInProcess = true;
+			instanceInConnection = this;
 		}
 	}
 	
 	public void endOfConnection() {
 		synchronized(Main.class) {
-			connectionInProcess = false;
+			instanceInConnection = null;
 			Main.class.notify();
 		}
 		this.frameUpdates.get(1).add(this.workingFrames.get(0)); // on retire la ConnectionFrame
 		this.frameUpdates.get(0).add(new SynchronisationFrame(this));
-		this.frameUpdates.get(0).add(new RoleplayFrame(this, CC));
+		this.frameUpdates.get(0).add(new RoleplayFrame(this, character));
 		this.workingFramesUpdates = true;
 	}
 	
 	public void startFight() {
 		this.log.p("Fight frame running.");
-		this.frameUpdates.get(0).add(new FightFrame(this, CC));
+		this.frameUpdates.get(0).add(new FightFrame(this, (FighterController) character));
 		this.workingFramesUpdates = true;
 	}
 	

@@ -1,7 +1,7 @@
 package messages.exchange;
 
 import messages.Message;
-import game.inventory.ObjectItem;
+import gamedata.inventory.ObjectItem;
 import utilities.ByteArray;
 
 public class ObjectAddedMessage extends Message{

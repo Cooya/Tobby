@@ -1,8 +1,8 @@
 package messages.gamestarting;
 
-import game.InterClientKeyManager;
 import utilities.ByteArray;
 import main.Emulation;
+import main.InterClientKeyManager;
 import messages.Message;
 
 public class ClientKeyMessage extends Message {

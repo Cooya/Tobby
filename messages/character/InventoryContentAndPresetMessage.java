@@ -1,8 +1,8 @@
 package messages.character;
 
-import game.inventory.IdolsPreset;
-import game.inventory.ObjectItem;
-import game.inventory.Preset;
+import gamedata.inventory.IdolsPreset;
+import gamedata.inventory.ObjectItem;
+import gamedata.inventory.Preset;
 
 import java.util.Vector;
 

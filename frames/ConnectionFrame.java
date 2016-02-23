@@ -2,7 +2,7 @@ package frames;
 
 import java.util.Hashtable;
 
-import main.CharacterController;
+import controller.CharacterController;
 import main.Emulation;
 import main.Instance;
 import messages.Message;

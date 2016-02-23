@@ -6,7 +6,6 @@ import java.util.LinkedList;
 import messages.Message;
 import messages.synchronisation.BasicPingMessage;
 import utilities.ByteArray;
-import utilities.Log;
 
 public class NetworkInterface extends Thread {
 	private static final boolean DEBUG = false;
