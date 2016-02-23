@@ -84,6 +84,8 @@
 3025 ObjectAddedMessage
 4001 FriendsGetListMessage
 4002 FriendsListMessage
+5001 InteractiveUseRequestMessage
+5501 LeaveDialogRequestMessage
 5503 SetUpdateMessage
 5508 ExchangeAcceptMessage
 5509 ExchangeIsReadyMessage
@@ -95,6 +97,7 @@
 5607 ClientKeyMessage
 5610 StatsUpgradeRequestMessage
 5613 ChallengeTargetsListMessage
+5616 NpcDialogReplyMessage
 5623 QuestListRequestMessage
 5626 QuestListMessage
 5628 ExchangeLeaveMessage
@@ -129,6 +132,7 @@
 5834 SpellForgottenMessage
 5836 CharacterSelectedErrorMessage
 5864 GameFightShowFighterMessage
+5898 NpcGenericActionRequestMessage
 5921 GameFightSynchronizeMessage
 5925 ObjectGroundListAddedMessage
 5927 GameFightOptionStateUpdateMessage

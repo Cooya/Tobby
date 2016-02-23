@@ -12,11 +12,15 @@ import controller.informations.RoleplayContext;
 import controller.pathfinding.CellsPathfinder;
 import controller.pathfinding.Path;
 import controller.pathfinding.Pathfinder;
+import controller.pathfinding.PathsCache;
 import main.Instance;
 import messages.EmptyMessage;
 import messages.character.PlayerStatusUpdateRequestMessage;
 import messages.context.ChangeMapMessage;
 import messages.context.GameMapMovementRequestMessage;
+import messages.interactions.InteractiveUseRequestMessage;
+import messages.interactions.NpcDialogReplyMessage;
+import messages.interactions.NpcGenericActionRequestMessage;
 
 public abstract class CharacterController extends Thread {
 	private static final boolean DEBUG = true;
@@ -159,7 +163,7 @@ public abstract class CharacterController extends Thread {
 		this.instance.log.p("Movement duration : " + duration + " ms.");
 
 		try {
-			sleep(duration); // on attend d'arriver à destination
+			sleep((long) (duration * 1.1)); // on attend d'arriver à destination
 		} catch(InterruptedException e) {
 			interrupt();
 			return;
@@ -203,5 +207,106 @@ public abstract class CharacterController extends Thread {
 		if(this.infos.currentMap.subareaId >= 422 && this.infos.currentMap.subareaId <= 450)
 			return true;
 		return false;
+	}
+	
+	protected void goDownToAstrub() {
+		PathsCache.moveTo(153880835, this); // map où se situe le pnj
+		if(interrupted())
+			return;
+		
+		NpcGenericActionRequestMessage NGARM = new NpcGenericActionRequestMessage();
+		NGARM.serialize(-10001, 3, this.infos.currentMap.id, this.instance.id); // on parle au pnj
+		this.instance.outPush(NGARM);
+		
+		try {
+			sleep(1000); // on attend la première question
+		} catch (InterruptedException e) {
+			interrupt();
+			return;
+		}
+		
+		NpcDialogReplyMessage NDRM = new NpcDialogReplyMessage();
+		NDRM.serialize(25209); // on sélectionne la première réponse
+		this.instance.outPush(NDRM);
+		
+		try {
+			sleep(1000); // on attend la seconde question
+		} catch (InterruptedException e) {
+			interrupt();
+			return;
+		}
+		
+		NDRM = new NpcDialogReplyMessage();
+		NDRM.serialize(25207); // on sélectionne la seconde réponse
+		this.instance.outPush(NDRM);
+		
+		this.states.put(CharacterState.IS_LOADED, false);
+	}
+	
+	protected void goToAstrubBank() {
+		PathsCache.moveTo(84674566, this); // map où se situe la banque
+		if(interrupted())
+			return;
+		
+		moveTo(317, false); // entrée de la banque
+		if(interrupted())
+			return;
+		
+		InteractiveUseRequestMessage IURM = new InteractiveUseRequestMessage();
+		IURM.serialize(465440, 140242, this.instance.id); // porte de la banque
+		this.instance.outPush(IURM);
+		
+		this.states.put(CharacterState.IS_FREE, false);
+		waitState(CharacterState.IS_FREE);
+		if(interrupted())
+			return;
+		
+		NpcGenericActionRequestMessage NGARM = new NpcGenericActionRequestMessage();
+		NGARM.serialize(-10001, 3, this.infos.currentMap.id, this.instance.id); // on parle au banquier
+		this.instance.outPush(NGARM);
+		
+		try {
+			sleep(1000); // on attend la question
+		} catch (InterruptedException e) {
+			interrupt();
+			return;
+		}
+		
+		NpcDialogReplyMessage NDRM = new NpcDialogReplyMessage();
+		NDRM.serialize(259); // on sélectionne la réponse
+		this.instance.outPush(NDRM);
+		
+		try {
+			sleep(2000); // on attend l'affichage de l'inventaire
+		} catch (InterruptedException e) {
+			interrupt();
+			return;
+		}
+		
+		EmptyMessage EM = new EmptyMessage("ExchangeObjectTransfertAllFromInvMessage");
+		this.instance.outPush(EM); // on transfère tous les objets de l'inventaire
+		
+		try {
+			sleep(1000);
+		} catch (InterruptedException e) {
+			interrupt();
+			return;
+		}
+		
+		EM = new EmptyMessage("LeaveDialogRequestMessage");
+		this.instance.outPush(EM); // on ferme l'inventaire
+		
+		try {
+			sleep(1000); // on attend que l'inventaire se ferme
+		} catch (InterruptedException e) {
+			interrupt();
+			return;
+		}
+		
+		moveTo(396, false);
+		if(interrupted())
+			return;
+		
+		// à finir
 	}
 }

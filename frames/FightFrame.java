@@ -50,6 +50,7 @@ public class FightFrame implements IFrame {
 			case 720 : // fin du combat
 				this.instance.log.p("End of fight.");
 				this.instance.quitFight();
+				this.fighter.updateState(CharacterState.IN_FIGHT, false);
 				return true;
 			case 956 : // action terminée
 				SequenceEndMessage SEM = new SequenceEndMessage(msg);

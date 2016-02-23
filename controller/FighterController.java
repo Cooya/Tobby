@@ -189,7 +189,7 @@ public class FighterController extends CharacterController {
 			return;
 		
 		ExchangePlayerRequestMessage EPRM = new ExchangePlayerRequestMessage(); // demande d'échange
-		EPRM.serialize(this.mule.infos.characterId, 1);
+		EPRM.serialize(this.mule.infos.characterId, 1, this.instance.id);
 		this.instance.outPush(EPRM);
 		waitState(CharacterState.IN_EXCHANGE); // attendre l'acceptation de l'échange
 		if(isInterrupted())
