@@ -56,11 +56,26 @@ public class FighterController extends CharacterController {
 		
 		if(this.levelUp.state) {
 			StatsUpgradeRequestMessage SURM = new StatsUpgradeRequestMessage();
-			SURM.serialize(this.infos.element, this.infos.stats.statsPoints);
+			SURM.serialize(this.infos.element, calculateMaxStatsPoints());
 			instance.outPush(SURM);
 			levelUp.state = false;
 			this.instance.log.p("Increase stat : " + Elements.intelligence + " of " + this.infos.stats.statsPoints + " points.");
 		}
+	}
+	
+	private int calculateMaxStatsPoints() {
+		int stage=(getElementInfoById()/100)+1;
+		return infos.stats.statsPoints-(infos.stats.statsPoints%stage);
+	}
+
+	private int getElementInfoById() {
+		switch(infos.element){
+		case 10: return infos.stats.strength.base;
+		case 13: return infos.stats.chance.base ;
+		case 14: return infos.stats.agility.base;
+		case 15: return infos.stats.intelligence.base;
+		}
+		return 0;
 	}
 	
 	private boolean lookForFight() {
