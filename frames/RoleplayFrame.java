@@ -34,6 +34,7 @@ public class RoleplayFrame implements IFrame {
 	}
 
 	public boolean processMessage(Message msg) {
+		this.instance.log.refresh(CC.infos);
 		switch(msg.getId()) {
 		case 6471 : // CharacterLoadingCompleteMessage
 			InterClientKeyManager ICKM = InterClientKeyManager.getInstance();

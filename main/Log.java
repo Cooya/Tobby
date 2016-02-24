@@ -7,6 +7,7 @@ import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import controller.informations.CharacterInformations;
 import messages.Message;
 
 public class Log {
@@ -73,6 +74,11 @@ public class Log {
 		else
 			p(str);
 	}
+	
+	public void refresh(CharacterInformations infos){
+		graphicalFrame.appendRefreshInfos(infos);
+	}
+	
 	
 	public enum Status {
 		INFO,
