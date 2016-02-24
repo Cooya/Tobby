@@ -30,13 +30,16 @@ public class Instance extends Thread {
 	private LinkedList<Message> output;
 	private LinkedList<Message> input;
 	
-	public Instance(String login, String password, int serverId, CharacterFrame graphicalFrame, MuleController mule) {
+	public Instance(boolean type, String login, String password, int serverId, CharacterFrame graphicalFrame) {
 		this.id = instancesId++;
 		instances.add(this);
 		this.log = new Log(login, graphicalFrame);
 		//this.graphicalFrame = graphicalFrame;
 		this.net = new NetworkInterface(this);
-		this.character = new FighterController(this, login, password, serverId, mule);
+		if(type)
+			this.character = new MuleController(this, login, password, serverId);
+		else
+			this.character = new FighterController(this, login, password, serverId);
 		this.workingFrames = new Vector<IFrame>();
 		this.frameUpdates = new Vector<Vector<IFrame>>();
 		this.frameUpdates.add(new Vector<IFrame>()); // add
@@ -162,6 +165,10 @@ public class Instance extends Thread {
 	
 	public void setGameServerIP(String gameServerIP) {
 		this.net.setGameServerIP(gameServerIP);
+	}
+	
+	public void setMule(Instance mule) {
+		((FighterController) this.character).setMule((MuleController) mule.character);
 	}
 	
 	public Latency getLatency() {

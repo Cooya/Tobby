@@ -72,8 +72,6 @@ public class MapsPathfinder extends Pathfinder {
 		private Map map;
 		@SuppressWarnings("unused")
 		private int worldId;
-		private int x;
-		private int y;
 		private Cell cell;
 		private Vector<Vector<Cell>> zones;
 		
@@ -81,7 +79,10 @@ public class MapsPathfinder extends Pathfinder {
 			super(map.id, lastDirection, parent);
 			this.map = map;
 			this.zones = MapsAnalyser.getZones(map);
-			setCoordsFromId(map.id);
+			MapPosition mp = MapPosition.getMapPositionById(map.id);
+			this.worldId = mp.worldMap; // est-ce la même chose ?!
+			this.x = mp.posX;
+			this.y = mp.posY;
 			if(lastDirection != -1)
 				setCurrentCell();
 			else { // cellule de départ et d'arrivée
@@ -89,13 +90,9 @@ public class MapsPathfinder extends Pathfinder {
 					this.cell = map.cells.get(getFirstAccessibleCellId());
 				else
 					this.cell = map.cells.get(startCellId); // s'applique aussi au noeud de destination, mais cela ne change rien
-			}	
-    		if(destNode == null) // si on est en train de définir destNode lui-même
-    			return;
-			if(parent != null)
-    			this.cost = distanceTo(parent) + distanceTo(destNode);
-    		else
-    			this.cost = distanceTo(destNode);
+			}
+			this.isAccessible = this.cell != null;
+			setHeuristic(destNode);
 		}
 		
 		private MapNode(int mapId, int lastDirection, PathNode parent) {
@@ -105,13 +102,6 @@ public class MapsPathfinder extends Pathfinder {
     	private MapNode(int mapId) {
     		this(getMapFromId(mapId), -1, null);
     	}
-		
-		private void setCoordsFromId(int mapId) {
-			MapPosition mp = MapPosition.getMapPositionById(mapId);
-			this.worldId = mp.worldMap; // est-ce la même chose ?!
-			this.x = mp.posX;
-			this.y = mp.posY;
-		}
 		
 		private void setCurrentCell() {
 			int[] directionCellIds;
@@ -137,10 +127,6 @@ public class MapsPathfinder extends Pathfinder {
 						}
 					}
 			// map inaccessible donc this.cell vaut null
-		}
-		
-		protected boolean isAccessible() {
-			return this.cell != null;
 		}
 		
 		private int getFirstAccessibleCellId() {
@@ -178,20 +164,6 @@ public class MapsPathfinder extends Pathfinder {
 				case DOWN : return this.map.cells.get((srcId + Map.WIDTH * 2) - 560);
 			}
 			throw new Error("Invalid direction for changing map.");
-		}
-
-		protected boolean equals(PathNode node) {
-			if(!(node instanceof MapNode))
-    			throw new Error("Invalid type.");
-    		MapNode mn = (MapNode) node;
-    		return this.map.id == mn.map.id;
-		}
-		
-		protected double distanceTo(PathNode node) {
-    		if(node == null || !(node instanceof MapNode))
-    			throw new Error("Null node or invalid type.");
-    		MapNode mn = (MapNode) node;
-    		return Math.sqrt(Math.pow(this.x - mn.x, 2) + Math.pow(this.y - mn.y, 2));
 		}
 		
     	protected int getCrossingDuration(boolean mode) {

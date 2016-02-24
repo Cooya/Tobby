@@ -429,7 +429,7 @@ public class ByteArray {
 		int var3 = 0;
 		Int64 var2 = db;
 		if(var2.low == 0)
-			writeInt32(var2.low);
+			writeInt32((int) var2.low);
 		else {
 			var3 = 0;
 			while(var3 < 4) {
@@ -441,7 +441,7 @@ public class ByteArray {
 				writeByte((byte) (var2.high << 4 | var2.low));
 			else {
 				writeByte((byte) ((var2.high << 4 | var2.low) & 127 | 128));
-				writeInt32(var2.high >>> 3);
+				writeInt32((int) (var2.high >>> 3));
 			}
 		}
 	}

@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.Vector;
 
 import controller.CharacterController;
+import controller.MovementAPI;
 import controller.informations.CharacterInformations;
 import controller.pathfinding.Pathfinder.PathNode;
 import main.Instance;
@@ -70,7 +71,7 @@ public class Path {
 		CC.currentPathName = this.name;
 		int nextMapId;
 		while((nextMapId = nextMap()) != -1)
-			CC.changeMap(nextMapId);
+			MovementAPI.changeMap(nextMapId, CC);
 	}
 	
 	public String getName() {
@@ -153,18 +154,6 @@ public class Path {
 		private SimplePathNode(int id, int direction) {
 			super(id, -1, null);
 			this.direction = direction;
-		}
-
-		protected boolean equals(PathNode node) {
-			throw new Error("Phony method !");
-		}
-
-		protected double distanceTo(PathNode node) {
-			throw new Error("Phony method !");
-		}
-
-		protected boolean isAccessible() {
-			throw new Error("Phony method !");
 		}
 
 		protected int getCrossingDuration(boolean mode) {

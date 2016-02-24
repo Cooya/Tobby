@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+import main.Instance;
 import main.Main;
 
 public class Processes {
@@ -31,7 +32,7 @@ public class Processes {
 			InputStream in = p.getInputStream();
 			byte[] bytes = new byte[Main.BUFFER_DEFAULT_SIZE];
 			in.read(bytes);
-			//System.out.println(("DLL Injection.\n" + new String(bytes)));
+			Instance.log("DLL Injection.\n" + new String(bytes));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

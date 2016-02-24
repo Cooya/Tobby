@@ -23,39 +23,37 @@ public abstract class Pathfinder {
 	
 	public Path compute(int srcId, int destId) {
     	currentNode = getNodeFromId(srcId);
+    	System.out.println(currentNode);
     	if(currentNode == null)
     		throw new Error("Invalid current node id.");
     	destNode = getNodeFromId(destId);
+    	System.out.println(destNode);
     	if(destNode == null)
     		throw new Error("Invalid destination node id.");
     	openedList = new Vector<PathNode>();
     	closedList = new Vector<PathNode>();
-    	closedList.add(currentNode);
 		Vector<PathNode> neighbours;
 		PathNode inListNode;
 		
 		while(!currentNode.equals(destNode)) {
 			neighbours = getNeighbourNodes(currentNode);
 			for(PathNode neighbourNode : neighbours) {
-				//System.out.println(neighbourNode + " " + neighbourNode.isAccessible());
-				if(!neighbourNode.isAccessible()) // obstacle
+				System.out.println(neighbourNode + " " + neighbourNode.isAccessible);
+				if(!neighbourNode.isAccessible) // obstacle
 					continue;
 				if(nodeIsInList(neighbourNode, closedList) != null) // déjà traitée
 					continue;				
 				if((inListNode = nodeIsInList(neighbourNode, openedList)) != null) { // déjà une possibilité
-					if(currentNode.cost < inListNode.cost)
-						inListNode = currentNode; // modification de la référence dans la liste
+					if(neighbourNode.g < inListNode.g)
+						inListNode = neighbourNode; // modification de la référence dans la liste
 				}
 				else
 					openedList.add(neighbourNode);	
 			}
-			//System.out.println(currentNode);
-			currentNode = getBestNodeOfList(openedList);
-			//System.out.println(currentNode);
+			closedList.add(currentNode);
+			currentNode = popBestNodeOfList(openedList);
 			if(currentNode == null)
 				throw new Error("None possible path found.");
-			openedList.remove(currentNode);
-			closedList.add(currentNode);
 		}
 		
 		//for(PathNode node : closedList)
@@ -75,15 +73,17 @@ public abstract class Pathfinder {
 		return path;
 	}
 	
-	private static PathNode getBestNodeOfList(Vector<PathNode> list) {
+	private static PathNode popBestNodeOfList(Vector<PathNode> list) {
 		if(list.size() == 0)
 			return null;
 		PathNode currentNode = list.firstElement();
 		for(PathNode listNode : list) {
-			//System.out.println(listNode + " " + listNode.cost);
-			if(listNode.cost < currentNode.cost)
+			System.out.println(listNode + " " + listNode.g + " " + listNode.f);
+			if(listNode.f < currentNode.f)
 				currentNode = listNode;
 		}
+		System.out.println("best node : " + currentNode);
+		list.remove(currentNode);
 		return currentNode;
 	}
 	
@@ -103,8 +103,13 @@ public abstract class Pathfinder {
 	
 	protected static abstract class PathNode {
 		protected int id;
+		protected double x;
+		protected double y;
 		protected PathNode parent;
-		protected double cost;
+		protected double g; // distance [noeud courant / voisin]
+		protected double f; // distance [noeud courant / voisin] + [voisin / noeud cible]
+		protected int cost; // nombre de noeuds traversés
+		protected boolean isAccessible;
 		protected int lastDirection;
 		protected int direction;
 		
@@ -113,11 +118,29 @@ public abstract class Pathfinder {
 			this.parent = parent;
 			this.lastDirection = lastDirection;
 			this.direction = -1;
+			if(parent != null) {
+				this.g = distanceTo(parent);	
+				this.cost = this.parent.cost + 1;
+			}
+    		else { // noeud initial et noeud final
+    			this.g = 0;
+    			this.cost = 0;
+    		}
 		}
-
-		protected abstract boolean equals(PathNode node);
-		protected abstract double distanceTo(PathNode node);
-		protected abstract boolean isAccessible();
+		
+		protected void setHeuristic(PathNode destNode) {
+			if(destNode != null)
+				this.f = this.g + distanceTo(destNode);
+		}
+		
+    	protected double distanceTo(PathNode node) {
+    		return Math.sqrt(Math.pow(this.x - node.x, 2) + Math.pow(this.y - node.y, 2));
+    	}
+    	
+    	protected boolean equals(PathNode node) {
+    		return this.id == node.id;
+    	}
+    	
 		protected abstract int getCrossingDuration(boolean mode);
 		public abstract String toString();
 	}

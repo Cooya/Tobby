@@ -19,7 +19,7 @@ public class Emulation {
 	private static Connection.Server clientDofusCo;
 	private static Reader reader = new Reader();
 
-	public static void runASLauncher() {
+	public static void runLauncher() {
 		if(!Processes.inProcess("adl.exe"))
 			try {
 				Instance.log("Running AS launcher.");
@@ -30,14 +30,14 @@ public class Emulation {
 				else
 					Runtime.getRuntime().exec(ADL_PATH + " " + ANTIBOT_PATH);
 			} catch (Exception e) {
-				e.printStackTrace();
-				System.exit(1);
+				Instance.fatalError(e);
 			}
 		else
 			Instance.log("AS launcher already in process.");
 	}
 	
-	public static void sendCredentials(String login, String password) {
+	private static void connectToLauncher() {
+		Instance.log("Connection to AS launcher.");
 		launcherCo = new Connection.Client("127.0.0.1", launcherPort);
 		byte[] buffer = new byte[1]; // booléen d'injection
 		try {
@@ -47,6 +47,12 @@ public class Emulation {
 		}
 		if(buffer[0] == 0)
 			Processes.injectDLL(Main.DLL_LOCATION, "adl.exe");
+	}
+	
+	public static void sendCredentials(String login, String password) {
+		if(launcherCo == null)
+			connectToLauncher();
+		
 		ByteArray array = new ByteArray();
 		array.writeInt(1 + 2 + login.length() + 2 + password.length());
 		array.writeByte((byte) 1);
@@ -93,7 +99,8 @@ public class Emulation {
 			clientDofusCo.close();
 			return CIM;
 		} catch(Exception e) {
-			throw new Error(e);
+			Instance.fatalError(e);
+			return null;
 		}
 	}
 	
@@ -120,14 +127,14 @@ public class Emulation {
 			} catch(SocketTimeoutException e) {
 				Instance.log("Timeout for launcher response.");
 			} catch(Exception e) {
-				throw new Error(e);
+				Instance.fatalError(e);
 			}
 		}
 		Instance.log("Message hashed, " + size + " bytes received.");
 		return new ByteArray(array.bytesFromPos());
 	}
 	
-	public static Message processMsgStack(LinkedList<Message> msgStack) {
+	private static Message processMsgStack(LinkedList<Message> msgStack) {
 		Message msg;
 		while((msg = msgStack.poll()) != null) {
 			Instance.log("r", msg);

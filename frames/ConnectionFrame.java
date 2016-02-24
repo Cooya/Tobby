@@ -84,8 +84,9 @@ public class ConnectionFrame implements IFrame {
 				RawDataMessage RDM = new RawDataMessage(msg);
 				Emulation.sendCredentials(CC.infos.login, CC.infos.password);
 				Message CIM = Emulation.createServer(HCM, ISM, RDM, instance.id);
-				instance.outPush(CIM);
-				return true;
+				if(CIM != null)
+					instance.outPush(CIM);
+				return true;		
 			case 6267 : // TrustStatusMessage
 				CharactersListRequestMessage CLRM = new CharactersListRequestMessage();
 				instance.outPush(CLRM);
@@ -97,12 +98,12 @@ public class ConnectionFrame implements IFrame {
 				CharacterSelectionMessage CSM = new CharacterSelectionMessage();
 				CSM.serialize(CLM);
 				instance.outPush(CSM);
-				
-				this.instance.endOfConnection();
 				return true;
-			case 153: // CharacterSelectedSuccessMessage
+			case 153 : // CharacterSelectedSuccessMessage
 				CharacterSelectedSuccessMessage CSSM = new CharacterSelectedSuccessMessage(msg);
 				this.CC.infos.level = CSSM.infos.level;
+				
+				this.instance.endOfConnection();
 				return true;
 		}
 		return false;

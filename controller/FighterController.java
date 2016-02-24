@@ -7,8 +7,6 @@ import gamedata.fight.GameFightMonsterInformations;
 import java.util.Vector;
 
 import controller.informations.FightContext;
-import controller.pathfinding.AreaRover;
-import controller.pathfinding.PathsCache;
 import main.Instance;
 import main.Log;
 import messages.EmptyMessage;
@@ -22,13 +20,16 @@ import messages.fight.GameFightTurnFinishMessage;
 
 public class FighterController extends CharacterController {
 	private int fightsCounter;
-	private AreaRover areaRover;
+	private MovementAPI.AreaRover areaRover;
 	private MuleController mule;
 	public FightContext fightContext;
 
-	public FighterController(Instance instance, String login, String password, int serverId, MuleController mule) {
+	public FighterController(Instance instance, String login, String password, int serverId) {
 		super(instance, login, password, serverId);
 		this.fightContext = new FightContext(this);
+	}
+	
+	public void setMule(MuleController mule) {
 		this.mule = mule;
 	}
 	
@@ -106,7 +107,7 @@ public class FighterController extends CharacterController {
 		waitState(CharacterState.IS_FREE);
 		
 		this.instance.log.p("Trying to take this monster group.");
-		moveTo(monsterGroup.disposition.cellId, false);
+		MovementAPI.moveTo(monsterGroup.disposition.cellId, false, this);
 		
 		if(isInterrupted())
 			return false;
@@ -175,22 +176,36 @@ public class FighterController extends CharacterController {
 		this.states.put(CharacterState.IN_GAME_TURN, false);
 	}
 	
-	private void selectAreaRoverDependingOnLevel() { // à terminer
+	private void selectAreaRoverDependingOnLevel() {
+		this.instance.log.p("Character level : " + this.infos.level + ".");
+		if(this.infos.level < 5)
+			this.areaRover = new MovementAPI.AreaRover(450, this); // route des âmes d'Incarnam
+		else if(this.infos.level < 10)
+			this.areaRover = new MovementAPI.AreaRover(442, this); // lac d'Incarnam
+		else
+			this.areaRover = new MovementAPI.AreaRover(445, this); // pâturages d'Incarnam
 		//this.areaRover = new AreaRover(95, this); // pious d'Astrub
-		this.areaRover = new AreaRover(445, this); // bouftous d'Incarnam
 	}
 	
 	private void goToExchangeWithMule(boolean giveKamas) {
+		waitState(CharacterState.IS_FREE);
+		if(isInterrupted())
+			return;
+		
 		if(this.infos.currentMap.id != this.mule.waitingMapId)
-			PathsCache.moveTo(this.mule.waitingMapId, this);
-		while(!isInterrupted() && !this.roleplayContext.actorIsOnMap(this.mule.infos.characterId))
+			MovementAPI.goTo(this.mule.waitingMapId, this);
+		
+		while(!isInterrupted() && !this.roleplayContext.actorIsOnMap(this.mule.infos.characterId)) {
 			waitState(CharacterState.NEW_ACTOR_ON_MAP); // attendre que la mule revienne sur la map
+			this.states.put(CharacterState.NEW_ACTOR_ON_MAP, false);
+		}
 		if(isInterrupted())
 			return;
 		
 		ExchangePlayerRequestMessage EPRM = new ExchangePlayerRequestMessage(); // demande d'échange
 		EPRM.serialize(this.mule.infos.characterId, 1, this.instance.id);
 		this.instance.outPush(EPRM);
+		this.instance.log.p("Sending exchange demand.");
 		waitState(CharacterState.IN_EXCHANGE); // attendre l'acceptation de l'échange
 		if(isInterrupted())
 			return;
@@ -204,6 +219,7 @@ public class FighterController extends CharacterController {
 		
 		EmptyMessage EM = new EmptyMessage("ExchangeObjectTransfertAllFromInvMessage"); // on transfère tout
 		this.instance.outPush(EM);
+		this.instance.log.p("Transfering all objects.");
 		
 		// donner aussi les kamas (à faire)
 		
@@ -217,8 +233,11 @@ public class FighterController extends CharacterController {
 		ExchangeReadyMessage ERM = new ExchangeReadyMessage();
 		ERM.serialize(true, 1);
 		this.instance.outPush(ERM); // on valide de notre côté
+		this.instance.log.p("Exchange validation from my side.");
 		
+		this.states.put(CharacterState.NEED_TO_EMPTY_INVENTORY, false);
 		waitState(CharacterState.IS_FREE);
+		this.instance.log.p("Exchange terminated.");
 	}
 	
 	public void run() {
@@ -229,10 +248,9 @@ public class FighterController extends CharacterController {
 		if(this.states.get(CharacterState.IN_FIGHT)) // reprise de combat à la reconnexion
 			fight(true);
 		
-		if(!isInterrupted())
-			selectAreaRoverDependingOnLevel(); // se rend à l'aire de combat
-		
 		while(!isInterrupted()) { // boucle principale 
+			selectAreaRoverDependingOnLevel(); // se rend à l'aire de combat
+			
 			while(!isInterrupted() && !this.states.get(CharacterState.NEED_TO_EMPTY_INVENTORY)) { // boucle recherche & combat
 				upgradeStats();
 				if(isInterrupted())
@@ -251,17 +269,22 @@ public class FighterController extends CharacterController {
 					if(this.states.get(CharacterState.IN_FIGHT)) // on vérifie si le combat a bien été lancé
 						fight(false);
 					else
-						changeMap(this.areaRover.nextMap(this));
+						MovementAPI.changeMap(this.areaRover.nextMap(this), this);
 				}
 				else {
 					if(isInterrupted())
 						break;
 					
-					changeMap(this.areaRover.nextMap(this));
+					MovementAPI.changeMap(this.areaRover.nextMap(this), this);
 				}
 			}
-			//if(!isInterrupted())
-				//goToExchangeWithMule(true);
+			if(isInterrupted())
+				break;
+			
+			if(this.mule != null)
+				goToExchangeWithMule(true);
+			else
+				Instance.fatalError("Undefined mule !");
 		}
 		this.instance.log.p(Log.Status.CONSOLE, "Thread controller of instance with id = " + this.instance.id + " terminated.");
 	}

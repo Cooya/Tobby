@@ -201,8 +201,10 @@
 6513 WarnOnPermaDeathStateMessage
 6525 CurrentServerStatusUpdateMessage
 6530 BasicStatMessage
+6535 ExchangeObjectsAddedMessage
 6542 GameFightPlacementSwapPositionsOfferMessage
 6585 IdolListMessage
 6586 IdolFightPreparationUpdateMessage
+6613 ExchangeOfflineSoldItemsMessage
 6620 HavenBagPackListMessage
 6630 RoomAvailableUpdateMessage

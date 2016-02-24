@@ -8,7 +8,6 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.io.IOException;
 
 import javax.swing.AbstractButton;
 import javax.swing.JInternalFrame;
@@ -17,23 +16,21 @@ import javax.swing.JOptionPane;
 import javax.swing.event.InternalFrameEvent;
 import javax.swing.event.InternalFrameListener;
 
-import controller.MuleController;
 import main.Instance;
 
 public class Controller {
 	private String accountsFilePath = "Ressources/accounts.txt";
 	private View view;
 	private Model model;
-	private MuleController mule; // juste pour tester
+	protected Instance mule;
 
 	public Controller() {
 		this.view = new View();
 		this.model = new Model();
-		
-		this.mule = new MuleController(null, null, null, -1);
-		
+		this.mule = null;
 		loadAccountsList();
 		new StartListener(this.view.menuItem);
+		new RunMuleButtonListener(this.view.runMuleButton);
 	}
 
 	private void loadAccountsList() {
@@ -56,6 +53,17 @@ public class Controller {
 			e.printStackTrace();
 		}
 	}
+	
+	private Instance createCharacterFrame(boolean type, String login, String password, int serverId) {
+		CharacterFrame frame = new CharacterFrame(login);
+		Instance instance = new Instance(type, login, password, serverId, frame);
+		model.instances.put(instance.id, instance);
+		view.desktopPane.add(frame);
+		view.instancesId.put(frame, instance.id);
+		frame.addInternalFrameListener(new CharacterFrameListener());
+		frame.setVisible(true);
+		return instance;
+	}
 
 	// pour le moment, l'instance n'est pas supprimée du vecteur d'instances
 	private void killInstance(JInternalFrame graphicalFrame) {
@@ -63,6 +71,17 @@ public class Controller {
 		Instance instance = this.model.instances.get(instanceId);
 		for(Thread thread : instance.threads)
 			thread.interrupt();
+	}
+	
+	private class RunMuleButtonListener implements ActionListener {
+		private RunMuleButtonListener(AbstractButton button) {
+			button.addActionListener(this);
+		}
+
+		public void actionPerformed(ActionEvent event) {
+			mule = createCharacterFrame(true, "nicomarchand", "poupinou47", 11);
+			model.assignMuleToEveryFighter(mule);
+		}
 	}
 
 	private class StartListener implements ActionListener {
@@ -90,31 +109,24 @@ public class Controller {
 			if(login.isEmpty() || password.isEmpty() || serverId == 0)
 				JOptionPane.showMessageDialog(null, "Missing informations.", "Erreur", JOptionPane.ERROR_MESSAGE);
 			else {
-				CharacterFrame frame = new CharacterFrame(login);
-				Instance instance = new Instance(login, password, serverId, frame, null);
-				model.instances.put(instance.id, instance);
-				view.desktopPane.add(frame);
-				view.instancesId.put(frame, instance.id);
+				createCharacterFrame(false, login, password, serverId);
 				loginPanel.dispose();
 				try {
-					//Ajout du compte dans le fichier de sauvegarde
-					if(model.accounts.get(login)==null){
-						BufferedWriter buffer = new BufferedWriter(new FileWriter(accountsFilePath,true));
-						buffer.write(login+" "+password+" "+serverId);
+					// ajout du compte dans le fichier de sauvegarde
+					if(model.accounts.get(login) == null) {
+						BufferedWriter buffer = new BufferedWriter(new FileWriter(accountsFilePath, true));
+						buffer.write(login + " " + password + " " + serverId);
 						buffer.newLine();
 						buffer.close();
-						model.accounts.put(login, login+" "+password+" "+serverId);
-						JMenuItem account=new JMenuItem(login);
+						model.accounts.put(login, login + " " + password + " " + serverId);
+						JMenuItem account = new JMenuItem(login);
 						view.accountsListItems.add(account);
 						view.accountsMenu.add(account);
 						new AccountItemListener(account);
 					}
-				} catch (IOException e) {
+				} catch(Exception e) {
 					e.printStackTrace();
 				}
-				frame.addInternalFrameListener(new CharacterFrameListener());
-				frame.setVisible(true);
-
 			}
 		}
 	}
@@ -155,13 +167,7 @@ public class Controller {
 
 		public void actionPerformed(ActionEvent e) {
 			String[] connectionInfos = model.accounts.get(this.accountItem.getText()).split(" ");
-			CharacterFrame frame = new CharacterFrame(connectionInfos[0]);
-			Instance instance = new Instance(connectionInfos[0], connectionInfos[1], Integer.parseInt(connectionInfos[2]), frame, mule);
-			model.instances.put(instance.id, instance);
-			view.desktopPane.add(frame);
-			view.instancesId.put(frame, instance.id);
-			frame.addInternalFrameListener(new CharacterFrameListener());
-			frame.setVisible(true);
+			createCharacterFrame(false, connectionInfos[0], connectionInfos[1], Integer.parseInt(connectionInfos[2]));
 		}
 	}
 }

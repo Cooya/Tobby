@@ -21,18 +21,24 @@ public class View {
 	protected JMenuItem menuItem;
 	protected Vector<JMenuItem> accountsListItems;
 	protected JMenu accountsMenu; 
+	protected JButton runMuleButton;
 	protected LoginPanel loginPanel;
 	private JMenuBar menuBar;
 
 	protected View() {
 		menuItem = new JMenuItem("Charger compte");
-		accountsMenu= new JMenu("Liste des comptes");
-		accountsListItems=new Vector<JMenuItem>();
+		accountsMenu = new JMenu("Liste des comptes");
+		accountsListItems = new Vector<JMenuItem>();
+		
 		JMenu menu = new JMenu("Commencer");
 		menu.add(menuItem);
 		menu.add(accountsMenu);
+		
+		runMuleButton = new JButton("Lancer la mule");
+		
 		menuBar = new JMenuBar();
 		menuBar.add(menu);
+		menuBar.add(runMuleButton);
 		
 		desktopPane = new JDesktopPane();
 		desktopPane.setDragMode(JDesktopPane.OUTLINE_DRAG_MODE);

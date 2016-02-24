@@ -11,7 +11,7 @@ public class Main {
 	
 	public static void main(String[] args) {
 		//if(MODE) {
-			Emulation.runASLauncher();
+			Emulation.runLauncher();
 			//new Instance("maxlebgdu9", "represente", 11);
 			//new Instance("maxlebgdu93", "represente", 11);
 			//new Instance("maxlebgdu94", "represente", 11);

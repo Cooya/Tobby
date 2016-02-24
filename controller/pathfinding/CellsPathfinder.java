@@ -27,7 +27,7 @@ public class CellsPathfinder extends Pathfinder {
 		for(int direction = 0; direction < 8; ++direction) {
 			cell = getNeighbourCellFromDirection(node.id, direction);
 			if(cell != null)
-				neighbours.add(new CellNode(cell, direction, currentNode));
+				neighbours.add(new CellNode(cell, direction, this.currentNode));
 		}
 		return neighbours;		
 	}
@@ -35,7 +35,7 @@ public class CellsPathfinder extends Pathfinder {
 	protected PathNode nodeIsInList(PathNode node, Vector<PathNode> list) {
 		CellNode cn = (CellNode) node;
 		for(PathNode pn : list)
-			if(((CellNode) pn).cell == cn.cell) // on peut utiliser la référence ici
+			if(pn.id == cn.id)
 				return pn;
 		return null;
 	}
@@ -167,19 +167,15 @@ public class CellsPathfinder extends Pathfinder {
     	private static final int HORIZONTAL_RUN_DURATION = 255;
     	private static final int VERTICAL_RUN_DURATION = 150;
     	private static final int DIAGONAL_RUN_DURATION = 170;
-    	protected Cell cell;
 		private Vector<Cell> checkedCells;
 		
 		private CellNode(Cell cell, int lastDirection, PathNode parent) {
 			super(cell.id, lastDirection, parent);
-			this.cell = cell;
+			this.x = cell.x;
+			this.y = cell.y;
+    		this.isAccessible = cell.isAccessibleDuringRP();
+			setHeuristic(destNode);
 			this.checkedCells = new Vector<Cell>();
-    		if(destNode == null) // si on est en train de définir destNode lui-même
-    			return;
-    		if(parent != null)
-    			this.cost = distanceTo(parent) + distanceTo(destNode);
-    		else
-    			this.cost = distanceTo(destNode);
 		}
 		
     	private CellNode(Cell cell) {
@@ -201,24 +197,6 @@ public class CellsPathfinder extends Pathfinder {
     				return false;
     		this.checkedCells.add(cell);
     		return cell.isAccessibleDuringRP();
-    	}
-    	
-    	protected boolean equals(PathNode node) {
-    		if(!(node instanceof CellNode))
-    			throw new Error("Invalid type.");
-    		CellNode cn = (CellNode) node;
-    		return this.cell.equals(cn.cell);
-    	}
-    	
-    	protected double distanceTo(PathNode node) {
-    		if(!(node instanceof CellNode))
-    			throw new Error("Invalid type.");
-    		CellNode cn = (CellNode) node;
-    		return Math.sqrt(Math.pow(this.cell.x - cn.cell.x, 2) + Math.pow(this.cell.y - cn.cell.y, 2));
-    	}
-    	
-    	protected boolean isAccessible() {
-    		return this.cell.isAccessibleDuringRP();
     	}
     	
     	protected int getCrossingDuration(boolean mode) {

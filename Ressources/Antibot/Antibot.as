@@ -20,7 +20,7 @@ package {
 		private var packetSize:int = -1;
 		private var interval:uint;
 		private var injected:Boolean = false;
-		private var hashFunctionsArray:Array = new Array();
+		private var hashFunctionsArray:Array;
 
 		public function Antibot() : void {
 			var ldr:Loader = new Loader();
@@ -41,6 +41,7 @@ package {
 
 		private function clientConnectionHandler(e:ServerSocketConnectEvent) : void {
 			trace("New client connected.");
+			hashFunctionsArray = new Array();
 			client = e.socket;
 			client.writeBoolean(this.injected);
 			client.flush();

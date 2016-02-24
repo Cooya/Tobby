@@ -134,6 +134,7 @@ public class RoleplayFrame implements IFrame {
 			this.CC.updateState(CharacterState.IN_EXCHANGE, false);
 			return true;
 		case 6129 : // ExchangeStartedWithPodsMessage
+			this.CC.updateState(CharacterState.PENDING_DEMAND, false);
 			this.CC.updateState(CharacterState.IN_EXCHANGE, true);
 			return true;
 		case 5509 : // ExchangeIsReadyMessage 
