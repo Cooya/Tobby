@@ -12,6 +12,7 @@ import messages.character.CharacterLevelUpMessage;
 import messages.character.CharacterStatsListMessage;
 import messages.character.InventoryWeightMessage;
 import messages.character.LifePointsRegenBeginMessage;
+import messages.character.SpellListMessage;
 import messages.context.CurrentMapMessage;
 import messages.context.GameContextRemoveElementMessage;
 import messages.context.GameMapMovementMessage;
@@ -33,6 +34,7 @@ public class RoleplayFrame implements IFrame {
 	}
 
 	public boolean processMessage(Message msg) {
+		this.instance.log.refresh(CC.infos);
 		switch(msg.getId()) {
 		case 6471 : // CharacterLoadingCompleteMessage
 			InterClientKeyManager ICKM = InterClientKeyManager.getInstance();
@@ -63,6 +65,11 @@ public class RoleplayFrame implements IFrame {
 			/*InventoryContentMessage ICM = new InventoryContentMessage(msg);
 				CC.kamasNumber = ICM.kamas;*/
 			return true;
+		case 1200:  //SpellListMessage
+			SpellListMessage SLM=new SpellListMessage(msg);
+			SLM.deserialize();
+			CC.infos.loadSpellList(SLM.spells);
+			return true;	
 		case 220 : // CurrentMapMessage
 			CurrentMapMessage CMM = new CurrentMapMessage(msg);
 			this.CC.setCurrentMap(CMM.mapId);

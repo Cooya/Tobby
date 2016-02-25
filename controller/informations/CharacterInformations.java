@@ -1,6 +1,10 @@
 package controller.informations;
 
+import java.util.HashMap;
+import java.util.Vector;
+
 import gamedata.character.CharacterCharacteristicsInformations;
+import gamedata.character.SpellItem;
 import gamedata.d2p.ankama.Map;
 
 public class CharacterInformations {
@@ -18,12 +22,15 @@ public class CharacterInformations {
 	public int level;
 	public int element;
 	public CharacterCharacteristicsInformations stats;
+	public HashMap<Integer,SpellItem> spellList; 
+	public int spellToUpgrade;
 	
 	public CharacterInformations(String login, String password, int serverId, int element) {
 		this.login = login;
 		this.password = password;
 		this.serverId = serverId;
 		this.element = element;
+		this.spellToUpgrade=161; //Fleche Magique par défault.
 	}
 	
 	public int missingLife() {
@@ -37,4 +44,13 @@ public class CharacterInformations {
 			return true;
 		return false;
 	}
+	
+	public void loadSpellList(Vector<SpellItem> vSpell){
+		spellList=new HashMap<Integer,SpellItem>();
+		for(SpellItem tmp:vSpell)
+			spellList.put(tmp.spellId, tmp);
+	}
+	
+	
+	
 }

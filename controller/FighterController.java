@@ -10,6 +10,7 @@ import controller.informations.FightContext;
 import main.Instance;
 import main.Log;
 import messages.EmptyMessage;
+import messages.character.SpellUpgradeRequestMessage;
 import messages.character.StatsUpgradeRequestMessage;
 import messages.context.GameRolePlayAttackMonsterRequestMessage;
 import messages.exchange.ExchangePlayerRequestMessage;
@@ -50,6 +51,34 @@ public class FighterController extends CharacterController {
 			this.states.put(CharacterState.IN_REGENERATION, false);
 		}
 	}
+	
+	//
+	
+	private void upgradeSpell(){
+		waitState(CharacterState.IS_FREE);
+		int id=infos.spellToUpgrade;
+		if(this.states.get(CharacterState.LEVEL_UP) && infos.spellList.get(id)!=null && canUpgradeSpell(id)) {
+			infos.spellList.get(id).spellLevel++;
+			SpellUpgradeRequestMessage SURM = new SpellUpgradeRequestMessage();
+			SURM.serialize(id,infos.spellList.get(id).spellLevel);
+			instance.outPush(SURM);
+			this.instance.log.p("Increase spell : Flèche Magique to lvl "+ infos.spellList.get(161).spellLevel);
+		}
+	}
+	
+
+	private boolean canUpgradeSpell(int idSpell) {
+		int lvl=infos.spellList.get(idSpell).spellLevel;
+		if(lvl<5){
+			return infos.stats.spellsPoints>=lvl;
+		}
+		return false;
+	}
+	
+	
+	//
+	
+	
 	
 	private void upgradeStats() {
 		waitState(CharacterState.IS_FREE);
@@ -253,6 +282,8 @@ public class FighterController extends CharacterController {
 			selectAreaRoverDependingOnLevel(); // se rend à l'aire de combat
 			
 			while(!isInterrupted() && !this.states.get(CharacterState.NEED_TO_EMPTY_INVENTORY)) { // boucle recherche & combat
+				
+				upgradeSpell();  //On upgrade le sort avant les stats
 				upgradeStats();
 				if(isInterrupted())
 					break;

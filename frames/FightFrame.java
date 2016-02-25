@@ -23,6 +23,7 @@ public class FightFrame implements IFrame {
 	}
 
 	public boolean processMessage(Message msg) {
+		this.instance.log.refresh(fighter.infos);
 		switch(msg.getId()) {
 			case 715 : // tour du personnage suivant
 				GameFightTurnReadyMessage GFTRM = new GameFightTurnReadyMessage(true);
