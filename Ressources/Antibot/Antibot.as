@@ -21,6 +21,7 @@ package {
 		private var interval:uint;
 		private var injected:Boolean = false;
 		private var hashFunctionsArray:Array;
+		private var clients:Array;
 
 		public function Antibot() : void {
 			var ldr:Loader = new Loader();
@@ -33,6 +34,7 @@ package {
 		}
 		
 		private function runServer(e:Event) : void {
+			clients = new Array();
 			server = new ServerSocket();
 			server.bind(5554, "127.0.0.1");
 			server.addEventListener(ServerSocketConnectEvent.CONNECT, clientConnectionHandler);
@@ -43,10 +45,19 @@ package {
 			trace("New client connected.");
 			hashFunctionsArray = new Array();
 			client = e.socket;
+			clients.push(client);
 			client.writeBoolean(this.injected);
 			client.flush();
 			this.injected = true;
+			client.addEventListener(Event.CLOSE, clientDisconnectionHandler);
 			client.addEventListener(ProgressEvent.SOCKET_DATA, dataReceptionHandler);
+		}
+
+		private function clientDisconnectionHandler(e:Event) : void {
+			trace("Client disconnected.");
+			client.removeAt(client.indexOf(e.target));
+			e.target.removeEventListener(Event.CLOSE, clientDisconnectionHandler);
+			e.target.removeEventListener(ProgressEvent.SOCKET_DATA, dataReceptionHandler);
 		}
 
 		private function dataReceptionHandler(e:ProgressEvent) : void {

@@ -57,6 +57,8 @@ public class Controller {
 	private Instance createCharacterFrame(boolean type, String login, String password, int serverId) {
 		CharacterFrame frame = new CharacterFrame(login);
 		Instance instance = new Instance(type, login, password, serverId, frame);
+		if(this.mule != null)
+			instance.setMule(this.mule);
 		model.instances.put(instance.id, instance);
 		view.desktopPane.add(frame);
 		view.instancesId.put(frame, instance.id);
@@ -66,9 +68,15 @@ public class Controller {
 	}
 
 	// pour le moment, l'instance n'est pas supprimée du vecteur d'instances
-	private void killInstance(JInternalFrame graphicalFrame) {
+	private void killInstance(JInternalFrame graphicalFrame) {		
 		int instanceId = this.view.instancesId.get(graphicalFrame);
 		Instance instance = this.model.instances.get(instanceId);
+		
+		if(instance == this.mule) {
+			this.model.removeMuleToEveryFighter(this.mule);
+			this.mule = null;
+		}
+		
 		for(Thread thread : instance.threads)
 			thread.interrupt();
 	}

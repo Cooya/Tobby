@@ -86,10 +86,12 @@
 4002 FriendsListMessage
 5001 InteractiveUseRequestMessage
 5501 LeaveDialogRequestMessage
+5502 LeaveDialogMessage
 5503 SetUpdateMessage
 5508 ExchangeAcceptMessage
 5509 ExchangeIsReadyMessage
 5511 ExchangeReadyMessage
+5537 KamasUpdateMessage
 5523 ExchangeRequestedTradeMessage
 5540 GameActionFightMarkCellsMessage
 5570 GameActionFightUnmarkCellsMessage
@@ -98,12 +100,15 @@
 5610 StatsUpgradeRequestMessage
 5613 ChallengeTargetsListMessage
 5616 NpcDialogReplyMessage
+5617 NpcDialogQuestionMessage
+5618 NpcDialogCreationMessage
 5623 QuestListRequestMessage
 5626 QuestListMessage
 5628 ExchangeLeaveMessage
 5630 FriendWarnOnConnectionStateMessage
 5632 GameRolePlayShowActorMessage
 5637 GameContextRefreshEntityLookMessage
+5646 StorageInventoryContentMessage
 5652 JobCrafterDirectorySettingsMessage
 5655 JobDescriptionMessage
 5663 BasicLatencyStatsMessage
@@ -141,6 +146,8 @@
 5970 MountXpRatioMessage
 6019 ChallengeResultMessage
 6022 ChallengeInfoMessage
+6034 ObjectsDeletedMessage
+6036 StorageObjectsUpdateMessage
 6058 AlignmentRankUpdateMessage
 6067 GameFightResumeMessage
 6068 CharacterSelectedForceMessage
@@ -161,6 +168,7 @@
 6205 AchievementListMessage
 6216 AccountCapabilitiesMessage
 6231 ShortcutBarContentMessage
+6236 ExchangeStartedWithStorageMessage
 6237 ServerExperienceModificatorMessage
 6253 RawDataMessage
 6265 SpouseStatusMessage

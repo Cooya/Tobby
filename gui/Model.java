@@ -18,4 +18,10 @@ public class Model {
 			if(fighter != mule)
 				fighter.setMule(mule);
 	}
+	
+	protected void removeMuleToEveryFighter(Instance mule) {
+		for(Instance fighter : instances.values())
+			if(fighter != mule)
+				fighter.setMule(null);
+	}
 }

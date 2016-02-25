@@ -49,7 +49,7 @@ public class Emulation {
 			Processes.injectDLL(Main.DLL_LOCATION, "adl.exe");
 	}
 	
-	public static void sendCredentials(String login, String password) {
+	public synchronized static void sendCredentials(String login, String password) {
 		if(launcherCo == null)
 			connectToLauncher();
 		
@@ -62,7 +62,7 @@ public class Emulation {
 		launcherCo.send(array.bytes());
 	}
 	
-	public static Message createServer(HelloConnectMessage HCM, IdentificationSuccessMessage ISM, RawDataMessage RDM, int instanceId) {
+	public synchronized static Message createServer(HelloConnectMessage HCM, IdentificationSuccessMessage ISM, RawDataMessage RDM, int instanceId) {
 		try {
 			clientDofusCo = new Connection.Server(serverPort);
 			Instance.log("Running emulation server. Waiting Dofus client connection...");
@@ -104,7 +104,7 @@ public class Emulation {
 		}
 	}
 	
-	public static synchronized ByteArray hashMessage(ByteArray msg, int instanceId) {
+	public synchronized static ByteArray hashMessage(ByteArray msg, int instanceId) {
 		ByteArray bytes = new ByteArray(msg.getSize() + 2);
 		bytes.writeInt(1 + 1 + msg.getSize());
 		bytes.writeByte((byte) 3); 

@@ -55,7 +55,7 @@ public class MovementAPI {
 		CC.instance.log.p("Movement duration : " + duration + " ms.");
 
 		try {
-			Thread.sleep((long) (duration * 1.5)); // on attend d'arriver à destination
+			Thread.sleep((long) (duration * 1.8)); // on attend d'arriver à destination
 		} catch(InterruptedException e) {
 			CC.interrupt();
 			return;
@@ -112,9 +112,10 @@ public class MovementAPI {
 		if(CC.isInterrupted())
 			return;
 		
-		CC.instance.log.p("Sending map changement request.");
+		int nextMapId = CC.infos.currentMap.getNeighbourMapFromDirection(direction);
+		CC.instance.log.p("Sending map changement request. Next map id : " + nextMapId + ".");
 		ChangeMapMessage CMM = new ChangeMapMessage();
-		CMM.serialize(CC.infos.currentMap.getNeighbourMapFromDirection(direction));
+		CMM.serialize(nextMapId);
 		CC.instance.outPush(CMM);
 			
 		CC.states.put(CharacterState.IS_LOADED, false); // on attend la fin du changement de map
@@ -128,6 +129,10 @@ public class MovementAPI {
 	}
 	
 	private static void goDownToAstrub(CharacterController CC) {
+		CC.waitState(CharacterState.IS_FREE);
+		if(CC.isInterrupted())
+			return;
+		
 		CC.instance.log.p("Going down to Astrub.");
 		PathsCache.moveTo(153880835, CC); // map où se situe le pnj
 		if(Thread.interrupted())
@@ -164,13 +169,17 @@ public class MovementAPI {
 	}
 	
 	private static void goUpToIncarnam(CharacterController CC) {
+		CC.waitState(CharacterState.IS_FREE);
+		if(CC.isInterrupted())
+			return;
+		
 		CC.instance.log.p("Going up to Incarnam.");
 		PathsCache.moveTo(84674054, CC);
-		if(Thread.interrupted())
+		if(CC.isInterrupted())
 			return;
 		
 		moveTo(375, false, CC); // entrée de la statue Féca
-		if(Thread.interrupted())
+		if(CC.isInterrupted())
 			return;
 		
 		InteractiveUseRequestMessage IURM = new InteractiveUseRequestMessage();

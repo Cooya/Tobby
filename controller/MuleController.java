@@ -7,6 +7,7 @@ import messages.exchange.ExchangeReadyMessage;
 import messages.interactions.InteractiveUseRequestMessage;
 import messages.interactions.NpcDialogReplyMessage;
 import messages.interactions.NpcGenericActionRequestMessage;
+import messages.synchronisation.BasicPingMessage;
 
 public class MuleController extends CharacterController {
 	protected int waitingMapId;
@@ -43,7 +44,7 @@ public class MuleController extends CharacterController {
 		IURM.serialize(465440, 140242, this.instance.id); // porte de la banque
 		this.instance.outPush(IURM);
 		
-		this.states.put(CharacterState.IS_FREE, false);
+		this.states.put(CharacterState.IS_LOADED, false);
 		waitState(CharacterState.IS_FREE);
 		if(interrupted())
 			return;
@@ -74,7 +75,7 @@ public class MuleController extends CharacterController {
 		this.instance.outPush(EM); // on transfère tous les objets de l'inventaire
 		
 		try {
-			sleep(3000);
+			sleep(2000);
 		} catch (InterruptedException e) {
 			interrupt();
 			return;
@@ -90,9 +91,11 @@ public class MuleController extends CharacterController {
 			return;
 		}
 		
-		MovementAPI.moveTo(396, false, this);
+		MovementAPI.moveTo(396, false, this); // on sort de la banques
 		if(interrupted())
 			return;
+		
+		this.states.put(CharacterState.IS_LOADED, false);
 	}
 	 
 	private boolean needToGoBank(float percentage) { // percentage < 1
@@ -105,23 +108,27 @@ public class MuleController extends CharacterController {
 		waitState(CharacterState.IS_FREE);
 		
 		while(!isInterrupted()) {
-			if(needToGoBank(0.3f)) {
+			if(needToGoBank(0.5f)) { // + de 50% de l'inventaire occupé
 				this.instance.log.p("Need to go to empty inventory at Astrub bank.");
 				returnTripToAstrubBank();
 			}
-			else
-				MovementAPI.goTo(this.waitingMapId, this);
+			MovementAPI.goTo(this.waitingMapId, this);
 			
-			waitState(CharacterState.PENDING_DEMAND); // on attend qu'un combattant lance un échange
-			this.instance.log.p("Exchange demand received.");
-			if(isInterrupted())
-				break;
-			
-			processExchange();
-			if(isInterrupted())
-				break;
+			while(!isInterrupted()) {
+				waitState(CharacterState.PENDING_DEMAND); // on attend qu'un combattant lance un échange
+				if(this.states.get(CharacterState.PENDING_DEMAND)) {
+					this.instance.log.p("Exchange demand received.");
+					processExchange();
+					break;
+				}
+				else {
+					BasicPingMessage BPM = new BasicPingMessage();
+					BPM.serialize(false);
+					this.instance.outPush(BPM);
+					this.instance.log.p("Sending a ping request to server for stay connected.");
+				}	
+			}	
 		}
-		
 		this.instance.log.p(Log.Status.CONSOLE, "Thread controller of instance with id = " + this.instance.id + " terminated.");
 	}
 }

@@ -241,12 +241,13 @@ public class FighterController extends CharacterController {
 	}
 	
 	public void run() {
-		waitState(CharacterState.IS_FREE);
+		waitState(CharacterState.IS_LOADED);
 		
 		changePlayerStatus();
 		
-		if(this.states.get(CharacterState.IN_FIGHT)) // reprise de combat à la reconnexion
-			fight(true);
+		waitState(CharacterState.IN_FIGHT); // on attend 2 secondes de savoir si on est en combat ou pas
+		if(this.states.get(CharacterState.IN_FIGHT))
+			fight(true); // reprise de combat
 		
 		while(!isInterrupted()) { // boucle principale 
 			selectAreaRoverDependingOnLevel(); // se rend à l'aire de combat

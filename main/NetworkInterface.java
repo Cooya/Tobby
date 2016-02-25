@@ -4,7 +4,6 @@ import java.net.SocketTimeoutException;
 import java.util.LinkedList;
 
 import messages.Message;
-import messages.synchronisation.BasicPingMessage;
 import utilities.ByteArray;
 
 public class NetworkInterface extends Thread {
@@ -13,7 +12,7 @@ public class NetworkInterface extends Thread {
 	private Reader reader;
 	private Connection.Client serverCo;
 	private String gameServerIP;
-	private boolean alreadyPing;
+	//private boolean alreadyPing;
 	protected Latency latency;
 	protected Sender sender; 
 	
@@ -22,7 +21,7 @@ public class NetworkInterface extends Thread {
 		this.reader = new Reader();
 		this.sender = new Sender();
 		this.latency = new Latency();
-		this.alreadyPing = false;
+		//this.alreadyPing = false;
 	}
 	
 	public void run() {
@@ -30,7 +29,7 @@ public class NetworkInterface extends Thread {
 		connectionToServer(Main.AUTH_SERVER_IP, Main.SERVER_PORT);
 		this.instance.log.p("Deconnected from authentification server.");
 		
-		this.alreadyPing = false;
+		//this.alreadyPing = false;
 		
 		if(!isInterrupted() && gameServerIP != null) {
 			this.instance.log.p("Connection to game server, waiting response...");
@@ -49,6 +48,7 @@ public class NetworkInterface extends Thread {
 				if((bytesReceived = this.serverCo.receive(buffer)) == -1)
 					break;
 			} catch(SocketTimeoutException e) {
+				/*
 				if(!this.alreadyPing) {
 					BasicPingMessage ping = new BasicPingMessage();
 					ping.serialize(true);
@@ -56,6 +56,7 @@ public class NetworkInterface extends Thread {
 					this.instance.log.p("Sending a ping request to server.");
 					this.alreadyPing = true;
 				}
+				*/
 				continue;
 			} catch(Exception e) {
 				break;

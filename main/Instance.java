@@ -168,7 +168,10 @@ public class Instance extends Thread {
 	}
 	
 	public void setMule(Instance mule) {
-		((FighterController) this.character).setMule((MuleController) mule.character);
+		if(mule == null)
+			((FighterController) this.character).setMule(null);
+		else
+			((FighterController) this.character).setMule((MuleController) mule.character);
 	}
 	
 	public Latency getLatency() {

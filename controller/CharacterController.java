@@ -51,10 +51,10 @@ public abstract class CharacterController extends Thread {
 		notify();
 	}
 	
-	protected synchronized boolean waitSpecificState(CharacterState condition, boolean expectedState, int timeout) {
+	protected synchronized boolean waitSpecificState(CharacterState state, int timeout) {
 		long startTime = System.currentTimeMillis();
 		long currentTime;
-		while(this.states.get(condition) != expectedState && (currentTime = System.currentTimeMillis() - startTime) < timeout) {
+		while(!this.states.get(state) && (currentTime = System.currentTimeMillis() - startTime) < timeout) {
 			try {
 				wait(timeout - currentTime);
 			} catch (Exception e) {
@@ -62,7 +62,7 @@ public abstract class CharacterController extends Thread {
 				return false;
 			}
 		}
-		if(this.states.get(condition) == expectedState)
+		if(this.states.get(state))
 			return true;
 		this.instance.log.p("TIMEOUT");
 		return false; // si on ne l'a pas reçu à temps
@@ -85,11 +85,17 @@ public abstract class CharacterController extends Thread {
 				while(!isInterrupted() && !isFree())
 					waitAnyEvent();
 				return;
+			case IS_LOADED:
+				if(DEBUG)
+					this.instance.log.p("Waiting for character to be loaded.");
+				while(!isInterrupted() && !this.states.get(CharacterState.IS_LOADED))
+					waitAnyEvent();
+				return;
 			case IN_FIGHT :
 				if(DEBUG)
 					this.instance.log.p("Waiting for fight beginning.");
 				while(!isInterrupted() && !this.states.get(CharacterState.IN_FIGHT))
-					if(!waitSpecificState(CharacterState.IN_FIGHT, true, 2000))
+					if(!waitSpecificState(CharacterState.IN_FIGHT, 2000))
 						return;
 				return;
 			case IN_GAME_TURN :
@@ -102,7 +108,8 @@ public abstract class CharacterController extends Thread {
 				if(DEBUG)
 					this.instance.log.p("Waiting for exchange demand.");
 				while(!isInterrupted() && !this.states.get(CharacterState.PENDING_DEMAND))
-					waitAnyEvent();
+					if(!waitSpecificState(CharacterState.PENDING_DEMAND, 1000 * 60 * 5)) // 5 minutes
+						return;
 				return;
 			case IN_EXCHANGE :
 				if(DEBUG)

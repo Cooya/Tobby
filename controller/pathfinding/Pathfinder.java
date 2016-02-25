@@ -23,11 +23,11 @@ public abstract class Pathfinder {
 	
 	public Path compute(int srcId, int destId) {
     	currentNode = getNodeFromId(srcId);
-    	System.out.println(currentNode);
+    	//System.out.println(currentNode);
     	if(currentNode == null)
     		throw new Error("Invalid current node id.");
     	destNode = getNodeFromId(destId);
-    	System.out.println(destNode);
+    	//System.out.println(destNode);
     	if(destNode == null)
     		throw new Error("Invalid destination node id.");
     	openedList = new Vector<PathNode>();
@@ -38,7 +38,7 @@ public abstract class Pathfinder {
 		while(!currentNode.equals(destNode)) {
 			neighbours = getNeighbourNodes(currentNode);
 			for(PathNode neighbourNode : neighbours) {
-				System.out.println(neighbourNode + " " + neighbourNode.isAccessible);
+				//System.out.println(neighbourNode + " " + neighbourNode.isAccessible);
 				if(!neighbourNode.isAccessible) // obstacle
 					continue;
 				if(nodeIsInList(neighbourNode, closedList) != null) // déjà traitée
@@ -78,11 +78,11 @@ public abstract class Pathfinder {
 			return null;
 		PathNode currentNode = list.firstElement();
 		for(PathNode listNode : list) {
-			System.out.println(listNode + " " + listNode.g + " " + listNode.f);
+			//System.out.println(listNode + " " + listNode.g + " " + listNode.f);
 			if(listNode.f < currentNode.f)
 				currentNode = listNode;
 		}
-		System.out.println("best node : " + currentNode);
+		//System.out.println("best node : " + currentNode);
 		list.remove(currentNode);
 		return currentNode;
 	}
@@ -106,8 +106,8 @@ public abstract class Pathfinder {
 		protected double x;
 		protected double y;
 		protected PathNode parent;
-		protected double g; // distance [noeud courant / voisin]
-		protected double f; // distance [noeud courant / voisin] + [voisin / noeud cible]
+		protected double g; // distance [noeud courant / parent]
+		protected double f; // distance [noeud courant / parent] + [voisin / noeud cible]
 		protected int cost; // nombre de noeuds traversés
 		protected boolean isAccessible;
 		protected int lastDirection;
