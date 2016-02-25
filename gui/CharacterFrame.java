@@ -12,6 +12,7 @@ import javax.swing.JTextArea;
 import javax.swing.text.DefaultCaret;
 
 import controller.informations.CharacterInformations;
+import gamedata.d2o.modules.MapPosition;
 
 public class CharacterFrame extends JInternalFrame {
 	private static final long serialVersionUID = 2448473860592287858L;
@@ -81,10 +82,11 @@ public class CharacterFrame extends JInternalFrame {
 
 
 	public void appendRefreshInfos(CharacterInformations infos){
-		Map.setText(String.valueOf(infos.currentMap));
+		
 		Name.setText(infos.characterName+" "+infos.level);
 		Pod.setText("Pods: "+infos.weight+"/"+infos.weightMax);
 		if(infos.stats!=null){
+			Map.setText(String.valueOf(MapPosition.getMapPositionById(infos.currentMap.id)));
 			Life.setText("Life: "+infos.stats.lifePoints+"/"+infos.stats.maxLifePoints);
 			Experience.setText("Experience: "+String.valueOf((int)infos.stats.experience)+"/"+String.valueOf((int)infos.stats.experienceNextLevelFloor));
 			Kamas.setText("Kamas: "+infos.stats.kamas);
