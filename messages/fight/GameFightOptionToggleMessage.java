@@ -14,7 +14,7 @@ public class GameFightOptionToggleMessage extends Message {
 		this.option = option;
 		
 		ByteArray buffer = new ByteArray();
-		buffer.writeByte((byte) this.option);
+		buffer.writeByte(this.option);
 		completeInfos(buffer);
 	}
 }

@@ -36,9 +36,5 @@ public class ObjectEffectLadder extends ObjectEffectCreature
 	{
 		super.deserialize(buffer);
 		this.monsterCount = buffer.readVarInt();
-		if(this.monsterCount < 0)
-		{
-			throw new Error("Forbidden value (" + this.monsterCount + ") on element of ObjectEffectLadder.monsterCount.");
-		}
 	}
 }

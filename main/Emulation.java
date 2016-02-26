@@ -2,6 +2,8 @@ package main;
 
 import java.net.SocketTimeoutException;
 import java.util.LinkedList;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import messages.Message;
 import messages.connection.HelloConnectMessage;
@@ -18,38 +20,28 @@ public class Emulation {
 	private static Connection.Client launcherCo;
 	private static Connection.Server clientDofusCo;
 	private static Reader reader = new Reader();
+	private static Lock lock = new ReentrantLock();
 
 	public static void runLauncher() {
 		if(!Processes.inProcess("adl.exe"))
 			try {
 				Instance.log("Running AS launcher.");
 				if(!Processes.fileExists(ADL_PATH))
-					throw new Error("AIR debug executable not found.");
+					throw new FatalError("AIR debug executable not found.");
 				if(!Processes.fileExists(ANTIBOT_PATH))
-					throw new Error("Antibot not found.");
+					throw new FatalError("Antibot not found.");
 				else
 					Runtime.getRuntime().exec(ADL_PATH + " " + ANTIBOT_PATH);
-			} catch (Exception e) {
-				Instance.fatalError(e);
+			} catch(Exception e) {
+				throw new FatalError(e);
 			}
 		else
 			Instance.log("AS launcher already in process.");
 	}
 	
-	private static void connectToLauncher() {
-		Instance.log("Connection to AS launcher.");
-		launcherCo = new Connection.Client("127.0.0.1", launcherPort);
-		byte[] buffer = new byte[1]; // booléen d'injection
-		try {
-			launcherCo.receive(buffer);
-		} catch(Exception e) {
-			throw new Error(e);
-		}
-		if(buffer[0] == 0)
-			Processes.injectDLL(Main.DLL_LOCATION, "adl.exe");
-	}
-	
-	public synchronized static void sendCredentials(String login, String password) {
+	public static void sendCredentials(String login, String password) {
+		lock.lock();
+		Instance.log("lock");
 		if(launcherCo == null)
 			connectToLauncher();
 		
@@ -60,9 +52,13 @@ public class Emulation {
 		array.writeUTF(password);
 		Instance.log("Sending credentials to AS launcher.");
 		launcherCo.send(array.bytes());
+		Instance.log("unlock");
+		lock.unlock();
 	}
 	
-	public synchronized static Message createServer(HelloConnectMessage HCM, IdentificationSuccessMessage ISM, RawDataMessage RDM, int instanceId) {
+	public static Message createServer(HelloConnectMessage HCM, IdentificationSuccessMessage ISM, RawDataMessage RDM, int instanceId) {
+		lock.lock();
+		Instance.log("lock");
 		try {
 			clientDofusCo = new Connection.Server(serverPort);
 			Instance.log("Running emulation server. Waiting Dofus client connection...");
@@ -97,14 +93,20 @@ public class Emulation {
 			
 			Instance.log("Deconnection from Dofus client.");
 			clientDofusCo.close();
+			Instance.log("unlock");
+			lock.unlock();
 			return CIM;
 		} catch(Exception e) {
-			Instance.fatalError(e);
-			return null;
+			Instance.log("Interaction with Dofus client failed, deconnection.");
+			clientDofusCo.close();
+			lock.unlock();
+			throw new FatalError(e);
 		}
 	}
 	
-	public synchronized static ByteArray hashMessage(ByteArray msg, int instanceId) {
+	public static ByteArray hashMessage(ByteArray msg, int instanceId) {
+		lock.lock();
+		Instance.log("lock");
 		ByteArray bytes = new ByteArray(msg.getSize() + 2);
 		bytes.writeInt(1 + 1 + msg.getSize());
 		bytes.writeByte((byte) 3); 
@@ -117,21 +119,42 @@ public class Emulation {
 		while(true) {
 			try {
 				Instance.log("Asking to hash message.");
-				size = launcherCo.receive(buffer, 1000);
-				if(size <= 0)
-					throw new Error("Invalid response from launcher.");
+				size = launcherCo.receive(buffer, 2000);
+				if(size <= 0) {
+					lock.unlock();
+					throw new FatalError("Launcher deconnected.");
+				}
 				array = new ByteArray(buffer, size);
-				if(size - 2 != array.readShort())
-					throw new Error("Missing bytes !");
+				if(size - 2 != array.readShort()) {
+					lock.unlock();
+					throw new FatalError("Missing bytes !"); // erreur qui n'est encore jamais arrivée
+				}
 				break;
 			} catch(SocketTimeoutException e) {
-				Instance.log("Timeout for launcher response.");
+				lock.unlock();
+				throw new FatalError("Timeout for launcher response. Connection lost with the launcher.");
 			} catch(Exception e) {
-				Instance.fatalError(e);
+				lock.unlock();
+				throw new FatalError(e);
 			}
 		}
 		Instance.log("Message hashed, " + size + " bytes received.");
+		Instance.log("unlock");
+		lock.unlock();
 		return new ByteArray(array.bytesFromPos());
+	}
+	
+	private static void connectToLauncher() {
+		Instance.log("Connection to AS launcher.");
+		launcherCo = new Connection.Client("127.0.0.1", launcherPort);
+		byte[] buffer = new byte[1]; // booléen d'injection
+		try {
+			launcherCo.receive(buffer);
+		} catch(Exception e) {
+			throw new FatalError(e);
+		}
+		if(buffer[0] == 0)
+			Processes.injectDLL(Main.DLL_LOCATION, "adl.exe");
 	}
 	
 	private static Message processMsgStack(LinkedList<Message> msgStack) {

@@ -58,7 +58,7 @@ public class Pathfinder {
 	
 	public static Cell getCellFromId(int cellId) {
 		if(cellId < 0 || cellId > 559)
-			throw new Error("Invalid cell id");
+			throw new FatalError("Invalid cell id");
 		return cells[cellId];
 	}
 	
@@ -93,7 +93,7 @@ public class Pathfinder {
 			case DOWN : return getNearestCellIdForMapChangement(552, direction); // (Map.CELLS_COUNT - 1 - Map.WIDTH) + (Map.WIDTH / 2)
 			case LEFT : return getNearestCellIdForMapChangement(280, direction); // Map.CELLS_COUNT * (Map.HEIGHT / 2)
 			case UP : return getNearestCellIdForMapChangement(7, direction); // Map.WIDTH / 2
-			default : throw new Error("Invalid direction for changing map.");
+			default : throw new FatalError("Invalid direction for changing map.");
 		}
 	}
 	
@@ -243,7 +243,7 @@ public class Pathfinder {
 					return cells[srcId - Map.WIDTH + offsetId];
 				return null;
 		}
-		throw new Error("Invalid direction.");
+		throw new FatalError("Invalid direction.");
 	}
 	
 	private static Cell getNeighbourCellFromDirection(Cell srcCell, int direction) {

@@ -34,10 +34,6 @@ public class ObjectEffect
 	public void deserialize(ByteArray buffer)
 	{
 		this.actionId = buffer.readVarShort();
-		if(this.actionId < 0)
-		{
-			throw new Error("Forbidden value (" + this.actionId + ") on element of ObjectEffect.actionId.");
-		}
 	}
 }
 

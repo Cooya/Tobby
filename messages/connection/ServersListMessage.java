@@ -4,6 +4,7 @@ import gamedata.server.GameServerInformations;
 
 import java.util.Vector;
 
+import main.FatalError;
 import messages.Message;
 import utilities.ByteArray;
 
@@ -34,6 +35,6 @@ public class ServersListMessage extends Message {
 					return false;
 				else
 					return true;
-		throw new Error("Invalid server id.");
+		throw new FatalError("Invalid server id.");
 	}
 }

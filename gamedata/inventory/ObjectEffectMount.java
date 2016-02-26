@@ -45,19 +45,7 @@ public class ObjectEffectMount extends ObjectEffect
 	{
 		super.deserialize(buffer);
 		this.mountId = buffer.readInt();
-		if(this.mountId < 0)
-		{
-			throw new Error("Forbidden value (" + this.mountId + ") on element of ObjectEffectMount.mountId.");
-		}
 		this.date = buffer.readDouble();
-		if(this.date < -9.007199254740992E15 || this.date > 9.007199254740992E15)
-		{
-			throw new Error("Forbidden value (" + this.date + ") on element of ObjectEffectMount.date.");
-		}
 		this.modelId = buffer.readVarShort();
-		if(this.modelId < 0)
-		{
-			throw new Error("Forbidden value (" + this.modelId + ") on element of ObjectEffectMount.modelId.");
-		}
 	}
 }

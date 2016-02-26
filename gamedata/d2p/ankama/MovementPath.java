@@ -2,6 +2,8 @@ package gamedata.d2p.ankama;
 
 import java.util.Vector;
 
+import main.FatalError;
+
 public class MovementPath {
 	public static final int RIGHT = 0;
 	public static final int DOWN_RIGHT = 1;
@@ -111,7 +113,7 @@ public class MovementPath {
 			int vectorSize = this._aPath.size();
 			for(int i = 0; i < vectorSize - 1; ++i) {
 				if(i > MAX_PATH_LENGTH)
-					throw new Error("Path too long. Maybe an orientation problem ?");
+					throw new FatalError("Path too long. Maybe an orientation problem ?");
 				pe = this._aPath.get(i);
 				if((Math.abs(pe.getStep().getX() - this._aPath.get(i + 1).getStep().getX()) > 1) || (Math.abs(pe.getStep().getY() - this._aPath.get(i + 1).getStep().getY()) > 1)) {
 					pe2 = new PathElement(null, 0);

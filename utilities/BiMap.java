@@ -3,6 +3,8 @@ package utilities;
 import java.util.HashMap;
 import java.util.Map;
 
+import main.FatalError;
+
 public class BiMap<T1, T2> {
 	private Map<T1, T2> map1;
 	private Map<T2, T1> map2;
@@ -29,6 +31,6 @@ public class BiMap<T1, T2> {
 		else if(c == t2)
 			return map2.get(o);
 		else
-			throw new Error("Invalid key type.");
+			throw new FatalError("Invalid key type.");
 	}
 }

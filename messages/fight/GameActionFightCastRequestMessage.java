@@ -20,16 +20,7 @@ public class GameActionFightCastRequestMessage extends Message{
 	public void serialize(int spell, short cell, int instanceId)
 	{
 		ByteArray buffer=new ByteArray();
-		
-		if(this.spellId < 0)
-		{
-			throw new Error("Forbidden value (" + this.spellId + ") on element spellId.");
-		}
 		buffer.writeVarShort(spell);
-		if(this.cellId < -1 || this.cellId > 559)
-		{
-			throw new Error("Forbidden value (" + this.cellId + ") on element cellId.");
-		}
 		buffer.writeShort(cell);
 		completeInfos(Emulation.hashMessage(buffer, instanceId));
 	}

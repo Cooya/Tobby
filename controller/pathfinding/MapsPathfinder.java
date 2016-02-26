@@ -7,6 +7,8 @@ import gamedata.d2p.ankama.Map;
 
 import java.util.Vector;
 
+import main.FatalError;
+
 public class MapsPathfinder extends Pathfinder {
 	private static int[] LEFT_CELL_IDS = new int[40];
 	private static int[] RIGHT_CELL_IDS = new int[40];
@@ -104,19 +106,19 @@ public class MapsPathfinder extends Pathfinder {
     	}
 		
 		private void setCurrentCell() {
-			int[] directionCellIds;
+			int[] directionCellIds = null;
 			switch(this.lastDirection) {
 				case LEFT : directionCellIds = LEFT_CELL_IDS; break;
 				case RIGHT : directionCellIds = RIGHT_CELL_IDS; break; 
 				case UP : directionCellIds = UP_CELL_IDS; break;
 				case DOWN : directionCellIds = DOWN_CELL_IDS; break;
-				default : throw new Error("Invalid direction for changing map.");
+				default : throw new FatalError("Invalid direction for changing map.");
 			}
 			
 			Cell cell;
 			Vector<Cell> parentCurrentZone = ((MapNode) this.parent).getCurrentZone();
 			if(parentCurrentZone == null)
-				throw new Error("Invalid parent current cell.");
+				throw new FatalError("Invalid parent current cell.");
 			for(int directionCellId : directionCellIds)
 				for(Cell parentCell : parentCurrentZone)
 					if(parentCell.allowsChangementMap() && directionCellId == parentCell.id) {
@@ -133,7 +135,7 @@ public class MapsPathfinder extends Pathfinder {
 			for(Cell cell : this.map.cells)
 				if(cell.isAccessibleDuringRP())
 					return cell.id;
-			throw new Error("Map without available cell ! Impossible !");
+			throw new FatalError("Map without available cell ! Impossible !");
 		}
 		
 		private Vector<Cell> getCurrentZone(int cellId) {
@@ -163,7 +165,7 @@ public class MapsPathfinder extends Pathfinder {
 				case UP : return this.map.cells.get((srcId - Map.WIDTH * 2) + 560);
 				case DOWN : return this.map.cells.get((srcId + Map.WIDTH * 2) - 560);
 			}
-			throw new Error("Invalid direction for changing map.");
+			throw new FatalError("Invalid direction for changing map.");
 		}
 		
     	protected int getCrossingDuration(boolean mode) {

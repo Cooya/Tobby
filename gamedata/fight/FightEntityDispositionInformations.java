@@ -12,10 +12,6 @@ public class FightEntityDispositionInformations extends EntityDispositionInforma
 	public FightEntityDispositionInformations(ByteArray buffer) {
 		super(buffer);
         this.carryingCharacterId = buffer.readDouble();
-        if(this.carryingCharacterId < -9.007199254740992E15 || this.carryingCharacterId > 9.007199254740992E15)
-        {
-           throw new Error("Forbidden value (" + this.carryingCharacterId + ") on element of FightEntityDispositionInformations.carryingCharacterId.");
-        }
 	}
 
 }

@@ -30,11 +30,6 @@ public class GameFightEndMessage extends Message{
        int loc6 = 0;
        var _loc7_:FightResultListEntry = null;
        var _loc8_:NamedPartyTeamWithOutcome = null;
-       this.duration = buffer.readInt();
-       if(this.duration < 0)
-       {
-          throw new Error("Forbidden value (" + this.duration + ") on element of GameFightEndMessage.duration.");
-       }
        this.ageBonus = buffer.readShort();
        this.lootShareLimitMalus = buffer.readShort();
        var _loc2_:uint = buffer.readUnsignedShort();

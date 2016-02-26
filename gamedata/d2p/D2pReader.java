@@ -3,6 +3,7 @@ package gamedata.d2p;
 import java.util.Hashtable;
 import java.util.zip.Inflater;
 
+import main.FatalError;
 import main.Instance;
 import main.Main;
 import utilities.ByteArray;
@@ -56,7 +57,7 @@ public class D2pReader {
 			buffer = ByteArray.fileToByteArray(filepath);
 			nextFile = false;
 			if(buffer.readByte() != 2 || buffer.readByte() != 1)
-				throw new Error("Invalid d2p file header.");
+				throw new FatalError("Invalid d2p file header.");
 			buffer.setPos(buffer.getSize() - 24);
 			pos1 = buffer.readInt();
 			buffer.readInt();
@@ -126,7 +127,7 @@ public class D2pReader {
 			Instance.log(bytesCounter + " bytes resulting of decompression.");
 		binaryMap.setPos(0);
 		if(binaryMap.readByte() != 77)
-			throw new Error("Invalid binary map header.");
+			throw new FatalError("Invalid binary map header.");
 		binaryMap.setPos(0);
 	}
 }

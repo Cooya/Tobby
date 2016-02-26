@@ -17,10 +17,6 @@ public class EmotePlayRequestMessage extends Message{
 	public void serialize(byte emoteId) 
 	{
 		ByteArray buffer=new ByteArray();
-		if(this.emoteId < 0 || this.emoteId > 255)
-		{
-			throw new Error("Forbidden value (" + this.emoteId + ") on element emoteId.");
-		}
 		buffer.writeByte(emoteId);
 		completeInfos(buffer);
 	}

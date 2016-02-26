@@ -1,5 +1,7 @@
 package utilities;
 
+import main.FatalError;
+
 public class BooleanByteWrapper {
 	
 	public static int setFlag(int i1, int i2, boolean b) {
@@ -12,7 +14,7 @@ public class BooleanByteWrapper {
 			case 5 : if(b) i1 |= 32; else i1 &= 0xFF - 32; break;
 			case 6 : if(b) i1 |= 64; else i1 &= 0xFF - 64; break;
 			case 7 : if(b) i1 |= 128; else i1 &= 0xFF - 128; break;
-            default : throw new Error("Bytebox overflow.");
+            default : throw new FatalError("Bytebox overflow.");
 		}
 		return i1;
 	}
@@ -27,7 +29,7 @@ public class BooleanByteWrapper {
 			case 5 : return (i1 & 32) != 0;
 			case 6 : return (i1 & 64) != 0;
 			case 7 : return (i1 & 128) != 0;
-			default : throw new Error("Bytebox overflow.");
+			default : throw new FatalError("Bytebox overflow.");
 		}
 	}
 }

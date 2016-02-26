@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.nio.ByteBuffer;
 
+import main.FatalError;
+
 public class ByteArray {	
     private static final int INT_SIZE = 32;  
     private static final int SHORT_SIZE = 16;
@@ -105,7 +107,7 @@ public class ByteArray {
 	public static ByteArray fileToByteArray(String filepath) {
 		File file = new File(filepath);
 		if(!file.exists())
-			throw new Error("File '" + filepath + "' does not exist.");
+			throw new FatalError("File '" + filepath + "' does not exist.");
 		byte[] bytes = new byte[(int) file.length()];
 		FileInputStream is;
 		try {
@@ -141,7 +143,7 @@ public class ByteArray {
 	
 	public byte[] bytesFromPos() {
 		if(this.size <= this.pos)	
-			throw new Error("Size lower than position");
+			throw new FatalError("Size lower than position");
 		byte[] clone = new byte[this.size - this.pos];
 		for(int i = 0; i < clone.length; ++i)
 			clone[i] = this.array[i + this.pos];
@@ -203,7 +205,7 @@ public class ByteArray {
 	public int readByte() {	
 		int val = this.array[this.pos++] & 0xFF;
 		if(val < 0)
-			throw new Error("Negative byte.");
+			throw new FatalError("Negative byte.");
 		return val;
 	}
 
@@ -221,7 +223,7 @@ public class ByteArray {
 	public int readShort() { // pas de unsigned short en Java
 		int val = readByte() * 256 + readByte();
 		if(val < 0)
-			throw new Error("Negative short.");
+			throw new FatalError("Negative short.");
 		return val;
 	}
 	
@@ -307,7 +309,7 @@ public class ByteArray {
 		boolean var3 = false;
 		do {
 			if(var2 >= INT_SIZE)
-				throw new Error("Too much data");
+				throw new FatalError("Too much data");
 			var4 = readByte();
 			var3 = (var4 & MASK_10000000) == MASK_10000000;
 			if(var2 > 0)
@@ -317,7 +319,7 @@ public class ByteArray {
 			var2 += CHUNCK_BIT_SIZE;
 		} while(var3);
 		if(getPos() - pos > 4)
-			throw new Error("So many bytes read.");
+			throw new FatalError("So many bytes read.");
 		return var1;
 	}
 	
@@ -329,7 +331,7 @@ public class ByteArray {
 		boolean var3 = false;
 		do {
 			if(var2 >= SHORT_SIZE)
-				throw new Error("Too much data");
+				throw new FatalError("Too much data");
 			var4 = readByte();
 			var3 = (var4 & MASK_10000000) == MASK_10000000;
 			if(var2 > 0)
@@ -341,7 +343,7 @@ public class ByteArray {
 		if(var1 > SHORT_MAX_VALUE)
 			var1 -= UNSIGNED_SHORT_MAX_VALUE;	
 		if(getPos() - pos > 2)
-			throw new Error("So many bytes read.");
+			throw new FatalError("So many bytes read.");
 		return var1;
 	}
 	

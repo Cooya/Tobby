@@ -46,19 +46,7 @@ public class ObjectEffectDice extends ObjectEffect
 	{
 		super.deserialize(buffer);
 		this.diceNum = buffer.readVarShort();
-		if(this.diceNum < 0)
-		{
-			throw new Error("Forbidden value (" + this.diceNum + ") on element of ObjectEffectDice.diceNum.");
-		}
 		this.diceSide = buffer.readVarShort();
-		if(this.diceSide < 0)
-		{
-			throw new Error("Forbidden value (" + this.diceSide + ") on element of ObjectEffectDice.diceSide.");
-		}
 		this.diceConst = buffer.readVarShort();
-		if(this.diceConst < 0)
-		{
-			throw new Error("Forbidden value (" + this.diceConst + ") on element of ObjectEffectDice.diceConst.");
-		}
 	}
 }

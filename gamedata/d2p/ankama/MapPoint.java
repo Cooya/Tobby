@@ -3,6 +3,8 @@ package gamedata.d2p.ankama;
 import java.awt.Point;
 import java.util.Vector;
 
+import main.FatalError;
+
 public class MapPoint {
 	public static final int RIGHT = 0;
 	public static final int DOWN_RIGHT = 1;
@@ -242,7 +244,7 @@ public class MapPoint {
 			init();
 		Point p = CELLPOS.get(this._nCellId);
 		if (p == null)
-			throw new Error("Cell identifier out of bound.");
+			throw new FatalError("Cell identifier out of bound.");
 		this._nX = p.x;
 		this._nY = p.y;
 	}

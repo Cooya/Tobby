@@ -73,8 +73,8 @@ public class Sniffer extends Thread {
 				if(mustDeconnectClient)
 					break;
 			}
-		} catch (Exception e) {
-			throw new Error(e);
+		} catch(Exception e) {
+			throw new FatalError(e);
 		}
 		clientCo.closeClient();
 		log.p("Deconnection from Dofus client.");
@@ -89,8 +89,8 @@ public class Sniffer extends Thread {
 					processMsgStack(reader.processBuffer(new ByteArray(buffer, bytesReceived)), "r");
 					clientCo.send(ByteArray.trimBuffer(buffer, bytesReceived));
 				}
-			} catch (Exception e) {
-				throw new Error(e);
+			} catch(Exception e) {
+				throw new FatalError(e);
 			}
 			serverCo.close();
 			log.p("Deconnected from game server.");
@@ -106,7 +106,7 @@ public class Sniffer extends Thread {
 				gameServerAddress = SSDM.address;
 				mustDeconnectClient = true;
 				if(msgStack.size() > 1)
-					throw new Error("Little problem !");
+					throw new FatalError("Little problem !");
 				SSDM.serialize("127.0.0.1");
 				clientCo.send(SSDM.makeRaw());
 				return false;

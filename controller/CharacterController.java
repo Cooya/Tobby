@@ -8,6 +8,7 @@ import gamedata.d2p.MapsCache;
 import controller.informations.CharacterInformations;
 import controller.informations.RoleplayContext;
 import controller.pathfinding.CellsPathfinder;
+import main.FatalError;
 import main.Instance;
 import messages.character.PlayerStatusUpdateRequestMessage;
 
@@ -129,7 +130,7 @@ public abstract class CharacterController extends Thread {
 				while(!isInterrupted() && !this.states.get(CharacterState.NEW_ACTOR_ON_MAP))
 					waitAnyEvent();
 				return;
-			default : new Error("Unexpected state waiting : " + state + "."); break;
+			default : throw new FatalError("Unexpected state waiting : " + state + ".");
 		}
 	}
 	

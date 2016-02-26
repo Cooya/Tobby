@@ -41,20 +41,8 @@ public class PresetItem
 	public void deserialize(ByteArray buffer)
 	{
 		this.position = buffer.readByte();
-		if(this.position < 0 || this.position > 255)
-		{
-			throw new Error("Forbidden value (" + this.position + ") on element of PresetItem.position.");
-		}
 		this.objGid = buffer.readVarShort();
-		if(this.objGid < 0)
-		{
-			throw new Error("Forbidden value (" + this.objGid + ") on element of PresetItem.objGid.");
-		}
 		this.objUid = buffer.readVarInt();
-		if(this.objUid < 0)
-		{
-			throw new Error("Forbidden value (" + this.objUid + ") on element of PresetItem.objUid.");
-		}
 	}
 }
 

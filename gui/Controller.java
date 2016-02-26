@@ -8,6 +8,7 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.util.Vector;
 
 import javax.swing.AbstractButton;
 import javax.swing.JInternalFrame;
@@ -22,12 +23,14 @@ public class Controller {
 	private String accountsFilePath = "Ressources/accounts.txt";
 	private View view;
 	private Model model;
-	protected Instance mule;
+	private Instance mule;
+	private Vector<Instance> fighters;
 
 	public Controller() {
 		this.view = new View();
 		this.model = new Model();
 		this.mule = null;
+		this.fighters = new Vector<Instance>();
 		loadAccountsList();
 		new StartListener(this.view.menuItem);
 		new RunMuleButtonListener(this.view.runMuleButton);
@@ -54,11 +57,15 @@ public class Controller {
 		}
 	}
 	
+	// type = true si c'est une mule
 	private Instance createCharacterFrame(boolean type, String login, String password, int serverId) {
 		CharacterFrame frame = new CharacterFrame(login);
 		Instance instance = new Instance(type, login, password, serverId, frame);
-		if(this.mule != null)
-			instance.setMule(this.mule);
+		if(!type) {
+			fighters.add(instance);
+			if(this.mule != null) // la mule est connectée
+				instance.setMule(this.mule);
+		}
 		model.instances.put(instance.id, instance);
 		view.desktopPane.add(frame);
 		view.instancesId.put(frame, instance.id);
@@ -67,18 +74,16 @@ public class Controller {
 		return instance;
 	}
 
-	// pour le moment, l'instance n'est pas supprimée du vecteur d'instances
 	private void killInstance(JInternalFrame graphicalFrame) {		
 		int instanceId = this.view.instancesId.get(graphicalFrame);
 		Instance instance = this.model.instances.get(instanceId);
-		
 		if(instance == this.mule) {
 			this.model.removeMuleToEveryFighter(this.mule);
 			this.mule = null;
 		}
-		
-		for(Thread thread : instance.threads)
-			thread.interrupt();
+		else
+			this.fighters.remove(instance);
+		Instance.killInstance(instance);
 	}
 	
 	private class RunMuleButtonListener implements ActionListener {

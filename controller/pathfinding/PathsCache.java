@@ -4,6 +4,7 @@ import gamedata.d2o.modules.MapPosition;
 
 import java.util.Vector;
 
+import main.FatalError;
 import controller.CharacterController;
 
 public class PathsCache {
@@ -44,12 +45,12 @@ public class PathsCache {
 		Vector<MapPosition> vector = MapPosition.getMapPositionByCoord(x, y);
 		int vectorSize = vector.size();
 		if(vectorSize == 0)
-			throw new Error("Invalid map coords : [" + x + ", " + y +"].");
+			throw new FatalError("Invalid map coords : [" + x + ", " + y +"].");
 		if(vectorSize == 1)
 			return vector.get(0).id;
 		for(MapPosition mp : vector)
 			if(mp.worldMap > 0)
 				return mp.id;
-		throw new Error("An error to fix, Nico !");
+		throw new FatalError("An error to fix, Nico !");
 	}
 }

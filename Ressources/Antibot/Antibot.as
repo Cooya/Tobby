@@ -20,7 +20,7 @@ package {
 		private var packetSize:int = -1;
 		private var interval:uint;
 		private var injected:Boolean = false;
-		private var hashFunctionsArray:Array;
+		private var hashFunctionsArray:Array = new Array();
 		private var clients:Array;
 
 		public function Antibot() : void {
@@ -43,7 +43,6 @@ package {
 
 		private function clientConnectionHandler(e:ServerSocketConnectEvent) : void {
 			trace("New client connected.");
-			hashFunctionsArray = new Array();
 			client = e.socket;
 			clients.push(client);
 			client.writeBoolean(this.injected);
@@ -54,8 +53,9 @@ package {
 		}
 
 		private function clientDisconnectionHandler(e:Event) : void {
+			sendResetGameAction();
 			trace("Client disconnected.");
-			client.removeAt(client.indexOf(e.target));
+			clients.splice(clients.indexOf(e.target), 1);
 			e.target.removeEventListener(Event.CLOSE, clientDisconnectionHandler);
 			e.target.removeEventListener(ProgressEvent.SOCKET_DATA, dataReceptionHandler);
 		}
@@ -124,18 +124,12 @@ package {
 			return NetworkMessage.HASH_FUNCTION;
 		}
 
-		/*
 		private function sendResetGameAction() : void {
 			var Kernel:Class = getDefinitionByName("com.ankamagames.dofus.kernel.Kernel") as Class;
 			var ResetGameAction:Class = getDefinitionByName("com.ankamagames.dofus.logic.common.actions.ResetGameAction") as Class;
 
 			Kernel["getWorker"]().process(new ResetGameAction());
 			trace("ResetGameAction sent.");
-
-			var keyCode:uint = Keyboard.ENTER;
-        	var e:KeyboardEvent = new KeyboardEvent(KeyboardEvent.KEY_DOWN, true, false, 0, keyCode);   
-        	dispatchEvent(e);
 		}
-		*/
     }
 }

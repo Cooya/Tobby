@@ -52,6 +52,7 @@ public class FightFrame implements IFrame {
 				this.instance.log.p("End of fight.");
 				this.instance.quitFight();
 				this.fighter.updateState(CharacterState.IN_FIGHT, false);
+				this.fighter.updateState(CharacterState.IS_LOADED, false);
 				return true;
 			case 956 : // action terminée
 				SequenceEndMessage SEM = new SequenceEndMessage(msg);
@@ -65,12 +66,13 @@ public class FightFrame implements IFrame {
 			case 1030 : // variation des points d'action
 				GameActionFightPointsVariationMessage GAFPVM = new GameActionFightPointsVariationMessage(msg);
 				GAFPVM.deserialize();
-				this.fighter.fightContext.self.stats.actionPoints -= GAFPVM.delta;
+				if(this.fighter.fightContext.self != null)
+					this.fighter.fightContext.self.stats.actionPoints -= GAFPVM.delta;
 				return true;
 			case 5927 : // GameFightOptionStateUpdateMessage
 				GameFightOptionStateUpdateMessage GFOSUM = new GameFightOptionStateUpdateMessage(msg);
 				if(GFOSUM.option == 2) {
-					if(!GFOSUM.state)
+					if(GFOSUM.state)
 						this.instance.log.p("Fight already locked.");
 					else {
 						GameFightOptionToggleMessage GFOTM = new GameFightOptionToggleMessage();

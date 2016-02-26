@@ -40,14 +40,6 @@ public class ObjectEffectMinMax extends ObjectEffect
 	{
 		super.deserialize(buffer);
 		this.min = buffer.readVarInt();
-		if(this.min < 0)
-		{
-			throw new Error("Forbidden value (" + this.min + ") on element of ObjectEffectMinMax.min.");
-		}
 		this.max = buffer.readVarInt();
-		if(this.max < 0)
-		{
-			throw new Error("Forbidden value (" + this.max + ") on element of ObjectEffectMinMax.max.");
-		}
 	}
 }

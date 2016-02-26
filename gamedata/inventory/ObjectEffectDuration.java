@@ -44,20 +44,8 @@ public class ObjectEffectDuration extends ObjectEffect
 	{
 		super.deserialize(buffer);
 		this.days = buffer.readVarShort();
-		if(this.days < 0)
-		{
-			throw new Error("Forbidden value (" + this.days + ") on element of ObjectEffectDuration.days.");
-		}
 		this.hours = buffer.readByte();
-		if(this.hours < 0)
-		{
-			throw new Error("Forbidden value (" + this.hours + ") on element of ObjectEffectDuration.hours.");
-		}
 		this.minutes = buffer.readByte();
-		if(this.minutes < 0)
-		{
-			throw new Error("Forbidden value (" + this.minutes + ") on element of ObjectEffectDuration.minutes.");
-		}
 	}
 }
 

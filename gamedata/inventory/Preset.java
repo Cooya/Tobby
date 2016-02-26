@@ -49,15 +49,7 @@ public class Preset
 	{
 		PresetItem item = null;
 		this.presetId = buffer.readByte();
-		if(this.presetId < 0)
-		{
-			throw new Error("Forbidden value (" + this.presetId + ") on element of Preset.presetId.");
-		}
 		this.symbolId = buffer.readByte();
-		if(this.symbolId < 0)
-		{
-			throw new Error("Forbidden value (" + this.symbolId + ") on element of Preset.symbolId.");
-		}
 		this.mount = buffer.readBoolean();
 		int loc2 = buffer.readShort();
 		int loc3 = 0;

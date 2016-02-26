@@ -3,9 +3,9 @@ package frames;
 import controller.CharacterController;
 import controller.CharacterState;
 import gamedata.d2o.modules.MapPosition;
+import main.FatalError;
 import main.Instance;
 import main.InterClientKeyManager;
-import main.Log;
 import messages.EmptyMessage;
 import messages.Message;
 import messages.character.CharacterLevelUpMessage;
@@ -61,12 +61,8 @@ public class RoleplayFrame implements IFrame {
 			instance.outPush(PLRM);
 			instance.outPush(CEM);
 			return true;
-		case 3016 : // InventoryContentMessage
-			/*InventoryContentMessage ICM = new InventoryContentMessage(msg);
-				CC.kamasNumber = ICM.kamas;*/
-			return true;
-		case 1200:  //SpellListMessage
-			SpellListMessage SLM=new SpellListMessage(msg);
+		case 1200: // SpellListMessage
+			SpellListMessage SLM = new SpellListMessage(msg);
 			SLM.deserialize();
 			CC.infos.loadSpellList(SLM.spells);
 			return true;	
@@ -89,9 +85,7 @@ public class RoleplayFrame implements IFrame {
 		case 226 : // MapComplementaryInformationsDataMessage
 			MapComplementaryInformationsDataMessage MCIDM = new MapComplementaryInformationsDataMessage(msg);
 			CC.roleplayContext.newContextActors(MCIDM.actors);
-
-			this.instance.log.p("Current map : " + MapPosition.getMapPositionById(CC.infos.currentMap.id) + ".\nCurrent cell id : " + CC.infos.currentCellId + ".\nCurrent area id : " + CC.infos.currentMap.subareaId + ".");
-			
+			this.instance.log.p("Current map : " + MapPosition.getMapPositionById(CC.infos.currentMap.id) + ".\nCurrent cell id : " + CC.infos.currentCellId + ".\nCurrent area id : " + CC.infos.currentMap.subareaId + ".");		
 			this.CC.updateState(CharacterState.IS_LOADED, true);
 			return true;
 		case 5632 : // GameRolePlayShowActorMessage
@@ -121,8 +115,7 @@ public class RoleplayFrame implements IFrame {
 			this.CC.updateState(CharacterState.IN_FIGHT, true);
 			return true;
 		case 954 : // GameMapNoMovementMessage
-			this.instance.log.p(Log.Status.ERROR, "Movement refused by server.");
-			return true;
+			throw new FatalError("Movement refused by server.");
 		case 3009 : // InventoryWeightMessage
 			InventoryWeightMessage IWM = new InventoryWeightMessage(msg);
 			this.CC.infos.weight = IWM.weight;
@@ -131,6 +124,10 @@ public class RoleplayFrame implements IFrame {
 				this.CC.updateState(CharacterState.NEED_TO_EMPTY_INVENTORY, true);
 				this.instance.log.p("Inventory weight maximum almost reached, need to empty.");
 			}
+			return true;
+		case 3016 : // InventoryContentMessage
+			/*InventoryContentMessage ICM = new InventoryContentMessage(msg);
+				CC.kamasNumber = ICM.kamas;*/
 			return true;
 		case 5523 : // ExchangeRequestedTradeMessage
 			//ExchangeRequestedTradeMessage ERTM = new ExchangeRequestedTradeMessage(msg);

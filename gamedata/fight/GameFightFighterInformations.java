@@ -23,15 +23,7 @@ public class GameFightFighterInformations extends GameContextActorInformations{
 		int loc5 = 0;
 		this.previousPositions = new Vector<Integer>();
 		this.teamId = buffer.readByte();
-		if(this.teamId < 0)
-		{
-			throw new Error("Forbidden value (" + this.teamId + ") on element of GameFightFighterInformations.teamId.");
-		}
 		this.wave = buffer.readByte();
-		if(this.wave < 0)
-		{
-			throw new Error("Forbidden value (" + this.wave + ") on element of GameFightFighterInformations.wave.");
-		}
 		this.alive = buffer.readBoolean();
 		int type = buffer.readShort();
 		switch(type){
@@ -47,10 +39,6 @@ public class GameFightFighterInformations extends GameContextActorInformations{
 		while(loc4 < loc3)
 		{
 			loc5 = buffer.readVarShort();
-			if(loc5 < 0 || loc5 > 559)
-			{
-				throw new Error("Forbidden value (" + loc5 + ") on elements of previousPositions.");
-			}
 			this.previousPositions.add(loc5);
 			loc4++;
 		}

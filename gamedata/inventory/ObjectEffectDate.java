@@ -52,30 +52,10 @@ public class ObjectEffectDate extends ObjectEffect
 	{
 		super.deserialize(buffer);
 		this.year = buffer.readVarShort();
-		if(this.year < 0)
-		{
-			throw new Error("Forbidden value (" + this.year + ") on element of ObjectEffectDate.year.");
-		}
 		this.month = buffer.readByte();
-		if(this.month < 0)
-		{
-			throw new Error("Forbidden value (" + this.month + ") on element of ObjectEffectDate.month.");
-		}
 		this.day = buffer.readByte();
-		if(this.day < 0)
-		{
-			throw new Error("Forbidden value (" + this.day + ") on element of ObjectEffectDate.day.");
-		}
 		this.hour = buffer.readByte();
-		if(this.hour < 0)
-		{
-			throw new Error("Forbidden value (" + this.hour + ") on element of ObjectEffectDate.hour.");
-		}
 		this.minute = buffer.readByte();
-		if(this.minute < 0)
-		{
-			throw new Error("Forbidden value (" + this.minute + ") on element of ObjectEffectDate.minute.");
-		}
 	}
 }
 

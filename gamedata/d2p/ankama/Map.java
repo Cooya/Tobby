@@ -4,12 +4,13 @@ import gamedata.d2p.Cell;
 
 import java.util.Vector;
 
+import main.FatalError;
 import controller.pathfinding.Pathfinder;
 import utilities.ByteArray;
 
 public class Map {
 	public static final int WIDTH = 14;
-	public static final int HEIGHT = 40; // normalement 20
+	public static final int HEIGHT = 20; // 40 pour l'ancienne version du pathfinder
 	private static final String decryptionKey = "649ae451ca33ec53bbcbcc33becf15f4";
 	public static final int CELLS_COUNT = 560;
     public Class<Map> mapClass;
@@ -82,7 +83,7 @@ public class Map {
     		int dataLen = raw.readInt();
     		if(this.encrypted) {
     			if(decryptionKey == null)
-                    throw new Error("Map decryption key is empty.");
+                    throw new FatalError("Map decryption key is empty.");
     			byte[] encryptedData = raw.readBytes(dataLen);
     			int keySize = decryptionKey.length();
     			for(int i = 0; i < dataLen; ++i)
@@ -166,7 +167,7 @@ public class Map {
     		case Pathfinder.RIGHT : return this.rightNeighbourId;
     		case Pathfinder.UP : return this.topNeighbourId;
     		case Pathfinder.DOWN : return this.bottomNeighbourId;
-    		default : throw new Error("Invalid direction for find neighbour map id");
+    		default : throw new FatalError("Invalid direction for find neighbour map id");
     	}
     }
     

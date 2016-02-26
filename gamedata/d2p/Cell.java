@@ -30,9 +30,17 @@ public class Cell {
 	public Cell(Map map, int id) {
 		this._map = map;
 		this.id = id;
+		/*
 		int tmp = id % Map.WIDTH;
 		this.x = (id / Map.WIDTH) % 2 == 0 ? HALF_WIDTH + WIDTH * tmp : WIDTH * (tmp + 1); 
 		this.y = HALF_HEIGHT * (id / Map.WIDTH + 1);
+		*/
+		int tmp = id % (Map.WIDTH * 2);
+		if(tmp < Map.WIDTH)
+			this.x = tmp * 2;
+		else
+			this.x = (tmp % Map.WIDTH) * 2 + 1; 
+		this.y = id / (Map.WIDTH * 2);
 	}
 	
 	public Map getMap() {

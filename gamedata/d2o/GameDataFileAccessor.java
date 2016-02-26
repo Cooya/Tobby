@@ -2,6 +2,7 @@ package gamedata.d2o;
 
 import java.util.Hashtable;
 
+import main.FatalError;
 import utilities.ByteArray;
 
 // les flux sont remplacés par des tableaux d'octets
@@ -20,7 +21,7 @@ public class GameDataFileAccessor {
     
     public GameDataFileAccessor() {
     	if(_self != null)
-    		throw new Error("Singleton object already instantiated.");
+    		throw new FatalError("Singleton object already instantiated.");
     }
     
     public static GameDataFileAccessor getInstance() {
@@ -66,13 +67,13 @@ public class GameDataFileAccessor {
     	if(!buffer.readUTFBytes(3).equals("D2O")) {
     		buffer.setPos(0);
     		if(!buffer.readUTF().equals(ANKAMA_SIGNED_FILE_HEADER))
-    			throw new Error("Malformated game data file.");
+    			throw new FatalError("Malformated game data file.");
     		buffer.readShort();
     		buffer.incPos(buffer.readInt());
     		val = buffer.getPos();
     		this._streamStartIndex.put(d2oModule, val + 7);
     		if(buffer.readUTFBytes(3) != "D2O")
-    			throw new Error("Malformated game data file.");
+    			throw new FatalError("Malformated game data file.");
     	}
     	int k = buffer.readInt();
     	buffer.setPos(val + k);

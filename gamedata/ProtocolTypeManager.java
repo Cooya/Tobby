@@ -62,6 +62,7 @@ import gamedata.inventory.ObjectEffectString;
 import java.lang.reflect.Constructor;
 import java.util.Hashtable;
 
+import main.FatalError;
 import utilities.ByteArray;
 
 public class ProtocolTypeManager {
@@ -246,7 +247,7 @@ public class ProtocolTypeManager {
 	public static Object getInstance(int protocolId, ByteArray buffer) {
 		Class<?> c = types.get(protocolId);
 		if(c == null)
-			throw new Error("Invalid or unhandled protocol id : " + protocolId + ".");
+			throw new FatalError("Invalid or unhandled protocol id : " + protocolId + ".");
 		else {
 			Object o = null;
 			Constructor<?> cons = c.getConstructors()[0];

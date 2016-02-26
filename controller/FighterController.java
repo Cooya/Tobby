@@ -7,6 +7,7 @@ import gamedata.fight.GameFightMonsterInformations;
 import java.util.Vector;
 
 import controller.informations.FightContext;
+import main.FatalError;
 import main.Instance;
 import main.Log;
 import messages.EmptyMessage;
@@ -52,7 +53,12 @@ public class FighterController extends CharacterController {
 		}
 	}
 	
+	
+	
+	
 	//
+	
+	
 	
 	private void upgradeSpell(){
 		waitState(CharacterState.IS_FREE);
@@ -65,7 +71,6 @@ public class FighterController extends CharacterController {
 			this.instance.log.p("Increase spell : Flèche Magique to lvl "+ infos.spellList.get(161).spellLevel);
 		}
 	}
-	
 
 	private boolean canUpgradeSpell(int idSpell) {
 		int lvl=infos.spellList.get(idSpell).spellLevel;
@@ -74,11 +79,6 @@ public class FighterController extends CharacterController {
 		}
 		return false;
 	}
-	
-	
-	//
-	
-	
 	
 	private void upgradeStats() {
 		waitState(CharacterState.IS_FREE);
@@ -99,13 +99,19 @@ public class FighterController extends CharacterController {
 
 	private int getElementInfoById() {
 		switch(infos.element){
-		case 10: return infos.stats.strength.base;
-		case 13: return infos.stats.chance.base ;
-		case 14: return infos.stats.agility.base;
-		case 15: return infos.stats.intelligence.base;
+			case 10: return infos.stats.strength.base;
+			case 13: return infos.stats.chance.base ;
+			case 14: return infos.stats.agility.base;
+			case 15: return infos.stats.intelligence.base;
 		}
 		return 0;
 	}
+	
+	
+	
+	//
+	
+	
 	
 	private boolean lookForFight() {
 		waitState(CharacterState.IS_FREE);
@@ -316,7 +322,7 @@ public class FighterController extends CharacterController {
 			if(this.mule != null)
 				goToExchangeWithMule(true);
 			else
-				Instance.fatalError("Undefined mule !");
+				throw new FatalError("Undefined mule !");
 		}
 		this.instance.log.p(Log.Status.CONSOLE, "Thread controller of instance with id = " + this.instance.id + " terminated.");
 	}

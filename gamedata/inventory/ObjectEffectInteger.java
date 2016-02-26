@@ -38,10 +38,6 @@ public class ObjectEffectInteger extends ObjectEffect{
 	{
 		super.deserialize(buffer);
 		this.value = buffer.readVarShort();
-		if(this.value < 0)
-		{
-			throw new Error("Forbidden value (" + this.value + ") on element of ObjectEffectInteger.value.");
-		}
 	}
 
 }

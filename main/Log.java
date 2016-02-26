@@ -66,7 +66,7 @@ public class Log {
 			case INFO : break;
 			case WARNING : str = ANSI_YELLOW + str + ANSI_RESET; break;
 			case ERROR : str = ANSI_RED + str + ANSI_RESET; break;
-			default : throw new Error("Invalid log status.");
+			default : throw new FatalError("Invalid log status.");
 		}
 		*/
 		if(status == Status.CONSOLE)
@@ -75,10 +75,9 @@ public class Log {
 			p(str);
 	}
 	
-	public void refresh(CharacterInformations infos){
+	public void refresh(CharacterInformations infos) {
 		graphicalFrame.appendRefreshInfos(infos);
 	}
-	
 	
 	public enum Status {
 		INFO,

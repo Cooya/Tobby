@@ -9,6 +9,7 @@ import controller.CharacterController;
 import controller.MovementAPI;
 import controller.informations.CharacterInformations;
 import controller.pathfinding.Pathfinder.PathNode;
+import main.FatalError;
 import main.Instance;
 
 public class Path {
@@ -25,7 +26,7 @@ public class Path {
 			if(mapPosition.subAreaId == areaId)
 				mapPositionsInArea.add(mapPosition);
 		if(mapPositionsInArea.size() == 0)
-			throw new Error("Invalid area id.");
+			throw new FatalError("Invalid area id.");
 		Instance.log(mapPositionsInArea.size() + " maps in the area with id = " + areaId + ".");
 		Pathfinder pathfinder = new MapsPathfinder(infos.currentCellId);
 		Path bestPath = null;
@@ -117,7 +118,7 @@ public class Path {
 	
 	protected void addNode(int id, int direction) {
 		if(direction != Pathfinder.LEFT && direction != Pathfinder.RIGHT && direction != Pathfinder.UP && direction != Pathfinder.DOWN)
-			throw new Error("Invalid direction for create a node path.");
+			throw new FatalError("Invalid direction for create a node path.");
 		this.nodes.add(new SimplePathNode(id, direction));
 	}
 	
@@ -157,7 +158,7 @@ public class Path {
 		}
 
 		protected int getCrossingDuration(boolean mode) {
-			throw new Error("Phony method !");
+			throw new FatalError("Phony method !");
 		}
 		
 		public String toString() {

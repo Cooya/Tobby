@@ -140,12 +140,12 @@ public class Pathfinder {
 					return cells[currentCell.x + offsetX][currentCell.y - 1];
 				return null;
 		}
-		throw new Error("Invalid direction.");
+		throw new FatalError("Invalid direction.");
 	}
 	
 	public static Cell getCellFromId(int cellId) {
 		if(cellId < 0 || cellId > 559)
-			throw new Error("Invalid cell id");
+			throw new FatalError("Invalid cell id");
 		return cells[cellId % Map.WIDTH][cellId / Map.WIDTH];
 	}
 	

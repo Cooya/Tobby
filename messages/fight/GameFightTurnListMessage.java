@@ -29,10 +29,6 @@ public class GameFightTurnListMessage extends Message{
 		while(loc3 < loc2)
 		{
 			loc6 = buffer.readDouble();
-			if(loc6 < -9.007199254740992E15 || loc6 > 9.007199254740992E15)
-			{
-				throw new Error("Forbidden value (" + loc6 + ") on elements of ids.");
-			}
 			this.ids.add(loc6);
 			loc3++;
 		}
@@ -41,10 +37,6 @@ public class GameFightTurnListMessage extends Message{
 		while(loc5 < loc4)
 		{
 			loc7 = buffer.readDouble();
-			if(loc7 < -9.007199254740992E15 || loc7 > 9.007199254740992E15)
-			{
-				throw new Error("Forbidden value (" + loc7 + ") on elements of deadsIds.");
-			}
 			this.deadsIds.add(loc7);
 			loc5++;
 		}

@@ -18,10 +18,6 @@ public class GameFightTurnEndMessage extends Message{
      {
 		 ByteArray buffer=new ByteArray(this.getContent());
         this.fighterId = buffer.readDouble();
-        if(this.fighterId < -9.007199254740992E15 || this.fighterId > 9.007199254740992E15)
-        {
-           throw new Error("Forbidden value (" + this.fighterId + ") on element of GameFightTurnEndMessage.id.");
-        }
      }
 	
 	

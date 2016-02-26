@@ -2,6 +2,8 @@ package controller.pathfinding;
 
 import java.util.Vector;
 
+import main.FatalError;
+
 public abstract class Pathfinder {
 	public static final int RIGHT = 0;
 	public static final int DOWN_RIGHT = 1;
@@ -25,11 +27,11 @@ public abstract class Pathfinder {
     	currentNode = getNodeFromId(srcId);
     	//System.out.println(currentNode);
     	if(currentNode == null)
-    		throw new Error("Invalid current node id.");
+    		throw new FatalError("Invalid current node id.");
     	destNode = getNodeFromId(destId);
     	//System.out.println(destNode);
     	if(destNode == null)
-    		throw new Error("Invalid destination node id.");
+    		throw new FatalError("Invalid destination node id.");
     	openedList = new Vector<PathNode>();
     	closedList = new Vector<PathNode>();
 		Vector<PathNode> neighbours;
@@ -38,13 +40,13 @@ public abstract class Pathfinder {
 		while(!currentNode.equals(destNode)) {
 			neighbours = getNeighbourNodes(currentNode);
 			for(PathNode neighbourNode : neighbours) {
-				//System.out.println(neighbourNode + " " + neighbourNode.isAccessible);
+				//System.out.println(neighbourNode.g + " " + Pathfinder.directionToString(neighbourNode.lastDirection));
 				if(!neighbourNode.isAccessible) // obstacle
 					continue;
 				if(nodeIsInList(neighbourNode, closedList) != null) // déjà traitée
 					continue;				
 				if((inListNode = nodeIsInList(neighbourNode, openedList)) != null) { // déjà une possibilité
-					if(neighbourNode.g < inListNode.g)
+					if(neighbourNode.f < inListNode.f)
 						inListNode = neighbourNode; // modification de la référence dans la liste
 				}
 				else
@@ -53,7 +55,7 @@ public abstract class Pathfinder {
 			closedList.add(currentNode);
 			currentNode = popBestNodeOfList(openedList);
 			if(currentNode == null)
-				throw new Error("None possible path found.");
+				throw new FatalError("None possible path found.");
 		}
 		
 		//for(PathNode node : closedList)
@@ -97,7 +99,7 @@ public abstract class Pathfinder {
 			case 5 : return "top and left";
 			case 6 : return "top";
 			case 7 : return "top and right";
-			default : throw new Error("Invalid direction integer.");
+			default : throw new FatalError("Invalid direction integer.");
 		}
 	}
 	
@@ -119,7 +121,7 @@ public abstract class Pathfinder {
 			this.lastDirection = lastDirection;
 			this.direction = -1;
 			if(parent != null) {
-				this.g = distanceTo(parent);	
+				this.g = parent.g + distanceTo(parent);
 				this.cost = this.parent.cost + 1;
 			}
     		else { // noeud initial et noeud final
@@ -134,7 +136,7 @@ public abstract class Pathfinder {
 		}
 		
     	protected double distanceTo(PathNode node) {
-    		return Math.sqrt(Math.pow(this.x - node.x, 2) + Math.pow(this.y - node.y, 2));
+    		return Math.sqrt(Math.pow(node.x - this.x, 2) + Math.pow(node.y - this.y, 2));
     	}
     	
     	protected boolean equals(PathNode node) {

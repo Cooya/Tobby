@@ -1,5 +1,6 @@
 package gamedata.d2p.ankama;
 
+import main.FatalError;
 import utilities.ByteArray;
 
 public class BasicElement {
@@ -17,7 +18,7 @@ public class BasicElement {
 		else if(i == SOUND)
 			return new SoundElement(cell);
 		else
-			throw new Error ("Unknown element.");
+			throw new FatalError("Unknown element.");
 	}
 	
 	public Cell getCell() {
@@ -29,6 +30,6 @@ public class BasicElement {
 	}
 
 	public void fromRaw(ByteArray raw, int i) {
-		throw new Error("This method must be overrided");
+		throw new FatalError("This method must be overrided");
 	}
 }

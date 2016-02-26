@@ -37,9 +37,5 @@ public class ObjectEffectCreature extends ObjectEffect
 	{
 		super.deserialize(buffer);
 		this.monsterFamilyId = buffer.readVarShort();
-		if(this.monsterFamilyId < 0)
-		{
-			throw new Error("Forbidden value (" + this.monsterFamilyId + ") on element of ObjectEffectCreature.monsterFamilyId.");
-		}
 	}
 }

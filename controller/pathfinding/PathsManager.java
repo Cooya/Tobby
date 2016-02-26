@@ -4,7 +4,9 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.Hashtable;
 
+import main.FatalError;
 import main.Instance;
+
 
 @SuppressWarnings("resource")
 public class PathsManager {
@@ -26,13 +28,13 @@ public class PathsManager {
 				splitLine = line.split(":");
 				
 				if(splitLine.length != 2)
-					throw new Error("Malformated paths file.");
+					throw new FatalError("Malformated paths file.");
 				if(splitLine[1].equals("true"))
 					isLoop = true;
 				else if(splitLine[1].equals("false"))
 					isLoop = false;
 				else
-					throw new Error("Malformated paths file.");
+					throw new FatalError("Malformated paths file.");
 				
 				path = new Path(splitLine[0], isLoop);
 				paths.put(splitLine[0], path);
@@ -41,7 +43,7 @@ public class PathsManager {
 					splitLine = line.split("/");
 					
 					if(splitLine.length != 2)
-						throw new Error("Malformated paths file.");
+						throw new FatalError("Malformated paths file.");
 					if(splitLine[1].equals("l"))
 						direction = Pathfinder.LEFT;
 					else if(splitLine[1].equals("r"))
@@ -51,14 +53,14 @@ public class PathsManager {
 					else if(splitLine[1].equals("d"))
 						direction = Pathfinder.DOWN;
 					else
-						throw new Error("Malformated paths file.");
+						throw new FatalError("Malformated paths file.");
 					
 					path.addNode(Integer.parseInt(splitLine[0]), direction);
 				}
 			} while(line != null);
 			buffer.close();
-		} catch (Exception e) {
-			e.printStackTrace();
+		} catch(Exception e) {
+			throw new FatalError(e);
 		}
 	}
 	

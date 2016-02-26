@@ -3,6 +3,7 @@ package gamedata.d2o;
 import java.lang.reflect.Method;
 import java.util.Vector;
 
+import main.FatalError;
 import utilities.ByteArray;
 
 public class GameDataField {
@@ -43,7 +44,7 @@ public class GameDataField {
     		default :
     			if(type > 0)
     				return getClass().getDeclaredMethod("readObject", String.class, ByteArray.class, Integer.class);
-    			throw new Error("Unknown type '" + type + "'.");
+    			throw new FatalError("Unknown type '" + type + "'.");
     	}
     }
     

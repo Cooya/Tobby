@@ -55,7 +55,7 @@ public class MovementAPI {
 		CC.instance.log.p("Movement duration : " + duration + " ms.");
 
 		try {
-			Thread.sleep((long) (duration * 1.8)); // on attend d'arriver à destination
+			Thread.sleep((long) (duration * 2)); // on attend d'arriver à destination
 		} catch(InterruptedException e) {
 			CC.interrupt();
 			return;
@@ -118,8 +118,8 @@ public class MovementAPI {
 		CMM.serialize(nextMapId);
 		CC.instance.outPush(CMM);
 			
-		CC.states.put(CharacterState.IS_LOADED, false); // on attend la fin du changement de map
-		CC.waitState(CharacterState.IS_FREE);
+		CC.states.put(CharacterState.IS_LOADED, false);
+		CC.waitState(CharacterState.IS_FREE);  // on attend la fin du changement de map
 	}
 	
 	private static boolean mapIsInIncarnam(Map map) {

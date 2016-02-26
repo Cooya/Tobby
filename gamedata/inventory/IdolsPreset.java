@@ -45,24 +45,12 @@ public class IdolsPreset
 	{
 		int loc4 = 0;
 		this.presetId = buffer.readByte();
-		if(this.presetId < 0)
-		{
-			throw new Error("Forbidden value (" + this.presetId + ") on element of IdolsPreset.presetId.");
-		}
 		this.symbolId = buffer.readByte();
-		if(this.symbolId < 0)
-		{
-			throw new Error("Forbidden value (" + this.symbolId + ") on element of IdolsPreset.symbolId.");
-		}
 		int loc2 = buffer.readShort();
 		int loc3 = 0;
 		while(loc3 < loc2)
 		{
 			loc4 = buffer.readVarShort();
-			if(loc4 < 0)
-			{
-				throw new Error("Forbidden value (" + loc4 + ") on elements of idolId.");
-			}
 			this.idolId.add(loc4);
 			loc3++;
 		}

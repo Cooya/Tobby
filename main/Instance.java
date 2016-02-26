@@ -62,17 +62,8 @@ public class Instance extends Thread {
 		
 		Instance.log("Instance with id = " + this.id + " started.");
 	}
-	
-	public static void fatalError(String str) {
-		new Exception(str).printStackTrace();
-		Instance.killCurrentInstance();
-	}
-	
-	public static void fatalError(Exception e) {
-		e.printStackTrace();
-		Instance.killCurrentInstance();
-	}
-	
+
+	// appelée depuis un thread interne à l'instance
 	public static void killCurrentInstance() {
 		Thread currentThread = Thread.currentThread();
 		Instance currentInstance = null;
@@ -85,6 +76,13 @@ public class Instance extends Thread {
 			for(Thread thread : currentInstance.threads)
 				thread.interrupt();
 		}
+	}
+	
+	// appelée depuis le contrôleur (thread principal)
+	public static void killInstance(Instance instance) {
+		instances.remove(instance);
+		for(Thread thread : instance.threads)
+			thread.interrupt();
 	}
 	
 	public static void log(Log.Status status, String msg) {
@@ -104,7 +102,7 @@ public class Instance extends Thread {
 		if(log != null)
 			log.p(direction, msg);
 		else
-			throw new Error("Invalid thread.");
+			throw new FatalError("Invalid thread.");
 	}
 	
 	public synchronized void inPush(Message msg) {

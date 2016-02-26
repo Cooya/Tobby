@@ -30,7 +30,7 @@ public class CharacterInformations {
 		this.password = password;
 		this.serverId = serverId;
 		this.element = element;
-		this.spellToUpgrade=161; //Fleche Magique par défault.
+		this.spellToUpgrade=161; //Fleche Magique par défaut
 	}
 	
 	public int missingLife() {
@@ -45,12 +45,9 @@ public class CharacterInformations {
 		return false;
 	}
 	
-	public void loadSpellList(Vector<SpellItem> vSpell){
-		spellList=new HashMap<Integer,SpellItem>();
-		for(SpellItem tmp:vSpell)
-			spellList.put(tmp.spellId, tmp);
+	public void loadSpellList(Vector<SpellItem> spells) {
+		spellList = new HashMap<Integer, SpellItem>();
+		for(SpellItem spellItem : spells)
+			spellList.put(spellItem.spellId, spellItem);
 	}
-	
-	
-	
 }

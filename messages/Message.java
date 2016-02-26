@@ -3,6 +3,7 @@ package messages;
 import java.io.BufferedReader;
 import java.io.FileReader;
 
+import main.FatalError;
 import main.Instance;
 import utilities.BiMap;
 import utilities.ByteArray;
@@ -73,7 +74,7 @@ public class Message {
 	public static int get(String name) {
 		Object id = map.get(name);
 		if(id == null)
-			throw new Error("Unknown message name : \"" + name + "\".");
+			throw new FatalError("Unknown message name : \"" + name + "\".");
 		return (int) id;
 	}
 	

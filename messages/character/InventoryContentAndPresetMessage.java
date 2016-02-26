@@ -40,10 +40,6 @@ public class InventoryContentAndPresetMessage extends Message {
 			loc3++;
 		}
 		this.kamas = buffer.readVarInt();
-		if(this.kamas < 0)
-		{
-			throw new Error("Forbidden value (" + this.kamas + ") on element of InventoryContentMessage.kamas.");
-		}
 	}
 
 	private void deserializePresets(ByteArray buffer){
