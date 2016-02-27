@@ -7,7 +7,6 @@ import gamedata.fight.GameFightMonsterInformations;
 import java.util.Vector;
 
 import controller.informations.FightContext;
-import main.FatalError;
 import main.Instance;
 import main.Log;
 import messages.EmptyMessage;
@@ -21,8 +20,7 @@ import messages.fight.GameFightReadyMessage;
 import messages.fight.GameFightTurnFinishMessage;
 
 public class FighterController extends CharacterController {
-	private int fightsCounter;
-	private MovementAPI.AreaRover areaRover;
+	private MovementController.AreaRover areaRover;
 	private MuleController mule;
 	public FightContext fightContext;
 
@@ -142,7 +140,7 @@ public class FighterController extends CharacterController {
 		waitState(CharacterState.IS_FREE);
 		
 		this.instance.log.p("Trying to take this monster group.");
-		MovementAPI.moveTo(monsterGroup.disposition.cellId, false, this);
+		this.mvt.moveTo(monsterGroup.disposition.cellId, false);
 		
 		if(isInterrupted())
 			return false;
@@ -181,7 +179,7 @@ public class FighterController extends CharacterController {
 			
 			concludeGameTurn();
 		}
-		this.instance.log.p("Number of fights done : " + ++this.fightsCounter);
+		this.infos.fightsCounter++;
 	}
 
 	private void launchSpell() {
@@ -213,12 +211,12 @@ public class FighterController extends CharacterController {
 	
 	private void selectAreaRoverDependingOnLevel() {
 		this.instance.log.p("Character level : " + this.infos.level + ".");
-		if(this.infos.level < 5)
-			this.areaRover = new MovementAPI.AreaRover(450, this); // route des âmes d'Incarnam
-		else if(this.infos.level < 10)
-			this.areaRover = new MovementAPI.AreaRover(442, this); // lac d'Incarnam
+		if(this.infos.level < 8)
+			this.areaRover = new MovementController.AreaRover(450, this); // route des âmes d'Incarnam
+		//else if(this.infos.level < 10)
+			//this.areaRover = new MovementAPI.AreaRover(442, this); // lac d'Incarnam
 		else
-			this.areaRover = new MovementAPI.AreaRover(445, this); // pâturages d'Incarnam
+			this.areaRover = new MovementController.AreaRover(445, this); // pâturages d'Incarnam
 		//this.areaRover = new AreaRover(95, this); // pious d'Astrub
 	}
 	
@@ -228,7 +226,7 @@ public class FighterController extends CharacterController {
 			return;
 		
 		if(this.infos.currentMap.id != this.mule.waitingMapId)
-			MovementAPI.goTo(this.mule.waitingMapId, this);
+			this.mvt.goTo(this.mule.waitingMapId);
 		
 		while(!isInterrupted() && !this.roleplayContext.actorIsOnMap(this.mule.infos.characterId)) {
 			waitState(CharacterState.NEW_ACTOR_ON_MAP); // attendre que la mule revienne sur la map
@@ -279,9 +277,8 @@ public class FighterController extends CharacterController {
 		waitState(CharacterState.IS_LOADED);
 		
 		changePlayerStatus();
-		
-		waitState(CharacterState.IN_FIGHT); // on attend 2 secondes de savoir si on est en combat ou pas
-		if(this.states.get(CharacterState.IN_FIGHT))
+		 
+		if(waitState(CharacterState.IN_FIGHT)) // on attend 2 secondes de savoir si on est en combat ou pas
 			fight(true); // reprise de combat
 		
 		while(!isInterrupted()) { // boucle principale 
@@ -299,30 +296,28 @@ public class FighterController extends CharacterController {
 					break;
 				
 				if(lookForFight()) {
-					waitState(CharacterState.IN_FIGHT); // avec timeout
-					
 					if(isInterrupted())
 						break;
 					
-					if(this.states.get(CharacterState.IN_FIGHT)) // on vérifie si le combat a bien été lancé
+					if(waitState(CharacterState.IN_FIGHT)) // on vérifie si le combat a bien été lancé (avec timeout)
 						fight(false);
 					else
-						MovementAPI.changeMap(this.areaRover.nextMap(this), this);
+						this.mvt.changeMap(this.areaRover.nextMap());
 				}
 				else {
 					if(isInterrupted())
 						break;
 					
-					MovementAPI.changeMap(this.areaRover.nextMap(this), this);
+					this.mvt.changeMap(this.areaRover.nextMap());
 				}
 			}
 			if(isInterrupted())
 				break;
 			
-			if(this.mule != null)
+			if(waitState(CharacterState.MULE_AVAILABLE))
 				goToExchangeWithMule(true);
 			else
-				throw new FatalError("Undefined mule !");
+				sendPingRequest();
 		}
 		this.instance.log.p(Log.Status.CONSOLE, "Thread controller of instance with id = " + this.instance.id + " terminated.");
 	}

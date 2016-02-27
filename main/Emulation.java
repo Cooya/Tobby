@@ -39,12 +39,13 @@ public class Emulation {
 			Instance.log("AS launcher already in process.");
 	}
 	
-	public static void sendCredentials(String login, String password) {
+	public static Message emulateServer(String login, String password, HelloConnectMessage HCM, IdentificationSuccessMessage ISM, RawDataMessage RDM, int instanceId) {
 		lock.lock();
 		Instance.log("lock");
 		if(launcherCo == null)
 			connectToLauncher();
 		
+		// simulation de l'authentification
 		ByteArray array = new ByteArray();
 		array.writeInt(1 + 2 + login.length() + 2 + password.length());
 		array.writeByte((byte) 1);
@@ -52,13 +53,8 @@ public class Emulation {
 		array.writeUTF(password);
 		Instance.log("Sending credentials to AS launcher.");
 		launcherCo.send(array.bytes());
-		Instance.log("unlock");
-		lock.unlock();
-	}
-	
-	public static Message createServer(HelloConnectMessage HCM, IdentificationSuccessMessage ISM, RawDataMessage RDM, int instanceId) {
-		lock.lock();
-		Instance.log("lock");
+		
+		// simulation du serveur officiel
 		try {
 			clientDofusCo = new Connection.Server(serverPort);
 			Instance.log("Running emulation server. Waiting Dofus client connection...");
@@ -84,7 +80,7 @@ public class Emulation {
 			Instance.log(bytesReceived + " bytes received from Dofus client.");
 			Message CIM = processMsgStack(reader.processBuffer(new ByteArray(buffer, bytesReceived)));
 			
-			ByteArray array = new ByteArray();
+			array = new ByteArray();
 			array.writeInt(1 + 1);
 			array.writeByte((byte) 2);
 			array.writeByte((byte) instanceId);

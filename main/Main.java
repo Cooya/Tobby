@@ -11,19 +11,21 @@ public class Main {
 	
 	public static void main(String[] args) {
 		//if(MODE) {
-			Emulation.runLauncher();
-			//new Instance("maxlebgdu9", "represente", 11);
-			//new Instance("maxlebgdu93", "represente", 11);
-			//new Instance("maxlebgdu94", "represente", 11);
 			//new Instance("maxlebgdu96", "represente", 11);
-			//new Instance("maxlebgdu97", "represente", 11);
 			//new Instance("maxlebgdu98", "represente", 11);
 			//new Instance("maxlebgdu99", "represente", 11);
 			//new Instance("maxlebgdu100", "represente", 11);
 			
+			Emulation.runLauncher();
 			new Controller();
 		//}
 		//else
 			//new Sniffer();
+			
+		/*
+		CellsPathfinder pf = new CellsPathfinder(MapsCache.loadMap(153879300));
+		Path path = pf.compute(187, 141);
+		System.out.println(path);
+		*/
 	}
 }

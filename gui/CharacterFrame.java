@@ -22,12 +22,14 @@ public class CharacterFrame extends JInternalFrame {
 	private	JPanel informationsPanel;
 
 	// infos
-	public JLabel map;
-	public JLabel charName;
-	public JLabel life;
-	public JLabel weight;
-	public JLabel experience;
-	public JLabel kamas;
+	private JLabel nameLabel;
+	private JLabel mapLabel;
+	private JLabel cellLabel;
+	private JLabel lifeLabel;
+	private JLabel weightLabel;
+	private JLabel experienceLabel;
+	private JLabel kamasLabel;
+	private JLabel fightsLabel;
 
 	// logs
 	private JTextArea textArea;
@@ -38,12 +40,15 @@ public class CharacterFrame extends JInternalFrame {
 		tabbedPane = new JTabbedPane();
 		textAreaPanel = new JPanel();
 		informationsPanel = new JPanel();
-		map=new JLabel("Map id : unknown");
-		charName=new JLabel("Name : unknown");
-		life=new JLabel("Life : unknown");
-		weight=new JLabel("Weight : unknown");
-		experience=new JLabel("Experience : unknown");
-		kamas=new JLabel("Kamas number : unknown");
+		mapLabel = new JLabel("Map id : unknown");
+		cellLabel = new JLabel("Cell id : unknown");
+		nameLabel = new JLabel("Name : unknown");
+		lifeLabel = new JLabel("Life : unknown");
+		weightLabel = new JLabel("Weight : unknown");
+		experienceLabel = new JLabel("Experience : unknown");
+		kamasLabel = new JLabel("Kamas number : unknown");
+		fightsLabel = new JLabel("Fights counter : unknown");
+		
 		this.textArea = new JTextArea(20, 35);
 
 		this.textArea.setEditable(false); 
@@ -51,12 +56,14 @@ public class CharacterFrame extends JInternalFrame {
 		caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
 		add(new JScrollPane(textArea));
 		informationsPanel.setLayout(new BoxLayout(informationsPanel, BoxLayout.PAGE_AXIS));
-		informationsPanel.add(map);
-		informationsPanel.add(charName);
-		informationsPanel.add(life);
-		informationsPanel.add(weight);
-		informationsPanel.add(experience);
-		informationsPanel.add(kamas);
+		informationsPanel.add(nameLabel);
+		informationsPanel.add(mapLabel);
+		informationsPanel.add(cellLabel);
+		informationsPanel.add(lifeLabel);
+		informationsPanel.add(weightLabel);
+		informationsPanel.add(experienceLabel);
+		informationsPanel.add(kamasLabel);
+		informationsPanel.add(fightsLabel);
 		textAreaPanel.add(new JScrollPane(textArea));
 		tabbedPane.addTab("Logs", textAreaPanel);
 		tabbedPane.addTab("Informations",informationsPanel);
@@ -67,15 +74,17 @@ public class CharacterFrame extends JInternalFrame {
 		textArea.append(text + EOL);
 	}
 
-	public void appendRefreshInfos(CharacterInformations infos){
-		charName.setText(infos.characterName+" "+infos.level);
-		weight.setText("Pods: "+infos.weight+"/"+infos.weightMax);
+	public void appendRefreshInfos(CharacterInformations infos) {
+		nameLabel.setText(infos.characterName + " (" + infos.level + ")");
 		if(infos.currentMap != null)
-			map.setText(String.valueOf(MapPosition.getMapPositionById(infos.currentMap.id)));
+			mapLabel.setText(String.valueOf(MapPosition.getMapPositionById(infos.currentMap.id)));
+		cellLabel.setText("Cell id : " + String.valueOf(infos.currentCellId));
+		weightLabel.setText("Weight : " + infos.weight + "/" + infos.weightMax);
 		if(infos.stats != null) {
-			life.setText("Life: "+infos.stats.lifePoints+"/"+infos.stats.maxLifePoints);
-			experience.setText("Experience: "+String.valueOf((int)infos.stats.experience)+"/"+String.valueOf((int)infos.stats.experienceNextLevelFloor));
-			kamas.setText("Kamas: "+infos.stats.kamas);
+			lifeLabel.setText("Life points : " + infos.stats.lifePoints + "/" + infos.stats.maxLifePoints);
+			experienceLabel.setText("Experience : " + String.valueOf((int) infos.stats.experience) + "/" + String.valueOf((int) infos.stats.experienceNextLevelFloor));
+			kamasLabel.setText("Kamas number : " + infos.stats.kamas);
 		}
+		fightsLabel.setText("Fights counter : " + String.valueOf(infos.fightsCounter));
 	}
 }

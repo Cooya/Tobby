@@ -7,7 +7,6 @@ import messages.exchange.ExchangeReadyMessage;
 import messages.interactions.InteractiveUseRequestMessage;
 import messages.interactions.NpcDialogReplyMessage;
 import messages.interactions.NpcGenericActionRequestMessage;
-import messages.synchronisation.BasicPingMessage;
 
 public class MuleController extends CharacterController {
 	protected int waitingMapId;
@@ -32,11 +31,11 @@ public class MuleController extends CharacterController {
 	}
 	
 	protected void returnTripToAstrubBank() {
-		MovementAPI.goTo(84674566, this); // map où se situe la banque
+		this.mvt.goTo(84674566); // map où se situe la banque
 		if(interrupted())
 			return;
 		
-		MovementAPI.moveTo(317, false, this); // entrée de la banque
+		this.mvt.moveTo(317, false); // entrée de la banque
 		if(interrupted())
 			return;
 		
@@ -91,7 +90,7 @@ public class MuleController extends CharacterController {
 			return;
 		}
 		
-		MovementAPI.moveTo(396, false, this); // on sort de la banques
+		this.mvt.moveTo(396, false); // on sort de la banques
 		if(interrupted())
 			return;
 		
@@ -112,21 +111,16 @@ public class MuleController extends CharacterController {
 				this.instance.log.p("Need to go to empty inventory at Astrub bank.");
 				returnTripToAstrubBank();
 			}
-			MovementAPI.goTo(this.waitingMapId, this);
+			this.mvt.goTo(this.waitingMapId);
 			
 			while(!isInterrupted()) {
-				waitState(CharacterState.PENDING_DEMAND); // on attend qu'un combattant lance un échange
-				if(this.states.get(CharacterState.PENDING_DEMAND)) {
+				if(waitState(CharacterState.PENDING_DEMAND)) { // on attend qu'un combattant lance un échange
 					this.instance.log.p("Exchange demand received.");
 					processExchange();
 					break;
 				}
-				else {
-					BasicPingMessage BPM = new BasicPingMessage();
-					BPM.serialize(false);
-					this.instance.outPush(BPM);
-					this.instance.log.p("Sending a ping request to server for stay connected.");
-				}	
+				else
+					sendPingRequest();	
 			}	
 		}
 		this.instance.log.p(Log.Status.CONSOLE, "Thread controller of instance with id = " + this.instance.id + " terminated.");

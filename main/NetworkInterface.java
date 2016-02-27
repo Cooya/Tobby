@@ -4,6 +4,7 @@ import java.net.SocketTimeoutException;
 import java.util.LinkedList;
 
 import messages.Message;
+import messages.synchronisation.BasicPingMessage;
 import utilities.ByteArray;
 
 public class NetworkInterface extends Thread {
@@ -12,7 +13,6 @@ public class NetworkInterface extends Thread {
 	private Reader reader;
 	private Connection.Client serverCo;
 	private String gameServerIP;
-	//private boolean alreadyPing;
 	protected Latency latency;
 	protected Sender sender; 
 	
@@ -21,15 +21,12 @@ public class NetworkInterface extends Thread {
 		this.reader = new Reader();
 		this.sender = new Sender();
 		this.latency = new Latency();
-		//this.alreadyPing = false;
 	}
 	
 	public void run() {
 		this.instance.log.p("Connection to authentification server, waiting response...");
 		connectionToServer(Main.AUTH_SERVER_IP, Main.SERVER_PORT);
 		this.instance.log.p("Deconnected from authentification server.");
-		
-		//this.alreadyPing = false;
 		
 		if(!isInterrupted() && gameServerIP != null) {
 			this.instance.log.p("Connection to game server, waiting response...");
@@ -40,6 +37,7 @@ public class NetworkInterface extends Thread {
 	}
 	
 	private void connectionToServer(String IP, int port) {
+		boolean canPing = true;
 		byte[] buffer = new byte[Main.BUFFER_DEFAULT_SIZE];
 		int bytesReceived = 0;
 		this.serverCo = new Connection.Client(IP, port);
@@ -47,16 +45,15 @@ public class NetworkInterface extends Thread {
 			try {
 				if((bytesReceived = this.serverCo.receive(buffer)) == -1)
 					break;
+				canPing = false;
 			} catch(SocketTimeoutException e) {
-				/*
-				if(!this.alreadyPing) {
+				if(canPing) {
 					BasicPingMessage ping = new BasicPingMessage();
 					ping.serialize(true);
 					instance.outPush(ping);
 					this.instance.log.p("Sending a ping request to server.");
-					this.alreadyPing = true;
+					canPing = false;
 				}
-				*/
 				continue;
 			} catch(Exception e) {
 				break;

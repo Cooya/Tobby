@@ -24,13 +24,15 @@ public class CharacterInformations {
 	public CharacterCharacteristicsInformations stats;
 	public HashMap<Integer,SpellItem> spellList; 
 	public int spellToUpgrade;
+	public int fightsCounter;
 	
 	public CharacterInformations(String login, String password, int serverId, int element) {
 		this.login = login;
 		this.password = password;
 		this.serverId = serverId;
 		this.element = element;
-		this.spellToUpgrade=161; //Fleche Magique par défaut
+		this.spellToUpgrade = 161; // flèche magique
+		this.fightsCounter = 0;
 	}
 	
 	public int missingLife() {

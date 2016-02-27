@@ -46,17 +46,17 @@ public class Log {
 		else
 			str += "Size : " + size + " byte" + EOL;
 		if(name == null || DEBUG)
-			graphicalFrame.appendText("[" + date.format(new Date()) + "]" + str, Color.BLACK);
-		writer.println("[" + date.format(new Date()) + "]" + str);
+			graphicalFrame.appendText("[" + date.format(new Date()) + "] " + str, Color.BLACK);
+		writer.println("[" + date.format(new Date()) + "] " + str);
 		writer.flush();
 	}
 	
 	public synchronized void p(String str) {
 		if(DEBUG)
-			graphicalFrame.appendText("[" + date.format(new Date()) + "]" + str + EOL, Color.BLACK);
+			graphicalFrame.appendText("[" + date.format(new Date()) + "] " + str + EOL, Color.BLACK);
 		else
-			graphicalFrame.appendText("[" + date.format(new Date()) + "]" + str, Color.BLACK);
-		writer.println("[" + date.format(new Date()) + "]" + str + EOL);
+			graphicalFrame.appendText("[" + date.format(new Date()) + "] " + str, Color.BLACK);
+		writer.println("[" + date.format(new Date()) + "] " + str + EOL);
 		writer.flush();
 	}
 	
@@ -78,7 +78,7 @@ public class Log {
 	public void refresh(CharacterInformations infos) {
 		graphicalFrame.appendRefreshInfos(infos);
 	}
-	
+
 	public enum Status {
 		INFO,
 		WARNING,

@@ -4,6 +4,7 @@ import java.util.LinkedList;
 import java.util.Vector;
 
 import controller.CharacterController;
+import controller.CharacterState;
 import controller.FighterController;
 import controller.MuleController;
 import messages.Message;
@@ -166,10 +167,14 @@ public class Instance extends Thread {
 	}
 	
 	public void setMule(Instance mule) {
-		if(mule == null)
+		if(mule == null) {
 			((FighterController) this.character).setMule(null);
-		else
+			this.character.updateState(CharacterState.MULE_AVAILABLE, false);
+		}
+		else {
 			((FighterController) this.character).setMule((MuleController) mule.character);
+			this.character.updateState(CharacterState.MULE_AVAILABLE, true);
+		}
 	}
 	
 	public Latency getLatency() {

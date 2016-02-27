@@ -84,6 +84,36 @@ package {
         		hashFunctionId = socket.readByte();
         		trace("Retrieving hash function for client with id = " + hashFunctionId + ".");
         		hashFunctionsArray[hashFunctionId] = getHashFunction();
+        		/*
+        		if(hashFunctionId > 0) {
+	        		var test:ByteArray = new ByteArray();
+	        		test.writeByte(40);
+	        		test.writeByte(45);
+	        		test.writeByte(50);
+	        		test.writeByte(55);
+	        		test.writeByte(60);
+	        		hashFunctionsArray[0].call(null, test);
+	        		trace(test.toString());
+
+	        		var test1:ByteArray = new ByteArray();
+	        		test1.writeByte(40);
+	        		test1.writeByte(45);
+	        		test1.writeByte(50);
+	        		test1.writeByte(55);
+	        		test1.writeByte(60);
+	        		hashFunctionsArray[0].call(null, test1);
+	        		trace(test1.toString());
+
+	        		var test2:ByteArray = new ByteArray();
+	        		test2.writeByte(40);
+	        		test2.writeByte(45);
+	        		test2.writeByte(50);
+	        		test2.writeByte(55);
+	        		test2.writeByte(60);
+	        		hashFunctionsArray[0].call(null, test2);
+	        		trace(test2.toString());
+	        	}
+	        	*/
         	}
         	else if(id == 3) { // demande d'utilisation de la fonction de hachage sur un paquet
         		var msg:ByteArray = new ByteArray();
@@ -120,7 +150,8 @@ package {
 
 		private function getHashFunction() : Function {
 			var NetworkMessage:Class = getDefinitionByName("com.ankamagames.jerakine.network.NetworkMessage") as Class;
-			trace(NetworkMessage.HASH_FUNCTION);
+			//var f:Function = NetworkMessage.HASH_FUNCTION;
+			//NetworkMessage.HASH_FUNCTION = null;
 			return NetworkMessage.HASH_FUNCTION;
 		}
 
@@ -131,5 +162,5 @@ package {
 			Kernel["getWorker"]().process(new ResetGameAction());
 			trace("ResetGameAction sent.");
 		}
-    }
+	}
 }

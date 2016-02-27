@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.Vector;
 
 import controller.CharacterController;
-import controller.MovementAPI;
 import controller.informations.CharacterInformations;
 import controller.pathfinding.Pathfinder.PathNode;
 import main.FatalError;
@@ -69,10 +68,9 @@ public class Path {
 	public void run(CharacterController CC) {
 		Instance.log("Running path named \"" + name + "\".");
 
-		CC.currentPathName = this.name;
 		int nextMapId;
 		while((nextMapId = nextMap()) != -1)
-			MovementAPI.changeMap(nextMapId, CC);
+			CC.mvt.changeMap(nextMapId);
 	}
 	
 	public String getName() {

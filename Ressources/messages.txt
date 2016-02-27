@@ -97,6 +97,7 @@
 5570 GameActionFightUnmarkCellsMessage
 5572 GameFightUpdateTeamMessage
 5607 ClientKeyMessage
+5608 SpellUpgradeRequestMessage
 5610 StatsUpgradeRequestMessage
 5613 ChallengeTargetsListMessage
 5616 NpcDialogReplyMessage

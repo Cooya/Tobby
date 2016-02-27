@@ -15,7 +15,7 @@ public class GameFightOptionStateUpdateMessage extends Message {
 	}
 
 	private void deserialize() {
-		ByteArray buffer = new ByteArray();
+		ByteArray buffer = new ByteArray(this.content);
 		this.fightId = buffer.readShort();
 		this.teamId = buffer.readByte();
 		this.option = buffer.readByte();

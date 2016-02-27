@@ -10,6 +10,7 @@ import gamedata.currentmap.BasicNamedAllianceInformations;
 import gamedata.currentmap.EntityDispositionInformations;
 import gamedata.currentmap.FightTeamInformations;
 import gamedata.currentmap.FightTeamMemberCharacterInformations;
+import gamedata.currentmap.FightTeamMemberCompanionInformations;
 import gamedata.currentmap.FightTeamMemberInformations;
 import gamedata.currentmap.FightTeamMemberMonsterInformations;
 import gamedata.currentmap.FightTeamMemberWithAllianceCharacterInformations;
@@ -216,7 +217,7 @@ public class ProtocolTypeManager {
         //types[448] = TaxCollectorComplementaryInformations.class;
         //types[449] = HumanOptionObjectUse.class;
         //types[450] = GameFightCompanionInformations.class;
-        //types[451] = FightTeamMemberCompanionInformations.class;
+        types.put(451, FightTeamMemberCompanionInformations.class);
         //types[454] = GameFightFighterCompanionLightInformations.class;
         //types[455] = GameFightFighterMonsterLightInformations.class;
         //types[456] = GameFightFighterNamedLightInformations.class;

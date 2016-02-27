@@ -46,12 +46,13 @@ public abstract class Pathfinder {
 				if(nodeIsInList(neighbourNode, closedList) != null) // déjà traitée
 					continue;				
 				if((inListNode = nodeIsInList(neighbourNode, openedList)) != null) { // déjà une possibilité
-					if(neighbourNode.f < inListNode.f)
+					if(neighbourNode.g < inListNode.g)
 						inListNode = neighbourNode; // modification de la référence dans la liste
 				}
 				else
 					openedList.add(neighbourNode);	
 			}
+			//System.out.println();
 			closedList.add(currentNode);
 			currentNode = popBestNodeOfList(openedList);
 			if(currentNode == null)
@@ -84,7 +85,7 @@ public abstract class Pathfinder {
 			if(listNode.f < currentNode.f)
 				currentNode = listNode;
 		}
-		//System.out.println("best node : " + currentNode);
+		//System.out.println("best node : " + currentNode + " " + currentNode.h);
 		list.remove(currentNode);
 		return currentNode;
 	}
@@ -109,7 +110,8 @@ public abstract class Pathfinder {
 		protected double y;
 		protected PathNode parent;
 		protected double g; // distance [noeud courant / parent]
-		protected double f; // distance [noeud courant / parent] + [voisin / noeud cible]
+		protected double f; // distance [noeud courant / parent] + [noeud courant / noeud cible]
+		protected double h; // distance [noeud courant / cible]
 		protected int cost; // nombre de noeuds traversés
 		protected boolean isAccessible;
 		protected int lastDirection;
@@ -120,19 +122,21 @@ public abstract class Pathfinder {
 			this.parent = parent;
 			this.lastDirection = lastDirection;
 			this.direction = -1;
+		}
+		
+		protected void setHeuristic(PathNode destNode) {
 			if(parent != null) {
 				this.g = parent.g + distanceTo(parent);
 				this.cost = this.parent.cost + 1;
 			}
-    		else { // noeud initial et noeud final
-    			this.g = 0;
+			else { // noeud initial et noeud final
+				this.g = 0;
     			this.cost = 0;
-    		}
-		}
-		
-		protected void setHeuristic(PathNode destNode) {
-			if(destNode != null)
-				this.f = this.g + distanceTo(destNode);
+			}
+			if(destNode != null) {
+				this.h = distanceTo(destNode);
+				this.f = this.g + this.h;
+			}
 		}
 		
     	protected double distanceTo(PathNode node) {

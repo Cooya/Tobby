@@ -82,10 +82,8 @@ public class ConnectionFrame implements IFrame {
 				HCM = (HelloConnectMessage) this.usefulInfos.get("HCM");
 				ISM = (IdentificationSuccessMessage) this.usefulInfos.get("ISM");
 				RawDataMessage RDM = new RawDataMessage(msg);
-				Emulation.sendCredentials(CC.infos.login, CC.infos.password);
-				Message CIM = Emulation.createServer(HCM, ISM, RDM, instance.id);
-				if(CIM != null)
-					instance.outPush(CIM);
+				Message CIM = Emulation.emulateServer(CC.infos.login, CC.infos.password, HCM, ISM, RDM, instance.id);
+				instance.outPush(CIM);
 				return true;		
 			case 6267 : // TrustStatusMessage
 				CharactersListRequestMessage CLRM = new CharactersListRequestMessage();
