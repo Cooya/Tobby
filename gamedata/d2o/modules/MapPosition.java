@@ -43,7 +43,7 @@ public class MapPosition {
     //private String _name;
     private SubArea _subArea;
     
-    public static MapPosition getMapPositionById(int id) {
+    public synchronized static MapPosition getMapPositionById(int id) {
     	MapPosition[] array;
     	if(_mapPositions == null) {
     		_mapPositions = new Hashtable<Integer, MapPosition>();

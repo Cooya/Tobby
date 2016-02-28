@@ -24,7 +24,7 @@ public class GameDataFileAccessor {
     		throw new FatalError("Singleton object already instantiated.");
     }
     
-    public static GameDataFileAccessor getInstance() {
+    public synchronized static GameDataFileAccessor getInstance() {
     	if(_self == null)
     		_self = new GameDataFileAccessor();
     	return _self;

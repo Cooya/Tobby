@@ -5,8 +5,6 @@ import utilities.ByteArray;
 public class ObjectEffectString extends ObjectEffect
 {
 
-	public static final int protocolId = 74;
-
 	public String value = "";
 
 	public ObjectEffectString()

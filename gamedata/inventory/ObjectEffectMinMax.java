@@ -5,8 +5,6 @@ import utilities.ByteArray;
 public class ObjectEffectMinMax extends ObjectEffect 
 {
 
-	public static final int protocolId = 82;
-
 	public int min = 0;
 
 	public int max = 0;

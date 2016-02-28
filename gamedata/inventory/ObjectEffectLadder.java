@@ -5,8 +5,6 @@ import utilities.ByteArray;
 public class ObjectEffectLadder extends ObjectEffectCreature
 {
 
-	public static final int protocolId = 81;
-
 	public int monsterCount = 0;
 
 	public ObjectEffectLadder()

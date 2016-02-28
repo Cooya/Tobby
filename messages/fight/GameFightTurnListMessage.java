@@ -6,7 +6,6 @@ import messages.Message;
 import utilities.ByteArray;
 
 public class GameFightTurnListMessage extends Message{
-	public static final int Id = 713;
 
 	public Vector<Double> ids;
 

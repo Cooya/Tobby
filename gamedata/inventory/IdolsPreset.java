@@ -6,9 +6,6 @@ import utilities.ByteArray;
 
 public class IdolsPreset
 {
-
-	public static final int protocolId = 491;
-
 	public int presetId = 0;
 
 	public int symbolId = 0;

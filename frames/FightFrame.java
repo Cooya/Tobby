@@ -38,8 +38,10 @@ public class FightFrame implements IFrame {
 			case 719 : // fin du tour
 				GameFightTurnEndMessage GFTEM = new GameFightTurnEndMessage(msg);
 				GFTEM.deserialize();
-				if(GFTEM.fighterId == this.fighter.infos.characterId)
+				if(GFTEM.fighterId == this.fighter.infos.characterId) {
 					this.instance.log.p("End of my game turn.");
+					this.fighter.updateState(CharacterState.IN_GAME_TURN, false);
+				}
 				return true;
 			case 5921 : // synchronisation avec le serveur
 				GameFightSynchronizeMessage GFSM = new GameFightSynchronizeMessage(msg);

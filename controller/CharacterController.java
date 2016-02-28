@@ -14,14 +14,14 @@ import messages.character.PlayerStatusUpdateRequestMessage;
 import messages.synchronisation.BasicPingMessage;
 
 public abstract class CharacterController extends Thread {
-	private static final boolean DEBUG = true;
-	protected Instance instance;
-	protected Hashtable<CharacterState, Boolean> states;
 	public CharacterInformations infos;
 	public RoleplayContext roleplayContext;
 	public MovementController mvt;
+	protected Instance instance;
+	private Hashtable<CharacterState, Boolean> states; // laisser en private
 	
 	public CharacterController(Instance instance, String login, String password, int serverId) {
+		super(login + "/controller");
 		this.instance = instance;
 		this.states = new Hashtable<CharacterState, Boolean>();
 		this.infos = new CharacterInformations(login, password, serverId, Elements.intelligence);
@@ -47,10 +47,13 @@ public abstract class CharacterController extends Thread {
 	
 	// seul le thread process entre ici
 	public synchronized void updateState(CharacterState state, boolean newState) {
-		if(DEBUG)
-			this.instance.log.p("State updated : " + state + " = " + newState + ".");
+		this.instance.log.p("State updated : " + state + " = " + newState + ".");
 		this.states.put(state, newState);
 		notify();
+	}
+	
+	public boolean inState(CharacterState state) {
+		return this.states.get(state);
 	}
 	
 	private synchronized boolean waitSpecificState(CharacterState state, int timeout) {
@@ -82,52 +85,43 @@ public abstract class CharacterController extends Thread {
 	protected boolean waitState(CharacterState state) {
 		switch(state) {
 			case IS_FREE:
-				if(DEBUG)
-					this.instance.log.p("Waiting for character to be free.");
+				this.instance.log.p("Waiting for character to be free.");
 				while(!isInterrupted() && !isFree())
 					waitAnyEvent();
 				return true;
 			case IS_LOADED:
-				if(DEBUG)
-					this.instance.log.p("Waiting for character to be loaded.");
+				this.instance.log.p("Waiting for character to be loaded.");
 				while(!isInterrupted() && !this.states.get(CharacterState.IS_LOADED))
 					waitAnyEvent();
 				return true;
 			case IN_FIGHT :
-				if(DEBUG)
-					this.instance.log.p("Waiting for fight beginning.");
+				this.instance.log.p("Waiting for fight beginning.");
 				return waitSpecificState(CharacterState.IN_FIGHT, 2000);
 			case IN_GAME_TURN :
-				if(DEBUG)
-					this.instance.log.p("Waiting for my game turn.");
+				this.instance.log.p("Waiting for my game turn.");
 				while(!isInterrupted() && this.states.get(CharacterState.IN_FIGHT) && !this.states.get(CharacterState.IN_GAME_TURN))
 					waitAnyEvent();	
 				return true;
 			case PENDING_DEMAND :
-				if(DEBUG)
-					this.instance.log.p("Waiting for exchange demand.");
+				this.instance.log.p("Waiting for exchange demand.");
 				return waitSpecificState(CharacterState.PENDING_DEMAND, 1000 * 60 * 5); // 5 minutes
 			case IN_EXCHANGE :
-				if(DEBUG)
-					this.instance.log.p("Waiting for exchange acceptance.");
+				this.instance.log.p("Waiting for exchange acceptance.");
 				while(!isInterrupted() && !this.states.get(CharacterState.IN_EXCHANGE))
 					waitAnyEvent();
 				return true;
 			case EXCHANGE_VALIDATED :
-				if(DEBUG)
-					this.instance.log.p("Waiting for exchange validation.");
+				this.instance.log.p("Waiting for exchange validation.");
 				while(!isInterrupted() && !this.states.get(CharacterState.EXCHANGE_VALIDATED))
 					waitAnyEvent();
 				return true;
 			case NEW_ACTOR_ON_MAP :
-				if(DEBUG)
-					this.instance.log.p("Waiting for new actor on the map.");
+				this.instance.log.p("Waiting for new actor on the map.");
 				while(!isInterrupted() && !this.states.get(CharacterState.NEW_ACTOR_ON_MAP))
 					waitAnyEvent();
 				return true;
 			case MULE_AVAILABLE :
-				if(DEBUG)
-					this.instance.log.p("Waiting for mule available.");
+				this.instance.log.p("Waiting for mule available.");
 				return waitSpecificState(CharacterState.MULE_AVAILABLE, 1000 * 60 * 5); // 5 minutes
 			default : throw new FatalError("Unexpected state waiting : " + state + ".");
 		}

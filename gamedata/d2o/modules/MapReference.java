@@ -7,14 +7,14 @@ import java.util.Arrays;
 
 public class MapReference {
     public static final String MODULE = "MapReferences";
-    
-    static {
-    	GameDataFileAccessor.getInstance().init(MODULE);
-    }
 
     public int id;
     public int mapId;
     public int cellId;
+    
+    static {
+    	GameDataFileAccessor.getInstance().init(MODULE);
+    }
     
     public static MapReference getMapReferenceById(int id) {
     	return (MapReference) GameData.getObject(MODULE, id);

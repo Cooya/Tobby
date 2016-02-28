@@ -5,8 +5,6 @@ import messages.Message;
 public class GameFightEndMessage extends Message{
 	/*
 
-	public static final int Id = 720;
-
     public int duration = 0;
     
     public int ageBonus = 0;

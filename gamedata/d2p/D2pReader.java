@@ -18,7 +18,7 @@ public class D2pReader {
     	readD2pFiles(d2pPath);
     }
     
-	public static ByteArray getBinaryMap(int mapId) {
+	public synchronized static ByteArray getBinaryMap(int mapId) {
 		if(DEBUG)
 			Instance.log("Retrieving binary data of map id " + mapId + "...");
 		Object[] index = indexes.get(d2pPath).get(getMapUriFromId(mapId));

@@ -10,7 +10,6 @@ import messages.Message;
 import utilities.ByteArray;
 
 public class GameFightSynchronizeMessage extends Message{
-	public static final int Id = 5921;
 
 	public Vector<GameFightFighterInformations> fighters;
 

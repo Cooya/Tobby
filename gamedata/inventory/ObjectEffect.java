@@ -5,7 +5,6 @@ import utilities.ByteArray;
 public class ObjectEffect 
 {
 
-	public static final int  protocolId = 76;
 
 	public int actionId = 0;
 

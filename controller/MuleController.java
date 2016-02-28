@@ -43,7 +43,7 @@ public class MuleController extends CharacterController {
 		IURM.serialize(465440, 140242, this.instance.id); // porte de la banque
 		this.instance.outPush(IURM);
 		
-		this.states.put(CharacterState.IS_LOADED, false);
+		updateState(CharacterState.IS_LOADED, false);
 		waitState(CharacterState.IS_FREE);
 		if(interrupted())
 			return;
@@ -94,7 +94,7 @@ public class MuleController extends CharacterController {
 		if(interrupted())
 			return;
 		
-		this.states.put(CharacterState.IS_LOADED, false);
+		updateState(CharacterState.IS_LOADED, false);
 	}
 	 
 	private boolean needToGoBank(float percentage) { // percentage < 1

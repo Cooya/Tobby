@@ -5,8 +5,6 @@ import utilities.ByteArray;
 public class PresetItem 
 {
 
-	public static final int protocolId = 354;
-
 	public int position = 63;
 
 	public int objGid = 0;

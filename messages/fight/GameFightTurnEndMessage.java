@@ -4,8 +4,6 @@ import messages.Message;
 import utilities.ByteArray;
 
 public class GameFightTurnEndMessage extends Message{
-
-	public static final int Id = 719;
 	
 	public double fighterId;
 	

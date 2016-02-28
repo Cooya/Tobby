@@ -5,8 +5,6 @@ import utilities.ByteArray;
 public class ObjectEffectMount extends ObjectEffect
 {
 
-	public static final int protocolId = 179;
-
 	public int mountId = 0;
 
 	public double date = 0;

@@ -89,6 +89,7 @@ public class Emulation {
 			
 			Instance.log("Deconnection from Dofus client.");
 			clientDofusCo.close();
+			Thread.sleep(2000);
 			Instance.log("unlock");
 			lock.unlock();
 			return CIM;
@@ -115,7 +116,7 @@ public class Emulation {
 		while(true) {
 			try {
 				Instance.log("Asking to hash message.");
-				size = launcherCo.receive(buffer, 2000);
+				size = launcherCo.receive(buffer, 10000);
 				if(size <= 0) {
 					lock.unlock();
 					throw new FatalError("Launcher deconnected.");

@@ -33,7 +33,7 @@ public class InterClientKeyManager {
 		
 	}
 	
-	public static InterClientKeyManager getInstance() {
+	public synchronized static InterClientKeyManager getInstance() {
 		if(instance == null)
 			instance = new InterClientKeyManager();
 		return instance;

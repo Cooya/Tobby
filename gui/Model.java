@@ -23,5 +23,6 @@ public class Model {
 		for(Instance fighter : instances.values())
 			if(fighter != mule)
 				fighter.setMule(null);
+		instances.remove(mule);
 	}
 }

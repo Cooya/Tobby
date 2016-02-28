@@ -6,8 +6,6 @@ import utilities.ByteArray;
 
 public class GameActionFightCastRequestMessage extends Message{
 
-	public static final int Id = 1005;
-
 	public int spellId = 0;
 
 	public short cellId = 0;

@@ -142,8 +142,6 @@ public class ByteArray {
 	}
 	
 	public byte[] bytesFromPos() {
-		if(this.size <= this.pos)	
-			throw new FatalError("Size lower than position");
 		byte[] clone = new byte[this.size - this.pos];
 		for(int i = 0; i < clone.length; ++i)
 			clone[i] = this.array[i + this.pos];

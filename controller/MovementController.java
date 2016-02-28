@@ -45,7 +45,7 @@ public class MovementController {
 		this.pathfinder = new CellsPathfinder(this.CC.infos.currentMap);
 		this.currentPath = this.pathfinder.compute(this.CC.infos.currentCellId, cellId);
 		
-		//this.CC.instance.log.p(path.toString());
+		this.CC.instance.log.p(this.currentPath.toString());
 		
 		MovementPath mvPath = CellsPathfinder.movementPathFromArray(this.currentPath.toVector());
 		mvPath.setStart(MapPoint.fromCellId(this.CC.infos.currentCellId));
@@ -56,13 +56,13 @@ public class MovementController {
 		GameMapMovementRequestMessage GMMRM = new GameMapMovementRequestMessage();
 		GMMRM.serialize(mvPath.getServerMovement(), this.CC.infos.currentMap.id, this.CC.instance.id);
 		this.CC.instance.outPush(GMMRM);
-		this.CC.states.put(CharacterState.IN_MOVEMENT, true);
+		this.CC.updateState(CharacterState.IN_MOVEMENT, true);
 		
 		int duration = this.currentPath.getCrossingDuration();
 		this.CC.instance.log.p("Movement duration : " + duration + " ms.");
 
 		try {
-			Thread.sleep((long) (duration * 1.5)); // on attend d'arriver à destination
+			Thread.sleep(duration); // on attend d'arriver à destination
 		} catch(InterruptedException e) {
 			this.CC.interrupt();
 			return;
@@ -72,7 +72,7 @@ public class MovementController {
 
 		EmptyMessage EM = new EmptyMessage("GameMapMovementConfirmMessage");
 		this.CC.instance.outPush(EM);
-		this.CC.states.put(CharacterState.IN_MOVEMENT, false);
+		this.CC.updateState(CharacterState.IN_MOVEMENT, false);
 		this.CC.waitState(CharacterState.IS_FREE);
 	}
 	
@@ -125,7 +125,7 @@ public class MovementController {
 		CMM.serialize(nextMapId);
 		this.CC.instance.outPush(CMM);
 			
-		this.CC.states.put(CharacterState.IS_LOADED, false);
+		this.CC.updateState(CharacterState.IS_LOADED, false);
 		this.CC.waitState(CharacterState.IS_FREE);  // on attend la fin du changement de map
 	}
 	
@@ -165,7 +165,7 @@ public class MovementController {
 		NDRM.serialize(25207); // on sélectionne la seconde réponse
 		this.CC.instance.outPush(NDRM);
 		
-		this.CC.states.put(CharacterState.IS_LOADED, false);
+		this.CC.updateState(CharacterState.IS_LOADED, false);
 		this.CC.waitState(CharacterState.IS_FREE);
 	}
 	
@@ -187,7 +187,7 @@ public class MovementController {
 		IURM.serialize(489378, 168278, this.CC.instance.id); // utilisation de la statue Féca
 		this.CC.instance.outPush(IURM);
 		
-		this.CC.states.put(CharacterState.IS_LOADED, false);
+		this.CC.updateState(CharacterState.IS_LOADED, false);
 		this.CC.waitState(CharacterState.IS_FREE);
 	}
 	
@@ -233,7 +233,7 @@ public class MovementController {
 			}
 		}
 		
-		private boolean areaIsInIncarnam(int areaId) {
+		private static boolean areaIsInIncarnam(int areaId) {
 			if(areaId >= 422 && areaId <= 450)
 				return true;
 			return false;

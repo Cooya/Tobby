@@ -4,7 +4,6 @@ import messages.Message;
 import utilities.ByteArray;
 
 public class GameFightTurnReadyMessage extends Message{
-	public static final int Id = 716;
 
 	public boolean isReady = false;
 

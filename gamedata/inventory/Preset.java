@@ -7,8 +7,6 @@ import utilities.ByteArray;
 public class Preset
 {
 
-	public static final int protocolId = 355;
-
 	public int presetId = 0;
 
 	public int symbolId = 0;

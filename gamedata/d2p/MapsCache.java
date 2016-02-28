@@ -11,7 +11,7 @@ public class MapsCache {
 	private static LinkedHashMap<Integer, Map> cache = new LinkedHashMap<Integer, Map>();
 	private static final int MAX_ENTRIES = 100;
 	
-	public static Map loadMap(int mapId) {
+	public synchronized static Map loadMap(int mapId) {
 		Map map = cache.get(mapId);
 		if(map != null)
 			return map;

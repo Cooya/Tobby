@@ -226,7 +226,7 @@ public class CellsPathfinder extends Pathfinder {
     	
     	public String toString() {
     		if(this.direction != -1)
-    			return String.valueOf(this.id) + " " + Pathfinder.directionToString(this.direction);
+    			return String.valueOf(this.id) + " [" + this.x + ", " + this.y + "] " + Pathfinder.directionToString(this.direction);
     		return String.valueOf(this.id) + " [" + this.x + ", " + this.y + "]";
     	}
 	}

@@ -5,8 +5,6 @@ import utilities.ByteArray;
 
 public class GameActionAcknowledgementMessage extends Message{
 
-	public static final int Id = 957;
-
     public boolean valid = false;
     
     public int actionId = 0;

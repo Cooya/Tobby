@@ -39,7 +39,7 @@ public class FighterController extends CharacterController {
 		int missingLife = this.infos.missingLife();
 		this.instance.log.p("Missing life : " + missingLife + " life points.");
 		if(missingLife > 0) {
-			this.states.put(CharacterState.IN_REGENERATION, true);
+			updateState(CharacterState.IN_REGENERATION, true);
 			this.instance.log.p("Break for life regeneration.");
 			try {
 				sleep(this.infos.regenRate * 100 * missingLife); // on attend de récupérer toute sa vie
@@ -47,7 +47,7 @@ public class FighterController extends CharacterController {
 				interrupt();
 				return;
 			}
-			this.states.put(CharacterState.IN_REGENERATION, false);
+			updateState(CharacterState.IN_REGENERATION, false);
 		}
 	}
 	
@@ -58,15 +58,15 @@ public class FighterController extends CharacterController {
 	
 	
 	
-	private void upgradeSpell(){
+	private void upgradeSpell() {
 		waitState(CharacterState.IS_FREE);
 		int id=infos.spellToUpgrade;
-		if(this.states.get(CharacterState.LEVEL_UP) && infos.spellList.get(id)!=null && canUpgradeSpell(id)) {
+		if(inState(CharacterState.LEVEL_UP) && infos.spellList.get(id) != null && canUpgradeSpell(id)) {
 			infos.spellList.get(id).spellLevel++;
 			SpellUpgradeRequestMessage SURM = new SpellUpgradeRequestMessage();
-			SURM.serialize(id,infos.spellList.get(id).spellLevel);
+			SURM.serialize(id, infos.spellList.get(id).spellLevel);
 			instance.outPush(SURM);
-			this.instance.log.p("Increase spell : Flèche Magique to lvl "+ infos.spellList.get(161).spellLevel);
+			this.instance.log.p("Increase spell \"Flèche Magique\" to level " + infos.spellList.get(161).spellLevel);
 		}
 	}
 
@@ -81,11 +81,11 @@ public class FighterController extends CharacterController {
 	private void upgradeStats() {
 		waitState(CharacterState.IS_FREE);
 		
-		if(this.states.get(CharacterState.LEVEL_UP)) {
+		if(inState(CharacterState.LEVEL_UP)) {
 			StatsUpgradeRequestMessage SURM = new StatsUpgradeRequestMessage();
 			SURM.serialize(this.infos.element, calculateMaxStatsPoints());
 			instance.outPush(SURM);
-			this.states.put(CharacterState.LEVEL_UP, false);
+			updateState(CharacterState.LEVEL_UP, false);
 			this.instance.log.p("Increase stat : " + Elements.intelligence + " of " + this.infos.stats.statsPoints + " points.");
 		}
 	}
@@ -168,9 +168,9 @@ public class FighterController extends CharacterController {
 			GFRM.serialize();
 			this.instance.outPush(GFRM);
 		}
-		while(!isInterrupted() && this.states.get(CharacterState.IN_FIGHT)) {
+		while(!isInterrupted() && inState(CharacterState.IN_FIGHT)) {
 			waitState(CharacterState.IN_GAME_TURN); // attente du début du prochain tour ou de la fin du combat
-			if(!this.states.get(CharacterState.IN_FIGHT))
+			if(!inState(CharacterState.IN_FIGHT))
 				break;
 			launchSpell();
 			
@@ -206,7 +206,7 @@ public class FighterController extends CharacterController {
 		GameFightTurnFinishMessage GFTFM = new GameFightTurnFinishMessage();
 		GFTFM.serialize();
 		this.instance.outPush(GFTFM);
-		this.states.put(CharacterState.IN_GAME_TURN, false);
+		updateState(CharacterState.IN_GAME_TURN, false);
 	}
 	
 	private void selectAreaRoverDependingOnLevel() {
@@ -230,7 +230,7 @@ public class FighterController extends CharacterController {
 		
 		while(!isInterrupted() && !this.roleplayContext.actorIsOnMap(this.mule.infos.characterId)) {
 			waitState(CharacterState.NEW_ACTOR_ON_MAP); // attendre que la mule revienne sur la map
-			this.states.put(CharacterState.NEW_ACTOR_ON_MAP, false);
+			updateState(CharacterState.NEW_ACTOR_ON_MAP, false);
 		}
 		if(isInterrupted())
 			return;
@@ -268,7 +268,7 @@ public class FighterController extends CharacterController {
 		this.instance.outPush(ERM); // on valide de notre côté
 		this.instance.log.p("Exchange validation from my side.");
 		
-		this.states.put(CharacterState.NEED_TO_EMPTY_INVENTORY, false);
+		updateState(CharacterState.NEED_TO_EMPTY_INVENTORY, false);
 		waitState(CharacterState.IS_FREE);
 		this.instance.log.p("Exchange terminated.");
 	}
@@ -284,7 +284,7 @@ public class FighterController extends CharacterController {
 		while(!isInterrupted()) { // boucle principale 
 			selectAreaRoverDependingOnLevel(); // se rend à l'aire de combat
 			
-			while(!isInterrupted() && !this.states.get(CharacterState.NEED_TO_EMPTY_INVENTORY)) { // boucle recherche & combat
+			while(!isInterrupted() && !inState(CharacterState.NEED_TO_EMPTY_INVENTORY)) { // boucle recherche & combat
 				
 				upgradeSpell();  //On upgrade le sort avant les stats
 				upgradeStats();

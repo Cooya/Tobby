@@ -5,8 +5,6 @@ import utilities.ByteArray;
 public class ObjectEffectCreature extends ObjectEffect 
 {
 
-	public static final int protocolId = 71;
-
 	public int monsterFamilyId = 0;
 
 	public ObjectEffectCreature()

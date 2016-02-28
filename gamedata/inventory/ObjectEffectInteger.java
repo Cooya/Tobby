@@ -4,8 +4,6 @@ import utilities.ByteArray;
 
 public class ObjectEffectInteger extends ObjectEffect{
 
-	public static final int protocolId = 70;
-
 	public int value = 0;
 
 	public ObjectEffectInteger()

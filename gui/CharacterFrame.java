@@ -15,8 +15,10 @@ import controller.informations.CharacterInformations;
 import gamedata.d2o.modules.MapPosition;
 
 public class CharacterFrame extends JInternalFrame {
+	protected static final int FRAME_SIZE = 400;
 	private static final long serialVersionUID = 2448473860592287858L;
 	private static String EOL = System.getProperty("line.separator");
+	protected int instanceId;
 	private	JTabbedPane tabbedPane;
 	private	JPanel textAreaPanel;
 	private	JPanel informationsPanel;
@@ -36,7 +38,7 @@ public class CharacterFrame extends JInternalFrame {
 
 	public CharacterFrame(String name) {
 		super(name, true, true, true, true);
-		setSize(400, 400);	
+		setSize(FRAME_SIZE, FRAME_SIZE);	
 		tabbedPane = new JTabbedPane();
 		textAreaPanel = new JPanel();
 		informationsPanel = new JPanel();

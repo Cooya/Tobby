@@ -4,8 +4,6 @@ import messages.Message;
 import utilities.ByteArray;
 
 public class SequenceEndMessage extends Message{
-	public static final int Id = 956;
-
 	public int actionId = 0;
 
 	public double authorId = 0;

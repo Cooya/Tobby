@@ -11,7 +11,7 @@ public class PathsCache {
 	private static Vector<Path> cache = new Vector<Path>();
 	private static final int MAX_ENTRIES = 100;
 	
-	public static Path buildPath(int x1, int y1, int x2, int y2, int currentCellId) {
+	public synchronized static Path buildPath(int x1, int y1, int x2, int y2, int currentCellId) {
 		int srcMapId = selectBestMapId(x1, y1);
 		int destMapId = selectBestMapId(x2, y2);
 		MapsPathfinder mpf = new MapsPathfinder(currentCellId);

@@ -5,8 +5,6 @@ import utilities.ByteArray;
 public class ObjectEffectDice extends ObjectEffect
 {
 
-	public static final int protocolId = 73;
-
 	public int diceNum = 0;
 
 	public int diceSide = 0;

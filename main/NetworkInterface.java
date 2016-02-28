@@ -16,10 +16,11 @@ public class NetworkInterface extends Thread {
 	protected Latency latency;
 	protected Sender sender; 
 	
-	public NetworkInterface(Instance instance) {
+	public NetworkInterface(Instance instance, String login) {
+		super(login + "/receiver");
 		this.instance = instance;
 		this.reader = new Reader();
-		this.sender = new Sender();
+		this.sender = new Sender(login);
 		this.latency = new Latency();
 	}
 	
@@ -79,6 +80,10 @@ public class NetworkInterface extends Thread {
 	}
 	
 	class Sender extends Thread {
+		private Sender(String login) {
+			super(login + "/sender");
+		}
+		
 		public synchronized void run() {
 			Message msg;
 			while (!isInterrupted()) {

@@ -5,8 +5,6 @@ import utilities.ByteArray;
 public class ObjectEffectDate extends ObjectEffect
 {
 
-	public static final int protocolId = 72;
-
 	public int year = 0;
 
 	public int month = 0;

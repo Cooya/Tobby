@@ -3,8 +3,6 @@ package gamedata.character;
 import utilities.ByteArray;
 
 public class SpellItem{
-	
-	public static final int protocolId = 49;
     
     public int position = 0;
     

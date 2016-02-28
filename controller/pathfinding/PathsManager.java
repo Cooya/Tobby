@@ -7,6 +7,7 @@ import java.util.Hashtable;
 import main.FatalError;
 import main.Instance;
 
+// classe inutilisée
 
 @SuppressWarnings("resource")
 public class PathsManager {
@@ -64,18 +65,18 @@ public class PathsManager {
 		}
 	}
 	
-	public static Path createPath(String name, boolean isLoop) {
+	public synchronized static Path createPath(String name, boolean isLoop) {
 		Instance.log("Creation of a path named \"" + name + "\".");
 		Path path = new Path(name, isLoop);
 		paths.put(name, path);
 		return path;
 	}
 	
-	public static Path getPathByName(String name) {
+	public synchronized static Path getPathByName(String name) {
 		return paths.get(name);
 	}
 	
-	public static void removePath(String name) {
+	public synchronized static void removePath(String name) {
 		paths.remove(name);
 	}
 }

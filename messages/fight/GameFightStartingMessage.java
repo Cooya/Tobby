@@ -4,7 +4,6 @@ import messages.Message;
 import utilities.ByteArray;
 
 public class GameFightStartingMessage extends Message{
-	public static final int Id = 700;
 
 	public int fightType = 0;
 

@@ -27,7 +27,7 @@ public class Log {
 		this.graphicalFrame = graphicalFrame;
 	}
 	
-	public synchronized void p(String msgDirection, Message msg) {
+	public void p(String msgDirection, Message msg) {
 		String str = "";
 		int id = msg.getId();
 		String name = Message.get(id);
@@ -51,7 +51,7 @@ public class Log {
 		writer.flush();
 	}
 	
-	public synchronized void p(String str) {
+	public void p(String str) {
 		if(DEBUG)
 			graphicalFrame.appendText("[" + date.format(new Date()) + "] " + str + EOL, Color.BLACK);
 		else
@@ -60,7 +60,7 @@ public class Log {
 		writer.flush();
 	}
 	
-	public synchronized void p(Status status, String str) {
+	public void p(Status status, String str) {
 		/*
 		switch(status) {
 			case INFO : break;

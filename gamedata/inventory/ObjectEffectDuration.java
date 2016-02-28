@@ -5,8 +5,6 @@ import utilities.ByteArray;
 public class ObjectEffectDuration extends ObjectEffect 
 {
 
-	public static final int protocolId = 75;
-
 	public int days = 0;
 
 	public int hours = 0;

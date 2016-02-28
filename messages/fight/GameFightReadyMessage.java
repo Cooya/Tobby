@@ -5,8 +5,6 @@ import utilities.ByteArray;
 
 public class GameFightReadyMessage extends Message{
 
-	public static final int Id = 708;
-
 	public GameFightReadyMessage()
 	{
 		super();

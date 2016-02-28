@@ -11,7 +11,7 @@ import main.Main;
 public class Processes {
 	private static String INJECTOR_PATH = System.getProperty("user.dir") + "/Ressources/DLLInjector/Injector.exe";
 	
-	public static boolean inProcess(String processName) {
+	public synchronized static boolean inProcess(String processName) {
 		try {
 		    String line;
 		    Process p = Runtime.getRuntime().exec("tasklist");
@@ -26,7 +26,7 @@ public class Processes {
 		return false;
 	}
 	
-	public static void injectDLL(String dllName, String exeName) {
+	public synchronized static void injectDLL(String dllName, String exeName) {
 		try {
 			Process p = Runtime.getRuntime().exec(INJECTOR_PATH + " " + dllName + " " + exeName);
 			InputStream in = p.getInputStream();
@@ -38,7 +38,7 @@ public class Processes {
 		}
 	}
 	
-	public static boolean fileExists(String filePath) {
+	public synchronized static boolean fileExists(String filePath) {
 		File f = new File(filePath);
 		if(f.exists() && !f.isDirectory())
 		    return true;

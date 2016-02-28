@@ -24,7 +24,7 @@ public class SuperArea {
     	return (SuperArea) GameData.getObject(MODULE, id);
     }
     
-    public static SuperArea[] getAllSuperArea() {
+    public synchronized static SuperArea[] getAllSuperArea() {
     	if(_allSuperAreas != null)
     		return _allSuperAreas;
     	Object[] objArray = GameData.getObjects(MODULE);

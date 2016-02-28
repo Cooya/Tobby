@@ -32,11 +32,12 @@ public class Instance extends Thread {
 	private LinkedList<Message> input;
 	
 	public Instance(boolean type, String login, String password, int serverId, CharacterFrame graphicalFrame) {
+		super(login + "/process");
 		this.id = instancesId++;
 		instances.add(this);
 		this.log = new Log(login, graphicalFrame);
 		//this.graphicalFrame = graphicalFrame;
-		this.net = new NetworkInterface(this);
+		this.net = new NetworkInterface(this, login);
 		if(type)
 			this.character = new MuleController(this, login, password, serverId);
 		else
@@ -63,9 +64,16 @@ public class Instance extends Thread {
 		
 		Instance.log("Instance with id = " + this.id + " started.");
 	}
+	
+	// appelée depuis le contrôleur (thread principal)
+	public synchronized static void killInstance(Instance instance) {
+		instances.remove(instance);
+		for(Thread thread : instance.threads)
+			thread.interrupt();
+	}
 
 	// appelée depuis un thread interne à l'instance
-	public static void killCurrentInstance() {
+	public synchronized static void killCurrentInstance() {
 		Thread currentThread = Thread.currentThread();
 		Instance currentInstance = null;
 		for(Instance instance : instances)
@@ -77,33 +85,6 @@ public class Instance extends Thread {
 			for(Thread thread : currentInstance.threads)
 				thread.interrupt();
 		}
-	}
-	
-	// appelée depuis le contrôleur (thread principal)
-	public static void killInstance(Instance instance) {
-		instances.remove(instance);
-		for(Thread thread : instance.threads)
-			thread.interrupt();
-	}
-	
-	public static void log(Log.Status status, String msg) {
-		Log log = getLog();
-		if(log != null)
-			log.p(status, msg);
-		else
-			System.out.println(msg);
-	}
-	
-	public static void log(String msg) {
-		log(Log.Status.INFO, msg);
-	}
-	
-	public static void log(String direction, Message msg) {
-		Log log = getLog();
-		if(log != null)
-			log.p(direction, msg);
-		else
-			throw new FatalError("Invalid thread.");
 	}
 	
 	public synchronized void inPush(Message msg) {
@@ -222,6 +203,26 @@ public class Instance extends Thread {
 			}
 	}
 	
+	public static void log(Log.Status status, String msg) {
+		Log log = getLog();
+		if(log != null)
+			log.p(status, msg);
+		else
+			System.out.println(msg);
+	}
+	
+	public static void log(String msg) {
+		log(Log.Status.INFO, msg);
+	}
+	
+	public static void log(String direction, Message msg) {
+		Log log = getLog();
+		if(log != null)
+			log.p(direction, msg);
+		else
+			throw new FatalError("Invalid thread.");
+	}
+	
 	private void updateWorkingFrames() {
 		for(IFrame frame : this.frameUpdates.get(0))
 			this.workingFrames.add(frame);
@@ -229,6 +230,7 @@ public class Instance extends Thread {
 			this.workingFrames.remove(frame);
 		this.workingFramesUpdates = false;
 	}
+	
 	
 	private static Log getLog() {
 		Thread currentThread = currentThread();

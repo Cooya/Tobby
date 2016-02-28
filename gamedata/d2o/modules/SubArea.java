@@ -53,7 +53,7 @@ public class SubArea {
     	return null;
     }
     
-    public static SubArea[] getAllSubArea() {
+    public synchronized static SubArea[] getAllSubArea() {
     	if(_allSubAreas != null)
     		return _allSubAreas;
     	Object[] objArray = GameData.getObjects(MODULE);

@@ -5,8 +5,6 @@ import utilities.ByteArray;
 
 public class GameActionFightPointsVariationMessage extends AbstractGameActionMessage{
 
-	public static final int Id = 1030;
-
 	public double targetId = 0;
 
 	public int delta = 0;

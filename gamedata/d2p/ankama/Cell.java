@@ -20,7 +20,7 @@ public class Cell {
     	this._layer = layer;
     }
     
-    public static Point cellCords(int i) {
+    public synchronized static Point cellCords(int i) {
     	if(_cellCoords == null)
     		_cellCoords = new Point();
     	_cellCoords.x = i % MAP_WIDTH;

@@ -30,7 +30,7 @@ public class Area {
     	return area;
     }
     
-    public static Area[] getAllArea() {
+    public synchronized static Area[] getAllArea() {
     	if(_allAreas != null)
     		return _allAreas;
     	Object[] objArray = GameData.getObjects(MODULE);

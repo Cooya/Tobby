@@ -12,7 +12,7 @@ public class ObjectItem extends Item {
 	public Vector<ObjectEffect> effects;
 	public int objectUID = 0;
 	public int quantity = 0;
-	
+
 	public ObjectItem(ByteArray buffer) {
 		this.effects = new Vector<ObjectEffect>();
 		this.position = buffer.readByte();

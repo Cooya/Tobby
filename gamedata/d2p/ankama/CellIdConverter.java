@@ -23,13 +23,13 @@ public class CellIdConverter {
     	}
     }
     
-    public static int coordToCellId(int i1, int i2) {
+    public synchronized static int coordToCellId(int i1, int i2) {
     	if(!_bInit)
     		init();
     	return (((i1 - i2) * MAP_WIDTH) + i2) + ((i1 - i2) / 2);
     }
 
-    public static Point cellIdToCoord(int i) {
+    public synchronized static Point cellIdToCoord(int i) {
     	if(!_bInit)
     		init();
     	if(i >= CELLPOS.size())

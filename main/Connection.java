@@ -87,6 +87,8 @@ public interface Connection {
 		}
 
 		public int receive(byte[] bytes) throws Exception {
+			if(this.client.isClosed())
+				throw new FatalError("Connection closed.");
 			return this.client.receive(bytes);
 		}
 

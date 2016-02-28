@@ -7,7 +7,6 @@ import messages.Message;
 import utilities.ByteArray;
 
 public class GameFightShowFighterMessage extends Message{
-	public static final int Id = 5864;
 
 	public GameFightFighterInformations informations;
 
