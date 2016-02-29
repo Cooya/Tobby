@@ -40,7 +40,7 @@ public abstract class Pathfinder {
 		while(!currentNode.equals(destNode)) {
 			neighbours = getNeighbourNodes(currentNode);
 			for(PathNode neighbourNode : neighbours) {
-				//System.out.println(neighbourNode.g + " " + Pathfinder.directionToString(neighbourNode.lastDirection));
+				//System.out.println(neighbourNode + " " + neighbourNode.g + " " + Pathfinder.directionToString(neighbourNode.lastDirection));
 				if(!neighbourNode.isAccessible) // obstacle
 					continue;
 				if(nodeIsInList(neighbourNode, closedList) != null) // déjà traitée

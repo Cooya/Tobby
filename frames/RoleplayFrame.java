@@ -24,7 +24,7 @@ import messages.gamestarting.ChannelEnablingMessage;
 import messages.gamestarting.ClientKeyMessage;
 import messages.gamestarting.PrismsListRegisterMessage;
 
-public class RoleplayFrame implements IFrame {
+public class RoleplayFrame extends Frame {
 	private Instance instance;
 	private CharacterController CC;
 
@@ -85,7 +85,7 @@ public class RoleplayFrame implements IFrame {
 		case 226 : // MapComplementaryInformationsDataMessage
 			MapComplementaryInformationsDataMessage MCIDM = new MapComplementaryInformationsDataMessage(msg);
 			CC.roleplayContext.newContextActors(MCIDM.actors);
-			this.instance.log.p("Current map : " + MapPosition.getMapPositionById(CC.infos.currentMap.id) + ".\nCurrent cell id : " + CC.infos.currentCellId + ".\nCurrent area id : " + CC.infos.currentMap.subareaId + ".");		
+			this.instance.log.p("Current map : " + MapPosition.getMapPositionById(CC.infos.currentMap.id) + ".\nCurrent cell id : " + CC.infos.currentCellId + ".\nCurrent area id : " + CC.infos.currentMap.subareaId + ".");
 			this.CC.updateState(CharacterState.IS_LOADED, true);
 			return true;
 		case 5632 : // GameRolePlayShowActorMessage
@@ -103,7 +103,8 @@ public class RoleplayFrame implements IFrame {
 			CC.roleplayContext.updateContextActorPosition(GMMM.actorId, position);
 			if(GMMM.actorId == this.CC.infos.characterId) {
 				this.CC.infos.currentCellId = position;
-				this.instance.log.p("Current cell id updated : " + position + ".");
+				this.instance.log.p("Next cell id after movement : " + position + ".");
+				this.CC.updateState(CharacterState.CAN_MOVE, true);
 			}
 			return true;
 		case 5684 : // LifePointsRegenBeginMessage

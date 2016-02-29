@@ -45,14 +45,14 @@ public abstract class CharacterController extends Thread {
 			&& !this.states.get(CharacterState.IN_EXCHANGE);
 	}
 	
-	// seul le thread process entre ici
+	// seul le thread de traitement entre ici
 	public synchronized void updateState(CharacterState state, boolean newState) {
 		this.instance.log.p("State updated : " + state + " = " + newState + ".");
 		this.states.put(state, newState);
 		notify();
 	}
 	
-	public boolean inState(CharacterState state) {
+	protected boolean inState(CharacterState state) {
 		return this.states.get(state);
 	}
 	
@@ -123,6 +123,11 @@ public abstract class CharacterController extends Thread {
 			case MULE_AVAILABLE :
 				this.instance.log.p("Waiting for mule available.");
 				return waitSpecificState(CharacterState.MULE_AVAILABLE, 1000 * 60 * 5); // 5 minutes
+			case CAN_MOVE :
+				this.instance.log.p("Waiting for movement acceptation by server.");
+				while(!isInterrupted() && !this.states.get(CharacterState.CAN_MOVE))
+					waitAnyEvent();
+				return true;
 			default : throw new FatalError("Unexpected state waiting : " + state + ".");
 		}
 	}

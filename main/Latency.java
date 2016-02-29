@@ -29,7 +29,7 @@ public class Latency {
 		if(size == 0)
 			return 0;
 		int latency = 0;
-		for(int i : _latencyBuffer)
+		for(int i : this._latencyBuffer)
 			latency += i;
 		return latency / size;
 	}

@@ -43,41 +43,50 @@ public class CellsPathfinder extends Pathfinder {
 	}
 	
 	private Cell getNeighbourCellFromDirection(int srcId, int direction) {
+		int destId;
 		int offsetId;
 		if((srcId / Map.WIDTH) % 2 == 0) offsetId = 0;
 		else offsetId = 1;
 		switch(direction) {
 			case RIGHT :
-				if((srcId + 1) % Map.WIDTH != 0)
-					return cells[srcId + 1];
+				destId = srcId + 1;
+				if(destId % Map.WIDTH != 0)
+					return cells[destId];
 				return null;
 			case DOWN_RIGHT :
-				if(srcId + Map.WIDTH + offsetId < Map.CELLS_COUNT && (srcId + 1) % Map.WIDTH != 0)
-					return cells[srcId + Map.WIDTH + offsetId];
+				destId = srcId + Map.WIDTH + offsetId;
+				if(destId < Map.CELLS_COUNT && (srcId + 1) % (Map.WIDTH * 2) != 0)
+					return cells[destId];
 				return null;
 			case DOWN :
-				if(srcId + Map.WIDTH * 2 < Map.CELLS_COUNT)
-					return cells[srcId + Map.WIDTH * 2];
+				destId = srcId + Map.WIDTH * 2;
+				if(destId < Map.CELLS_COUNT)
+					return cells[destId];
 				return null;
 			case DOWN_LEFT :
-				if(srcId + Map.WIDTH - 1 + offsetId < Map.CELLS_COUNT && srcId % Map.WIDTH != 0)
-					return cells[srcId + Map.WIDTH - 1 + offsetId];
+				destId = srcId + Map.WIDTH - 1 + offsetId;
+				if(destId < Map.CELLS_COUNT && srcId % (Map.WIDTH * 2) != 0)
+					return cells[destId];
 				return null;
 			case LEFT :
+				destId = srcId - 1;
 				if(srcId % Map.WIDTH != 0)
-					return cells[srcId - 1];
+					return cells[destId];
 				return null;
 			case UP_LEFT :
-				if(srcId - Map.WIDTH - 1 + offsetId > 0 && srcId % Map.WIDTH != 0)
-					return cells[srcId - Map.WIDTH - 1 + offsetId];
+				destId = srcId - Map.WIDTH - 1 + offsetId;
+				if(destId >= 0 && srcId % (Map.WIDTH * 2) != 0)
+					return cells[destId];
 				return null;
 			case UP :
-				if(srcId - Map.WIDTH * 2 > 0)
-					return cells[srcId - Map.WIDTH * 2];
+				destId = srcId - Map.WIDTH * 2;
+				if(destId >= 0)
+					return cells[destId];
 				return null;
 			case UP_RIGHT :
-				if(srcId - Map.WIDTH + offsetId > 0 && (srcId + 1) % Map.WIDTH != 0)
-					return cells[srcId - Map.WIDTH + offsetId];
+				destId = srcId - Map.WIDTH + offsetId;
+				if(destId > 0 && (srcId + 1) % (Map.WIDTH * 2) != 0)
+					return cells[destId];
 				return null;
 		}
 		throw new FatalError("Invalid direction.");

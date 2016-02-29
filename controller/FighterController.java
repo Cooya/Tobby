@@ -111,7 +111,7 @@ public class FighterController extends CharacterController {
 	
 	
 	
-	private boolean lookForFight() {
+	private boolean lookForAndLaunchFight() {
 		waitState(CharacterState.IS_FREE);
 		
 		this.instance.log.p("Searching for monster group to fight.");
@@ -122,37 +122,21 @@ public class FighterController extends CharacterController {
 			monsterGroupsSize = monsterGroups.size();
 			if(monsterGroupsSize > 0) {
 				GameRolePlayGroupMonsterInformations monsterGroup = this.roleplayContext.getMonsterGroups().get((int) Math.random() * monsterGroupsSize);
-				this.instance.log.p("Monster group on cell id " + monsterGroup.disposition.cellId + ".");
-				if(launchFight(monsterGroup))
-					return true;
-				
+				this.instance.log.p("Going to take a monster group on cell id " + monsterGroup.disposition.cellId + ".");
+				this.mvt.moveTo(monsterGroup.disposition.cellId, false);
 				if(isInterrupted())
 					return false;
+				this.instance.log.p("Sending attack request.");
+				GameRolePlayAttackMonsterRequestMessage GRPAMRM = new GameRolePlayAttackMonsterRequestMessage();
+				GRPAMRM.serialize(monsterGroup.contextualId);
+				instance.outPush(GRPAMRM);
+				return true;
 			}
 			else {
 				this.instance.log.p("None monster group available on the map.");
 				return false;
 			}
 		}
-	}
-	
-	private boolean launchFight(GameRolePlayGroupMonsterInformations monsterGroup) {
-		waitState(CharacterState.IS_FREE);
-		
-		this.instance.log.p("Trying to take this monster group.");
-		this.mvt.moveTo(monsterGroup.disposition.cellId, false);
-		
-		if(isInterrupted())
-			return false;
-		
-		if(this.roleplayContext.getMonsterGroupCellId(monsterGroup) == this.infos.currentCellId) {
-			this.instance.log.p("Monster group taken.");
-			GameRolePlayAttackMonsterRequestMessage GRPAMRM = new GameRolePlayAttackMonsterRequestMessage();
-			GRPAMRM.serialize(monsterGroup.contextualId);
-			instance.outPush(GRPAMRM);
-			return true;
-		}
-		return false;
 	}
 	
 	private void fight(boolean fightRecovery) {
@@ -177,7 +161,12 @@ public class FighterController extends CharacterController {
 			if(isInterrupted())
 				return;
 			
-			concludeGameTurn();
+			if(inState(CharacterState.IN_FIGHT)) {
+				GameFightTurnFinishMessage GFTFM = new GameFightTurnFinishMessage();
+				GFTFM.serialize();
+				this.instance.outPush(GFTFM);
+				updateState(CharacterState.IN_GAME_TURN, false);
+			}
 		}
 		this.infos.fightsCounter++;
 	}
@@ -200,13 +189,6 @@ public class FighterController extends CharacterController {
 				return;
 			}
 		}
-	}
-	
-	private void concludeGameTurn() {
-		GameFightTurnFinishMessage GFTFM = new GameFightTurnFinishMessage();
-		GFTFM.serialize();
-		this.instance.outPush(GFTFM);
-		updateState(CharacterState.IN_GAME_TURN, false);
 	}
 	
 	private void selectAreaRoverDependingOnLevel() {
@@ -295,7 +277,7 @@ public class FighterController extends CharacterController {
 				if(isInterrupted())
 					break;
 				
-				if(lookForFight()) {
+				if(lookForAndLaunchFight()) {
 					if(isInterrupted())
 						break;
 					

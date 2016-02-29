@@ -52,11 +52,12 @@ public class MovementController {
 		mvPath.setEnd(MapPoint.fromCellId(cellId));
 		
 		this.CC.instance.log.p("Sending movement request.");
-	
+		
 		GameMapMovementRequestMessage GMMRM = new GameMapMovementRequestMessage();
 		GMMRM.serialize(mvPath.getServerMovement(), this.CC.infos.currentMap.id, this.CC.instance.id);
 		this.CC.instance.outPush(GMMRM);
 		this.CC.updateState(CharacterState.IN_MOVEMENT, true);
+		this.CC.waitState(CharacterState.CAN_MOVE); // on attend le GameMapMovementMessage
 		
 		int duration = this.currentPath.getCrossingDuration();
 		this.CC.instance.log.p("Movement duration : " + duration + " ms.");
@@ -69,11 +70,10 @@ public class MovementController {
 		}
 		
 		this.CC.instance.log.p("Target cell reached.");
-
 		EmptyMessage EM = new EmptyMessage("GameMapMovementConfirmMessage");
 		this.CC.instance.outPush(EM);
+		this.CC.updateState(CharacterState.CAN_MOVE, false);
 		this.CC.updateState(CharacterState.IN_MOVEMENT, false);
-		this.CC.waitState(CharacterState.IS_FREE);
 	}
 	
 	protected void goTo(int mapId) {

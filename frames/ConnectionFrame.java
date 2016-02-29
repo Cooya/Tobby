@@ -21,7 +21,7 @@ import messages.connection.ServerSelectionMessage;
 import messages.connection.ServerStatusUpdateMessage;
 import messages.connection.ServersListMessage;
 
-public class ConnectionFrame implements IFrame {
+public class ConnectionFrame extends Frame {
 	private Instance instance;
 	private CharacterController CC;
 	private Hashtable<String, Object> usefulInfos = new Hashtable<String, Object>();
@@ -100,7 +100,6 @@ public class ConnectionFrame implements IFrame {
 			case 153 : // CharacterSelectedSuccessMessage
 				CharacterSelectedSuccessMessage CSSM = new CharacterSelectedSuccessMessage(msg);
 				this.CC.infos.level = CSSM.infos.level;
-				
 				this.instance.endOfConnection();
 				return true;
 		}

@@ -10,7 +10,7 @@ import controller.MuleController;
 import messages.Message;
 import frames.ConnectionFrame;
 import frames.FightFrame;
-import frames.IFrame;
+import frames.Frame;
 import frames.RoleplayFrame;
 import frames.SynchronisationFrame;
 import gui.CharacterFrame;
@@ -25,9 +25,7 @@ public class Instance extends Thread {
 	//private CharacterFrame graphicalFrame;
 	private NetworkInterface net;
 	private CharacterController character;
-	private Vector<IFrame> workingFrames;
-	private Vector<Vector<IFrame>> frameUpdates; // résolution d'accès concurrents lors de l'ajout ou de la suppression de frames
-	private boolean workingFramesUpdates;
+	private Vector<Frame> frames;
 	private LinkedList<Message> output;
 	private LinkedList<Message> input;
 	
@@ -42,15 +40,16 @@ public class Instance extends Thread {
 			this.character = new MuleController(this, login, password, serverId);
 		else
 			this.character = new FighterController(this, login, password, serverId);
-		this.workingFrames = new Vector<IFrame>();
-		this.frameUpdates = new Vector<Vector<IFrame>>();
-		this.frameUpdates.add(new Vector<IFrame>()); // add
-		this.frameUpdates.add(new Vector<IFrame>()); // del
-		this.workingFramesUpdates = false;
+		this.frames = new Vector<Frame>();
 		this.output = new LinkedList<Message>();
 		this.input = new LinkedList<Message>();
 		
-		this.workingFrames.add(new ConnectionFrame(this, character));
+		this.frames.add(new ConnectionFrame(this, character));
+		this.frames.add(new SynchronisationFrame(this));
+		this.frames.add(new RoleplayFrame(this, character));
+		if(!type)
+			this.frames.add(new FightFrame(this, (FighterController) this.character));
+		this.frames.get(0).isActive = true; // activation de la ConnectionFrame
 		
 		this.threads = new Thread[4];
 		this.threads[0] = this.net;
@@ -121,11 +120,10 @@ public class Instance extends Thread {
 		Message msg;
 		while(!isInterrupted()) {
 			if((msg = inPull()) != null) {
-				for(IFrame frame : this.workingFrames)
-					if(frame.processMessage(msg))
-						break;
-				if(workingFramesUpdates)
-					updateWorkingFrames();
+				for(Frame frame : this.frames)
+					if(frame.isActive)
+						if(frame.processMessage(msg))
+							break;
 			}
 			else
 				try {
@@ -162,47 +160,6 @@ public class Instance extends Thread {
 		return net.latency;
 	}
 	
-	public void waitForConnection() {
-		synchronized(Main.class) {
-			while(!isInterrupted() && instanceInConnection != null) {
-				this.log.p("Waiting for connection.");
-				try {
-					Main.class.wait();
-				} catch (Exception e) {
-					Thread.currentThread().interrupt();
-				}
-			}
-			instanceInConnection = this;
-		}
-	}
-	
-	public void endOfConnection() {
-		synchronized(Main.class) {
-			instanceInConnection = null;
-			Main.class.notify();
-		}
-		this.frameUpdates.get(1).add(this.workingFrames.get(0)); // on retire la ConnectionFrame
-		this.frameUpdates.get(0).add(new SynchronisationFrame(this));
-		this.frameUpdates.get(0).add(new RoleplayFrame(this, character));
-		this.workingFramesUpdates = true;
-	}
-	
-	public void startFight() {
-		this.log.p("Fight frame running.");
-		this.frameUpdates.get(0).add(new FightFrame(this, (FighterController) character));
-		this.workingFramesUpdates = true;
-	}
-	
-	public void quitFight() {
-		for(IFrame frame : this.workingFrames)
-			if(frame instanceof FightFrame) {
-				this.log.p("Fight frame stopping.");
-				this.frameUpdates.get(1).add(frame);
-				this.workingFramesUpdates = true;
-				return;
-			}
-	}
-	
 	public static void log(Log.Status status, String msg) {
 		Log log = getLog();
 		if(log != null)
@@ -223,14 +180,6 @@ public class Instance extends Thread {
 			throw new FatalError("Invalid thread.");
 	}
 	
-	private void updateWorkingFrames() {
-		for(IFrame frame : this.frameUpdates.get(0))
-			this.workingFrames.add(frame);
-		for(IFrame frame : this.frameUpdates.get(1))
-			this.workingFrames.remove(frame);
-		this.workingFramesUpdates = false;
-	}
-	
 	
 	private static Log getLog() {
 		Thread currentThread = currentThread();
@@ -239,5 +188,43 @@ public class Instance extends Thread {
 				if(thread == currentThread)
 					return instance.log;
 		return null;
+	}
+	
+	public void waitForConnection() {
+		synchronized(Main.class) {
+			while(!isInterrupted() && instanceInConnection != null) {
+				this.log.p("Waiting for connection.");
+				try {
+					Main.class.wait();
+				} catch (Exception e) {
+					Thread.currentThread().interrupt();
+				}
+			}
+			instanceInConnection = this;
+		}
+	}
+	
+	public void endOfConnection() {
+		synchronized(Main.class) {
+			instanceInConnection = null;
+			Main.class.notify();
+		}
+		this.frames.get(0).isActive = false; // désactivation de la ConnectionFrame
+		this.frames.get(1).isActive = true; // activation de la SynchronisationFrame
+		this.frames.get(2).isActive = true; // activation de la RoleplayFrame
+	}
+	
+	public void startFight() {
+		this.log.p("Fight frame running.");
+		this.frames.get(3).isActive = true; // activation de la FightFrame
+	}
+	
+	public void quitFight() {
+		for(Frame frame : this.frames)
+			if(frame instanceof FightFrame) {
+				this.log.p("Fight frame stopping.");
+				this.frames.get(3).isActive = false; // désactivation de la FightFrame
+				return;
+			}
 	}
 }

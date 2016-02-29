@@ -13,7 +13,7 @@ import messages.fight.GameFightTurnEndMessage;
 import messages.fight.GameFightTurnReadyMessage;
 import messages.fight.SequenceEndMessage;
 
-public class FightFrame implements IFrame {
+public class FightFrame extends Frame {
 	private Instance instance;
 	private FighterController fighter;
 
@@ -38,10 +38,8 @@ public class FightFrame implements IFrame {
 			case 719 : // fin du tour
 				GameFightTurnEndMessage GFTEM = new GameFightTurnEndMessage(msg);
 				GFTEM.deserialize();
-				if(GFTEM.fighterId == this.fighter.infos.characterId) {
+				if(GFTEM.fighterId == this.fighter.infos.characterId)
 					this.instance.log.p("End of my game turn.");
-					this.fighter.updateState(CharacterState.IN_GAME_TURN, false);
-				}
 				return true;
 			case 5921 : // synchronisation avec le serveur
 				GameFightSynchronizeMessage GFSM = new GameFightSynchronizeMessage(msg);
@@ -52,9 +50,10 @@ public class FightFrame implements IFrame {
 				return true;
 			case 720 : // fin du combat
 				this.instance.log.p("End of fight.");
-				this.instance.quitFight();
-				this.fighter.updateState(CharacterState.IN_FIGHT, false);
 				this.fighter.updateState(CharacterState.IS_LOADED, false);
+				this.fighter.updateState(CharacterState.IN_FIGHT, false);
+				this.fighter.updateState(CharacterState.IN_GAME_TURN, false);
+				this.instance.quitFight();
 				return true;
 			case 956 : // action terminée
 				SequenceEndMessage SEM = new SequenceEndMessage(msg);
