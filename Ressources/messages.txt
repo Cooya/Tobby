@@ -92,6 +92,8 @@
 5509 ExchangeIsReadyMessage
 5511 ExchangeReadyMessage
 5537 KamasUpdateMessage
+5520 ExchangeObjectMoveKamaMessage
+5521 ExchangeKamaModifiedMessage
 5523 ExchangeRequestedTradeMessage
 5540 GameActionFightMarkCellsMessage
 5570 GameActionFightUnmarkCellsMessage

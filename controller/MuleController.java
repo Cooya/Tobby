@@ -17,17 +17,28 @@ public class MuleController extends CharacterController {
 	}
 	
 	private void processExchange() {
-		EmptyMessage EM = new EmptyMessage("ExchangeAcceptMessage"); // accepter l'échange
-		this.instance.outPush(EM);
-		waitState(CharacterState.EXCHANGE_VALIDATED); // attendre que l'échange soit validé
-		if(isInterrupted())
-			return;
-		ExchangeReadyMessage ERM = new ExchangeReadyMessage();
-		ERM.serialize(true, 1);
-		this.instance.outPush(ERM); // on valide de notre côté
-		this.instance.log.p("Exchange validation from my side.");
+		if(Instance.isWorkmate(this.roleplayContext.actorDemandingExchange)) {
+			EmptyMessage EM = new EmptyMessage("ExchangeAcceptMessage"); // accepter l'échange
+			this.instance.outPush(EM);
+			waitState(CharacterState.EXCHANGE_VALIDATED); // attendre que l'échange soit validé
+			if(isInterrupted())
+				return;
+			ExchangeReadyMessage ERM = new ExchangeReadyMessage();
+			ERM.serialize(true, 2); // car il y a eu 2 actions lors de l'échange
+			this.instance.outPush(ERM); // on valide de notre côté
+			this.instance.log.p("Exchange validated from my side.");
+		}
+		else { // on refuse l'échange
+			try {
+				Thread.sleep(2000); // pour faire un peu normal
+			} catch(InterruptedException e) {
+				interrupt();
+				return;
+			}
+			EmptyMessage EM = new EmptyMessage("LeaveDialogRequestMessage");
+			this.instance.outPush(EM);
+		}
 		updateState(CharacterState.EXCHANGE_VALIDATED, false); // on enlève cet état pour les prochains échanges
-		waitState(CharacterState.IS_FREE);
 	}
 	
 	protected void returnTripToAstrubBank() {
@@ -90,7 +101,7 @@ public class MuleController extends CharacterController {
 			return;
 		}
 		
-		this.mvt.moveTo(396, false); // on sort de la banques
+		this.mvt.moveTo(396, false); // on sort de la banque
 		if(interrupted())
 			return;
 		
@@ -104,9 +115,7 @@ public class MuleController extends CharacterController {
 	}
 	
 	public void run() {
-		waitState(CharacterState.IS_FREE);
-		
-		while(!isInterrupted()) {
+		while(!isInterrupted() && waitState(CharacterState.IS_FREE)) { // attente d'état importante afin de laisser le temps aux pods de se mettre à jour après un échange
 			if(needToGoBank(0.5f)) { // + de 50% de l'inventaire occupé
 				this.instance.log.p("Need to go to empty inventory at Astrub bank.");
 				returnTripToAstrubBank();

@@ -11,24 +11,26 @@ import controller.CharacterController;
 import main.Instance;
 
 public class RoleplayContext {
-	private CharacterController CC;
+	private CharacterController character;
 	private Vector<GameRolePlayActorInformations> actors;
+	public double actorDemandingExchange;
+	public boolean lastExchangeResult;
 	
 	public RoleplayContext(CharacterController CC) {
-		this.CC = CC;
+		this.character = CC;
 	}
 	
 	public void newContextActors(Vector<GameRolePlayActorInformations> actors) {
 		this.actors = actors;
 		
-		double characterId = CC.infos.characterId;
+		double characterId = this.character.infos.characterId;
 		for(GameRolePlayActorInformations actor : actors)
 			if(actor.contextualId == characterId)
-				CC.infos.characterName = ((GameRolePlayNamedActorInformations) actor).name;
+				this.character.infos.characterName = ((GameRolePlayNamedActorInformations) actor).name;
 		for(GameRolePlayActorInformations actor : actors)
 			if(actor.contextualId == characterId) {
-				CC.infos.currentCellId = actor.disposition.cellId;
-				CC.infos.currentDirection = actor.disposition.direction;
+				this.character.infos.currentCellId = actor.disposition.cellId;
+				this.character.infos.currentDirection = actor.disposition.direction;
 			}
 	}
 	

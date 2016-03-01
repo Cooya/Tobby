@@ -7,12 +7,14 @@ import gamedata.fight.GameFightMonsterInformations;
 import java.util.Vector;
 
 import controller.informations.FightContext;
+import main.FatalError;
 import main.Instance;
 import main.Log;
 import messages.EmptyMessage;
 import messages.character.SpellUpgradeRequestMessage;
 import messages.character.StatsUpgradeRequestMessage;
 import messages.context.GameRolePlayAttackMonsterRequestMessage;
+import messages.exchange.ExchangeObjectMoveKamaMessage;
 import messages.exchange.ExchangePlayerRequestMessage;
 import messages.exchange.ExchangeReadyMessage;
 import messages.fight.GameActionFightCastRequestMessage;
@@ -232,11 +234,12 @@ public class FighterController extends CharacterController {
 			return;
 		}
 		
-		EmptyMessage EM = new EmptyMessage("ExchangeObjectTransfertAllFromInvMessage"); // on transfère tout
+		EmptyMessage EM = new EmptyMessage("ExchangeObjectTransfertAllFromInvMessage"); // on transfère tous les objets
 		this.instance.outPush(EM);
 		this.instance.log.p("Transfering all objects.");
-		
-		// donner aussi les kamas (à faire)
+		ExchangeObjectMoveKamaMessage EOMKM = new ExchangeObjectMoveKamaMessage(); // et les kamas
+		EOMKM.serialize(this.infos.stats.kamas);
+		this.instance.outPush(EOMKM);
 		
 		try {
 			sleep(5000); // on attend de pouvoir valider l'échange
@@ -246,13 +249,17 @@ public class FighterController extends CharacterController {
 		}
 		
 		ExchangeReadyMessage ERM = new ExchangeReadyMessage();
-		ERM.serialize(true, 1);
+		ERM.serialize(true, 2); // car il y a eu 2 actions lors de l'échange
 		this.instance.outPush(ERM); // on valide de notre côté
-		this.instance.log.p("Exchange validation from my side.");
+		this.instance.log.p("Exchange validated from my side.");
 		
-		updateState(CharacterState.NEED_TO_EMPTY_INVENTORY, false);
 		waitState(CharacterState.IS_FREE);
-		this.instance.log.p("Exchange terminated.");
+		if(this.roleplayContext.lastExchangeResult) {
+			updateState(CharacterState.NEED_TO_EMPTY_INVENTORY, false);
+			this.instance.log.p("Exchange with mule terminated successfully.");
+		}
+		else
+			throw new FatalError("Exchange with mule has failed.");	
 	}
 	
 	public void run() {

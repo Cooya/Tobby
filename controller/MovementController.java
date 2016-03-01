@@ -41,18 +41,13 @@ public class MovementController {
 		}
 		
 		this.CC.instance.log.p("Moving from cell " + this.CC.infos.currentCellId + " to " + cellId + ".");
-
 		this.pathfinder = new CellsPathfinder(this.CC.infos.currentMap);
 		this.currentPath = this.pathfinder.compute(this.CC.infos.currentCellId, cellId);
-		
-		this.CC.instance.log.p(this.currentPath.toString());
-		
 		MovementPath mvPath = CellsPathfinder.movementPathFromArray(this.currentPath.toVector());
 		mvPath.setStart(MapPoint.fromCellId(this.CC.infos.currentCellId));
 		mvPath.setEnd(MapPoint.fromCellId(cellId));
 		
 		this.CC.instance.log.p("Sending movement request.");
-		
 		GameMapMovementRequestMessage GMMRM = new GameMapMovementRequestMessage();
 		GMMRM.serialize(mvPath.getServerMovement(), this.CC.infos.currentMap.id, this.CC.instance.id);
 		this.CC.instance.outPush(GMMRM);
@@ -81,7 +76,7 @@ public class MovementController {
 		if(this.CC.isInterrupted())
 			return;
 		
-		if(this.CC.infos.currentMap.id == mapId) { // déjà sur la cellule cible
+		if(this.CC.infos.currentMap.id == mapId) { // déjà sur la map cible
 			this.CC.instance.log.p("Already on the target map id.");
 			return;
 		}

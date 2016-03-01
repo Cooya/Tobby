@@ -6,8 +6,6 @@ import main.Instance;
 import messages.Message;
 import messages.fight.GameActionAcknowledgementMessage;
 import messages.fight.GameActionFightPointsVariationMessage;
-import messages.fight.GameFightOptionStateUpdateMessage;
-import messages.fight.GameFightOptionToggleMessage;
 import messages.fight.GameFightSynchronizeMessage;
 import messages.fight.GameFightTurnEndMessage;
 import messages.fight.GameFightTurnReadyMessage;
@@ -69,19 +67,6 @@ public class FightFrame extends Frame {
 				GAFPVM.deserialize();
 				if(this.fighter.fightContext.self != null)
 					this.fighter.fightContext.self.stats.actionPoints -= GAFPVM.delta;
-				return true;
-			case 5927 : // GameFightOptionStateUpdateMessage
-				GameFightOptionStateUpdateMessage GFOSUM = new GameFightOptionStateUpdateMessage(msg);
-				if(GFOSUM.option == 2) {
-					if(GFOSUM.state)
-						this.instance.log.p("Fight already locked.");
-					else {
-						GameFightOptionToggleMessage GFOTM = new GameFightOptionToggleMessage();
-						GFOTM.serialize(2); // lock (0 pour interdire les spectateurs)
-						this.instance.outPush(GFOTM);
-						this.instance.log.p("Fight locked.");
-					}
-				}
 				return true;
 		}
 		return false;

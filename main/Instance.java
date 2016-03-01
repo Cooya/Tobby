@@ -9,6 +9,7 @@ import controller.FighterController;
 import controller.MuleController;
 import messages.Message;
 import frames.ConnectionFrame;
+import frames.DialogFrame;
 import frames.FightFrame;
 import frames.Frame;
 import frames.RoleplayFrame;
@@ -49,6 +50,9 @@ public class Instance extends Thread {
 		this.frames.add(new RoleplayFrame(this, character));
 		if(!type)
 			this.frames.add(new FightFrame(this, (FighterController) this.character));
+		else
+			this.frames.add(null); // pour avoir le même nombre de frames que les combattants (pas propre)
+		this.frames.add(new DialogFrame(this, character));
 		this.frames.get(0).isActive = true; // activation de la ConnectionFrame
 		
 		this.threads = new Thread[4];
@@ -121,7 +125,7 @@ public class Instance extends Thread {
 		while(!isInterrupted()) {
 			if((msg = inPull()) != null) {
 				for(Frame frame : this.frames)
-					if(frame.isActive)
+					if(frame != null && frame.isActive)
 						if(frame.processMessage(msg))
 							break;
 			}
@@ -158,6 +162,13 @@ public class Instance extends Thread {
 	
 	public Latency getLatency() {
 		return net.latency;
+	}
+	
+	public static boolean isWorkmate(double characterId) {
+		for(Instance instance : instances)
+			if(instance.character.infos.characterId == characterId)
+				return true;
+		return false;
 	}
 	
 	public static void log(Log.Status status, String msg) {
@@ -220,11 +231,17 @@ public class Instance extends Thread {
 	}
 	
 	public void quitFight() {
-		for(Frame frame : this.frames)
-			if(frame instanceof FightFrame) {
-				this.log.p("Fight frame stopping.");
-				this.frames.get(3).isActive = false; // désactivation de la FightFrame
-				return;
-			}
+		this.log.p("Fight frame stopping.");
+		this.frames.get(3).isActive = false; // désactivation de la FightFrame
+	}
+	
+	public void startExchange() {
+		this.log.p("Dialog frame running.");
+		this.frames.get(4).isActive = true; // activation de la DialogFrame
+	}
+	
+	public void quitExchange() {
+		this.log.p("Dialog frame stopping.");
+		this.frames.get(4).isActive = false; // désactivation de la DialogFrame
 	}
 }
