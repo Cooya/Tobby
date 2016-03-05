@@ -2,6 +2,8 @@ package main;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -28,6 +30,18 @@ public interface Connection {
 		public Client(Socket client) {
 			try {
 				this.client = client;
+				this.inputStream = this.client.getInputStream();
+				this.outputStream = this.client.getOutputStream();
+			} catch(Exception e) {
+				throw new FatalError(e);
+			}
+		}
+		
+		public Client(String proxyIP, int proxyPort, String serverIP, int serverPort) {
+			try {
+				Proxy proxy = new Proxy(Proxy.Type.SOCKS, new InetSocketAddress(proxyIP, proxyPort));
+				this.client = new Socket(proxy);
+				this.client.connect(new InetSocketAddress(serverIP, serverPort));
 				this.inputStream = this.client.getInputStream();
 				this.outputStream = this.client.getOutputStream();
 			} catch(Exception e) {

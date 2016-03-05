@@ -1,67 +1,59 @@
 package controller;
 
-import java.util.Collections;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Random;
+import java.util.Vector;
 
+import controller.pathfinding.Path;
+import controller.pathfinding.Path.Direction;
+import controller.pathfinding.Pathfinding;
 import gamedata.d2p.MapsCache;
 import gamedata.d2p.ankama.Map;
-import gamedata.d2p.ankama.MapPoint;
-import gamedata.d2p.ankama.MovementPath;
-import main.Instance;
 import messages.EmptyMessage;
 import messages.context.ChangeMapMessage;
 import messages.context.GameMapMovementRequestMessage;
-import messages.interactions.InteractiveUseRequestMessage;
 import messages.interactions.NpcDialogReplyMessage;
 import messages.interactions.NpcGenericActionRequestMessage;
-import controller.pathfinding.CellsPathfinder;
-import controller.pathfinding.Path;
-import controller.pathfinding.Pathfinder;
-import controller.pathfinding.PathsCache;
 
 public class MovementController {
 	private CharacterController CC;
-	private Path currentPath;
-	protected CellsPathfinder pathfinder;
+	protected Pathfinding pathfinding;
 	
 	public MovementController(CharacterController CC) {
 		this.CC = CC;
+		this.pathfinding = new Pathfinding();
 	}
 	
-	protected void moveTo(int cellId, boolean changeMap) {
+	// changement de cellule
+	protected boolean moveTo(int targetId, boolean changeMap) {
 		this.CC.waitState(CharacterState.IS_FREE);
 		if(this.CC.isInterrupted())
-			return;
+			return false;
 
-		if(this.CC.infos.currentCellId == cellId) { // déjà sur la cellule cible
+		if(this.CC.infos.currentCellId == targetId) { // déjà sur la cellule cible
 			this.CC.instance.log.p("Already on the target cell id.");
-			return;
+			return true;
 		}
 		
-		this.CC.instance.log.p("Moving from cell " + this.CC.infos.currentCellId + " to " + cellId + ".");
-		this.pathfinder = new CellsPathfinder(this.CC.infos.currentMap);
-		this.currentPath = this.pathfinder.compute(this.CC.infos.currentCellId, cellId);
-		MovementPath mvPath = CellsPathfinder.movementPathFromArray(this.currentPath.toVector());
-		mvPath.setStart(MapPoint.fromCellId(this.CC.infos.currentCellId));
-		mvPath.setEnd(MapPoint.fromCellId(cellId));
+		this.CC.instance.log.p("Moving from cell " + this.CC.infos.currentCellId + " to " + targetId + ".");
+		
+		Vector<Integer> path = pathfinding.getCellsPathTo(targetId);
+		if(path == null)
+			return false;
 		
 		this.CC.instance.log.p("Sending movement request.");
 		GameMapMovementRequestMessage GMMRM = new GameMapMovementRequestMessage();
-		GMMRM.serialize(mvPath.getServerMovement(), this.CC.infos.currentMap.id, this.CC.instance.id);
+		GMMRM.serialize(path, this.CC.infos.currentMap.id, this.CC.instance.id);
 		this.CC.instance.outPush(GMMRM);
 		this.CC.updateState(CharacterState.IN_MOVEMENT, true);
 		this.CC.waitState(CharacterState.CAN_MOVE); // on attend le GameMapMovementMessage
 		
-		int duration = this.currentPath.getCrossingDuration();
+		int duration = this.pathfinding.getCellsPathDuration();
 		this.CC.instance.log.p("Movement duration : " + duration + " ms.");
 
 		try {
 			Thread.sleep(duration); // on attend d'arriver à destination
 		} catch(InterruptedException e) {
 			this.CC.interrupt();
-			return;
+			return false;
 		}
 		
 		this.CC.instance.log.p("Target cell reached.");
@@ -69,8 +61,10 @@ public class MovementController {
 		this.CC.instance.outPush(EM);
 		this.CC.updateState(CharacterState.CAN_MOVE, false);
 		this.CC.updateState(CharacterState.IN_MOVEMENT, false);
+		return true;
 	}
 	
+	// changement de map (map distante)
 	protected void goTo(int mapId) {
 		this.CC.waitState(CharacterState.IS_FREE);
 		if(this.CC.isInterrupted())
@@ -97,31 +91,58 @@ public class MovementController {
 		if(this.CC.isInterrupted())
 			return;
 		
-		PathsCache.moveTo(mapId, this.CC);
+		travel(this.pathfinding.pathToMap(mapId));
 		
 		this.CC.instance.log.p("Map cell reached.");
 	}
-
-	public void changeMap(int direction) {
+	
+	protected void goToArea(int areaId) {
+		if(this.CC.infos.currentMap.subareaId == areaId) // déjà sur l'aire
+			return;
+		boolean isInIncarnam = mapIsInIncarnam(this.CC.infos.currentMap);
+		if(areaIsInIncarnam(areaId)) {
+			if(!isInIncarnam)
+				this.CC.mvt.goUpToIncarnam();
+		}
+		else {
+			if(isInIncarnam)
+				this.CC.mvt.goDownToAstrub();
+		}
+		if(Thread.interrupted())
+			return;
+		
+		this.CC.mvt.travel(this.CC.mvt.pathfinding.pathToArea());
+	}
+	
+	// changement de map (map collatéral)
+	public boolean changeMap(Direction direction) {
 		this.CC.waitState(CharacterState.IS_FREE);
 		if(this.CC.isInterrupted())
-			return;
+			return false;
 
-		this.CC.instance.log.p("Moving to " + Pathfinder.directionToString(direction) + " map.");
+		this.CC.instance.log.p("Moving to " + Map.directionToString(direction.direction) + " map.");
 
-		moveTo(this.pathfinder.getChangementMapCell(direction), true);
+		if(!moveTo(direction.outgoingCellId, true))
+			return false;
 		
 		if(this.CC.isInterrupted())
-			return;
+			return false;
 		
-		int nextMapId = this.CC.infos.currentMap.getNeighbourMapFromDirection(direction);
+		int nextMapId = this.CC.infos.currentMap.getNeighbourMapFromDirection(direction.direction);
 		this.CC.instance.log.p("Sending map changement request. Next map id : " + nextMapId + ".");
 		ChangeMapMessage CMM = new ChangeMapMessage();
 		CMM.serialize(nextMapId);
 		this.CC.instance.outPush(CMM);
+		this.CC.infos.mapsTravelled++;
+		this.CC.instance.log.graphicalFrame.setMapsTravelledCounter(this.CC.infos.mapsTravelled);
 			
 		this.CC.updateState(CharacterState.IS_LOADED, false);
 		this.CC.waitState(CharacterState.IS_FREE);  // on attend la fin du changement de map
+		return true;
+	}
+	
+	public boolean changeMap() {
+		return changeMap(this.pathfinding.nextDirection());
 	}
 	
 	private void goDownToAstrub() {
@@ -130,7 +151,7 @@ public class MovementController {
 			return;
 		
 		this.CC.instance.log.p("Going down to Astrub.");
-		PathsCache.moveTo(153880835, this.CC); // map où se situe le pnj
+		travel(this.pathfinding.pathToMap(153880835)); // map où se situe le pnj
 		if(Thread.interrupted())
 			return;
 		
@@ -166,24 +187,15 @@ public class MovementController {
 	
 	private void goUpToIncarnam() {
 		this.CC.waitState(CharacterState.IS_FREE);
-		if(this.CC.isInterrupted())
-			return;
-		
 		this.CC.instance.log.p("Going up to Incarnam.");
-		PathsCache.moveTo(84674054, this.CC);
-		if(this.CC.isInterrupted())
-			return;
-		
-		moveTo(375, false); // entrée de la statue Féca
-		if(this.CC.isInterrupted())
-			return;
-		
-		InteractiveUseRequestMessage IURM = new InteractiveUseRequestMessage();
-		IURM.serialize(489378, 168278, this.CC.instance.id); // utilisation de la statue Féca
-		this.CC.instance.outPush(IURM);
-		
-		this.CC.updateState(CharacterState.IS_LOADED, false);
-		this.CC.waitState(CharacterState.IS_FREE);
+		travel(this.pathfinding.pathToMap(84674054));
+		this.CC.useInteractive(375, 489378, 168278); // utilisation de la statue Féca
+	}
+	
+	private void travel(Path path) {
+		Direction direction;
+		while(!Thread.currentThread().isInterrupted() && (direction = path.nextDirection()) != null)
+			changeMap(direction);
 	}
 	
 	private static boolean mapIsInIncarnam(Map map) {
@@ -191,67 +203,10 @@ public class MovementController {
 			return true;
 		return false;
 	}
-
-	protected static class AreaRover {
-		private CharacterController CC;
-		private int areaId;
-		
-		protected AreaRover(int areaId, CharacterController CC) {
-			this.CC = CC;
-			this.areaId = areaId;
-			goToAreaIfRequired();
-		}
 	
-		protected int nextMap() {
-			goToAreaIfRequired();
-			if(Thread.interrupted())
-				return -1;
-			
-			
-			Hashtable<Integer, Integer> neighbours  = new Hashtable<Integer, Integer>();
-			for(int direction = 0; direction < 8; direction += 2)
-				neighbours.put(direction, this.CC.infos.currentMap.getNeighbourMapFromDirection(direction));
-			
-			Random randomGen = new Random();
-			int randomDirection;
-			Map map;
-			while(true) {
-				List<Integer> directionList = Collections.list(neighbours.keys());
-				randomDirection = directionList.get(randomGen.nextInt(neighbours.size())); // on prend une direction au hasard
-				map = MapsCache.loadMap(neighbours.get(randomDirection));
-				if(map != null && map.subareaId == this.CC.infos.currentMap.subareaId)
-					return randomDirection;
-				else {
-					Instance.log("Direction to " + Pathfinder.directionToString(randomDirection) + " impossible.");
-					neighbours.remove(randomDirection);
-				}
-			}
-		}
-		
-		private static boolean areaIsInIncarnam(int areaId) {
-			if(areaId >= 422 && areaId <= 450)
-				return true;
-			return false;
-		}
-		
-		private void goToAreaIfRequired() {
-			boolean isInIncarnam = mapIsInIncarnam(this.CC.infos.currentMap);
-			if(areaIsInIncarnam(this.areaId)) {
-				if(!isInIncarnam)
-					this.CC.mvt.goUpToIncarnam();
-			}
-			else {
-				if(isInIncarnam)
-					this.CC.mvt.goDownToAstrub();
-			}
-			
-			if(Thread.interrupted())
-				return;
-			
-			if(this.CC.infos.currentMap.subareaId != this.areaId) {
-				Instance.log("Going to area with id = " + this.areaId + ".");
-				Path.getPathToArea(areaId, this.CC.infos).run(this.CC);
-			}
-		}
+	private static boolean areaIsInIncarnam(int areaId) {
+		if(areaId >= 422 && areaId <= 450)
+			return true;
+		return false;
 	}
 }

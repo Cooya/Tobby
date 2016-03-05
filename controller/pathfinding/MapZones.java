@@ -5,10 +5,34 @@ import gamedata.d2p.ankama.Map;
 
 import java.util.Vector;
 
-public class MapsAnalyser {
-	public static Vector<Vector<Cell>> getZones(Map map) {
-		CellsPathfinder pathfinder = new CellsPathfinder(map);
-		Vector<Vector<Cell>> zones = new Vector<Vector<Cell>>();
+class MapZones {
+	private Vector<Vector<Cell>> zones;
+	
+	protected MapZones(Map map) {
+		retrieveZones(map);
+	}
+	
+	protected boolean inSameZone(int mapId, int cellId1, int cellId2) {
+		return getZone(cellId1) == getZone(cellId2);		
+	}
+	
+	protected Vector<Cell> getZone(int cellId) {
+		Vector<Cell> currentZone = null;
+		boolean found = false;
+		for(Vector<Cell> zone : this.zones)
+			if(!found)
+				for(Cell cell : zone)
+					if(cell.id == cellId) {
+						currentZone = zone;
+						found = true;
+						break;
+					}
+		return currentZone;
+	}
+	
+	private void retrieveZones(Map map) {
+		this.zones = new Vector<Vector<Cell>>();
+		LightMapNode mapNode = new LightMapNode(map);
 		@SuppressWarnings("unchecked")
 		Vector<Cell> cells = (Vector<Cell>) map.cells.clone();
 		Vector<Cell> buffer = new Vector<Cell>();
@@ -41,7 +65,7 @@ public class MapsAnalyser {
 				cells.remove(currentCell);
 				
 				// on ajoute les cellules voisines dans le buffer de cellules à traiter
-				neighbours = pathfinder.getNeighboursCell(currentCell.id);
+				neighbours = mapNode.getNeighboursCell(currentCell.id);
 				for(Cell neighbourCell : neighbours)
 					if(!currentZone.contains(neighbourCell) && !buffer.contains(neighbourCell) && neighbourCell.isAccessibleDuringRP()) {
 						buffer.add(neighbourCell);
@@ -53,8 +77,7 @@ public class MapsAnalyser {
 			//System.out.println();
 			
 			if(currentZone.size() > 0)
-				zones.add(currentZone);
+				this.zones.add(currentZone);
 		}
-		return zones;
 	}
 }

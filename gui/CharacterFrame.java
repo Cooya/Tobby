@@ -11,9 +11,6 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.text.DefaultCaret;
 
-import controller.informations.CharacterInformations;
-import gamedata.d2o.modules.MapPosition;
-
 public class CharacterFrame extends JInternalFrame {
 	protected static final int FRAME_SIZE = 400;
 	private static final long serialVersionUID = 2448473860592287858L;
@@ -22,6 +19,19 @@ public class CharacterFrame extends JInternalFrame {
 	private	JTabbedPane tabbedPane;
 	private	JPanel textAreaPanel;
 	private	JPanel informationsPanel;
+	
+	// chaînes de caractères statiques
+	private static final String UNKNOWN = "unknown";
+	private static final String MAP_LABEL = "Map id : ";
+	private static final String CELL_LABEL = "Cell id : ";
+	private static final String NAME_LABEL = "Name : ";
+	private static final String LIFE_LABEL = "Life : ";
+	private static final String WEIGHT_LABEL = "Weight : ";
+	private static final String EXPERIENCE_LABEL = "Experience : ";
+	private static final String KAMAS_LABEL = "Kamas number : ";
+	private static final String FIGHTS_WON_LABEL = "Fights won counter : ";
+	private static final String FIGHTS_LOST_LABEL = "Fights won counter : ";
+	private static final String MAPS_TRAVELLED_LABEL = "Maps travelled counter : ";
 
 	// infos
 	private JLabel nameLabel;
@@ -31,7 +41,9 @@ public class CharacterFrame extends JInternalFrame {
 	private JLabel weightLabel;
 	private JLabel experienceLabel;
 	private JLabel kamasLabel;
-	private JLabel fightsLabel;
+	private JLabel fightsWonLabel;
+	private JLabel fightsLostLabel;
+	private JLabel mapsTravelledLabel;
 
 	// logs
 	private JTextArea textArea;
@@ -42,14 +54,16 @@ public class CharacterFrame extends JInternalFrame {
 		tabbedPane = new JTabbedPane();
 		textAreaPanel = new JPanel();
 		informationsPanel = new JPanel();
-		mapLabel = new JLabel("Map id : unknown");
-		cellLabel = new JLabel("Cell id : unknown");
-		nameLabel = new JLabel("Name : unknown");
-		lifeLabel = new JLabel("Life : unknown");
-		weightLabel = new JLabel("Weight : unknown");
-		experienceLabel = new JLabel("Experience : unknown");
-		kamasLabel = new JLabel("Kamas number : unknown");
-		fightsLabel = new JLabel("Fights counter : unknown");
+		mapLabel = new JLabel(MAP_LABEL + UNKNOWN);
+		cellLabel = new JLabel(CELL_LABEL + UNKNOWN);
+		nameLabel = new JLabel(NAME_LABEL + UNKNOWN);
+		lifeLabel = new JLabel(LIFE_LABEL + UNKNOWN);
+		weightLabel = new JLabel(WEIGHT_LABEL + UNKNOWN);
+		experienceLabel = new JLabel(EXPERIENCE_LABEL + UNKNOWN);
+		kamasLabel = new JLabel(KAMAS_LABEL + UNKNOWN);
+		fightsWonLabel = new JLabel(FIGHTS_WON_LABEL + UNKNOWN);
+		fightsLostLabel = new JLabel(FIGHTS_LOST_LABEL + UNKNOWN);
+		mapsTravelledLabel = new JLabel(MAPS_TRAVELLED_LABEL + UNKNOWN);
 		
 		this.textArea = new JTextArea(20, 35);
 
@@ -65,7 +79,9 @@ public class CharacterFrame extends JInternalFrame {
 		informationsPanel.add(weightLabel);
 		informationsPanel.add(experienceLabel);
 		informationsPanel.add(kamasLabel);
-		informationsPanel.add(fightsLabel);
+		informationsPanel.add(fightsWonLabel);
+		informationsPanel.add(fightsLostLabel);
+		informationsPanel.add(mapsTravelledLabel);
 		textAreaPanel.add(new JScrollPane(textArea));
 		tabbedPane.addTab("Logs", textAreaPanel);
 		tabbedPane.addTab("Informations",informationsPanel);
@@ -73,20 +89,46 @@ public class CharacterFrame extends JInternalFrame {
 	}
 
 	public void appendText(String text, Color color) {
-		textArea.append(text + EOL);
+		this.textArea.append(text + EOL);
 	}
-
-	public void appendRefreshInfos(CharacterInformations infos) {
-		nameLabel.setText(infos.characterName + " (" + infos.level + ")");
-		if(infos.currentMap != null)
-			mapLabel.setText(String.valueOf(MapPosition.getMapPositionById(infos.currentMap.id)));
-		cellLabel.setText("Cell id : " + String.valueOf(infos.currentCellId));
-		weightLabel.setText("Weight : " + infos.weight + "/" + infos.weightMax);
-		if(infos.stats != null) {
-			lifeLabel.setText("Life points : " + infos.stats.lifePoints + "/" + infos.stats.maxLifePoints);
-			experienceLabel.setText("Experience : " + String.valueOf((int) infos.stats.experience) + "/" + String.valueOf((int) infos.stats.experienceNextLevelFloor));
-			kamasLabel.setText("Kamas number : " + infos.stats.kamas);
-		}
-		fightsLabel.setText("Fights counter : " + String.valueOf(infos.fightsCounter));
+	
+	public void setNameLabel(String name, int level) {
+		this.nameLabel.setText(NAME_LABEL + name + "(" + level + ")");
+	}
+	
+	public void setMapLabel(String map) {
+		this.mapLabel.setText(MAP_LABEL + map);
+	}
+	
+	public void setCellLabel(String cell) {
+		this.cellLabel.setText(CELL_LABEL + cell);
+	}
+	
+	public void setWeightLabel(int weight, int weightMax) {
+		this.weightLabel.setText(WEIGHT_LABEL + weight + "/" + weightMax);
+	}
+	
+	public void setLifeLabel(int lifePoints, int maxLifePoints) {
+		this.lifeLabel.setText(LIFE_LABEL + lifePoints + "/" + maxLifePoints);
+	}
+	
+	public void setExperienceLabel(int experience, int experienceNextLevelFloor) {
+		this.experienceLabel.setText(EXPERIENCE_LABEL + experience + "/" + experienceNextLevelFloor);
+	}
+	
+	public void setKamasLabel(int kamas) {
+		this.kamasLabel.setText(KAMAS_LABEL + kamas); 
+	}
+	
+	public void setFightsWonLabel(int fightsWonCounter) {
+		this.fightsWonLabel.setText(FIGHTS_WON_LABEL + fightsWonCounter); 
+	}
+	
+	public void setFightsLostLabel(int fightsLostCounter) {
+		this.fightsLostLabel.setText(FIGHTS_LOST_LABEL + fightsLostCounter); 
+	}
+	
+	public void setMapsTravelledCounter(int mapsTravelledCounter) {
+		this.mapsTravelledLabel.setText(MAPS_TRAVELLED_LABEL + mapsTravelledCounter);
 	}
 }

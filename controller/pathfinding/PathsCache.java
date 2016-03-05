@@ -5,12 +5,14 @@ import gamedata.d2o.modules.MapPosition;
 import java.util.Vector;
 
 import main.FatalError;
-import controller.CharacterController;
+import main.Instance;
 
-public class PathsCache {
+// cache pas encore utilisé
+class PathsCache {
 	private static Vector<Path> cache = new Vector<Path>();
 	private static final int MAX_ENTRIES = 100;
 	
+	/*
 	public synchronized static Path buildPath(int x1, int y1, int x2, int y2, int currentCellId) {
 		int srcMapId = selectBestMapId(x1, y1);
 		int destMapId = selectBestMapId(x2, y2);
@@ -23,24 +25,60 @@ public class PathsCache {
 		addPath(path);
 		return path;
 	}
-	
-	public static void moveTo(int mapId, CharacterController CC) {
-		Pathfinder pf = new MapsPathfinder(CC.infos.currentCellId);
-		Path path = pf.compute(CC.infos.currentMap.id, mapId);
-		path.startCellId = CC.infos.currentCellId;
-		path.run(CC);
+	*/
+
+	protected static Path toMap(int targetMapId, int sourceMapId, int startCellId) {
+		Pathfinder pf = new MapsPathfinder(startCellId);
+		Path path = pf.compute(sourceMapId, targetMapId);
+		
+		System.out.println(path);
+		
+		path.startCellId = startCellId;
+		return path;
 	}
 	
-	public static void moveTo(int x, int y, CharacterController CC) {
-		moveTo(selectBestMapId(x, y), CC);
+	protected static Path toArea(int areaId, int sourceMapId, int startCellId) {
+		Instance.log("Going to area with id = " + areaId + ".");
+		MapPosition[] mapPositions = MapPosition.getMapPositions();
+		Vector<MapPosition> mapPositionsInArea = new Vector<MapPosition>();
+		for(MapPosition mapPosition : mapPositions)
+			if(mapPosition.subAreaId == areaId)
+				mapPositionsInArea.add(mapPosition);
+		if(mapPositionsInArea.size() == 0)
+			throw new FatalError("Invalid area id.");
+		Instance.log(mapPositionsInArea.size() + " maps in the area with id = " + areaId + ".");
+		Pathfinder pathfinder = new MapsPathfinder(startCellId);
+		Path bestPath = null;
+		Path tmpPath;
+		int shortestDistance = 999999;
+		int tmpDistance;
+		for(MapPosition mapPosition : mapPositionsInArea) {
+			if(mapPosition.worldMap < 1)
+				continue;
+			tmpPath = pathfinder.compute(sourceMapId, mapPosition.id);
+			if(tmpPath == null) // chemin impossible
+				continue;
+			tmpDistance = tmpPath.getCrossingDuration(); // c'est en fait la distance
+			if(tmpDistance < shortestDistance) {
+				shortestDistance = tmpDistance;
+				bestPath = tmpPath;
+			}
+		}
+		System.out.println(bestPath);
+		
+		bestPath.startCellId = startCellId;
+		return bestPath;
 	}
+
 	
+	@SuppressWarnings("unused")
 	private static void addPath(Path path) {
 		cache.add(path);
 		if(cache.size() > MAX_ENTRIES)
 			cache.remove(0);
 	}
 	
+	@SuppressWarnings("unused")
 	private static int selectBestMapId(int x, int y) {
 		Vector<MapPosition> vector = MapPosition.getMapPositionByCoord(x, y);
 		int vectorSize = vector.size();

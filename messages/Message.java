@@ -138,7 +138,7 @@ public class Message {
 		return buffer.bytes();
 	}
 	
-	public void completeInfos(ByteArray buffer) {
+	protected void completeInfos(ByteArray buffer) {
 		this.size = buffer.getSize();
 		this.lenofsize = computeLenOfSize(this.size);
 		if(this.size > 0)

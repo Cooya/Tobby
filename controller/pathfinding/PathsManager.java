@@ -1,5 +1,7 @@
 package controller.pathfinding;
 
+import gamedata.d2p.ankama.Map;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.Hashtable;
@@ -10,7 +12,7 @@ import main.Instance;
 // classe inutilisée
 
 @SuppressWarnings("resource")
-public class PathsManager {
+class PathsManager {
 	private static final String pathsFilePath = "Ressources/paths.txt";
 	private static Hashtable<String, Path> paths = new Hashtable<String, Path>(); 
 	
@@ -46,13 +48,13 @@ public class PathsManager {
 					if(splitLine.length != 2)
 						throw new FatalError("Malformated paths file.");
 					if(splitLine[1].equals("l"))
-						direction = Pathfinder.LEFT;
+						direction = Map.LEFT;
 					else if(splitLine[1].equals("r"))
-						direction = Pathfinder.RIGHT;
+						direction = Map.RIGHT;
 					else if(splitLine[1].equals("u"))
-						direction = Pathfinder.UP;
+						direction = Map.UP;
 					else if(splitLine[1].equals("d"))
-						direction = Pathfinder.DOWN;
+						direction = Map.DOWN;
 					else
 						throw new FatalError("Malformated paths file.");
 					
@@ -65,18 +67,18 @@ public class PathsManager {
 		}
 	}
 	
-	public synchronized static Path createPath(String name, boolean isLoop) {
+	protected synchronized static Path createPath(String name, boolean isLoop) {
 		Instance.log("Creation of a path named \"" + name + "\".");
 		Path path = new Path(name, isLoop);
 		paths.put(name, path);
 		return path;
 	}
 	
-	public synchronized static Path getPathByName(String name) {
+	protected synchronized static Path getPathByName(String name) {
 		return paths.get(name);
 	}
 	
-	public synchronized static void removePath(String name) {
+	protected synchronized static void removePath(String name) {
 		paths.remove(name);
 	}
 }

@@ -1,7 +1,8 @@
 package main;
 
-import java.util.LinkedList;
+import java.util.NoSuchElementException;
 import java.util.Vector;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import controller.CharacterController;
 import controller.CharacterState;
@@ -27,8 +28,8 @@ public class Instance extends Thread {
 	private NetworkInterface net;
 	private CharacterController character;
 	private Vector<Frame> frames;
-	private LinkedList<Message> output;
-	private LinkedList<Message> input;
+	private ConcurrentLinkedQueue<Message> output;
+	private ConcurrentLinkedQueue<Message> input;
 	
 	public Instance(boolean type, String login, String password, int serverId, CharacterFrame graphicalFrame) {
 		super(login + "/process");
@@ -42,8 +43,8 @@ public class Instance extends Thread {
 		else
 			this.character = new FighterController(this, login, password, serverId);
 		this.frames = new Vector<Frame>();
-		this.output = new LinkedList<Message>();
-		this.input = new LinkedList<Message>();
+		this.output = new ConcurrentLinkedQueue<Message>();
+		this.input = new ConcurrentLinkedQueue<Message>();
 		
 		this.frames.add(new ConnectionFrame(this, character));
 		this.frames.add(new SynchronisationFrame(this));
@@ -102,7 +103,7 @@ public class Instance extends Thread {
 	
 	public Message inPull() {
 		try {
-			return this.input.pop();
+			return this.input.poll();
 		}
 		catch(Exception e) {
 			return null;
@@ -111,10 +112,14 @@ public class Instance extends Thread {
 	
 	public Message outPull() {
 		try {
-			return this.output.pop();
+			return this.output.poll();
+		}
+		catch(NoSuchElementException e) {
+			this.log.p(this.output.size() + " message(s) in the output queue.");
+			return null;
 		}
 		catch(Exception e) {
-			return null;
+			throw new FatalError(e);
 		}
 	}
 	

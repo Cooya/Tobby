@@ -4,7 +4,6 @@ import main.Instance;
 import main.Log;
 import messages.EmptyMessage;
 import messages.exchange.ExchangeReadyMessage;
-import messages.interactions.InteractiveUseRequestMessage;
 import messages.interactions.NpcDialogReplyMessage;
 import messages.interactions.NpcGenericActionRequestMessage;
 
@@ -13,7 +12,8 @@ public class MuleController extends CharacterController {
 	
 	public MuleController(Instance instance, String login, String password, int serverId) {
 		super(instance, login, password, serverId);
-		this.waitingMapId = 153879299; // temporaire bien sûr
+		//this.waitingMapId = 153879299; // temporaire bien sûr
+		this.waitingMapId = 84674566; // banque d'Astrub
 	}
 	
 	private void processExchange() {
@@ -27,6 +27,7 @@ public class MuleController extends CharacterController {
 			ERM.serialize(true, 2); // car il y a eu 2 actions lors de l'échange
 			this.instance.outPush(ERM); // on valide de notre côté
 			this.instance.log.p("Exchange validated from my side.");
+			updateState(CharacterState.EXCHANGE_VALIDATED, false); // on enlève cet état pour les prochains échanges
 		}
 		else { // on refuse l'échange
 			try {
@@ -38,27 +39,14 @@ public class MuleController extends CharacterController {
 			EmptyMessage EM = new EmptyMessage("LeaveDialogRequestMessage");
 			this.instance.outPush(EM);
 		}
-		updateState(CharacterState.EXCHANGE_VALIDATED, false); // on enlève cet état pour les prochains échanges
 	}
 	
 	protected void returnTripToAstrubBank() {
 		this.mvt.goTo(84674566); // map où se situe la banque
-		if(interrupted())
-			return;
 		
-		this.mvt.moveTo(317, false); // entrée de la banque
-		if(interrupted())
-			return;
+		useInteractive(317, 465440, 140242); // porte de la banque
 		
-		InteractiveUseRequestMessage IURM = new InteractiveUseRequestMessage();
-		IURM.serialize(465440, 140242, this.instance.id); // porte de la banque
-		this.instance.outPush(IURM);
-		
-		updateState(CharacterState.IS_LOADED, false);
 		waitState(CharacterState.IS_FREE);
-		if(interrupted())
-			return;
-		
 		NpcGenericActionRequestMessage NGARM = new NpcGenericActionRequestMessage();
 		NGARM.serialize(-10001, 3, this.infos.currentMap.id, this.instance.id); // on parle au banquier
 		this.instance.outPush(NGARM);

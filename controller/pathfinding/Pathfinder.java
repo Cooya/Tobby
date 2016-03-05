@@ -4,15 +4,7 @@ import java.util.Vector;
 
 import main.FatalError;
 
-public abstract class Pathfinder {
-	public static final int RIGHT = 0;
-	public static final int DOWN_RIGHT = 1;
-	public static final int DOWN = 2;
-	public static final int DOWN_LEFT = 3;
-	public static final int LEFT = 4;
-	public static final int UP_LEFT = 5;
-	public static final int UP = 6;
-	public static final int UP_RIGHT = 7;
+abstract class Pathfinder {
 	protected PathNode currentNode;
 	protected PathNode destNode;
 	protected Path path;
@@ -23,7 +15,7 @@ public abstract class Pathfinder {
 	protected abstract PathNode nodeIsInList(PathNode node, Vector<PathNode> list);
 	protected abstract Vector<PathNode> getNeighbourNodes(PathNode node);
 	
-	public Path compute(int srcId, int destId) {
+	protected Path compute(int srcId, int destId) {
     	currentNode = getNodeFromId(srcId);
     	//System.out.println(currentNode);
     	if(currentNode == null)
@@ -40,7 +32,7 @@ public abstract class Pathfinder {
 		while(!currentNode.equals(destNode)) {
 			neighbours = getNeighbourNodes(currentNode);
 			for(PathNode neighbourNode : neighbours) {
-				//System.out.println(neighbourNode + " " + neighbourNode.g + " " + Pathfinder.directionToString(neighbourNode.lastDirection));
+				//System.out.println(neighbourNode + " " + neighbourNode.g + " " + Pathfinder.directionToString(neighbourNode.lastDirection) + " " + neighbourNode.isAccessible);
 				if(!neighbourNode.isAccessible) // obstacle
 					continue;
 				if(nodeIsInList(neighbourNode, closedList) != null) // déjà traitée
@@ -55,8 +47,8 @@ public abstract class Pathfinder {
 			//System.out.println();
 			closedList.add(currentNode);
 			currentNode = popBestNodeOfList(openedList);
-			if(currentNode == null)
-				throw new FatalError("None possible path found.");
+			if(currentNode == null) // pas de chemin possible
+				return null;
 		}
 		
 		//for(PathNode node : closedList)
@@ -68,6 +60,7 @@ public abstract class Pathfinder {
 		while(currentNode != null) {
 			if(direction != -2) // le noeud d'arrivée n'a pas de direction
 				currentNode.direction = direction;
+			currentNode.setNode();
 			direction = currentNode.lastDirection;
 			path.addNode(currentNode);
 			currentNode = currentNode.parent;
@@ -90,20 +83,6 @@ public abstract class Pathfinder {
 		return currentNode;
 	}
 	
-	public static String directionToString(int direction) {
-		switch(direction) {
-			case 0 : return "right";
-			case 1 : return "down and right";
-			case 2 : return "down";
-			case 3 : return "down and left";
-			case 4 : return "left";
-			case 5 : return "top and left";
-			case 6 : return "top";
-			case 7 : return "top and right";
-			default : throw new FatalError("Invalid direction integer.");
-		}
-	}
-	
 	protected static abstract class PathNode {
 		protected int id;
 		protected double x;
@@ -116,6 +95,7 @@ public abstract class Pathfinder {
 		protected boolean isAccessible;
 		protected int lastDirection;
 		protected int direction;
+		protected int outgoingCellId; // uniquement pour les MapNodes
 		
 		protected PathNode(int id, int lastDirection, PathNode parent) {
 			this.id = id;
@@ -147,6 +127,7 @@ public abstract class Pathfinder {
     		return this.id == node.id;
     	}
     	
+    	protected abstract void setNode();
 		protected abstract int getCrossingDuration(boolean mode);
 		public abstract String toString();
 	}

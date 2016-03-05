@@ -33,6 +33,8 @@ public class NetworkInterface extends Thread {
 			this.instance.log.p("Connection to game server, waiting response...");
 			connectionToServer(gameServerIP, Main.SERVER_PORT);
 			this.instance.log.p("Deconnected from game server.");
+			if(!isInterrupted())
+				throw new FatalError("Deconnected from game server.");
 		}
 		instance.log.p(Log.Status.CONSOLE, "Thread receiver of instance with id = " + instance.id + " terminated.");
 	}
@@ -88,15 +90,17 @@ public class NetworkInterface extends Thread {
 			Message msg;
 			while (!isInterrupted()) {
 				if((msg = instance.outPull()) != null) {
+					//instance.log.p("Message pulled from the output queue.");
 					latency.setLatestSent();
 					serverCo.send(msg.makeRaw());
 					instance.log.p("s", msg);
 				}
 				else
 					try {
+						//instance.log.p("None message to pull from the output queue.");
 						wait();
 					} catch(Exception e) {
-						Thread.currentThread().interrupt();
+						interrupt();
 					}
 			}
 			instance.log.p(Log.Status.CONSOLE, "Thread sender of instance with id = " + instance.id + " terminated.");
@@ -104,6 +108,7 @@ public class NetworkInterface extends Thread {
 		
 		public synchronized void wakeUp() {
 			notify();
+			//instance.log.p("Sender waking up.");
 		}
 	}
 }

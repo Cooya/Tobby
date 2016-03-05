@@ -135,7 +135,7 @@ public class Cell {
 	}
 	
 	public boolean isAccessibleDuringRP() {
-		return !this._nonWalkableDuringRP && _mov;
+		return !this._nonWalkableDuringRP && this._floor == 0 && this._mov;	
 	}
 	
 	public boolean allowsChangementMap() {
@@ -144,5 +144,9 @@ public class Cell {
 	
 	public String toString() {
 		return "[x = " + this.x + ", y = " + this.y + ", id = " + this.id + "]";
+	}
+	
+	public static double distanceBetween(Cell cell1, Cell cell2) {
+		return Math.sqrt(Math.pow(cell1.x - cell2.x, 2) + Math.pow(cell1.y - cell2.y, 2));
 	}
 }

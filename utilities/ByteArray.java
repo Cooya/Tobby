@@ -201,10 +201,11 @@ public class ByteArray {
 	}
 
 	public int readByte() {	
-		int val = this.array[this.pos++] & 0xFF;
-		if(val < 0)
-			throw new FatalError("Negative byte.");
-		return val;
+		return this.array[this.pos++] & 0xFF;
+	}
+	
+	public int readSignedByte() { // pour readVarShort (temporaire)
+		return this.array[this.pos++];
 	}
 
 	public boolean readBoolean() {
@@ -322,7 +323,7 @@ public class ByteArray {
 	}
 	
 	public int readVarShort() {
-		int pos = getPos();
+		//int pos = getPos();
 		int var4 = 0;
 		int var1 = 0;
 		int var2 = 0;
@@ -330,7 +331,7 @@ public class ByteArray {
 		do {
 			if(var2 >= SHORT_SIZE)
 				throw new FatalError("Too much data");
-			var4 = readByte();
+			var4 = readSignedByte();
 			var3 = (var4 & MASK_10000000) == MASK_10000000;
 			if(var2 > 0)
 				var1 += (var4 & MASK_01111111) << var2;
@@ -340,8 +341,8 @@ public class ByteArray {
 		} while(var3);
 		if(var1 > SHORT_MAX_VALUE)
 			var1 -= UNSIGNED_SHORT_MAX_VALUE;	
-		if(getPos() - pos > 2)
-			throw new FatalError("So many bytes read.");
+		//if(getPos() - pos > 2)
+			//throw new FatalError("So many bytes read.");
 		return var1;
 	}
 	

@@ -7,16 +7,15 @@ import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import controller.informations.CharacterInformations;
 import messages.Message;
 
 public class Log {
 	private static final boolean DEBUG = false;
 	private static String LOG_PATH = System.getProperty("user.dir") + "/Ressources/";
 	private static String EOL = System.getProperty("line.separator");
-	private PrintWriter writer;
-	private CharacterFrame graphicalFrame;
     private static SimpleDateFormat date = new SimpleDateFormat("HH:mm:ss:SSS");
+	private PrintWriter writer;
+	public CharacterFrame graphicalFrame;
 	
 	public Log(String characterName, CharacterFrame graphicalFrame) {
 		try {
@@ -28,6 +27,9 @@ public class Log {
 	}
 	
 	public void p(String msgDirection, Message msg) {
+		if(Thread.currentThread().isInterrupted())
+			return;
+		
 		String str = "";
 		int id = msg.getId();
 		String name = Message.get(id);
@@ -52,6 +54,9 @@ public class Log {
 	}
 	
 	public void p(String str) {
+		if(Thread.currentThread().isInterrupted())
+			return;
+		
 		if(DEBUG)
 			graphicalFrame.appendText("[" + date.format(new Date()) + "] " + str + EOL, Color.BLACK);
 		else
@@ -61,6 +66,9 @@ public class Log {
 	}
 	
 	public void p(Status status, String str) {
+		if(Thread.currentThread().isInterrupted())
+			return;
+		
 		/*
 		switch(status) {
 			case INFO : break;
@@ -73,10 +81,6 @@ public class Log {
 			System.out.println(str);
 		else
 			p(str);
-	}
-	
-	public void refresh(CharacterInformations infos) {
-		graphicalFrame.appendRefreshInfos(infos);
 	}
 
 	public enum Status {

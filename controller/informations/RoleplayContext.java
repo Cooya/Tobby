@@ -20,21 +20,20 @@ public class RoleplayContext {
 		this.character = CC;
 	}
 	
-	public void newContextActors(Vector<GameRolePlayActorInformations> actors) {
+	public synchronized void newContextActors(Vector<GameRolePlayActorInformations> actors) {
 		this.actors = actors;
 		
-		double characterId = this.character.infos.characterId;
 		for(GameRolePlayActorInformations actor : actors)
-			if(actor.contextualId == characterId)
+			if(actor.contextualId == this.character.infos.characterId)
 				this.character.infos.characterName = ((GameRolePlayNamedActorInformations) actor).name;
 		for(GameRolePlayActorInformations actor : actors)
-			if(actor.contextualId == characterId) {
+			if(actor.contextualId == this.character.infos.characterId) {
 				this.character.infos.currentCellId = actor.disposition.cellId;
 				this.character.infos.currentDirection = actor.disposition.direction;
 			}
 	}
 	
-	public void updateContextActorPosition(double actorId, int position) {
+	public synchronized void updateContextActorPosition(double actorId, int position) {
 		for(GameRolePlayActorInformations actor : actors)
 			if(actor.contextualId == actorId) {
 				if(actor instanceof GameRolePlayGroupMonsterInformations)
@@ -43,18 +42,18 @@ public class RoleplayContext {
 			}
 	} 
 	
-	public void addContextActor(GameRolePlayActorInformations actor) {
+	public synchronized void addContextActor(GameRolePlayActorInformations actor) {
 		actors.add(actor);
 	}
 	
-	public void removeContextActor(double actorId) {
+	public synchronized void removeContextActor(double actorId) {
 		Iterator<GameRolePlayActorInformations> it = this.actors.iterator();
 		while(it.hasNext())
 			if(it.next().contextualId == actorId)
 				it.remove();
 	}
 	
-	public Vector<Integer> getCellIdsTakenByMonsters() {
+	public synchronized Vector<Integer> getCellIdsTakenByMonsters() {
 		Vector<Integer> cellIds = new Vector<Integer>();
 		for(GameRolePlayActorInformations actor : actors)
 			if(actor instanceof GameRolePlayGroupMonsterInformations)
@@ -62,21 +61,21 @@ public class RoleplayContext {
 		return cellIds;
 	}
 	
-	public double getActorIdByName(String name) {
+	public synchronized double getActorIdByName(String name) {
 		for(GameRolePlayActorInformations actor : actors)
 			if(actor instanceof GameRolePlayNamedActorInformations && ((GameRolePlayNamedActorInformations) actor).name == name)
 				return actor.contextualId;
 		return -1;
 	}
 	
-	public GameRolePlayActorInformations getActorById(double id) {
+	public synchronized GameRolePlayActorInformations getActorById(double id) {
 		for(GameRolePlayActorInformations actor : actors)
 			if(actor.contextualId == id)
 				return actor;
 		return null;
 	}
 	
-	public Vector<GameRolePlayGroupMonsterInformations> getMonsterGroups() {
+	public synchronized Vector<GameRolePlayGroupMonsterInformations> getMonsterGroups() {
 		Vector<GameRolePlayGroupMonsterInformations> monsters = new Vector<GameRolePlayGroupMonsterInformations>();
 		for(GameRolePlayActorInformations actor : actors)
 			if(actor instanceof GameRolePlayGroupMonsterInformations)
@@ -84,14 +83,14 @@ public class RoleplayContext {
 		return monsters;
 	}
 	
-	public int getMonsterGroupCellId(GameRolePlayGroupMonsterInformations monsterGroup) {
+	public synchronized int getMonsterGroupCellId(GameRolePlayGroupMonsterInformations monsterGroup) {
 		for(GameRolePlayActorInformations actor : this.actors)
 			if(actor.contextualId == monsterGroup.contextualId)
 				return actor.disposition.cellId;
 		return -1;
 	}
 	
-	public boolean actorIsOnMap(double actorId) {
+	public synchronized boolean actorIsOnMap(double actorId) {
 		for(GameRolePlayActorInformations actor : this.actors)
 			if(actor.contextualId == actorId)
 				return true;

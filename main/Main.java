@@ -8,9 +8,21 @@ public class Main {
 	public static final String AUTH_SERVER_IP = "213.248.126.39";
 	public static final int SERVER_PORT = 5555;
 	
-	public static void main(String[] args) {
-		//new Instance("maxlebgdu100", "represente", 11);	
+	public static void main(String[] args) {	
 		Emulation.runLauncher();
 		new Controller();
+		
+		/*
+		MapPosition mp = MapPosition.getMapPositionById(84805636);
+		System.out.println(mp.posX + " " + mp.posY);
+		
+		Vector<Integer> vector = MapPosition.getMapIdByCoord(-3, -17);
+		for(Integer i : vector)
+			System.out.println(i + " " + MapsCache.loadMap(i).mapType);
+		
+		Map map = MapsCache.loadMap(84675590);
+		for(Cell cell : map.cells)
+			System.out.println(cell.id + " " + cell.getFloor() + " " + cell.getNonWalkableDuringRP());
+		*/
 	}
 }

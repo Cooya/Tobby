@@ -3,6 +3,7 @@ package frames;
 import controller.CharacterController;
 import controller.CharacterState;
 import gamedata.d2o.modules.MapPosition;
+import gamedata.d2p.MapsCache;
 import main.FatalError;
 import main.Instance;
 import main.InterClientKeyManager;
@@ -19,6 +20,7 @@ import messages.context.GameMapMovementMessage;
 import messages.context.GameRolePlayShowActorMessage;
 import messages.context.MapComplementaryInformationsDataMessage;
 import messages.context.MapInformationsRequestMessage;
+import messages.exchange.ExchangeLeaveMessage;
 import messages.exchange.ExchangeRequestedTradeMessage;
 import messages.fight.GameFightOptionToggleMessage;
 import messages.gamestarting.ChannelEnablingMessage;
@@ -35,7 +37,6 @@ public class RoleplayFrame extends Frame {
 	}
 
 	public boolean processMessage(Message msg) {
-		this.instance.log.refresh(this.character.infos);
 		switch(msg.getId()) {
 		case 6471 : // CharacterLoadingCompleteMessage
 			InterClientKeyManager ICKM = InterClientKeyManager.getInstance();
@@ -69,7 +70,7 @@ public class RoleplayFrame extends Frame {
 			return true;	
 		case 220 : // CurrentMapMessage
 			CurrentMapMessage CMM = new CurrentMapMessage(msg);
-			this.character.setCurrentMap(CMM.mapId);
+			this.character.infos.currentMap = MapsCache.loadMap(CMM.mapId);
 			MapInformationsRequestMessage MIRM = new MapInformationsRequestMessage();
 			MIRM.serialize(this.character.infos.currentMap.id);
 			instance.outPush(MIRM);
@@ -77,16 +78,22 @@ public class RoleplayFrame extends Frame {
 		case 500 : // CharacterStatsListMessage
 			CharacterStatsListMessage CSLM = new CharacterStatsListMessage(msg);
 			this.character.infos.stats = CSLM.stats;
+			this.instance.log.graphicalFrame.setKamasLabel(this.character.infos.stats.kamas);
+			this.instance.log.graphicalFrame.setExperienceLabel((int) this.character.infos.stats.experience, (int) this.character.infos.stats.experienceNextLevelFloor);
 			return true;
 		case 5670 : // CharacterLevelUpMessage
 			CharacterLevelUpMessage CLUM = new CharacterLevelUpMessage(msg);
 			this.character.infos.level = CLUM.newLevel;
+			this.instance.log.graphicalFrame.setNameLabel(this.character.infos.characterName, this.character.infos.level);
 			this.character.updateState(CharacterState.LEVEL_UP, true);
 			return true;
 		case 226 : // MapComplementaryInformationsDataMessage
 			MapComplementaryInformationsDataMessage MCIDM = new MapComplementaryInformationsDataMessage(msg);
 			this.character.roleplayContext.newContextActors(MCIDM.actors);
 			this.instance.log.p("Current map : " + MapPosition.getMapPositionById(this.character.infos.currentMap.id) + ".\nCurrent cell id : " + this.character.infos.currentCellId + ".\nCurrent area id : " + this.character.infos.currentMap.subareaId + ".");
+			this.instance.log.graphicalFrame.setMapLabel(String.valueOf(MapPosition.getMapPositionById(this.character.infos.currentMap.id)));
+			this.instance.log.graphicalFrame.setCellLabel(String.valueOf(this.character.infos.currentCellId));
+			this.character.updatePosition(this.character.infos.currentMap, this.character.infos.currentCellId);
 			this.character.updateState(CharacterState.IS_LOADED, true);
 			return true;
 		case 5632 : // GameRolePlayShowActorMessage
@@ -105,6 +112,8 @@ public class RoleplayFrame extends Frame {
 			if(GMMM.actorId == this.character.infos.characterId) {
 				this.character.infos.currentCellId = position;
 				this.instance.log.p("Next cell id after movement : " + position + ".");
+				this.instance.log.graphicalFrame.setCellLabel(String.valueOf(this.character.infos.currentCellId));
+				this.character.updatePosition(this.character.infos.currentCellId);
 				this.character.updateState(CharacterState.CAN_MOVE, true);
 			}
 			return true;
@@ -114,7 +123,7 @@ public class RoleplayFrame extends Frame {
 			return true;
 		case 700 : // GameFightStartingMessage
 			this.instance.log.p("Starting fight.");
-			if(this.character.infos.fightsCounter == 0) { // blocage automatique pour les combats suivants
+			if(this.character.infos.fightsWonCounter + this.character.infos.fightsLostCounter == 0) { // blocage automatique pour les combats suivants
 				GameFightOptionToggleMessage GFOTM = new GameFightOptionToggleMessage();
 				GFOTM.serialize(2); // 0 pour interdire les spectateurs
 				this.instance.outPush(GFOTM);
@@ -128,6 +137,7 @@ public class RoleplayFrame extends Frame {
 			InventoryWeightMessage IWM = new InventoryWeightMessage(msg);
 			this.character.infos.weight = IWM.weight;
 			this.character.infos.weightMax = IWM.weightMax;
+			this.instance.log.graphicalFrame.setWeightLabel(this.character.infos.weight, this.character.infos.weightMax);
 			if(this.character.infos.weightMaxAlmostReached()) {
 				this.character.updateState(CharacterState.NEED_TO_EMPTY_INVENTORY, true);
 				this.instance.log.p("Inventory weight maximum almost reached, need to empty.");
@@ -146,6 +156,16 @@ public class RoleplayFrame extends Frame {
 			this.instance.startExchange();
 			this.character.updateState(CharacterState.PENDING_DEMAND, false);
 			this.character.updateState(CharacterState.IN_EXCHANGE, true);
+			return true;
+		case 5628 : // ExchangeLeaveMessage
+			ExchangeLeaveMessage ELM = new ExchangeLeaveMessage(msg);
+			this.character.roleplayContext.lastExchangeResult = ELM.success;
+			if(this.character.inState(CharacterState.IN_EXCHANGE)) { // on quitte un échange
+				this.instance.quitExchange();
+				this.character.updateState(CharacterState.IN_EXCHANGE, false);
+			}
+			else // on refuse un échange
+				this.character.updateState(CharacterState.PENDING_DEMAND, false);
 			return true;
 		}
 		return false;

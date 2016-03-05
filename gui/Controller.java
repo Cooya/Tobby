@@ -8,7 +8,6 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.util.Vector;
 
 import javax.swing.AbstractButton;
 import javax.swing.JInternalFrame;
@@ -24,13 +23,11 @@ public class Controller {
 	private View view;
 	private Model model;
 	private Instance mule;
-	private Vector<Instance> fighters;
 
 	public Controller() {
 		this.view = new View();
 		this.model = new Model();
 		this.mule = null;
-		this.fighters = new Vector<Instance>();
 		loadAccountsList();
 		new StartListener(this.view.menuItem);
 		new RunMuleButtonListener(this.view.runMuleButton);
@@ -62,27 +59,26 @@ public class Controller {
 		CharacterFrame frame = new CharacterFrame(login);
 		Instance instance = new Instance(type, login, password, serverId, frame);
 		frame.instanceId = instance.id;
-		if(!type) {
-			fighters.add(instance);
+		if(!type)
 			if(this.mule != null) // la mule est connectée
 				instance.setMule(this.mule);
-		}
-		model.instances.put(instance.id, instance);
-		view.addCharacterFrame(frame);
+		this.model.addInstance(instance.id, instance, type);
+		this.view.addCharacterFrame(frame);
 		frame.addInternalFrameListener(new CharacterFrameListener());
 		frame.setVisible(true);
 		return instance;
 	}
 
-	private void killInstance(JInternalFrame graphicalFrame) {	
-		Instance instance = this.model.instances.get(this.view.getInstance(graphicalFrame).instanceId);
+	private void killInstance(JInternalFrame graphicalFrame) {
+		int instanceId = this.view.getInstance(graphicalFrame).instanceId;
+		Instance instance = this.model.getInstance(instanceId);
 		this.view.removeCharacterFrame(graphicalFrame);
 		if(instance == this.mule) {
-			this.model.removeMuleToEveryFighter(this.mule);
+			this.model.removeInstance(instanceId, true);
 			this.mule = null;
 		}
 		else
-			this.fighters.remove(instance);
+			this.model.removeInstance(instanceId, false);
 		Instance.killInstance(instance);
 	}
 	
@@ -93,7 +89,6 @@ public class Controller {
 
 		public void actionPerformed(ActionEvent event) {
 			mule = createCharacterFrame(true, "nicomarchand", "poupinou47", 11);
-			model.assignMuleToEveryFighter(mule);
 		}
 	}
 

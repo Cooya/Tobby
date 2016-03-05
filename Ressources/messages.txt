@@ -80,6 +80,7 @@
 1301 StartupActionsListMessage
 3009 InventoryWeightMessage
 3016 InventoryContentMessage
+3017 ObjectGroundAddedMessage
 3023 ObjectQuantityMessage
 3025 ObjectAddedMessage
 4001 FriendsGetListMessage
@@ -100,6 +101,7 @@
 5572 GameFightUpdateTeamMessage
 5607 ClientKeyMessage
 5608 SpellUpgradeRequestMessage
+5609 StatsUpgradeResultMessage
 5610 StatsUpgradeRequestMessage
 5613 ChallengeTargetsListMessage
 5616 NpcDialogReplyMessage
@@ -160,6 +162,7 @@
 6087 NotificationListMessage
 6100 QueueStatusMessage
 6103 NotificationByServerMessage
+6113 GameActionFightDispellEffectMessage
 6123 ChallengeTargetUpdateMessage
 6129 ExchangeStartedWithPodsMessage
 6132 GameActionFightNoSpellCastMessage

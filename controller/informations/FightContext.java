@@ -11,6 +11,7 @@ public class FightContext {
 	private CharacterController CC;
 	public Vector<GameFightFighterInformations> fighters;
 	public GameFightFighterInformations self;
+	public boolean lastFightOutcome;
 	
 	public FightContext(CharacterController CC) {
 		this.CC = CC;

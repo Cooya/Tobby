@@ -41,7 +41,6 @@ public class Emulation {
 	
 	public static Message emulateServer(String login, String password, HelloConnectMessage HCM, IdentificationSuccessMessage ISM, RawDataMessage RDM, int instanceId) {
 		lock.lock();
-		Instance.log("lock");
 		if(launcherCo == null)
 			connectToLauncher();
 		
@@ -90,7 +89,6 @@ public class Emulation {
 			Instance.log("Deconnection from Dofus client.");
 			clientDofusCo.close();
 			Thread.sleep(2000);
-			Instance.log("unlock");
 			lock.unlock();
 			return CIM;
 		} catch(Exception e) {
@@ -103,7 +101,6 @@ public class Emulation {
 	
 	public static ByteArray hashMessage(ByteArray msg, int instanceId) {
 		lock.lock();
-		Instance.log("lock");
 		ByteArray bytes = new ByteArray(msg.getSize() + 2);
 		bytes.writeInt(1 + 1 + msg.getSize());
 		bytes.writeByte((byte) 3); 
@@ -136,7 +133,6 @@ public class Emulation {
 			}
 		}
 		Instance.log("Message hashed, " + size + " bytes received.");
-		Instance.log("unlock");
 		lock.unlock();
 		return new ByteArray(array.bytesFromPos());
 	}

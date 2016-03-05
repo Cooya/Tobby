@@ -4,19 +4,19 @@ import java.util.Hashtable;
 
 import gamedata.character.Elements;
 import gamedata.character.PlayerStatusEnum;
-import gamedata.d2p.MapsCache;
+import gamedata.d2p.ankama.Map;
 import controller.informations.CharacterInformations;
 import controller.informations.RoleplayContext;
-import controller.pathfinding.CellsPathfinder;
 import main.FatalError;
 import main.Instance;
 import messages.character.PlayerStatusUpdateRequestMessage;
+import messages.interactions.InteractiveUseRequestMessage;
 import messages.synchronisation.BasicPingMessage;
 
 public abstract class CharacterController extends Thread {
 	public CharacterInformations infos;
 	public RoleplayContext roleplayContext;
-	public MovementController mvt;
+	protected MovementController mvt;
 	protected Instance instance;
 	private Hashtable<CharacterState, Boolean> states; // laisser en private
 	
@@ -31,10 +31,13 @@ public abstract class CharacterController extends Thread {
 		for(CharacterState state : CharacterState.values())
 			this.states.put(state, false);
 	}
+	
+	public void updatePosition(Map map, int cellId) {
+		this.mvt.pathfinding.updatePosition(map, cellId);
+	}
 
-	public void setCurrentMap(int mapId) {
-		this.infos.currentMap = MapsCache.loadMap(mapId);
-		this.mvt.pathfinder = new CellsPathfinder(this.infos.currentMap);
+	public void updatePosition(int cellId) {
+		this.mvt.pathfinding.updatePosition(cellId);
 	}
 	
 	private boolean isFree() {
@@ -52,7 +55,7 @@ public abstract class CharacterController extends Thread {
 		notify();
 	}
 	
-	protected boolean inState(CharacterState state) {
+	public boolean inState(CharacterState state) {
 		return this.states.get(state);
 	}
 	
@@ -107,9 +110,7 @@ public abstract class CharacterController extends Thread {
 				return waitSpecificState(CharacterState.PENDING_DEMAND, 1000 * 60 * 5); // 5 minutes
 			case IN_EXCHANGE :
 				this.instance.log.p("Waiting for exchange acceptance.");
-				while(!isInterrupted() && !this.states.get(CharacterState.IN_EXCHANGE))
-					waitAnyEvent();
-				return true;
+				return waitSpecificState(CharacterState.IN_EXCHANGE, 5000);
 			case EXCHANGE_VALIDATED :
 				this.instance.log.p("Waiting for exchange validation.");
 				while(!isInterrupted() && !this.states.get(CharacterState.EXCHANGE_VALIDATED))
@@ -147,5 +148,15 @@ public abstract class CharacterController extends Thread {
 		BPM.serialize(false);
 		this.instance.outPush(BPM);
 		this.instance.log.p("Sending a ping request to server for stay connected.");
+	}
+	
+	protected void useInteractive(int besideCellId, int elemId, int skillInstanceUid) {
+		if(!this.mvt.moveTo(besideCellId, false))
+			return;
+		waitState(CharacterState.IS_FREE);
+		InteractiveUseRequestMessage IURM = new InteractiveUseRequestMessage();
+		IURM.serialize(elemId, skillInstanceUid, this.instance.id);
+		this.instance.outPush(IURM);
+		updateState(CharacterState.IS_LOADED, false);
 	}
 }

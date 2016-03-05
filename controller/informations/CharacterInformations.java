@@ -24,7 +24,9 @@ public class CharacterInformations {
 	public CharacterCharacteristicsInformations stats;
 	public HashMap<Integer,SpellItem> spellList; 
 	public int spellToUpgrade;
-	public int fightsCounter;
+	public int fightsWonCounter;
+	public int fightsLostCounter;
+	public int mapsTravelled;
 	
 	public CharacterInformations(String login, String password, int serverId, int element) {
 		this.login = login;
@@ -32,7 +34,7 @@ public class CharacterInformations {
 		this.serverId = serverId;
 		this.element = element;
 		this.spellToUpgrade = 161; // flèche magique
-		this.fightsCounter = 0;
+		this.mapsTravelled = 1;
 	}
 	
 	public int missingLife() {

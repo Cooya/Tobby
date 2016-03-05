@@ -1,15 +1,12 @@
 package controller.pathfinding;
 
-import gamedata.d2o.modules.MapPosition;
+import gamedata.d2p.ankama.Map;
 
 import java.util.Collections;
 import java.util.Vector;
 
-import controller.CharacterController;
-import controller.informations.CharacterInformations;
 import controller.pathfinding.Pathfinder.PathNode;
 import main.FatalError;
-import main.Instance;
 
 public class Path {
 	private String name;
@@ -17,35 +14,6 @@ public class Path {
 	private int currentPos;
 	private boolean isLoop;
 	protected int startCellId = -1; // uniquement pour les paths de maps
-	
-	public static Path getPathToArea(int areaId, CharacterInformations infos) {
-		MapPosition[] mapPositions = MapPosition.getMapPositions();
-		Vector<MapPosition> mapPositionsInArea = new Vector<MapPosition>();
-		for(MapPosition mapPosition : mapPositions)
-			if(mapPosition.subAreaId == areaId)
-				mapPositionsInArea.add(mapPosition);
-		if(mapPositionsInArea.size() == 0)
-			throw new FatalError("Invalid area id.");
-		Instance.log(mapPositionsInArea.size() + " maps in the area with id = " + areaId + ".");
-		Pathfinder pathfinder = new MapsPathfinder(infos.currentCellId);
-		Path bestPath = null;
-		Path tmpPath;
-		int shortestDistance = 999999;
-		int tmpDistance;
-		for(MapPosition mapPosition : mapPositionsInArea) {
-			if(mapPosition.worldMap < 1)
-				continue;
-			tmpPath = pathfinder.compute(infos.currentMap.id, mapPosition.id);
-			if(tmpPath == null)
-				continue;
-			tmpDistance = tmpPath.getCrossingDuration(); // c'est en fait la distance
-			if(tmpDistance < shortestDistance) {
-				shortestDistance = tmpDistance;
-				bestPath = tmpPath;
-			}
-		}
-		return bestPath;
-	}
 	
 	protected Path(Vector<PathNode> nodes) {
 		this.name = "anonymous";
@@ -65,31 +33,32 @@ public class Path {
 		this("anonymous", false);
 	}
 	
-	public void run(CharacterController CC) {
-		Instance.log("Running path named \"" + name + "\".");
-
-		int nextMapId;
-		while((nextMapId = nextMap()) != -1)
-			CC.mvt.changeMap(nextMapId);
+	public Direction nextDirection() {
+		if(this.isLoop && this.currentPos == this.nodes.size()) // absolument inutile car il ne rend pas la main
+			this.currentPos = 0;
+		else if(this.currentPos == this.nodes.size() - 1) // on ne s'intéresse pas au noeud d'arrivée
+			return null;
+		PathNode currentNode = this.nodes.get(this.currentPos++);
+		return new Direction(currentNode.direction, currentNode.outgoingCellId);
 	}
 	
 	public String getName() {
 		return this.name;
 	}
 	
-	public PathNode getFirstNode() {
+	protected PathNode getFirstNode() {
 		return this.nodes.firstElement();
 	}
 	
-	public PathNode getLastNode() {
+	protected PathNode getLastNode() {
 		return this.nodes.lastElement();
 	}
 	
-	public void resetPosition() {
+	protected void resetPosition() {
 		this.currentPos = 0;
 	}
 	
-	public int getCrossingDuration() {
+	protected int getCrossingDuration() {
 		int pathLen = nodes.size();
 		int time = 0;
 		for(int i = 1; i < pathLen; ++i) // on saute la première cellule
@@ -100,7 +69,7 @@ public class Path {
 		return time;
 	}
 	
-	public Vector<Integer> toVector() {
+	protected Vector<Integer> toVector() {
 		Vector<Integer> vector = new Vector<Integer>();
 		for(PathNode node : nodes)
 			vector.add(node.id);
@@ -115,22 +84,13 @@ public class Path {
 	}
 	
 	protected void addNode(int id, int direction) {
-		if(direction != Pathfinder.LEFT && direction != Pathfinder.RIGHT && direction != Pathfinder.UP && direction != Pathfinder.DOWN)
+		if(direction != Map.LEFT && direction != Map.RIGHT && direction != Map.UP && direction != Map.DOWN)
 			throw new FatalError("Invalid direction for create a node path.");
 		this.nodes.add(new SimplePathNode(id, direction));
 	}
 	
 	protected void addNode(PathNode node) {
 		this.nodes.add(node);
-	}
-	
-	protected int nextMap() {
-		if(this.currentPos == this.nodes.size())
-			if(this.isLoop)
-				this.currentPos = 0;
-			else
-				return -1;
-		return this.nodes.get(this.currentPos++).direction;
 	}
 	
 	protected void reverse() {
@@ -148,7 +108,17 @@ public class Path {
 		return false;
 	}
 	
-	private class SimplePathNode extends PathNode {
+	public static class Direction {
+		public int direction;
+		public int outgoingCellId;
+		
+		protected Direction(int direction, int outgoingCellId) {
+			this.direction = direction;
+			this.outgoingCellId = outgoingCellId;
+		}
+	}
+	
+	private class SimplePathNode extends PathNode { // pour les paths enregistrés dans le fichier "paths.txt"
 
 		private SimplePathNode(int id, int direction) {
 			super(id, -1, null);
@@ -157,6 +127,10 @@ public class Path {
 
 		protected int getCrossingDuration(boolean mode) {
 			throw new FatalError("Phony method !");
+		}
+		
+		protected void setNode() {
+			
 		}
 		
 		public String toString() {

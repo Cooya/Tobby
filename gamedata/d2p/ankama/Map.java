@@ -5,12 +5,19 @@ import gamedata.d2p.Cell;
 import java.util.Vector;
 
 import main.FatalError;
-import controller.pathfinding.Pathfinder;
 import utilities.ByteArray;
 
 public class Map {
 	public static final int WIDTH = 14;
 	public static final int HEIGHT = 20; // 40 pour l'ancienne version du pathfinder
+	public static final int RIGHT = 0;
+	public static final int DOWN_RIGHT = 1;
+	public static final int DOWN = 2;
+	public static final int DOWN_LEFT = 3;
+	public static final int LEFT = 4;
+	public static final int UP_LEFT = 5;
+	public static final int UP = 6;
+	public static final int UP_RIGHT = 7;
 	private static final String decryptionKey = "649ae451ca33ec53bbcbcc33becf15f4";
 	public static final int CELLS_COUNT = 560;
     public Class<Map> mapClass;
@@ -163,13 +170,27 @@ public class Map {
     
     public int getNeighbourMapFromDirection(int direction) {
     	switch(direction) {
-    		case Pathfinder.LEFT : return this.leftNeighbourId;
-    		case Pathfinder.RIGHT : return this.rightNeighbourId;
-    		case Pathfinder.UP : return this.topNeighbourId;
-    		case Pathfinder.DOWN : return this.bottomNeighbourId;
+    		case LEFT : return this.leftNeighbourId;
+    		case RIGHT : return this.rightNeighbourId;
+    		case UP : return this.topNeighbourId;
+    		case DOWN : return this.bottomNeighbourId;
     		default : throw new FatalError("Invalid direction for find neighbour map id");
     	}
     }
+    
+	public static String directionToString(int direction) {
+		switch(direction) {
+			case RIGHT : return "right";
+			case DOWN_RIGHT : return "down and right";
+			case DOWN : return "down";
+			case DOWN_LEFT : return "down and left";
+			case LEFT : return "left";
+			case UP_LEFT : return "up and left";
+			case UP : return "up";
+			case UP_RIGHT : return "up and right";
+			default : throw new FatalError("Invalid direction integer.");
+		}
+	}
     
     /*
     public static int getMapIdFromCoords(int worldId, int x, int y) {
