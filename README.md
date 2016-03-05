@@ -17,17 +17,22 @@
 * ~~**GameMapNoMovementMessage (probablement à cause d'une cellule courante fausse)**~~
 * **"array index out of bounds" lors de la lecture d'un paquet**
 * ~~ChangeMapMessage qui ne s'envoie pas~~
-* "Connection reset" pendant la création du serveur d'émulation
+* ~~"Connection reset" pendant la création du serveur d'émulation~~
 * ~~Déconnexion intempestive pour une raison inconnue (en combat ou en mouvement)~~
-* "None possible path found" sur les maps séparées par un "mur" d'obstacles
-* Problème d'accès concurrents dans la classe RoleplayContext (et peut-être aussi dans FightContext)
+* ~~"None possible path found" sur les maps séparées par un "mur" d'obstacles~~
+* ~~Problème d'accès concurrents dans la classe RoleplayContext (et peut-être aussi dans FightContext)~~
+* Chemins de maps possiblement erronés des fois, à vérifier sur le long terme
+* Cellules dans le coin des maps ne permettant de changer de map que d'un seul côté (donc problème quand on veut aller dans l'autre côté)
+* Exceptions en double (FatalError)
+* Temps mort à la création d'un path de maps (peut-être que c'est normal)
+* Launcher qui finit par s'écrouler au bout d'un certain temps
 
 ### Échanges ###
 
 * ~~Vérifier le lanceur de l'échange (côté mule)~~
 * ~~Vérifier si l'échange a été un succès ou pas du côté combattant~~
 * ~~Ajouter les kamas lors de l'échange (fighter -> mule)~~
-* Si la demande d'échange a échoué (cible occupée ou pas encore chargée complètement sur la map), la relancer lorsque la cible sera disponible
+* ~~Si la demande d'échange a échoué (cible occupée ou pas encore chargée complètement sur la map), la relancer lorsque la cible sera disponible~~
 
 ### Interface graphique ###
 
