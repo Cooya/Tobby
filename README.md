@@ -22,7 +22,7 @@
 * ~~"None possible path found" sur les maps séparées par un "mur" d'obstacles~~
 * ~~Problème d'accès concurrents dans la classe RoleplayContext (et peut-être aussi dans FightContext)~~
 * Chemins de maps possiblement erronés des fois, à vérifier sur le long terme
-* Cellules dans le coin des maps ne permettant de changer de map que d'un seul côté (donc problème quand on veut aller dans l'autre côté)
+* Cellules dans le coin des maps ne permettant de changer de map que d'un seul côté (donc problème quand on veut aller vers l'autre côté)
 * Exceptions en double (FatalError)
 * Temps mort à la création d'un path de maps (peut-être que c'est normal)
 * Launcher qui finit par s'écrouler au bout d'un certain temps
@@ -39,9 +39,11 @@
 * "Scroll down" automatique qui s'arrête
 * Ajouter la couleur dans les logs des CharacterFrames
 * Padding à ajouter autour des logs des CharacterFrames
+* Améliorer le rafraichissement des informations dans les CharacterFrames (trop lourd actuellement) 
 
 ### Facultatif ###
 
 * Envoyer le message "GameContextReadyMessage"
 * Éviter de repartir sur l'aire de combat lorsqu'on est full pods
 * Améliorer la réflexion
+* Correction de la frame nulle ajoutée dans le vecteur de frames de l'instance de la mule (pas très propre)
