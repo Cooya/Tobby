@@ -20,8 +20,7 @@ public class View {
 	protected Vector<CharacterFrame> charactersFrame;
 	protected JMenuItem menuItem;
 	protected Vector<JMenuItem> accountsListItems;
-	protected JMenu accountsMenu; 
-	protected JButton runMuleButton;
+	protected JMenu accountsMenu;
 	protected LoginPanel loginPanel;
 	private JMenuBar menuBar;
 
@@ -36,11 +35,8 @@ public class View {
 		menu.add(menuItem);
 		menu.add(accountsMenu);
 		
-		runMuleButton = new JButton("Lancer la mule");
-		
 		menuBar = new JMenuBar();
 		menuBar.add(menu);
-		menuBar.add(runMuleButton);
 		
 		desktopPane = new JDesktopPane();
 		desktopPane.setDragMode(JDesktopPane.OUTLINE_DRAG_MODE);

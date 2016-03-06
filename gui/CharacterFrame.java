@@ -15,7 +15,7 @@ public class CharacterFrame extends JInternalFrame {
 	protected static final int FRAME_SIZE = 400;
 	private static final long serialVersionUID = 2448473860592287858L;
 	private static String EOL = System.getProperty("line.separator");
-	protected int instanceId;
+	protected int id;
 	private	JTabbedPane tabbedPane;
 	private	JPanel textAreaPanel;
 	private	JPanel informationsPanel;
@@ -48,8 +48,9 @@ public class CharacterFrame extends JInternalFrame {
 	// logs
 	private JTextArea textArea;
 
-	public CharacterFrame(String name) {
-		super(name, true, true, true, true);
+	public CharacterFrame(int id, String login) {
+		super(login, true, true, true, true);
+		this.id = id;
 		setSize(FRAME_SIZE, FRAME_SIZE);	
 		tabbedPane = new JTabbedPane();
 		textAreaPanel = new JPanel();

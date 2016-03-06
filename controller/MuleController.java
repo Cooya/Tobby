@@ -1,5 +1,6 @@
 package controller;
 
+import gui.Controller;
 import main.Instance;
 import main.Log;
 import messages.EmptyMessage;
@@ -17,7 +18,7 @@ public class MuleController extends CharacterController {
 	}
 	
 	private void processExchange() {
-		if(Instance.isWorkmate(this.roleplayContext.actorDemandingExchange)) {
+		if(Controller.isWorkmate(this.roleplayContext.actorDemandingExchange)) {
 			EmptyMessage EM = new EmptyMessage("ExchangeAcceptMessage"); // accepter l'échange
 			this.instance.outPush(EM);
 			waitState(CharacterState.EXCHANGE_VALIDATED); // attendre que l'échange soit validé

@@ -1,5 +1,6 @@
 package gui;
 
+import gui.Model.Account;
 import gui.View.LoginPanel;
 
 import java.awt.event.ActionEvent;
@@ -17,36 +18,59 @@ import javax.swing.event.InternalFrameEvent;
 import javax.swing.event.InternalFrameListener;
 
 import main.Instance;
+import main.Log;
 
 public class Controller {
-	private String accountsFilePath = "Ressources/accounts.txt";
-	private View view;
-	private Model model;
-	private Instance mule;
+	private static final String accountsFilePath = "Ressources/accounts.txt";
+	private static View view;
+	private static Model model; // contient les instances lancées et les comptes disponibles
 
 	public Controller() {
-		this.view = new View();
-		this.model = new Model();
-		this.mule = null;
+		view = new View();
+		model = new Model();
 		loadAccountsList();
-		new StartListener(this.view.menuItem);
-		new RunMuleButtonListener(this.view.runMuleButton);
+		new StartListener(view.menuItem);
+	}
+	
+	public static void restartInstance() {
+		Instance instance = model.getCurrentInstance();
+		instance.interruptThreads();
+		// TODO
+	}
+	
+	public static boolean isWorkmate(double characterId) {
+		for(Instance instance : model.getConnectedInstances())
+			if(instance.getCharacterId() == characterId)
+				return true;
+		return false;
+	}
+	
+	public static Log getLog() {
+		Thread currentThread = Thread.currentThread();
+		for(Instance instance : model.getConnectedInstances())
+			for(Thread thread : instance.threads)
+				if(thread == currentThread)
+					return instance.log;
+		return null;
 	}
 
 	private void loadAccountsList() {
 		try {
 			BufferedReader buffer = new BufferedReader(new FileReader(accountsFilePath));
-			String[] splitLine;
 			String line;
-			line = buffer.readLine();
-			while(line != null) {
-				splitLine = line.split(" ");
-				model.accounts.put(splitLine[0], line);
-				JMenuItem account = new JMenuItem(splitLine[0]);
-				view.accountsListItems.add(account);
-				view.accountsMenu.add(account);
-				new AccountItemListener(account);
-				line = buffer.readLine();
+			Account account;
+			JMenuItem item;
+			while((line = buffer.readLine()) != null) {
+				if(!line.equals("")) {
+					account = model.createAccount(line);
+					if(account.type == 0)
+						item = new JMenuItem(account.login + " (mule)");
+					else
+						item = new JMenuItem(account.login);
+					view.accountsListItems.add(item);
+					view.accountsMenu.add(item);
+					new AccountItemListener(item);
+				}
 			}
 			buffer.close();
 		} catch(Exception e) {
@@ -54,42 +78,23 @@ public class Controller {
 		}
 	}
 	
-	// type = true si c'est une mule
-	private Instance createCharacterFrame(boolean type, String login, String password, int serverId) {
-		CharacterFrame frame = new CharacterFrame(login);
-		Instance instance = new Instance(type, login, password, serverId, frame);
-		frame.instanceId = instance.id;
-		if(!type)
-			if(this.mule != null) // la mule est connectée
-				instance.setMule(this.mule);
-		this.model.addInstance(instance.id, instance, type);
-		this.view.addCharacterFrame(frame);
+	private void createInstance(Account account) {
+		CharacterFrame frame = new CharacterFrame(account.id, account.login);
+		view.addCharacterFrame(frame);
 		frame.addInternalFrameListener(new CharacterFrameListener());
 		frame.setVisible(true);
-		return instance;
+		
+		Instance instance = new Instance(account.id, account.type, account.login, account.password, account.serverId, frame);
+		model.addInstance(account, instance);
 	}
 
 	private void killInstance(JInternalFrame graphicalFrame) {
-		int instanceId = this.view.getInstance(graphicalFrame).instanceId;
-		Instance instance = this.model.getInstance(instanceId);
-		this.view.removeCharacterFrame(graphicalFrame);
-		if(instance == this.mule) {
-			this.model.removeInstance(instanceId, true);
-			this.mule = null;
-		}
-		else
-			this.model.removeInstance(instanceId, false);
-		Instance.killInstance(instance);
-	}
-	
-	private class RunMuleButtonListener implements ActionListener {
-		private RunMuleButtonListener(AbstractButton button) {
-			button.addActionListener(this);
-		}
-
-		public void actionPerformed(ActionEvent event) {
-			mule = createCharacterFrame(true, "nicomarchand", "poupinou47", 11);
-		}
+		int instanceId = view.getInstance(graphicalFrame).id;
+		view.removeCharacterFrame(graphicalFrame);
+		
+		Instance instance = model.getInstance(instanceId);
+		model.removeInstance(instance);
+		instance.interruptThreads();
 	}
 
 	private class StartListener implements ActionListener {
@@ -117,24 +122,24 @@ public class Controller {
 			if(login.isEmpty() || password.isEmpty() || serverId == 0)
 				JOptionPane.showMessageDialog(null, "Missing informations.", "Erreur", JOptionPane.ERROR_MESSAGE);
 			else {
-				createCharacterFrame(false, login, password, serverId);
 				loginPanel.dispose();
-				try {
-					// ajout du compte dans le fichier de sauvegarde
-					if(model.accounts.get(login) == null) {
+				Account account = model.getAccount(login);
+				if(account == null) {
+					account = model.createAccount(1, login, password, serverId);
+					try {
 						BufferedWriter buffer = new BufferedWriter(new FileWriter(accountsFilePath, true));
-						buffer.write(login + " " + password + " " + serverId);
 						buffer.newLine();
+						buffer.write("1 " + login + " " + password + " " + serverId);
 						buffer.close();
-						model.accounts.put(login, login + " " + password + " " + serverId);
-						JMenuItem account = new JMenuItem(login);
-						view.accountsListItems.add(account);
-						view.accountsMenu.add(account);
-						new AccountItemListener(account);
+					} catch(Exception e) {
+						e.printStackTrace();
 					}
-				} catch(Exception e) {
-					e.printStackTrace();
+					JMenuItem item = new JMenuItem(login);
+					view.accountsListItems.add(item);
+					view.accountsMenu.add(item);
+					new AccountItemListener(item);
 				}
+				createInstance(account);
 			}
 		}
 	}
@@ -174,8 +179,8 @@ public class Controller {
 		}
 
 		public void actionPerformed(ActionEvent e) {
-			String[] connectionInfos = model.accounts.get(this.accountItem.getText()).split(" ");
-			createCharacterFrame(false, connectionInfos[0], connectionInfos[1], Integer.parseInt(connectionInfos[2]));
+			Account account = model.getAccount(this.accountItem.getText());
+			createInstance(account);
 		}
 	}
 }

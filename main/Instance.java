@@ -16,29 +16,27 @@ import frames.Frame;
 import frames.RoleplayFrame;
 import frames.SynchronisationFrame;
 import gui.CharacterFrame;
+import gui.Controller;
 
 public class Instance extends Thread {
-	private static Vector<Instance> instances = new Vector<Instance>();
-	private static int instancesId = 0; // important lors des déconnexions (car instances.size() devient faux)
 	private static Instance instanceInConnection;
-	public Thread[] threads;
-	public int id;
-	public Log log;
-	//private CharacterFrame graphicalFrame;
 	private NetworkInterface net;
 	private CharacterController character;
 	private Vector<Frame> frames;
 	private ConcurrentLinkedQueue<Message> output;
 	private ConcurrentLinkedQueue<Message> input;
+	public Thread[] threads;
+	public int id;
+	public Log log;
 	
-	public Instance(boolean type, String login, String password, int serverId, CharacterFrame graphicalFrame) {
+	public Instance(int id, int type, String login, String password, int serverId, CharacterFrame graphicalFrame) {
 		super(login + "/process");
-		this.id = instancesId++;
-		instances.add(this);
+		this.id = id;
+		
+		// initialisation des différents acteurs
 		this.log = new Log(login, graphicalFrame);
-		//this.graphicalFrame = graphicalFrame;
 		this.net = new NetworkInterface(this, login);
-		if(type)
+		if(type == 0)
 			this.character = new MuleController(this, login, password, serverId);
 		else
 			this.character = new FighterController(this, login, password, serverId);
@@ -49,13 +47,14 @@ public class Instance extends Thread {
 		this.frames.add(new ConnectionFrame(this, character));
 		this.frames.add(new SynchronisationFrame(this));
 		this.frames.add(new RoleplayFrame(this, character));
-		if(!type)
-			this.frames.add(new FightFrame(this, (FighterController) this.character));
-		else
+		if(type == 0)
 			this.frames.add(null); // pour avoir le même nombre de frames que les combattants (pas propre)
+		else
+			this.frames.add(new FightFrame(this, (FighterController) this.character));
 		this.frames.add(new DialogFrame(this, character));
 		this.frames.get(0).isActive = true; // activation de la ConnectionFrame
 		
+		// lancement des threads
 		this.threads = new Thread[4];
 		this.threads[0] = this.net;
 		this.threads[1] = this.net.sender;
@@ -69,26 +68,10 @@ public class Instance extends Thread {
 		Instance.log("Instance with id = " + this.id + " started.");
 	}
 	
-	// appelée depuis le contrôleur (thread principal)
-	public synchronized static void killInstance(Instance instance) {
-		instances.remove(instance);
-		for(Thread thread : instance.threads)
+	// destruction des threads de l'instance depuis la GUI
+	public void interruptThreads() {
+		for(Thread thread : this.threads)
 			thread.interrupt();
-	}
-
-	// appelée depuis un thread interne à l'instance
-	public synchronized static void killCurrentInstance() {
-		Thread currentThread = Thread.currentThread();
-		Instance currentInstance = null;
-		for(Instance instance : instances)
-			for(Thread thread : instance.threads)
-				if(currentThread == thread)
-					currentInstance = instance;
-		if(currentInstance != null) {
-			instances.remove(currentInstance);
-			for(Thread thread : currentInstance.threads)
-				thread.interrupt();
-		}
 	}
 	
 	public synchronized void inPush(Message msg) {
@@ -169,15 +152,12 @@ public class Instance extends Thread {
 		return net.latency;
 	}
 	
-	public static boolean isWorkmate(double characterId) {
-		for(Instance instance : instances)
-			if(instance.character.infos.characterId == characterId)
-				return true;
-		return false;
+	public double getCharacterId() {
+		return this.character.infos.characterId;
 	}
 	
 	public static void log(Log.Status status, String msg) {
-		Log log = getLog();
+		Log log = Controller.getLog();
 		if(log != null)
 			log.p(status, msg);
 		else
@@ -189,21 +169,11 @@ public class Instance extends Thread {
 	}
 	
 	public static void log(String direction, Message msg) {
-		Log log = getLog();
+		Log log = Controller.getLog();
 		if(log != null)
 			log.p(direction, msg);
 		else
 			throw new FatalError("Invalid thread.");
-	}
-	
-	
-	private static Log getLog() {
-		Thread currentThread = currentThread();
-		for(Instance instance : instances)
-			for(Thread thread : instance.threads)
-				if(thread == currentThread)
-					return instance.log;
-		return null;
 	}
 	
 	public void waitForConnection() {
