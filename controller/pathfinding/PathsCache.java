@@ -30,9 +30,6 @@ class PathsCache {
 	protected static Path toMap(int targetMapId, int sourceMapId, int startCellId) {
 		Pathfinder pf = new MapsPathfinder(startCellId);
 		Path path = pf.compute(sourceMapId, targetMapId);
-		
-		System.out.println(path);
-		
 		path.startCellId = startCellId;
 		return path;
 	}
@@ -64,8 +61,6 @@ class PathsCache {
 				bestPath = tmpPath;
 			}
 		}
-		System.out.println(bestPath);
-		
 		bestPath.startCellId = startCellId;
 		return bestPath;
 	}

@@ -9,22 +9,32 @@ import messages.Message;
 import messages.fight.GameActionAcknowledgementMessage;
 import messages.fight.GameActionFightPointsVariationMessage;
 import messages.fight.GameFightEndMessage;
+import messages.fight.GameFightOptionToggleMessage;
 import messages.fight.GameFightSynchronizeMessage;
 import messages.fight.GameFightTurnEndMessage;
 import messages.fight.GameFightTurnReadyMessage;
 import messages.fight.SequenceEndMessage;
 
-public class FightFrame extends Frame {
+public class FightContextFrame extends Frame {
 	private Instance instance;
 	private FighterController fighter;
 
-	public FightFrame(Instance instance, FighterController fighter) {
+	public FightContextFrame(Instance instance, FighterController fighter) {
 		this.instance = instance;
 		this.fighter = fighter;
 	}
 
 	public boolean processMessage(Message msg) {
 		switch(msg.getId()) {
+			case 700 : // GameFightStartingMessage
+				this.instance.log.p("Starting fight.");
+				if(this.fighter.infos.fightsWonCounter + this.fighter.infos.fightsLostCounter == 0) { // blocage automatique pour les combats suivants
+					GameFightOptionToggleMessage GFOTM = new GameFightOptionToggleMessage();
+					GFOTM.serialize(2); // 0 pour interdire les spectateurs
+					this.instance.outPush(GFOTM);
+					this.instance.log.p("Fight locked.");
+				}
+				return true;
 			case 715 : // GameFightTurnReadyRequestMessage
 				GameFightTurnReadyMessage GFTRM = new GameFightTurnReadyMessage(true);
 				GFTRM.serialize();
@@ -57,10 +67,6 @@ public class FightFrame extends Frame {
 						break;
 					}	
 				this.instance.log.p("End of fight.");
-				this.fighter.updateState(CharacterState.IS_LOADED, false);
-				this.fighter.updateState(CharacterState.IN_FIGHT, false);
-				this.fighter.updateState(CharacterState.IN_GAME_TURN, false);
-				this.instance.quitFight();
 				return true;
 			case 956 : // SequenceEndMessage
 				SequenceEndMessage SEM = new SequenceEndMessage(msg);

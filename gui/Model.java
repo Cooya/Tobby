@@ -1,33 +1,37 @@
 package gui;
 
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.Vector;
 
 import main.Instance;
 
 public class Model {
-	private Hashtable<Account, Instance> instances;
+	private HashMap<Account, Instance> instances;
 	private Instance mule;
 	
 	protected Model() {
-		this.instances = new Hashtable<Account, Instance>();
+		this.instances = new HashMap<Account, Instance>();
 		this.mule = null;
 	}
 	
-	protected void addInstance(Account account, Instance instance) {
+	protected void addInstance(Account account, Instance newInstance) {
 		if(account.type == 0) { // création d'une mule
-			for(Instance fighter : this.instances.values())
-				fighter.setMule(instance);
-			this.mule = instance;
+			for(Instance instance : this.instances.values())
+				if(instance != null)
+					instance.setMule(newInstance);
+			this.mule = newInstance;
 		}
 		else // création d'un combattant
 			if(this.mule != null) // mule connectée
-				instance.setMule(this.mule);
-		this.instances.put(account, instance);
+				newInstance.setMule(this.mule);
+		this.instances.put(account, newInstance);
 	}
 	
 	protected Instance getInstance(int instanceId) {
-		return this.instances.get(instanceId);
+		for(Instance instance : this.instances.values())
+			if(instance != null && instance.id == instanceId)
+				return instance;
+		return null;
 	}
 	
 	protected Vector<Instance> getConnectedInstances() {
@@ -41,9 +45,10 @@ public class Model {
 	protected Instance getCurrentInstance() {
 		Thread currentThread = Thread.currentThread();
 		for(Instance instance : this.instances.values())
-			for(Thread thread : instance.threads)
-				if(thread == currentThread)
-					return instance;
+			if(instance != null)
+				for(Thread thread : instance.threads)
+					if(thread == currentThread)
+						return instance;
 		return null;
 	}
 	

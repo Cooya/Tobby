@@ -1,5 +1,7 @@
 package main;
 
+import java.text.SimpleDateFormat;
+
 import gui.Controller;
 
 public class Main {
@@ -7,10 +9,11 @@ public class Main {
 	public static final int BUFFER_DEFAULT_SIZE = 8192;
 	public static final String AUTH_SERVER_IP = "213.248.126.39";
 	public static final int SERVER_PORT = 5555;
+	public static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("HH:mm:ss:SSS");
 	
 	public static void main(String[] args) {	
 		Emulation.runLauncher();
-		new Controller();
+		Controller.runApp();
 		
 		/*
 		MapPosition mp = MapPosition.getMapPositionById(84805636);

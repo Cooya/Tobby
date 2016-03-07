@@ -1,6 +1,7 @@
 package gui;
 
 import java.awt.Color;
+import java.util.Date;
 
 import javax.swing.BoxLayout;
 import javax.swing.JInternalFrame;
@@ -10,6 +11,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.text.DefaultCaret;
+
+import main.Main;
 
 public class CharacterFrame extends JInternalFrame {
 	protected static final int FRAME_SIZE = 400;
@@ -30,8 +33,9 @@ public class CharacterFrame extends JInternalFrame {
 	private static final String EXPERIENCE_LABEL = "Experience : ";
 	private static final String KAMAS_LABEL = "Kamas number : ";
 	private static final String FIGHTS_WON_LABEL = "Fights won counter : ";
-	private static final String FIGHTS_LOST_LABEL = "Fights won counter : ";
+	private static final String FIGHTS_LOST_LABEL = "Fights lost counter : ";
 	private static final String MAPS_TRAVELLED_LABEL = "Maps travelled counter : ";
+	private static final String LAST_ACTIVITY_LABEL = "Last activity : ";
 
 	// infos
 	private JLabel nameLabel;
@@ -44,6 +48,7 @@ public class CharacterFrame extends JInternalFrame {
 	private JLabel fightsWonLabel;
 	private JLabel fightsLostLabel;
 	private JLabel mapsTravelledLabel;
+	private JLabel lastActivityLabel;
 
 	// logs
 	private JTextArea textArea;
@@ -65,6 +70,7 @@ public class CharacterFrame extends JInternalFrame {
 		fightsWonLabel = new JLabel(FIGHTS_WON_LABEL + UNKNOWN);
 		fightsLostLabel = new JLabel(FIGHTS_LOST_LABEL + UNKNOWN);
 		mapsTravelledLabel = new JLabel(MAPS_TRAVELLED_LABEL + UNKNOWN);
+		lastActivityLabel = new JLabel(LAST_ACTIVITY_LABEL + UNKNOWN);
 		
 		this.textArea = new JTextArea(20, 35);
 
@@ -83,6 +89,7 @@ public class CharacterFrame extends JInternalFrame {
 		informationsPanel.add(fightsWonLabel);
 		informationsPanel.add(fightsLostLabel);
 		informationsPanel.add(mapsTravelledLabel);
+		informationsPanel.add(lastActivityLabel);
 		textAreaPanel.add(new JScrollPane(textArea));
 		tabbedPane.addTab("Logs", textAreaPanel);
 		tabbedPane.addTab("Informations",informationsPanel);
@@ -94,7 +101,7 @@ public class CharacterFrame extends JInternalFrame {
 	}
 	
 	public void setNameLabel(String name, int level) {
-		this.nameLabel.setText(NAME_LABEL + name + "(" + level + ")");
+		this.nameLabel.setText(NAME_LABEL + name + " (" + level + ")");
 	}
 	
 	public void setMapLabel(String map) {
@@ -131,5 +138,9 @@ public class CharacterFrame extends JInternalFrame {
 	
 	public void setMapsTravelledCounter(int mapsTravelledCounter) {
 		this.mapsTravelledLabel.setText(MAPS_TRAVELLED_LABEL + mapsTravelledCounter);
+	}
+
+	public void setLastActivityLabel(Date lastActivity) {
+		this.lastActivityLabel.setText(LAST_ACTIVITY_LABEL + Main.DATE_FORMAT.format(lastActivity));
 	}
 }

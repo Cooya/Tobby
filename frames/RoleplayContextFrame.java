@@ -15,6 +15,7 @@ import messages.character.InventoryWeightMessage;
 import messages.character.LifePointsRegenBeginMessage;
 import messages.character.SpellListMessage;
 import messages.context.CurrentMapMessage;
+import messages.context.GameContextCreateMessage;
 import messages.context.GameContextRemoveElementMessage;
 import messages.context.GameMapMovementMessage;
 import messages.context.GameRolePlayShowActorMessage;
@@ -22,16 +23,15 @@ import messages.context.MapComplementaryInformationsDataMessage;
 import messages.context.MapInformationsRequestMessage;
 import messages.exchange.ExchangeLeaveMessage;
 import messages.exchange.ExchangeRequestedTradeMessage;
-import messages.fight.GameFightOptionToggleMessage;
 import messages.gamestarting.ChannelEnablingMessage;
 import messages.gamestarting.ClientKeyMessage;
 import messages.gamestarting.PrismsListRegisterMessage;
 
-public class RoleplayFrame extends Frame {
+public class RoleplayContextFrame extends Frame {
 	private Instance instance;
 	private CharacterController character;
 
-	public RoleplayFrame(Instance instance, CharacterController character) {
+	public RoleplayContextFrame(Instance instance, CharacterController character) {
 		this.instance = instance;
 		this.character = character;
 	}
@@ -39,6 +39,8 @@ public class RoleplayFrame extends Frame {
 	public boolean processMessage(Message msg) {
 		switch(msg.getId()) {
 		case 6471 : // CharacterLoadingCompleteMessage
+			this.instance.log.graphicalFrame.setFightsWonLabel(0);
+			this.instance.log.graphicalFrame.setFightsLostLabel(0);
 			InterClientKeyManager ICKM = InterClientKeyManager.getInstance();
 			ICKM.getKey();
 			EmptyMessage EM1 = new EmptyMessage("FriendsGetListMessage");
@@ -63,7 +65,20 @@ public class RoleplayFrame extends Frame {
 			instance.outPush(PLRM);
 			instance.outPush(CEM);
 			return true;
-		case 1200: // SpellListMessage
+		case 200 : // GameContextCreateMessage
+			GameContextCreateMessage GCCM = new GameContextCreateMessage(msg);
+			if(GCCM.context == 1 && this.character.inState(CharacterState.IN_FIGHT)) {
+				this.character.updateState(CharacterState.IN_FIGHT, false);
+				this.character.updateState(CharacterState.IN_GAME_TURN, false);
+				this.instance.quitFightContext();
+			}
+			else if(GCCM.context == 2) {
+				this.character.updateState(CharacterState.IS_LOADED, false);
+				this.character.updateState(CharacterState.IN_FIGHT, true);
+				this.instance.startFightContext();
+			}
+			return true;
+		case 1200 : // SpellListMessage
 			SpellListMessage SLM = new SpellListMessage(msg);
 			SLM.deserialize();
 			this.character.infos.loadSpellList(SLM.spells);
@@ -121,16 +136,6 @@ public class RoleplayFrame extends Frame {
 			LifePointsRegenBeginMessage LPRBM = new LifePointsRegenBeginMessage(msg);
 			this.character.infos.regenRate = LPRBM.regenRate;
 			return true;
-		case 700 : // GameFightStartingMessage
-			this.instance.log.p("Starting fight.");
-			if(this.character.infos.fightsWonCounter + this.character.infos.fightsLostCounter == 0) { // blocage automatique pour les combats suivants
-				GameFightOptionToggleMessage GFOTM = new GameFightOptionToggleMessage();
-				GFOTM.serialize(2); // 0 pour interdire les spectateurs
-				this.instance.outPush(GFOTM);
-				this.instance.log.p("Fight locked.");
-			}
-			this.character.updateState(CharacterState.IN_FIGHT, true);
-			return true;
 		case 954 : // GameMapNoMovementMessage
 			throw new FatalError("Movement refused by server.");
 		case 3009 : // InventoryWeightMessage
@@ -143,17 +148,13 @@ public class RoleplayFrame extends Frame {
 				this.instance.log.p("Inventory weight maximum almost reached, need to empty.");
 			}
 			return true;
-		case 3016 : // InventoryContentMessage
-			//InventoryContentMessage ICM = new InventoryContentMessage(msg);
-			//character.kamasNumber = ICM.kamas;
-			return true;
 		case 5523 : // ExchangeRequestedTradeMessage
 			ExchangeRequestedTradeMessage ERTM = new ExchangeRequestedTradeMessage(msg);
 			this.character.roleplayContext.actorDemandingExchange = ERTM.source;
 			this.character.updateState(CharacterState.PENDING_DEMAND, true);
 			return true;
 		case 6129 : // ExchangeStartedWithPodsMessage
-			this.instance.startExchange();
+			this.instance.startExchangeContext();
 			this.character.updateState(CharacterState.PENDING_DEMAND, false);
 			this.character.updateState(CharacterState.IN_EXCHANGE, true);
 			return true;
@@ -161,7 +162,7 @@ public class RoleplayFrame extends Frame {
 			ExchangeLeaveMessage ELM = new ExchangeLeaveMessage(msg);
 			this.character.roleplayContext.lastExchangeResult = ELM.success;
 			if(this.character.inState(CharacterState.IN_EXCHANGE)) { // on quitte un échange
-				this.instance.quitExchange();
+				this.instance.quitExchangeContext();
 				this.character.updateState(CharacterState.IN_EXCHANGE, false);
 			}
 			else // on refuse un échange

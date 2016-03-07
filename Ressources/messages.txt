@@ -157,6 +157,7 @@
 6067 GameFightResumeMessage
 6068 CharacterSelectedForceMessage
 6070 GameActionFightDispellableEffectMessage
+6071 GameContextReadyMessage
 6076 CharacterLevelUpInformationMessage
 6078 FriendWarnOnLevelGainStateMessage
 6087 NotificationListMessage

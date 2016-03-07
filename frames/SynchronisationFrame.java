@@ -19,13 +19,6 @@ public class SynchronisationFrame extends Frame {
 	
 	public boolean processMessage(Message msg) {
 		switch(msg.getId()) {
-			/*
-			case 153 : // CharacterSelectedSuccessMessage
-				BasicStatMessage BSM = new BasicStatMessage();
-				BSM.serialize();
-				instance.outPush(BSM);
-				return true;
-			*/
 			case 5816 : // BasicLatencyStatsRequestMessage
 				BasicLatencyStatsMessage BLSM = new BasicLatencyStatsMessage();
 				Latency latency = instance.getLatency();

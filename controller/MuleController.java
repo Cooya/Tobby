@@ -2,7 +2,6 @@ package controller;
 
 import gui.Controller;
 import main.Instance;
-import main.Log;
 import messages.EmptyMessage;
 import messages.exchange.ExchangeReadyMessage;
 import messages.interactions.NpcDialogReplyMessage;
@@ -121,6 +120,6 @@ public class MuleController extends CharacterController {
 					sendPingRequest();	
 			}	
 		}
-		this.instance.log.p(Log.Status.CONSOLE, "Thread controller of instance with id = " + this.instance.id + " terminated.");
+		System.out.println("Thread controller of instance with id = " + this.instance.id + " terminated.");
 	}
 }

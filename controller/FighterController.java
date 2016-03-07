@@ -9,10 +9,10 @@ import java.util.Vector;
 import controller.informations.FightContext;
 import main.FatalError;
 import main.Instance;
-import main.Log;
 import messages.EmptyMessage;
 import messages.character.SpellUpgradeRequestMessage;
 import messages.character.StatsUpgradeRequestMessage;
+import messages.context.GameContextReadyMessage;
 import messages.context.GameRolePlayAttackMonsterRequestMessage;
 import messages.exchange.ExchangeObjectMoveKamaMessage;
 import messages.exchange.ExchangePlayerRequestMessage;
@@ -141,7 +141,6 @@ public class FighterController extends CharacterController {
 	}
 	
 	private void fight(boolean fightRecovery) {
-		this.instance.startFight(); // lancement de la FightFrame (à mettre en premier)
 		if(!fightRecovery) { // si c'est un combat tout frais
 			try {
 				sleep(1000); // pour paraître plus naturel lors du lancement du combat
@@ -279,8 +278,12 @@ public class FighterController extends CharacterController {
 		changePlayerStatus();
 		updateFightArea();
 		 
-		if(waitState(CharacterState.IN_FIGHT)) // on attend 2 secondes de savoir si on est en combat ou pas
-			fight(true); // reprise de combat
+		if(inState(CharacterState.IN_FIGHT)) { // reprise de combat
+			GameContextReadyMessage GCRM = new GameContextReadyMessage(); // je ne sais pas à quoi sert ce message
+			GCRM.serialize(this.infos.currentMap.id);
+			this.instance.outPush(GCRM);
+			fight(true);
+		}
 		
 		while(!isInterrupted()) {
 			waitState(CharacterState.IS_FREE); // important
@@ -315,6 +318,6 @@ public class FighterController extends CharacterController {
 				if(!isInterrupted())
 					this.mvt.changeMap();
 		}
-		this.instance.log.p(Log.Status.CONSOLE, "Thread controller of instance with id = " + this.instance.id + " terminated.");
+		System.out.println("Thread controller of instance with id = " + this.instance.id + " terminated.");
 	}
 }

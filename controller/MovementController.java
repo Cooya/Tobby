@@ -137,7 +137,6 @@ public class MovementController {
 		this.CC.instance.log.graphicalFrame.setMapsTravelledCounter(this.CC.infos.mapsTravelled);
 			
 		this.CC.updateState(CharacterState.IS_LOADED, false);
-		this.CC.waitState(CharacterState.IS_FREE);  // on attend la fin du changement de map
 		return true;
 	}
 	
@@ -182,7 +181,6 @@ public class MovementController {
 		this.CC.instance.outPush(NDRM);
 		
 		this.CC.updateState(CharacterState.IS_LOADED, false);
-		this.CC.waitState(CharacterState.IS_FREE);
 	}
 	
 	private void goUpToIncarnam() {

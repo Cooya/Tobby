@@ -23,12 +23,12 @@ import messages.connection.ServersListMessage;
 
 public class ConnectionFrame extends Frame {
 	private Instance instance;
-	private CharacterController CC;
+	private CharacterController character;
 	private Hashtable<String, Object> usefulInfos = new Hashtable<String, Object>();
 	
 	public ConnectionFrame(Instance instance, CharacterController CC) {
 		this.instance = instance;
-		this.CC = CC;
+		this.character = CC;
 	}
 	
 	public boolean processMessage(Message msg) {
@@ -37,7 +37,7 @@ public class ConnectionFrame extends Frame {
 				HelloConnectMessage HCM = new HelloConnectMessage(msg);
 				this.usefulInfos.put("HCM", HCM);
 				IdentificationMessage IM = new IdentificationMessage();
-				IM.serialize(HCM, CC.infos.login, CC.infos.password);
+				IM.serialize(HCM, this.character.infos.login, this.character.infos.password);
 				instance.outPush(IM);
 				return true;
 			case 22 : // IdentificationSuccessMessage
@@ -50,7 +50,7 @@ public class ConnectionFrame extends Frame {
 				return true;
 			case 30 : // ServersListMessage
 				ServersListMessage SLM = new ServersListMessage(msg);
-				int serverId = CC.infos.serverId;
+				int serverId = this.character.infos.serverId;
 				if(SLM.isSelectable(serverId)) {
 					ServerSelectionMessage SSM = new ServerSelectionMessage();
 					SSM.serialize(serverId);
@@ -61,7 +61,7 @@ public class ConnectionFrame extends Frame {
 				return true;
 			case 50 : // ServerStatusUpdateMessage
 				ServerStatusUpdateMessage SSUM = new ServerStatusUpdateMessage(msg);
-				serverId = CC.infos.serverId;
+				serverId = this.character.infos.serverId;
 				if(SSUM.server.id == serverId && SSUM.server.isSelectable) {	
 					ServerSelectionMessage SSM = new ServerSelectionMessage();
 					SSM.serialize(serverId);
@@ -82,7 +82,7 @@ public class ConnectionFrame extends Frame {
 				HCM = (HelloConnectMessage) this.usefulInfos.get("HCM");
 				ISM = (IdentificationSuccessMessage) this.usefulInfos.get("ISM");
 				RawDataMessage RDM = new RawDataMessage(msg);
-				Message CIM = Emulation.emulateServer(CC.infos.login, CC.infos.password, HCM, ISM, RDM, instance.id);
+				Message CIM = Emulation.emulateServer(this.character.infos.login, this.character.infos.password, HCM, ISM, RDM, instance.id);
 				instance.outPush(CIM);
 				return true;		
 			case 6267 : // TrustStatusMessage
@@ -92,14 +92,15 @@ public class ConnectionFrame extends Frame {
 			case 151 : // CharactersListMessage
 			case 6475 : // BasicCharactersListMessage
 				CharactersListMessage CLM = new CharactersListMessage(msg);
-				CC.infos.characterId = CLM.id.toNumber();
+				this.character.infos.characterId = CLM.id.toNumber();
 				CharacterSelectionMessage CSM = new CharacterSelectionMessage();
 				CSM.serialize(CLM);
 				instance.outPush(CSM);
 				return true;
 			case 153 : // CharacterSelectedSuccessMessage
 				CharacterSelectedSuccessMessage CSSM = new CharacterSelectedSuccessMessage(msg);
-				this.CC.infos.level = CSSM.infos.level;
+				this.character.infos.level = CSSM.infos.level;
+				this.instance.log.graphicalFrame.setNameLabel(this.character.infos.characterName, this.character.infos.level);
 				this.instance.endOfConnection();
 				return true;
 		}

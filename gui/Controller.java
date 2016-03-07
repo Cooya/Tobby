@@ -22,12 +22,10 @@ import main.Log;
 
 public class Controller {
 	private static final String accountsFilePath = "Ressources/accounts.txt";
-	private static View view;
-	private static Model model; // contient les instances lancées et les comptes disponibles
+	private static View view = new View();
+	private static Model model = new Model();
 
-	public Controller() {
-		view = new View();
-		model = new Model();
+	public static void runApp() {
 		loadAccountsList();
 		new StartListener(view.menuItem);
 	}
@@ -54,7 +52,7 @@ public class Controller {
 		return null;
 	}
 
-	private void loadAccountsList() {
+	private static void loadAccountsList() {
 		try {
 			BufferedReader buffer = new BufferedReader(new FileReader(accountsFilePath));
 			String line;
@@ -78,7 +76,7 @@ public class Controller {
 		}
 	}
 	
-	private void createInstance(Account account) {
+	private static void createInstance(Account account) {
 		CharacterFrame frame = new CharacterFrame(account.id, account.login);
 		view.addCharacterFrame(frame);
 		frame.addInternalFrameListener(new CharacterFrameListener());
@@ -88,7 +86,7 @@ public class Controller {
 		model.addInstance(account, instance);
 	}
 
-	private void killInstance(JInternalFrame graphicalFrame) {
+	private static void killInstance(JInternalFrame graphicalFrame) {
 		int instanceId = view.getInstance(graphicalFrame).id;
 		view.removeCharacterFrame(graphicalFrame);
 		
@@ -97,7 +95,7 @@ public class Controller {
 		instance.interruptThreads();
 	}
 
-	private class StartListener implements ActionListener {
+	private static class StartListener implements ActionListener {
 		private StartListener(AbstractButton button) {
 			button.addActionListener(this);
 		}
@@ -107,7 +105,7 @@ public class Controller {
 		}
 	}
 
-	private class ConnectionListener implements ActionListener {
+	private static class ConnectionListener implements ActionListener {
 		private LoginPanel loginPanel;
 
 		private ConnectionListener(LoginPanel loginPanel) {
@@ -144,7 +142,7 @@ public class Controller {
 		}
 	}
 
-	private class CharacterFrameListener implements InternalFrameListener {
+	private static class CharacterFrameListener implements InternalFrameListener {
 
 		@Override
 		public void internalFrameActivated(InternalFrameEvent arg0) {}
@@ -170,7 +168,7 @@ public class Controller {
 		public void internalFrameOpened(InternalFrameEvent arg0) {}
 	}
 
-	private class AccountItemListener implements ActionListener {
+	private static class AccountItemListener implements ActionListener {
 		private JMenuItem accountItem;
 
 		private AccountItemListener(JMenuItem item) {
@@ -179,8 +177,9 @@ public class Controller {
 		}
 
 		public void actionPerformed(ActionEvent e) {
-			Account account = model.getAccount(this.accountItem.getText());
-			createInstance(account);
+			Account account = model.getAccount(this.accountItem.getText().split(" ")[0]);
+			if(account != null)
+				createInstance(account);
 		}
 	}
 }

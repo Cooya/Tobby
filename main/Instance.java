@@ -1,5 +1,6 @@
 package main;
 
+import java.util.Date;
 import java.util.NoSuchElementException;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -10,10 +11,10 @@ import controller.FighterController;
 import controller.MuleController;
 import messages.Message;
 import frames.ConnectionFrame;
-import frames.DialogFrame;
-import frames.FightFrame;
+import frames.DialogContextFrame;
+import frames.FightContextFrame;
 import frames.Frame;
-import frames.RoleplayFrame;
+import frames.RoleplayContextFrame;
 import frames.SynchronisationFrame;
 import gui.CharacterFrame;
 import gui.Controller;
@@ -25,6 +26,7 @@ public class Instance extends Thread {
 	private Vector<Frame> frames;
 	private ConcurrentLinkedQueue<Message> output;
 	private ConcurrentLinkedQueue<Message> input;
+	private Date lastActivity;
 	public Thread[] threads;
 	public int id;
 	public Log log;
@@ -46,12 +48,12 @@ public class Instance extends Thread {
 		
 		this.frames.add(new ConnectionFrame(this, character));
 		this.frames.add(new SynchronisationFrame(this));
-		this.frames.add(new RoleplayFrame(this, character));
+		this.frames.add(new RoleplayContextFrame(this, character));
 		if(type == 0)
 			this.frames.add(null); // pour avoir le même nombre de frames que les combattants (pas propre)
 		else
-			this.frames.add(new FightFrame(this, (FighterController) this.character));
-		this.frames.add(new DialogFrame(this, character));
+			this.frames.add(new FightContextFrame(this, (FighterController) this.character));
+		this.frames.add(new DialogContextFrame(this, character));
 		this.frames.get(0).isActive = true; // activation de la ConnectionFrame
 		
 		// lancement des threads
@@ -95,6 +97,8 @@ public class Instance extends Thread {
 	
 	public Message outPull() {
 		try {
+			this.lastActivity = new Date();
+			this.log.graphicalFrame.setLastActivityLabel(this.lastActivity);
 			return this.output.poll();
 		}
 		catch(NoSuchElementException e) {
@@ -130,7 +134,7 @@ public class Instance extends Thread {
 				Main.class.notify();
 			}
 		}
-		this.log.p(Log.Status.CONSOLE, "Thread process of instance with id = " + this.id + " terminated.");
+		System.out.println("Thread process of instance with id = " + this.id + " terminated.");
 	}
 	
 	public void setGameServerIP(String gameServerIP) {
@@ -156,16 +160,12 @@ public class Instance extends Thread {
 		return this.character.infos.characterId;
 	}
 	
-	public static void log(Log.Status status, String msg) {
+	public static void log(String msg) {
 		Log log = Controller.getLog();
 		if(log != null)
-			log.p(status, msg);
+			log.p(msg);
 		else
 			System.out.println(msg);
-	}
-	
-	public static void log(String msg) {
-		log(Log.Status.INFO, msg);
 	}
 	
 	public static void log(String direction, Message msg) {
@@ -197,26 +197,26 @@ public class Instance extends Thread {
 		}
 		this.frames.get(0).isActive = false; // désactivation de la ConnectionFrame
 		this.frames.get(1).isActive = true; // activation de la SynchronisationFrame
-		this.frames.get(2).isActive = true; // activation de la RoleplayFrame
+		this.frames.get(2).isActive = true; // activation de la RoleplayContextFrame
+	}
+
+	public void startFightContext() {
+		this.frames.get(3).isActive = true;
+		this.log.p("Fight context frame activated.");
 	}
 	
-	public void startFight() {
-		this.log.p("Fight frame running.");
-		this.frames.get(3).isActive = true; // activation de la FightFrame
+	public void quitFightContext() {
+		this.frames.get(3).isActive = false;
+		this.log.p("Fight context frame deactivated.");
 	}
 	
-	public void quitFight() {
-		this.log.p("Fight frame stopping.");
-		this.frames.get(3).isActive = false; // désactivation de la FightFrame
+	public void startExchangeContext() {
+		this.frames.get(4).isActive = true;
+		this.log.p("Dialog context frame activated.");
 	}
 	
-	public void startExchange() {
-		this.log.p("Dialog frame running.");
-		this.frames.get(4).isActive = true; // activation de la DialogFrame
-	}
-	
-	public void quitExchange() {
-		this.log.p("Dialog frame stopping.");
-		this.frames.get(4).isActive = false; // désactivation de la DialogFrame
+	public void quitExchangeContext() {
+		this.frames.get(4).isActive = false;
+		this.log.p("Dialog context frame deactivated.");
 	}
 }

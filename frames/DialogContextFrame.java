@@ -6,11 +6,11 @@ import main.Instance;
 import messages.Message;
 import messages.exchange.ExchangeIsReadyMessage;
 
-public class DialogFrame extends Frame {
+public class DialogContextFrame extends Frame {
 	private Instance instance;
 	private CharacterController character;
 	
-	public DialogFrame(Instance instance, CharacterController character) {
+	public DialogContextFrame(Instance instance, CharacterController character) {
 		this.instance = instance;
 		this.character = character;
 	}

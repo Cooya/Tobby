@@ -14,7 +14,7 @@ public class NetworkInterface extends Thread {
 	private Connection.Client serverCo;
 	private String gameServerIP;
 	protected Latency latency;
-	protected Sender sender; 
+	protected Sender sender;
 	
 	public NetworkInterface(Instance instance, String login) {
 		super(login + "/receiver");
@@ -36,7 +36,7 @@ public class NetworkInterface extends Thread {
 			if(!isInterrupted())
 				throw new FatalError("Deconnected from game server.");
 		}
-		instance.log.p(Log.Status.CONSOLE, "Thread receiver of instance with id = " + instance.id + " terminated.");
+		System.out.println("Thread receiver of instance with id = " + instance.id + " terminated.");
 	}
 	
 	private void connectionToServer(String IP, int port) {
@@ -103,7 +103,7 @@ public class NetworkInterface extends Thread {
 						interrupt();
 					}
 			}
-			instance.log.p(Log.Status.CONSOLE, "Thread sender of instance with id = " + instance.id + " terminated.");
+			System.out.println("Thread sender of instance with id = " + instance.id + " terminated.");
 		}
 		
 		public synchronized void wakeUp() {
