@@ -28,12 +28,13 @@ public class Log {
 		String str = "";
 		int id = msg.getId();
 		String name = Message.get(id);
-		int lenofsize = msg.getLenOfSize();
-		int size = msg.getSize();
+		//int lenofsize = msg.getLenOfSize();
+		//int size = msg.getSize();
 		if(msgDirection == "r" || msgDirection == "reception")
-			str += "Receiving message " + id + " (" + name + ")" + EOL;
+			str += "Receiving message " + id + " (" + name + ")";
 		else if(msgDirection == "s" || msgDirection == "sending")
-			str += "Sending message " + id + " (" + name + ")" + EOL;
+			str += "Sending message " + id + " (" + name + ")";
+		/*
 		if(lenofsize > 1)
 			str += "Length of size : " + lenofsize + " bytes" + EOL;
 		else
@@ -42,7 +43,8 @@ public class Log {
 			str += "Size : " + size + " bytes" + EOL;
 		else
 			str += "Size : " + size + " byte" + EOL;
-		if(name == null || DEBUG)
+		*/
+		if(name == null)
 			graphicalFrame.appendText("[" + Main.DATE_FORMAT.format(new Date()) + "] " + str, Color.BLACK);
 		writer.println("[" + Main.DATE_FORMAT.format(new Date()) + "] " + str);
 		writer.flush();
@@ -53,7 +55,7 @@ public class Log {
 			graphicalFrame.appendText("[" + Main.DATE_FORMAT.format(new Date()) + "] " + str + EOL, Color.BLACK);
 		else
 			graphicalFrame.appendText("[" + Main.DATE_FORMAT.format(new Date()) + "] " + str, Color.BLACK);
-		writer.println("[" + Main.DATE_FORMAT.format(new Date()) + "] " + str + EOL);
+		writer.println("[" + Main.DATE_FORMAT.format(new Date()) + "] " + str);
 		writer.flush();
 	}
 }

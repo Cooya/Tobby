@@ -1,6 +1,6 @@
 package gamedata.fight;
 
-import gamedata.currentmap.EntityDispositionInformations;
+import gamedata.context.EntityDispositionInformations;
 import utilities.ByteArray;
 
 public class FightEntityDispositionInformations extends EntityDispositionInformations {

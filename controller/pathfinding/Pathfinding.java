@@ -12,6 +12,7 @@ import java.util.Vector;
 
 import main.FatalError;
 import controller.pathfinding.Path.Direction;
+import controller.pathfinding.Pathfinder.PathNode;
 
 // classe interface qui fait le lien entre le package "pathfinding" et les contrôleurs,
 // elle ne retourne que des chemins ou des directions
@@ -26,6 +27,7 @@ public class Pathfinding {
 	public void updatePosition(Map map, int currentCellId) {
 		this.mapNode = new LightMapNode(map);
 		this.currentCellId = currentCellId;
+		this.lastDirection = -1;
 	}
 	
 	public void updatePosition(int currentCellId) {
@@ -55,13 +57,24 @@ public class Pathfinding {
 		return PathsCache.toMap(mapId, this.mapNode.map.id, this.currentCellId);
 	}
 	
+	public Direction directionToMap(int mapId) {
+		Path path = pathToMap(mapId);
+		PathNode firstNode = path.getFirstNode();
+		this.lastDirection = firstNode.direction;
+		return new Direction(firstNode.direction, mapNode.getMapChangementCell(firstNode.direction));
+	}
+	
 	public Path pathToArea() {
 		return PathsCache.toArea(this.areaId, this.mapNode.map.id, this.currentCellId);
 	}
 
-	public Direction nextDirection() {
+	public Direction nextDirection() { // direction aléatoire pour le parcours des aires
 		if(mapNode.map.subareaId != this.areaId)
 			throw new FatalError("Bad current area.");
+		
+		Random randomGen = new Random();
+		if(this.lastDirection == -1) // pas encore initialisé
+			this.lastDirection = randomGen.nextInt(4) * 2; // première direction tirée au hasard
 		
 		Hashtable<Integer, Integer> neighbours  = new Hashtable<Integer, Integer>();
 		for(int direction = 0; direction < 8; direction += 2)
@@ -79,7 +92,6 @@ public class Pathfinding {
 		neighbours.remove(this.lastDirection); // on ne peut pas aller à la direction opposée
 		neighbours.remove(incomingDirection); // pour éviter les retours en arrière
 		
-		Random randomGen = new Random();
 		int randomDirection;
 		while(neighbours.size() > 0) {
 			randomDirection = Collections.list(neighbours.keys()).get(randomGen.nextInt(neighbours.size())); // on prend une direction au hasard

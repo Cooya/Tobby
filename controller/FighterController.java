@@ -1,7 +1,7 @@
 package controller;
 
 import gamedata.character.Elements;
-import gamedata.currentmap.GameRolePlayGroupMonsterInformations;
+import gamedata.context.GameRolePlayGroupMonsterInformations;
 import gamedata.fight.GameFightMonsterInformations;
 
 import java.util.Vector;
@@ -12,18 +12,17 @@ import main.Instance;
 import messages.EmptyMessage;
 import messages.character.SpellUpgradeRequestMessage;
 import messages.character.StatsUpgradeRequestMessage;
-import messages.context.GameContextReadyMessage;
 import messages.context.GameRolePlayAttackMonsterRequestMessage;
-import messages.exchange.ExchangeObjectMoveKamaMessage;
-import messages.exchange.ExchangePlayerRequestMessage;
-import messages.exchange.ExchangeReadyMessage;
-import messages.fight.GameActionFightCastRequestMessage;
-import messages.fight.GameFightReadyMessage;
-import messages.fight.GameFightTurnFinishMessage;
+import messages.exchanges.ExchangeObjectMoveKamaMessage;
+import messages.exchanges.ExchangePlayerRequestMessage;
+import messages.exchanges.ExchangeReadyMessage;
+import messages.fights.GameActionFightCastRequestMessage;
+import messages.fights.GameFightReadyMessage;
+import messages.fights.GameFightTurnFinishMessage;
 
-public class FighterController extends CharacterController {
-	private int areaId;
-	private int monsterGroupMaxSize;
+public abstract class FighterController extends CharacterController {
+	protected int areaId;
+	protected int monsterGroupMaxSize;
 	private MuleController mule;
 	public FightContext fightContext;
 
@@ -36,13 +35,13 @@ public class FighterController extends CharacterController {
 		this.mule = mule;
 	}
 	
-	public void regenerateLife() {
-		waitState(CharacterState.IS_FREE);
+	@SuppressWarnings("unused")
+	private void regenerateLife() {
+		waitState(CharacterState.IS_LOADED);
 		
 		int missingLife = this.infos.missingLife();
 		this.instance.log.p("Missing life : " + missingLife + " life points.");
 		if(missingLife > 0) {
-			updateState(CharacterState.IN_REGENERATION, true);
 			this.instance.log.p("Break for life regeneration.");
 			try {
 				sleep(this.infos.regenRate * 100 * missingLife); // on attend de récupérer toute sa vie
@@ -52,7 +51,6 @@ public class FighterController extends CharacterController {
 			}
 			this.infos.stats.lifePoints = this.infos.stats.maxLifePoints;
 			this.instance.log.graphicalFrame.setLifeLabel(this.infos.stats.lifePoints, this.infos.stats.maxLifePoints);
-			updateState(CharacterState.IN_REGENERATION, false);
 		}
 	}
 	
@@ -61,11 +59,20 @@ public class FighterController extends CharacterController {
 	
 	//
 	
+	protected void upgradeStatsAndSpell() {
+		if(!inState(CharacterState.LEVEL_UP))
+			return;
+		waitState(CharacterState.IS_LOADED);
+		upgradeSpell();
+		StatsUpgradeRequestMessage SURM = new StatsUpgradeRequestMessage();
+		SURM.serialize(this.infos.element, calculateMaxStatsPoints());
+		instance.outPush(SURM);
+		updateState(CharacterState.LEVEL_UP, false);
+		this.instance.log.p("Increase stat : " + Elements.intelligence + " of " + this.infos.stats.statsPoints + " points.");
+	}
 	
 	
 	private void upgradeSpell() {
-		waitState(CharacterState.IS_FREE);
-		
 		int spellId = infos.spellToUpgrade;
 		if(infos.spellList.get(spellId) != null && canUpgradeSpell(spellId)) {
 			infos.spellList.get(spellId).spellLevel++;
@@ -81,16 +88,6 @@ public class FighterController extends CharacterController {
 		if(level < 5)
 			return infos.stats.spellsPoints >= level;
 		return false;
-	}
-	
-	private void upgradeStats() {
-		waitState(CharacterState.IS_FREE);
-		
-		StatsUpgradeRequestMessage SURM = new StatsUpgradeRequestMessage();
-		SURM.serialize(this.infos.element, calculateMaxStatsPoints());
-		instance.outPush(SURM);
-		updateState(CharacterState.LEVEL_UP, false);
-		this.instance.log.p("Increase stat : " + Elements.intelligence + " of " + this.infos.stats.statsPoints + " points.");
 	}
 	
 	private int calculateMaxStatsPoints() {
@@ -114,8 +111,8 @@ public class FighterController extends CharacterController {
 	
 	
 	
-	private boolean lookForAndLaunchFight() {
-		waitState(CharacterState.IS_FREE);
+	protected boolean lookForAndLaunchFight() {
+		waitState(CharacterState.IS_LOADED);
 		
 		this.instance.log.p("Searching for monster group to fight.");
 		int monsterGroupSize;
@@ -140,14 +137,8 @@ public class FighterController extends CharacterController {
 		return 1 + monsterGroup.staticInfos.underlings.size();
 	}
 	
-	private void fight(boolean fightRecovery) {
+	protected void fight(boolean fightRecovery) {
 		if(!fightRecovery) { // si c'est un combat tout frais
-			try {
-				sleep(1000); // pour paraître plus naturel lors du lancement du combat
-			} catch(Exception e) {
-				interrupt();
-				return;
-			}
 			GameFightReadyMessage GFRM = new GameFightReadyMessage();
 			GFRM.serialize();
 			this.instance.outPush(GFRM);
@@ -168,7 +159,7 @@ public class FighterController extends CharacterController {
 				updateState(CharacterState.IN_GAME_TURN, false);
 			}
 		}
-		if(this.fightContext.lastFightOutcome) { // si on a gagné le combat
+		if(this.roleplayContext.lastFightOutcome) { // si on a gagné le combat
 			this.infos.fightsWonCounter++;
 			this.instance.log.graphicalFrame.setFightsWonLabel(this.infos.fightsWonCounter);
 		}
@@ -199,8 +190,8 @@ public class FighterController extends CharacterController {
 		}
 	}
 	
-	private void goToExchangeWithMule(boolean giveKamas) {
-		waitState(CharacterState.IS_FREE);
+	protected void goToExchangeWithMule(boolean giveKamas) {
+		waitState(CharacterState.IS_LOADED);
 		if(isInterrupted())
 			return;
 		
@@ -240,8 +231,8 @@ public class FighterController extends CharacterController {
 		this.instance.outPush(ERM); // on valide de notre côté
 		this.instance.log.p("Exchange validated from my side.");
 		
-		waitState(CharacterState.IS_FREE);
-		if(this.roleplayContext.lastExchangeResult) {
+		waitState(CharacterState.IS_FREE); // pour obtenir le résultat de l'échange
+		if(this.roleplayContext.lastExchangeOutcome) {
 			updateState(CharacterState.NEED_TO_EMPTY_INVENTORY, false);
 			this.instance.log.p("Exchange with mule terminated successfully.");
 		}
@@ -249,8 +240,8 @@ public class FighterController extends CharacterController {
 			throw new FatalError("Exchange with mule has failed.");	
 	}
 	
+	@SuppressWarnings("unused")
 	private void updateFightArea() {
-		this.instance.log.p("Character level : " + this.infos.level + ".");
 		if(this.infos.level < 8) {
 			this.areaId = 450; // route des âmes d'Incarnam
 			this.monsterGroupMaxSize = 3;
@@ -273,6 +264,7 @@ public class FighterController extends CharacterController {
 		// 442 -> lac d'Incarnam
 	}
 	
+	/*
 	public void run() {
 		waitState(CharacterState.IS_FREE);
 		changePlayerStatus();
@@ -320,4 +312,5 @@ public class FighterController extends CharacterController {
 		}
 		System.out.println("Thread controller of instance with id = " + this.instance.id + " terminated.");
 	}
+	*/
 }

@@ -1,14 +1,15 @@
 package main;
 
 import java.util.Date;
-import java.util.NoSuchElementException;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import controller.CharacterController;
 import controller.CharacterState;
 import controller.FighterController;
+import controller.CaptainController;
 import controller.MuleController;
+import controller.SoldierController;
 import messages.Message;
 import frames.ConnectionFrame;
 import frames.DialogContextFrame;
@@ -40,8 +41,10 @@ public class Instance extends Thread {
 		this.net = new NetworkInterface(this, login);
 		if(type == 0)
 			this.character = new MuleController(this, login, password, serverId);
+		else if(type == 1)
+			this.character = new CaptainController(this, login, password, serverId);
 		else
-			this.character = new FighterController(this, login, password, serverId);
+			this.character = new SoldierController(this, login, password, serverId);
 		this.frames = new Vector<Frame>();
 		this.output = new ConcurrentLinkedQueue<Message>();
 		this.input = new ConcurrentLinkedQueue<Message>();
@@ -87,27 +90,14 @@ public class Instance extends Thread {
 	}
 	
 	public Message inPull() {
-		try {
-			return this.input.poll();
-		}
-		catch(Exception e) {
-			return null;
-		}
+		return this.input.poll();
 	}
 	
 	public Message outPull() {
-		try {
-			this.lastActivity = new Date();
-			this.log.graphicalFrame.setLastActivityLabel(this.lastActivity);
-			return this.output.poll();
-		}
-		catch(NoSuchElementException e) {
-			this.log.p(this.output.size() + " message(s) in the output queue.");
-			return null;
-		}
-		catch(Exception e) {
-			throw new FatalError(e);
-		}
+		this.lastActivity = new Date();
+		this.log.graphicalFrame.setLastActivityLabel(this.lastActivity);
+		//this.log.p(this.output.size() + " message(s) in the output queue.");
+		return this.output.poll();
 	}
 	
 	public synchronized void run() {
@@ -150,6 +140,10 @@ public class Instance extends Thread {
 			((FighterController) this.character).setMule((MuleController) mule.character);
 			this.character.updateState(CharacterState.MULE_AVAILABLE, true);
 		}
+	}
+	
+	public void setCaptain(Instance captain) {
+		((SoldierController) this.character).setCaptain((CaptainController) captain.character); 
 	}
 	
 	public Latency getLatency() {

@@ -35,7 +35,7 @@ class PathsCache {
 	}
 	
 	protected static Path toArea(int areaId, int sourceMapId, int startCellId) {
-		Instance.log("Going to area with id = " + areaId + ".");
+		Instance.log("Going to area with id = " + areaId + " from  " + MapPosition.getMapPositionById(sourceMapId) + ".");
 		MapPosition[] mapPositions = MapPosition.getMapPositions();
 		Vector<MapPosition> mapPositionsInArea = new Vector<MapPosition>();
 		for(MapPosition mapPosition : mapPositions)

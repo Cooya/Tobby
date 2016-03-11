@@ -3,7 +3,7 @@ package controller;
 import gui.Controller;
 import main.Instance;
 import messages.EmptyMessage;
-import messages.exchange.ExchangeReadyMessage;
+import messages.exchanges.ExchangeReadyMessage;
 import messages.interactions.NpcDialogReplyMessage;
 import messages.interactions.NpcGenericActionRequestMessage;
 
@@ -46,7 +46,7 @@ public class MuleController extends CharacterController {
 		
 		useInteractive(317, 465440, 140242); // porte de la banque
 		
-		waitState(CharacterState.IS_FREE);
+		waitState(CharacterState.IS_LOADED);
 		NpcGenericActionRequestMessage NGARM = new NpcGenericActionRequestMessage();
 		NGARM.serialize(-10001, 3, this.infos.currentMap.id, this.instance.id); // on parle au banquier
 		this.instance.outPush(NGARM);
@@ -109,16 +109,10 @@ public class MuleController extends CharacterController {
 				returnTripToAstrubBank();
 			}
 			this.mvt.goTo(this.waitingMapId);
-			
-			while(!isInterrupted()) {
-				if(waitState(CharacterState.PENDING_DEMAND)) { // on attend qu'un combattant lance un échange
-					this.instance.log.p("Exchange demand received.");
-					processExchange();
-					break;
-				}
-				else
-					sendPingRequest();	
-			}	
+			if(waitState(CharacterState.PENDING_DEMAND)) { // on attend qu'un combattant lance un échange
+				this.instance.log.p("Exchange demand received.");
+				processExchange();
+			}
 		}
 		System.out.println("Thread controller of instance with id = " + this.instance.id + " terminated.");
 	}

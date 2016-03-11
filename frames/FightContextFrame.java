@@ -6,14 +6,14 @@ import controller.CharacterState;
 import controller.FighterController;
 import main.Instance;
 import messages.Message;
-import messages.fight.GameActionAcknowledgementMessage;
-import messages.fight.GameActionFightPointsVariationMessage;
-import messages.fight.GameFightEndMessage;
-import messages.fight.GameFightOptionToggleMessage;
-import messages.fight.GameFightSynchronizeMessage;
-import messages.fight.GameFightTurnEndMessage;
-import messages.fight.GameFightTurnReadyMessage;
-import messages.fight.SequenceEndMessage;
+import messages.fights.GameActionAcknowledgementMessage;
+import messages.fights.GameActionFightPointsVariationMessage;
+import messages.fights.GameFightEndMessage;
+import messages.fights.GameFightShowFighterMessage;
+import messages.fights.GameFightSynchronizeMessage;
+import messages.fights.GameFightTurnEndMessage;
+import messages.fights.GameFightTurnReadyMessage;
+import messages.fights.SequenceEndMessage;
 
 public class FightContextFrame extends Frame {
 	private Instance instance;
@@ -28,12 +28,19 @@ public class FightContextFrame extends Frame {
 		switch(msg.getId()) {
 			case 700 : // GameFightStartingMessage
 				this.instance.log.p("Starting fight.");
+				/*
 				if(this.fighter.infos.fightsWonCounter + this.fighter.infos.fightsLostCounter == 0) { // blocage automatique pour les combats suivants
 					GameFightOptionToggleMessage GFOTM = new GameFightOptionToggleMessage();
 					GFOTM.serialize(2); // 0 pour interdire les spectateurs
 					this.instance.outPush(GFOTM);
 					this.instance.log.p("Fight locked.");
 				}
+				*/
+				return true;
+			case 5864 : // GameFightShowFighterMessage
+				GameFightShowFighterMessage GFSFM = new GameFightShowFighterMessage(msg);
+				this.fighter.fightContext.newFighter(GFSFM.informations);
+				this.fighter.updateState(CharacterState.NEW_ACTOR_IN_FIGHT, true);
 				return true;
 			case 715 : // GameFightTurnReadyRequestMessage
 				GameFightTurnReadyMessage GFTRM = new GameFightTurnReadyMessage(true);
@@ -63,7 +70,7 @@ public class FightContextFrame extends Frame {
 				GameFightEndMessage GFEM = new GameFightEndMessage(msg);
 				for(FightResultListEntry result : GFEM.results)
 					if(result instanceof FightResultPlayerListEntry && ((FightResultPlayerListEntry) result).id == this.fighter.infos.characterId) {
-						this.fighter.fightContext.lastFightOutcome = result.outcome == 2; // 2 = gagné, 0 = perdu
+						this.fighter.roleplayContext.lastFightOutcome = result.outcome == 2; // 2 = gagné, 0 = perdu
 						break;
 					}	
 				this.instance.log.p("End of fight.");

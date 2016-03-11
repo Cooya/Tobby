@@ -1,12 +1,12 @@
 package gamedata.fight;
 
-import gamedata.currentmap.GameContextActorInformations;
+import gamedata.context.GameContextActorInformations;
 
 import java.util.Vector;
 
 import utilities.ByteArray;
 
-public class GameFightFighterInformations extends GameContextActorInformations{
+public class GameFightFighterInformations extends GameContextActorInformations {
 	public int teamId = 2;
 
 	public int wave = 0;

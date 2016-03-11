@@ -24,35 +24,8 @@ public class Controller {
 	private static final String accountsFilePath = "Ressources/accounts.txt";
 	private static View view = new View();
 	private static Model model = new Model();
-
-	public static void runApp() {
-		loadAccountsList();
-		new StartListener(view.menuItem);
-	}
 	
-	public static void restartInstance() {
-		Instance instance = model.getCurrentInstance();
-		instance.interruptThreads();
-		// TODO
-	}
-	
-	public static boolean isWorkmate(double characterId) {
-		for(Instance instance : model.getConnectedInstances())
-			if(instance.getCharacterId() == characterId)
-				return true;
-		return false;
-	}
-	
-	public static Log getLog() {
-		Thread currentThread = Thread.currentThread();
-		for(Instance instance : model.getConnectedInstances())
-			for(Thread thread : instance.threads)
-				if(thread == currentThread)
-					return instance.log;
-		return null;
-	}
-
-	private static void loadAccountsList() {
+	static {
 		try {
 			BufferedReader buffer = new BufferedReader(new FileReader(accountsFilePath));
 			String line;
@@ -75,24 +48,46 @@ public class Controller {
 			e.printStackTrace();
 		}
 	}
+
+	public static void runApp() {
+		new StartListener(view.menuItem);
+	}
 	
-	private static void createInstance(Account account) {
+	public static boolean isWorkmate(double characterId) {
+		for(Instance instance : model.getConnectedInstances())
+			if(instance.getCharacterId() == characterId)
+				return true;
+		return false;
+	}
+	
+	public static Log getLog() {
+		Thread currentThread = Thread.currentThread();
+		for(Instance instance : model.getConnectedInstances())
+			for(Thread thread : instance.threads)
+				if(thread == currentThread)
+					return instance.log;
+		return null;
+	}
+	
+	private synchronized static void createInstance(Account account) {
 		CharacterFrame frame = new CharacterFrame(account.id, account.login);
 		view.addCharacterFrame(frame);
 		frame.addInternalFrameListener(new CharacterFrameListener());
 		frame.setVisible(true);
-		
-		Instance instance = new Instance(account.id, account.type, account.login, account.password, account.serverId, frame);
-		model.addInstance(account, instance);
+		model.createInstance(account, frame);
 	}
 
-	private static void killInstance(JInternalFrame graphicalFrame) {
+	private synchronized static void killInstance(JInternalFrame graphicalFrame) {
 		int instanceId = view.getInstance(graphicalFrame).id;
 		view.removeCharacterFrame(graphicalFrame);
-		
-		Instance instance = model.getInstance(instanceId);
-		model.removeInstance(instance);
+		Instance instance = model.removeInstance(instanceId);
 		instance.interruptThreads();
+	}
+	
+	public static void restartInstance() {
+		Instance instance = model.getCurrentInstance();
+		instance.interruptThreads();
+		// TODO
 	}
 
 	private static class StartListener implements ActionListener {

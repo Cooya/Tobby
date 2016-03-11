@@ -1,20 +1,21 @@
 package controller.informations;
 
-import gamedata.currentmap.GameRolePlayActorInformations;
-import gamedata.currentmap.GameRolePlayGroupMonsterInformations;
-import gamedata.currentmap.GameRolePlayNamedActorInformations;
+import gamedata.context.GameRolePlayActorInformations;
+import gamedata.context.GameRolePlayGroupMonsterInformations;
+import gamedata.context.GameRolePlayNamedActorInformations;
 
 import java.util.Iterator;
 import java.util.Vector;
 
 import controller.CharacterController;
-import main.Instance;
 
 public class RoleplayContext {
 	private CharacterController character;
 	private Vector<GameRolePlayActorInformations> actors;
 	public double actorDemandingExchange;
-	public boolean lastExchangeResult;
+	public boolean lastFightOutcome;
+	public boolean lastExchangeOutcome;
+	public int currentCaptainFightId;
 	
 	public RoleplayContext(CharacterController CC) {
 		this.character = CC;
@@ -36,8 +37,8 @@ public class RoleplayContext {
 	public synchronized void updateContextActorPosition(double actorId, int position) {
 		for(GameRolePlayActorInformations actor : actors)
 			if(actor.contextualId == actorId) {
-				if(actor instanceof GameRolePlayGroupMonsterInformations)
-					Instance.log("Monster group is moving from cell id " + actor.disposition.cellId + " to " + position + ".");
+				//if(actor instanceof GameRolePlayGroupMonsterInformations)
+					//Instance.log("Monster group is moving from cell id " + actor.disposition.cellId + " to " + position + ".");
 				actor.disposition.cellId = position;
 			}
 	} 

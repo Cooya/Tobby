@@ -1,39 +1,52 @@
 package {
-	import flash.display.Sprite;
 	import flash.utils.*;
+	import flash.display.Sprite;
+	import flash.display.Loader;
 	import flash.net.Socket;
 	import flash.net.ServerSocket;
 	import flash.net.URLRequest;
+	import flash.system.ApplicationDomain;
 	import flash.system.LoaderContext;
-	import flash.display.Loader;
 	import flash.events.Event;
 	import flash.events.ProgressEvent;
 	import flash.events.ServerSocketConnectEvent;
-	//import flash.events.IEventDispatcher;
-	//import flash.events.KeyboardEvent;
-	import flash.system.ApplicationDomain;
-	//import flash.ui.Keyboard;
 	
-	public class Antibot extends Sprite /* implements IEventDispatcher */ {
+	public class Antibot extends Sprite {
 		private var server:ServerSocket;
 		private var client:Socket;
 		private var packetSize:int = -1;
 		private var interval:uint;
+		private var unloadTimeout:uint;
 		private var injected:Boolean = false;
 		private var hashFunctionsArray:Array = new Array();
 		private var clients:Array;
+		private var loader:Loader;
+		private var clientIsLoaded:Boolean = false;
 
 		public function Antibot() : void {
-			var ldr:Loader = new Loader();
+			runServer();
+		}
+
+		private function loadClient() : void {
+			trace("Loading client...");
+			loader = new Loader();
 			var lc:LoaderContext = new LoaderContext(false, ApplicationDomain.currentDomain);
             lc.allowCodeImport = true;
 			lc.allowLoadBytesCodeExecution = true;
-			ldr.contentLoaderInfo.addEventListener(Event.COMPLETE, runServer);
-			ldr.load(new URLRequest("DofusInvoker.swf"), lc); // chargement du client officiel
-			addChild(ldr);
+			loader.load(new URLRequest("DofusInvoker.swf"), lc); // chargement du client officiel
+			addChild(loader);
+			clientIsLoaded = true;
+		}
+
+		private function unloadClient() : void {
+			trace("Unloading client...");
+			loader.unloadAndStop();
+			removeChild(loader);
+			loader = null;
+			clientIsLoaded = false;
 		}
 		
-		private function runServer(e:Event) : void {
+		private function runServer() : void {
 			clients = new Array();
 			server = new ServerSocket();
 			server.bind(5554, "127.0.0.1");
@@ -53,7 +66,6 @@ package {
 		}
 
 		private function clientDisconnectionHandler(e:Event) : void {
-			sendResetGameAction();
 			trace("Client disconnected.");
 			clients.splice(clients.indexOf(e.target), 1);
 			e.target.removeEventListener(Event.CLOSE, clientDisconnectionHandler);
@@ -75,45 +87,19 @@ package {
         	var hashFunctionId:int;
         	var id:int = socket.readByte();
         	if(id == 1) { // demande de simulation d'une authentification à partir du client officiel
+        		if(!clientIsLoaded)
+        			loadClient();
         		trace("Simulating authentification on official client.");
         		var username:String = socket.readUTF();
         		var password:String = socket.readUTF();
-				login(username, password);
+				interval = setInterval(loginAttempt, 500, username, password);
         	}
         	else if(id == 2) { // demande de récupération de la fonction de hachage
         		hashFunctionId = socket.readByte();
         		trace("Retrieving hash function for client with id = " + hashFunctionId + ".");
         		hashFunctionsArray[hashFunctionId] = getHashFunction();
-        		/*
-        		if(hashFunctionId > 0) {
-	        		var test:ByteArray = new ByteArray();
-	        		test.writeByte(40);
-	        		test.writeByte(45);
-	        		test.writeByte(50);
-	        		test.writeByte(55);
-	        		test.writeByte(60);
-	        		hashFunctionsArray[0].call(null, test);
-	        		trace(test.toString());
-
-	        		var test1:ByteArray = new ByteArray();
-	        		test1.writeByte(40);
-	        		test1.writeByte(45);
-	        		test1.writeByte(50);
-	        		test1.writeByte(55);
-	        		test1.writeByte(60);
-	        		hashFunctionsArray[0].call(null, test1);
-	        		trace(test1.toString());
-
-	        		var test2:ByteArray = new ByteArray();
-	        		test2.writeByte(40);
-	        		test2.writeByte(45);
-	        		test2.writeByte(50);
-	        		test2.writeByte(55);
-	        		test2.writeByte(60);
-	        		hashFunctionsArray[0].call(null, test2);
-	        		trace(test2.toString());
-	        	}
-	        	*/
+        		sendResetGameAction();
+        		//unloadTimeout = setTimeout(unloadClient, 30000);
         	}
         	else if(id == 3) { // demande d'utilisation de la fonction de hachage sur un paquet
         		var msg:ByteArray = new ByteArray();
@@ -130,16 +116,13 @@ package {
         		trace("Invalid packet id.");
         }
 
-		private function login(username:String, password:String) : void {
-			var LoginValidationAction:Class = getDefinitionByName("com.ankamagames.dofus.logic.connection.actions.LoginValidationAction") as Class;
+		private function loginAttempt(username:String, password:String) : void {
 			var Kernel:Class = getDefinitionByName("com.ankamagames.dofus.kernel.Kernel") as Class;
-			var AuthentificationFrame:Class = getDefinitionByName("com.ankamagames.dofus.logic.connection.frames.AuthentificationFrame") as Class;
-			
+			if(Kernel == null)
+				return;
 			var worker:Object = Kernel["getWorker"]();
-			interval = setInterval(checkAM, 500, worker, AuthentificationFrame, LoginValidationAction, username, password);
-		}
-
-		private function checkAM(worker:Object, AuthentificationFrame:Class, LoginValidationAction:Class, username:String, password:String) : void {
+			var LoginValidationAction:Class = getDefinitionByName("com.ankamagames.dofus.logic.connection.actions.LoginValidationAction") as Class;
+			var AuthentificationFrame:Class = getDefinitionByName("com.ankamagames.dofus.logic.connection.frames.AuthentificationFrame") as Class;
 			if(worker.contains(AuthentificationFrame)) {
 				clearInterval(interval);
 				var lva:Object = LoginValidationAction["create"](username, password, false, 0);
@@ -150,17 +133,21 @@ package {
 
 		private function getHashFunction() : Function {
 			var NetworkMessage:Class = getDefinitionByName("com.ankamagames.jerakine.network.NetworkMessage") as Class;
-			//var f:Function = NetworkMessage.HASH_FUNCTION;
-			//NetworkMessage.HASH_FUNCTION = null;
 			return NetworkMessage.HASH_FUNCTION;
 		}
 
 		private function sendResetGameAction() : void {
 			var Kernel:Class = getDefinitionByName("com.ankamagames.dofus.kernel.Kernel") as Class;
 			var ResetGameAction:Class = getDefinitionByName("com.ankamagames.dofus.logic.common.actions.ResetGameAction") as Class;
-
-			Kernel["getWorker"]().process(new ResetGameAction());
+			Kernel["getWorker"]().process(ResetGameAction["create"]());
 			trace("ResetGameAction sent.");
+		}
+
+		private function sendQuitGameAction() : void {
+			var Kernel:Class = getDefinitionByName("com.ankamagames.dofus.kernel.Kernel") as Class;
+			var QuitGameAction:Class = getDefinitionByName("com.ankamagames.dofus.logic.common.actions.QuitGameAction") as Class;
+			Kernel["getWorker"]().process(QuitGameAction["create"]());
+			trace("QuitGameAction sent.");
 		}
 	}
 }

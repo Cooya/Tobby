@@ -8,27 +8,57 @@ import java.util.Vector;
 import controller.CharacterController;
 
 public class FightContext {
-	private CharacterController CC;
-	public Vector<GameFightFighterInformations> fighters;
+	private CharacterController character;
 	public GameFightFighterInformations self;
-	public boolean lastFightOutcome;
+	public Vector<GameFightFighterInformations> fighters;
+	public Vector<Integer> positionsForChallengers;
+	public Vector<Integer> positionsForDefenders;
 	
-	public FightContext(CharacterController CC) {
-		this.CC = CC;
+	public FightContext(CharacterController character) {
+		this.character = character;
 	}
 	
-	public void setFightContext(Vector<GameFightFighterInformations> fighters) {
+	public synchronized void clearFightContext() {
+		this.self = null;
+		this.fighters = null;
+		this.positionsForChallengers = null;
+		this.positionsForDefenders = null;
+	}
+	
+	// phase de préparation du combat
+	public synchronized void newFighter(GameFightFighterInformations fighter) {
+		if(this.fighters == null)
+			this.fighters = new Vector<GameFightFighterInformations>();
+		this.fighters.add(fighter);
+	}
+	
+	// appelée à chaque synchronisation (nouveau tour)
+	public synchronized void setFightContext(Vector<GameFightFighterInformations> fighters) {
 		this.fighters = fighters;
 		for(GameFightFighterInformations fighter : this.fighters)
-			if(fighter.contextualId == this.CC.infos.characterId)
+			if(fighter.contextualId == this.character.infos.characterId)
 				this.self = fighter;
 	}
 
-	public Vector<GameFightMonsterInformations> getAliveMonsters() {
+	public synchronized Vector<GameFightMonsterInformations> getAliveMonsters() {
 		Vector<GameFightMonsterInformations> monsters = new Vector<GameFightMonsterInformations>();
 		for(GameFightFighterInformations fighter : this.fighters)
 			if(fighter instanceof GameFightMonsterInformations && fighter.alive)
 				monsters.add((GameFightMonsterInformations) fighter);		
 		return monsters;
+	}
+	
+	public synchronized void setPossiblePositions(Vector<Integer> positionsForChallengers, Vector<Integer> positionsForDefenders) {
+		this.positionsForChallengers = positionsForChallengers;
+		this.positionsForDefenders = positionsForDefenders;
+	}
+	
+	public synchronized boolean inFight(double characterId) {
+		if(this.fighters != null) {
+			for(GameFightFighterInformations fighter : this.fighters)
+				if(fighter.contextualId == characterId)
+					return true;
+		}
+		return false;
 	}
 }

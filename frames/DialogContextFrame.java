@@ -4,7 +4,7 @@ import controller.CharacterController;
 import controller.CharacterState;
 import main.Instance;
 import messages.Message;
-import messages.exchange.ExchangeIsReadyMessage;
+import messages.exchanges.ExchangeIsReadyMessage;
 
 public class DialogContextFrame extends Frame {
 	private Instance instance;

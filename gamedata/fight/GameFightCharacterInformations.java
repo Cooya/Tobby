@@ -1,6 +1,6 @@
 package gamedata.fight;
 
-import gamedata.currentmap.ActorAlignmentInformations;
+import gamedata.context.ActorAlignmentInformations;
 import utilities.ByteArray;
 
 public class GameFightCharacterInformations extends GameFightFighterNamedInformations{

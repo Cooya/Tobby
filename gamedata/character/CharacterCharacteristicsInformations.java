@@ -1,6 +1,6 @@
 package gamedata.character;
 
-import gamedata.currentmap.ActorExtendedAlignmentInformations;
+import gamedata.context.ActorExtendedAlignmentInformations;
 
 import java.util.Vector;
 

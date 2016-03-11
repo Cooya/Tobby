@@ -26,9 +26,9 @@ public class ConnectionFrame extends Frame {
 	private CharacterController character;
 	private Hashtable<String, Object> usefulInfos = new Hashtable<String, Object>();
 	
-	public ConnectionFrame(Instance instance, CharacterController CC) {
+	public ConnectionFrame(Instance instance, CharacterController character) {
 		this.instance = instance;
-		this.character = CC;
+		this.character = character;
 	}
 	
 	public boolean processMessage(Message msg) {
@@ -99,6 +99,7 @@ public class ConnectionFrame extends Frame {
 				return true;
 			case 153 : // CharacterSelectedSuccessMessage
 				CharacterSelectedSuccessMessage CSSM = new CharacterSelectedSuccessMessage(msg);
+				this.character.infos.characterName = CSSM.infos.name;
 				this.character.infos.level = CSSM.infos.level;
 				this.instance.log.graphicalFrame.setNameLabel(this.character.infos.characterName, this.character.infos.level);
 				this.instance.endOfConnection();

@@ -114,7 +114,7 @@ public class ByteArray {
 			is = new FileInputStream(file);
 			is.read(bytes);
 			is.close();
-		} catch (Exception e) {
+		} catch(Exception e) {
 			return null;
 		}
 		return new ByteArray(bytes);
@@ -200,11 +200,15 @@ public class ByteArray {
 		printBytes(bytes(), format);
 	}
 
-	public int readByte() {	
+	public int readByte() {
+		if(this.pos >= this.size)
+			throw new FatalError("Invalid reading, end of byte array reached.");
 		return this.array[this.pos++] & 0xFF;
 	}
 	
 	public int readSignedByte() { // pour readVarShort (temporaire)
+		if(this.pos >= this.size)
+			throw new FatalError("Invalid reading, end of byte array reached.");
 		return this.array[this.pos++];
 	}
 
@@ -220,10 +224,7 @@ public class ByteArray {
 	}
 
 	public int readShort() { // pas de unsigned short en Java
-		int val = readByte() * 256 + readByte();
-		if(val < 0)
-			throw new FatalError("Negative short.");
-		return val;
+		return readByte() * 256 + readByte();
 	}
 	
 	public int readInt() {

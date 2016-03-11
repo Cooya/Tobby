@@ -1,6 +1,6 @@
 package gamedata.character;
 
-import gamedata.currentmap.EntityLook;
+import gamedata.context.EntityLook;
 import utilities.ByteArray;
 
 public class CharacterMinimalPlusLookInformations extends CharacterMinimalInformations {
