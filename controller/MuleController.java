@@ -17,12 +17,10 @@ public class MuleController extends CharacterController {
 	}
 	
 	private void processExchange() {
-		if(Controller.isWorkmate(this.roleplayContext.actorDemandingExchange)) {
+		if(!inState(CharacterState.NEED_TO_EMPTY_INVENTORY) && Controller.isWorkmate(this.roleplayContext.actorDemandingExchange)) {
 			EmptyMessage EM = new EmptyMessage("ExchangeAcceptMessage"); // accepter l'échange
 			this.instance.outPush(EM);
 			waitState(CharacterState.EXCHANGE_VALIDATED); // attendre que l'échange soit validé
-			if(isInterrupted())
-				return;
 			ExchangeReadyMessage ERM = new ExchangeReadyMessage();
 			ERM.serialize(true, 2); // car il y a eu 2 actions lors de l'échange
 			this.instance.outPush(ERM); // on valide de notre côté
@@ -89,11 +87,10 @@ public class MuleController extends CharacterController {
 			return;
 		}
 		
+		updateState(CharacterState.NEED_TO_EMPTY_INVENTORY, false);
+	
 		this.mvt.moveTo(396, false); // on sort de la banque
-		if(interrupted())
-			return;
-		
-		updateState(CharacterState.IS_LOADED, false);
+		updateState(CharacterState.IS_LOADED, false); // important (porte de la banque)
 	}
 	 
 	private boolean needToGoBank(float percentage) { // percentage < 1
@@ -105,7 +102,10 @@ public class MuleController extends CharacterController {
 	public void run() {
 		while(!isInterrupted() && waitState(CharacterState.IS_FREE)) { // attente d'état importante afin de laisser le temps aux pods de se mettre à jour après un échange
 			if(needToGoBank(0.5f)) { // + de 50% de l'inventaire occupé
+				updateState(CharacterState.NEED_TO_EMPTY_INVENTORY, true);
 				this.instance.log.p("Need to go to empty inventory at Astrub bank.");
+				if(inState(CharacterState.PENDING_DEMAND))
+					processExchange();
 				returnTripToAstrubBank();
 			}
 			this.mvt.goTo(this.waitingMapId);

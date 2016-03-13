@@ -148,10 +148,7 @@ public abstract class FighterController extends CharacterController {
 			if(!inState(CharacterState.IN_FIGHT))
 				break;
 			launchSpell();
-			
-			if(isInterrupted())
-				return;
-			
+
 			if(inState(CharacterState.IN_FIGHT)) {
 				GameFightTurnFinishMessage GFTFM = new GameFightTurnFinishMessage();
 				GFTFM.serialize();
@@ -192,11 +189,11 @@ public abstract class FighterController extends CharacterController {
 	
 	protected void goToExchangeWithMule(boolean giveKamas) {
 		waitState(CharacterState.IS_LOADED);
-		if(isInterrupted())
-			return;
 		
 		if(this.infos.currentMap.id != this.mule.waitingMapId)
 			this.mvt.goTo(this.mule.waitingMapId);
+		
+		waitState(CharacterState.IS_LOADED);
 		
 		while(!isInterrupted() && !inState(CharacterState.IN_EXCHANGE)) {
 			if(!this.roleplayContext.actorIsOnMap(this.mule.infos.characterId)) { // si la mule n'est pas sur la map
@@ -209,8 +206,6 @@ public abstract class FighterController extends CharacterController {
 			this.instance.log.p("Sending exchange demand.");
 			waitState(CharacterState.IN_EXCHANGE); // attendre l'acceptation de l'échange (avec timeout)
 		}
-		if(isInterrupted())
-			return;
 		
 		EmptyMessage EM = new EmptyMessage("ExchangeObjectTransfertAllFromInvMessage"); // on transfère tous les objets
 		this.instance.outPush(EM);
@@ -221,7 +216,7 @@ public abstract class FighterController extends CharacterController {
 		
 		try {
 			sleep(5000); // on attend de pouvoir valider l'échange
-		} catch (InterruptedException e) {
+		} catch(InterruptedException e) {
 			interrupt();
 			return;
 		}
@@ -258,7 +253,7 @@ public abstract class FighterController extends CharacterController {
 			this.areaId = 92; // contour d'Astrub
 			this.monsterGroupMaxSize = 2;
 		}
-		this.mvt.pathfinding.updateArea(this.areaId);
+		this.mvt.setArea(this.areaId);
 		
 		// 95 -> pious d'Astrub
 		// 442 -> lac d'Incarnam

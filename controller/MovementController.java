@@ -2,9 +2,8 @@ package controller;
 
 import java.util.Vector;
 
-import controller.pathfinding.Path;
-import controller.pathfinding.Path.Direction;
 import controller.pathfinding.Pathfinding;
+import controller.pathfinding.Pathfinding.Direction;
 import gamedata.d2p.MapsCache;
 import gamedata.d2p.ankama.Map;
 import messages.EmptyMessage;
@@ -15,18 +14,31 @@ import messages.interactions.NpcGenericActionRequestMessage;
 
 public class MovementController {
 	private CharacterController character;
-	protected Pathfinding pathfinding;
+	private Pathfinding pathfinding;
 	
 	public MovementController(CharacterController character) {
 		this.character = character;
 		this.pathfinding = new Pathfinding();
 	}
 	
-	// changement de cellule
+	// refresh des infos par le thread de traitement
+	protected void updatePosition(Map map, int cellId) {
+		this.pathfinding.updatePosition(map, cellId);
+	}
+
+	// refresh des infos par le thread de traitement
+	protected void updatePosition(int cellId) {
+		this.pathfinding.updatePosition(cellId);
+	}
+	
+	protected void setArea(int areaId) {
+		this.character.waitState(CharacterState.IS_LOADED); // attendre le refresh des infos
+		this.pathfinding.setArea(areaId);
+	}
+	
+	 // changement de cellule
 	protected boolean moveTo(int targetId, boolean changeMap) {
 		this.character.waitState(CharacterState.IS_FREE);
-		if(this.character.isInterrupted())
-			return false;
 
 		if(this.character.infos.currentCellId == targetId) { // déjà sur la cellule cible
 			this.character.instance.log.p("Already on the target cell id.");
@@ -62,22 +74,16 @@ public class MovementController {
 		return true;
 	}
 	
-	// changement de map (map distante)
-	protected void goTo(int mapId) {
-		this.character.waitState(CharacterState.IS_LOADED);
-		if(this.character.isInterrupted())
-			return;
-		
+	// définition d'une map de destination
+	protected void defineTargetMap(int mapId) {
+		this.character.waitState(CharacterState.IS_LOADED); // attendre le refresh des infos
 		if(this.character.infos.currentMap.id == mapId) { // déjà sur la map cible
-			this.character.instance.log.p("Already on the target map id.");
+			this.character.instance.log.p("Already on the target map.");
 			return;
 		}
-		
-		this.character.instance.log.p("Going from map " + this.character.infos.currentMap.id + " to " + mapId + ".");
-		
+		this.character.instance.log.p("Going from map " + this.character.infos.currentMap.id + " to map " + mapId + ".");
 		boolean isInIncarnam = mapIsInIncarnam(this.character.infos.currentMap);
-		boolean targetIsInIncarnam = mapIsInIncarnam(MapsCache.loadMap(mapId));
-		if(targetIsInIncarnam) {
+		if(mapIsInIncarnam(MapsCache.loadMap(mapId))) {
 			if(!isInIncarnam)
 				goUpToIncarnam();
 		}
@@ -86,16 +92,18 @@ public class MovementController {
 				goDownToAstrub();
 		}
 		
-		if(this.character.isInterrupted())
-			return;
-		this.character.waitState(CharacterState.IS_LOADED);
-		travel(this.pathfinding.pathToMap(mapId));
-		this.character.instance.log.p("Map cell reached.");
+		this.character.waitState(CharacterState.IS_LOADED); // attendre le refresh des infos
+		this.pathfinding.setTargetMap(mapId);
 	}
 	
-	protected void goToArea(int areaId) {
-		if(this.character.infos.currentMap.subareaId == areaId) // déjà sur l'aire
+	// définition d'une aire de destination et de parcours
+	protected void defineArea(int areaId) {
+		this.character.waitState(CharacterState.IS_LOADED); // attendre le refresh des infos
+		if(this.character.infos.currentMap.subareaId == areaId) { // déjà sur l'aire
+			this.character.instance.log.p("Already on the target area.");
 			return;
+		}
+		this.character.instance.log.p("Going from map " + this.character.infos.currentMap.id + " to area " + areaId + ".");
 		boolean isInIncarnam = mapIsInIncarnam(this.character.infos.currentMap);
 		if(areaIsInIncarnam(areaId)) {
 			if(!isInIncarnam)
@@ -105,26 +113,43 @@ public class MovementController {
 			if(isInIncarnam)
 				goDownToAstrub();
 		}
-		if(Thread.interrupted())
-			return;
 		
-		this.character.waitState(CharacterState.IS_LOADED);
-		this.character.mvt.travel(this.character.mvt.pathfinding.pathToArea());
+		setArea(areaId);
 	}
 	
-	// changement de map (map collatéral)
-	public boolean changeMap(Direction direction) {
-		this.character.waitState(CharacterState.IS_LOADED);
-		if(this.character.isInterrupted())
-			return false;
-
-		this.character.instance.log.p("Moving to " + Map.directionToString(direction.direction) + " map.");
-
-		if(!moveTo(direction.outgoingCellId, true))
+	// déplacement vers une cible fixe
+	protected void goTo(int mapId) {
+		defineTargetMap(mapId);
+		Direction direction;
+		while((direction = this.pathfinding.nextDirectionForReachTarget()) != null)
+			this.changeMap(direction);
+	}
+	
+	// déplacement vers une cible se déplaçant
+	protected void dynamicGoTo(int mapId) {
+		defineTargetMap(mapId);
+		this.changeMap(this.pathfinding.nextDirectionForReachTarget());
+	}
+	
+	// déplacement vers la plus proche map d'une aire
+	protected void goToArea(int areaId) {
+		defineArea(areaId);
+		Direction direction;
+		while((direction = this.pathfinding.nextDirectionForReachTarget()) != null)
+			this.changeMap(direction);
+	}
+	
+	// fonction réservée aux parcours d'aires
+	protected boolean changeMap() {
+		return changeMap(this.pathfinding.nextDirectionInArea());
+	}
+	
+	// fonction réservée aux chemins à destination fixe
+	private boolean changeMap(Direction direction) {
+		if(direction == null || !moveTo(direction.outgoingCellId, true))
 			return false;
 		
-		if(this.character.isInterrupted())
-			return false;
+		this.character.instance.log.p("Moving to " + Map.directionToString(direction.direction) + " map.");
 		
 		int nextMapId = this.character.infos.currentMap.getNeighbourMapFromDirection(direction.direction);
 		this.character.instance.log.p("Sending map changement request. Next map id : " + nextMapId + ".");
@@ -134,24 +159,18 @@ public class MovementController {
 		this.character.infos.mapsTravelled++;
 		this.character.instance.log.graphicalFrame.setMapsTravelledCounter(this.character.infos.mapsTravelled);
 			
-		this.character.updateState(CharacterState.IS_LOADED, false);
+		this.character.updateState(CharacterState.IS_LOADED, false); // chargement de map
 		return true;
 	}
 	
-	public boolean changeMap() {
-		this.character.waitState(CharacterState.IS_LOADED);
-		return changeMap(this.pathfinding.nextDirection());
-	}
-	
 	private void goDownToAstrub() {
-		this.character.waitState(CharacterState.IS_LOADED);
-		if(this.character.isInterrupted())
-			return;
-		
 		this.character.instance.log.p("Going down to Astrub.");
-		travel(this.pathfinding.pathToMap(153880835)); // map où se situe le pnj
-		if(Thread.interrupted())
-			return;
+		defineTargetMap(153880835); // map où se situe le pnj
+		Direction direction;
+		while(!Thread.interrupted() && (direction = this.pathfinding.nextDirectionForReachTarget()) != null)
+			changeMap(direction);
+		
+		this.character.waitState(CharacterState.IS_LOADED); // important
 		
 		NpcGenericActionRequestMessage NGARM = new NpcGenericActionRequestMessage();
 		NGARM.serialize(-10001, 3, this.character.infos.currentMap.id, this.character.instance.id); // on parle au pnj
@@ -179,20 +198,16 @@ public class MovementController {
 		NDRM.serialize(25207); // on sélectionne la seconde réponse
 		this.character.instance.outPush(NDRM);
 		
-		this.character.updateState(CharacterState.IS_LOADED, false);
+		this.character.updateState(CharacterState.IS_LOADED, false); // chargement de map
 	}
 	
 	private void goUpToIncarnam() {
-		this.character.waitState(CharacterState.IS_LOADED);
 		this.character.instance.log.p("Going up to Incarnam.");
-		travel(this.pathfinding.pathToMap(84674054));
-		this.character.useInteractive(375, 489378, 168278); // utilisation de la statue Féca
-	}
-	
-	private void travel(Path path) {
+		defineTargetMap(84674054); // map où se situe la statue Féca
 		Direction direction;
-		while(!Thread.currentThread().isInterrupted() && (direction = path.nextDirection()) != null)
+		while(!Thread.interrupted() && (direction = this.pathfinding.nextDirectionForReachTarget()) != null)
 			changeMap(direction);
+		this.character.useInteractive(375, 489378, 168278); // utilisation de la statue Féca
 	}
 	
 	private static boolean mapIsInIncarnam(Map map) {

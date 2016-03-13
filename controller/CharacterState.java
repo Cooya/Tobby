@@ -5,6 +5,7 @@ public enum CharacterState {
 	IS_LOADED,
 	IN_FIGHT,
 	IN_PARTY,
+	NOT_IN_PARTY,
 	IN_GAME_TURN,
 	NEED_TO_EMPTY_INVENTORY,
 	LEVEL_UP,

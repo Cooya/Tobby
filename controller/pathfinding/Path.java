@@ -6,9 +6,10 @@ import java.util.Collections;
 import java.util.Vector;
 
 import controller.pathfinding.Pathfinder.PathNode;
+import controller.pathfinding.Pathfinding.Direction;
 import main.FatalError;
 
-public class Path {
+class Path {
 	private String name;
 	private Vector<PathNode> nodes;
 	private int currentPos;
@@ -106,16 +107,6 @@ public class Path {
 				return true;
 			}
 		return false;
-	}
-	
-	public static class Direction {
-		public int direction;
-		public int outgoingCellId;
-		
-		protected Direction(int direction, int outgoingCellId) {
-			this.direction = direction;
-			this.outgoingCellId = outgoingCellId;
-		}
 	}
 	
 	private class SimplePathNode extends PathNode { // pour les paths enregistrés dans le fichier "paths.txt"

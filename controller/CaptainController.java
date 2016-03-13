@@ -20,6 +20,12 @@ public class CaptainController extends FighterController {
 		this.teamLevel = 0;
 	}
 	
+	@Override
+	public void updatePosition(Map map, int cellId) {
+		super.updatePosition(map, cellId);
+		broadcastEventToSquad();
+	}
+	
 	protected synchronized void newRecruit(SoldierController recruit) {
 		this.recruits.add(recruit);
 		this.instance.log.p("Recruit " + recruit.infos.characterName + " added to the recruits list.");
@@ -41,11 +47,7 @@ public class CaptainController extends FighterController {
 			this.instance.log.p("Recruit " + recruit.infos.characterName + " joined the party.");
 		}
 		this.recruits.clear();
-	}
-	
-	public void updatePosition(Map map, int cellId) {
-		super.updatePosition(map, cellId);
-		broadcastEventToSquad();
+		updateFightArea();
 	}
 	
 	private void broadcastEventToSquad() {
@@ -90,7 +92,7 @@ public class CaptainController extends FighterController {
 			this.areaId = 95;
 			this.monsterGroupMaxSize = 6;
 		}
-		this.mvt.pathfinding.updateArea(this.areaId);
+		this.mvt.setArea(this.areaId);
 		// 92 -> contour d'Astrub
 		// 95 -> pious d'Astrub
 		// 442 -> lac d'Incarnam
@@ -145,15 +147,14 @@ public class CaptainController extends FighterController {
 	private void waitSoldiersInFight() {
 		this.instance.log.p("Waiting for complete team be in the fight.");
 		for(CharacterController soldier : this.squad)
-			while(!this.fightContext.inFight(soldier.infos.characterId)) {
-				waitState(CharacterState.NEW_ACTOR_IN_FIGHT);
-				if(inState(CharacterState.IN_GAME_TURN)) // fin de la phase de préparation
+			while(!this.fightContext.inFight(soldier.infos.characterId))
+				if(!waitState(CharacterState.NEW_ACTOR_IN_FIGHT)) // fin de la phase de préparation ou interruption
 					return;
-			}
 	}
 	
 	public void run() {
-		waitState(CharacterState.IS_LOADED);
+		waitState(CharacterState.IS_LOADED); // attendre l'entrée en jeu
+		this.teamLevel += this.infos.level;
 		
 		if(inState(CharacterState.IN_FIGHT)) { // reprise de combat
 			GameContextReadyMessage GCRM = new GameContextReadyMessage(); // je ne sais pas à quoi sert ce message
@@ -161,8 +162,9 @@ public class CaptainController extends FighterController {
 			this.instance.outPush(GCRM);
 			fight(true);
 		}
-		
 		changePlayerStatus();
+		if(inState(CharacterState.IN_PARTY))
+			leaveGroup();
 		updateFightArea();
 		
 		while(!isInterrupted()) {
@@ -197,9 +199,9 @@ public class CaptainController extends FighterController {
 					}
 				}
 				else
-					if(!isInterrupted())
-						this.mvt.changeMap();
+					this.mvt.changeMap();
 			}
 		}
+		System.out.println("Thread controller of instance with id = " + this.instance.id + " terminated.");
 	}
 }

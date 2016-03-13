@@ -16,15 +16,15 @@ public class SoldierController extends FighterController {
 	}
 	
 	private void followCaptain() {
-		waitState(CharacterState.IS_LOADED);
+		waitState(CharacterState.IS_LOADED); // attendre le refresh des infos
 		while(this.infos.currentMap.id != this.captain.infos.currentMap.id) {
-			this.mvt.changeMap(this.mvt.pathfinding.directionToMap(this.captain.infos.currentMap.id));
-			waitState(CharacterState.IS_LOADED);
+			this.mvt.dynamicGoTo(this.captain.infos.currentMap.id);
+			waitState(CharacterState.IS_LOADED); // attendre le refresh des infos
 		}
 	}
 	
 	private void joinFight() {
-		waitState(CharacterState.IS_LOADED);
+		waitState(CharacterState.IS_LOADED); // peut-être encore dans le précédent combat
 		
 		GameFightJoinRequestMessage GFJRM = new GameFightJoinRequestMessage();
 		GFJRM.fighterId = this.captain.infos.characterId;
@@ -43,17 +43,14 @@ public class SoldierController extends FighterController {
 			this.instance.outPush(GCRM);
 			fight(true);
 		}
-		
+		if(inState(CharacterState.IN_PARTY))
+			leaveGroup();
 		captain.newRecruit(this);
 		waitState(CharacterState.IN_PARTY);
 		changePlayerStatus();
 		
 		while(!isInterrupted()) {
-			waitState(CharacterState.IS_LOADED); // important
-			
 			followCaptain();
-			
-			waitState(CharacterState.IS_LOADED);
 			waitState(CharacterState.CAPTAIN_ACT);
 			if(this.captain.inState(CharacterState.IN_FIGHT)) {
 				waitState(CharacterState.FIGHT_LAUNCHED);
@@ -66,5 +63,6 @@ public class SoldierController extends FighterController {
 			else if(this.captain.inState(CharacterState.NEED_TO_EMPTY_INVENTORY))
 				goToExchangeWithMule(true);
 		}
+		System.out.println("Thread controller of instance with id = " + this.instance.id + " terminated.");
 	}
 }

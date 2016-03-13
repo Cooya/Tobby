@@ -11,33 +11,50 @@ import java.util.Random;
 import java.util.Vector;
 
 import main.FatalError;
-import controller.pathfinding.Path.Direction;
-import controller.pathfinding.Pathfinder.PathNode;
 
-// classe interface qui fait le lien entre le package "pathfinding" et les contrôleurs,
-// elle ne retourne que des chemins ou des directions
+// classe interface qui fait le lien entre le package "pathfinding" et les contrôleur de mouvement
+// elle retourne soit :
+// un chemin de cellules pour les changements de cases
+// une durée en millisecondes d'un chemin de celulles
+// une direction pour un changement de map
 
 public class Pathfinding {
 	private LightMapNode mapNode;
 	private int currentCellId;
 	private Path currentCellsPath;
+	private Path currentMapsPath;
 	private int areaId;
 	private int lastDirection;
 	
+	public Pathfinding() {
+		this.currentCellId = -1;
+		this.lastDirection = -1;
+		this.areaId = -1;
+	}
+	
+	// met à jour la position du personnage
 	public void updatePosition(Map map, int currentCellId) {
 		this.mapNode = new LightMapNode(map);
 		this.currentCellId = currentCellId;
-		this.lastDirection = -1;
 	}
 	
+	// met à jour la position du personnage
 	public void updatePosition(int currentCellId) {
 		this.currentCellId = currentCellId;
 	}
 	
-	public void updateArea(int areaId) {
+	// modifie l'aire cible
+	public void setArea(int areaId) {
 		this.areaId = areaId;
+		this.currentMapsPath = PathsCache.toArea(this.areaId, this.mapNode.map.id, this.currentCellId);
 	}
 	
+	// modifie la map cible
+	public void setTargetMap(int mapId) {
+		this.currentMapsPath = PathsCache.toMap(mapId, this.mapNode.map.id, this.currentCellId);
+	}
+	
+	// retourne une chemin de cellules vers une cellule cible
 	public Vector<Integer> getCellsPathTo(int targetId) {
 		Pathfinder pathfinder = new CellsPathfinder(this.mapNode.map);
 		this.currentCellsPath = pathfinder.compute(this.currentCellId, targetId);
@@ -49,26 +66,22 @@ public class Pathfinding {
 		return mvPath.getServerMovement();
 	}
 	
+	// retourne la durée en millisecondes d'un chemin de celulles
 	public int getCellsPathDuration() {
 		return this.currentCellsPath.getCrossingDuration();
 	}
 	
-	public Path pathToMap(int mapId) {
-		return PathsCache.toMap(mapId, this.mapNode.map.id, this.currentCellId);
+	// retourne une direction vers la map cible
+	public Direction nextDirectionForReachTarget() {
+		if(this.currentMapsPath == null)
+			return null;
+		return this.currentMapsPath.nextDirection();
 	}
 	
-	public Direction directionToMap(int mapId) {
-		Path path = pathToMap(mapId);
-		PathNode firstNode = path.getFirstNode();
-		this.lastDirection = firstNode.direction;
-		return new Direction(firstNode.direction, mapNode.getMapChangementCell(firstNode.direction));
-	}
-	
-	public Path pathToArea() {
-		return PathsCache.toArea(this.areaId, this.mapNode.map.id, this.currentCellId);
-	}
-
-	public Direction nextDirection() { // direction aléatoire pour le parcours des aires
+	// retourne une direction aléatoire pour le parcours des aires
+	public Direction nextDirectionInArea() {
+		if(this.areaId == -1)
+			throw new FatalError("Area not initialized.");
 		if(mapNode.map.subareaId != this.areaId)
 			throw new FatalError("Bad current area.");
 		
@@ -114,5 +127,15 @@ public class Pathfinding {
 			return direction - 4;
 		else
 			return direction + 4;
+	}
+	
+	public static class Direction {
+		public int direction;
+		public int outgoingCellId;
+		
+		protected Direction(int direction, int outgoingCellId) {
+			this.direction = direction;
+			this.outgoingCellId = outgoingCellId;
+		}
 	}
 }

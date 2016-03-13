@@ -108,6 +108,8 @@
 5580 PartyAcceptInvitationMessage
 5585 PartyInvitationRequestMessage
 5586 PartyInvitationMessage
+5593 PartyLeaveRequestMessage
+5594 PartyLeaveMessage
 5607 ClientKeyMessage
 5608 SpellUpgradeRequestMessage
 5609 StatsUpgradeResultMessage

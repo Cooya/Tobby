@@ -30,6 +30,7 @@ import messages.gamestarting.ClientKeyMessage;
 import messages.gamestarting.PrismsListRegisterMessage;
 import messages.parties.PartyAcceptInvitationMessage;
 import messages.parties.PartyInvitationMessage;
+import messages.parties.PartyJoinMessage;
 import messages.parties.PartyMemberInFightMessage;
 
 public class RoleplayContextFrame extends Frame {
@@ -172,8 +173,10 @@ public class RoleplayContextFrame extends Frame {
 					this.instance.quitExchangeContext();
 					this.character.updateState(CharacterState.IN_EXCHANGE, false);
 				}
-				else // on refuse un échange
+				else { // on refuse un échange
+					this.character.roleplayContext.actorDemandingExchange = 0;
 					this.character.updateState(CharacterState.PENDING_DEMAND, false);
+				}
 				return true;
 			case 5586 : // PartyInvitationMessage
 				PartyInvitationMessage PIM = new PartyInvitationMessage(msg);
@@ -187,7 +190,9 @@ public class RoleplayContextFrame extends Frame {
 				}
 				return true;
 			case 5576 : // PartyJoinMessage
+				PartyJoinMessage PJM = new PartyJoinMessage(msg);
 				this.instance.log.p("Party joined.");
+				this.character.setPartyId(PJM.partyId);
 				this.character.updateState(CharacterState.IN_PARTY, true);
 				return true;
 			case 6306 : // PartyNewMemberMessage
@@ -197,6 +202,12 @@ public class RoleplayContextFrame extends Frame {
 				PartyMemberInFightMessage PMIFM = new PartyMemberInFightMessage(msg);
 				this.character.roleplayContext.currentCaptainFightId = PMIFM.fightId;
 				this.character.updateState(CharacterState.FIGHT_LAUNCHED, true);
+				return true;
+			case 5594 : // PartyLeaveMessage
+			case 6261 : // PartyDeletedMessage
+				this.character.setPartyId(0);
+				this.character.updateState(CharacterState.IN_PARTY, false);
+				this.instance.log.p("Party left.");
 				return true;
 		}
 		return false;

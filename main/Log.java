@@ -25,6 +25,9 @@ public class Log {
 	}
 	
 	public void p(String msgDirection, Message msg) { // pour la réception et l'envoi de messages
+		if(Thread.interrupted())
+			return;
+		
 		String str = "";
 		int id = msg.getId();
 		String name = Message.get(id);
@@ -51,6 +54,9 @@ public class Log {
 	}
 	
 	public void p(String str) {
+		if(Thread.interrupted())
+			return;
+		
 		if(DEBUG)
 			graphicalFrame.appendText("[" + Main.DATE_FORMAT.format(new Date()) + "] " + str + EOL, Color.BLACK);
 		else
