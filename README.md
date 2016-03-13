@@ -14,6 +14,7 @@
 * Supprimer à terme les boucles infinies lors de l'attente d'états
 * Gérer le cas où un soldat se déconnecte (reconnexion ou suppression du vecteur de soldats)
 * Optimiser la régénération de la vie (beaucoup de pertes de temps actuellement)
+* Ajouter, lors de la recherche d'un chemin vers une map distante, une cellule cible pour la map cible (ça évitera de se retrouver de l'autre côté d'une muraille par rapport au capitaine par exemple)
 
 ### Bugs à résoudre ###
 
@@ -26,10 +27,11 @@
 * ~~Problème d'accès concurrents dans la classe RoleplayContext (et peut-être aussi dans FightContext)~~
 * Chemins de maps possiblement erronés des fois, à vérifier sur le long terme
 * Cellules dans le coin des maps ne permettant de changer de map que d'un seul côté (donc problème quand on veut aller vers l'autre côté)
-* Exceptions en double (FatalError)
-* Temps mort à la création d'un path de maps (peut-être que c'est normal)
+* Exceptions en double (FatalError) -> inévitable je pense
+* Temps mort à la création d'un chemin de maps -> probablement normal (calcul de dizaines de chemins de maps)
 * **Launcher qui finit par s'écrouler au bout d'un certain temps**
 * Mode absent qui ne fonctionne pas pour le capitaine (probablement à cause du fait qu'il est chef de groupe)
+* Chemin de maps calculé trop souvent (il prend du temps donc à optimiser)
 
 ### Échanges ###
 
@@ -51,3 +53,4 @@
 * ~~Éviter de repartir sur l'aire de combat lorsqu'on est full pods~~
 * Améliorer la réflexion
 * Correction de la frame nulle ajoutée dans le vecteur de frames de l'instance de la mule (pas très propre)
+* Améliorer l'utilisation des "interactives" (récupérer le résultat et se rendre à la cellule adjacente à l'"interactive")
