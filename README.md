@@ -11,7 +11,6 @@
 * ~~Gérer les combats en groupe~~
 * Ajouter des critères pour le choix des groupes de monstres à combattre
 * Améliorer les échanges et les dialogues avec les PNJ (suppression de "sleeps" peu propres)
-* Implémenter les combats en groupe
 * Supprimer à terme les boucles infinies lors de l'attente d'états
 * Gérer le cas où un soldat se déconnecte (reconnexion ou suppression du vecteur de soldats)
 * Optimiser la régénération de la vie (beaucoup de pertes de temps actuellement)
