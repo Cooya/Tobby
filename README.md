@@ -3,7 +3,6 @@
 ### Fonctionnalités/améliorations à implémenter ###
 
 * Améliorer l'IA de combat
-* Optimiser le pathfinder (changements de direction)
 * Implémenter la lecture des valeurs négatives dans la classe ByteArray (bug du readVarShort...)
 * Optimiser l'envoi des paquets (avec création de variables locales dans les frames) -> très lourd à faire
 * ~~Faire une méthode "useInteractive"~~
@@ -25,7 +24,7 @@
 * ~~"None possible path found" sur les maps séparées par un "mur" d'obstacles~~
 * ~~Problème d'accès concurrents dans la classe RoleplayContext (et peut-être aussi dans FightContext)~~
 * Chemins de maps possiblement erronés des fois, à vérifier sur le long terme
-* Cellules dans le coin des maps ne permettant de changer de map que d'un seul côté (donc problème quand on veut aller vers l'autre côté)
+* ~~Cellules dans le coin des maps ne permettant de changer de map que d'un seul côté (donc problème quand on veut aller vers l'autre côté)~~
 * Exceptions en double (FatalError) -> inévitable je pense
 * Temps mort à la création d'un chemin de maps vers une aire -> probablement normal (calcul de dizaines de chemins de maps)
 * **Launcher qui finit par s'écrouler au bout d'un certain temps**
@@ -52,15 +51,16 @@
 * Après reconnexion lors d'un combat, l'invitation de groupe émise par le capitaine n'est pas reçue
 * La mule a du mal à enchaîner les échanges avec plusieurs combattants à la suite
 * Améliorer l'intégration d'un soldat au groupe (pas bien fait et donc trop long)
-* Gérer le cas où un soldat se déconnecte (reconnexion ou suppression du vecteur de soldats)
+* ~~Gérer le cas où un soldat se déconnecte (reconnexion ou suppression du vecteur de soldats)~~
 * Optimiser la régénération de la vie (beaucoup de pertes de temps actuellement)
-* Déconnecter un combattant lorsqu'il a atteint la limite de 200 combats par jour (traitement du "TextInformationMessage" reçu)
+* ~~Déconnecter un combattant lorsqu'il a atteint la limite de 200 combats par jour (traitement du "TextInformationMessage" reçu)~~
 
 ### Facultatif ###
 
 * ~~Envoyer le message "GameContextReadyMessage"~~
 * ~~Éviter de repartir sur l'aire de combat lorsqu'on est full pods~~
+* Optimiser le pathfinder (changements de direction)
 * Améliorer la réflexion
 * Correction de la frame nulle ajoutée dans le vecteur de frames de l'instance de la mule (pas très propre)
 * Améliorer l'utilisation des "interactives" (récupérer le résultat et se rendre à la cellule adjacente à l'"interactive")
-* Gérer les "TextInformationMessage" qui peuvent donner des informations utiles pour le debuggage
+* ~~Gérer les "TextInformationMessage" qui peuvent donner des informations utiles pour le debuggage~~
