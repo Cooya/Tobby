@@ -13,6 +13,7 @@
 * Améliorer les échanges et les dialogues avec les PNJ (suppression de "sleeps" peu propres)
 * Supprimer à terme les boucles infinies lors de l'attente d'états
 * Ajouter, lors de la recherche d'un chemin vers une map distante, une cellule cible pour la map cible (ça évitera de se retrouver de l'autre côté d'une muraille par rapport au capitaine par exemple)
+* Mettre à jour l'aire de combat à chaque level up (que ce soit seul ou en groupe)
 
 ### Bugs à résoudre ###
 
@@ -53,6 +54,7 @@
 * Améliorer l'intégration d'un soldat au groupe (pas bien fait et donc trop long)
 * Gérer le cas où un soldat se déconnecte (reconnexion ou suppression du vecteur de soldats)
 * Optimiser la régénération de la vie (beaucoup de pertes de temps actuellement)
+* Déconnecter un combattant lorsqu'il a atteint la limite de 200 combats par jour (traitement du "TextInformationMessage" reçu)
 
 ### Facultatif ###
 
