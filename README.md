@@ -28,9 +28,9 @@
 * Exceptions en double (FatalError) -> inévitable je pense
 * Temps mort à la création d'un chemin de maps vers une aire -> probablement normal (calcul de dizaines de chemins de maps)
 * **Launcher qui finit par s'écrouler au bout d'un certain temps**
-* Mode absent qui ne fonctionne pas pour le capitaine (probablement à cause du fait qu'il est chef de groupe)
+* ~~Mode absent qui ne fonctionne pas pour le capitaine (probablement à cause du fait qu'il est chef de groupe)~~
 * ~~Chemin de maps calculé trop souvent (il prend du temps donc à optimiser)~~
-* **Au bout d'un moment, un message n'est pas envoyé (ou n'est pas reçu par le serveur), de ce fait, le bot est kick**
+* **Au bout d'un moment, un message n'est pas envoyé (ou n'est pas reçu par le serveur), de ce fait, le bot est kické**
 
 ### Échanges ###
 
@@ -48,12 +48,13 @@
 
 ### Groupes de combat ###
 
-* Après reconnexion lors d'un combat, l'invitation de groupe émise par le capitaine n'est pas reçue
+* ~~Après reconnexion lors d'un combat, l'invitation de groupe émise par le capitaine n'est pas reçue~~
 * La mule a du mal à enchaîner les échanges avec plusieurs combattants à la suite
 * Améliorer l'intégration d'un soldat au groupe (pas bien fait et donc trop long)
 * ~~Gérer le cas où un soldat se déconnecte (reconnexion ou suppression du vecteur de soldats)~~
 * Optimiser la régénération de la vie (beaucoup de pertes de temps actuellement)
 * ~~Déconnecter un combattant lorsqu'il a atteint la limite de 200 combats par jour (traitement du "TextInformationMessage" reçu)~~
+* Promouvoir un soldat lorsque le capitaine du groupe est déconnecté
 
 ### Facultatif ###
 
@@ -63,4 +64,5 @@
 * Améliorer la réflexion
 * Correction de la frame nulle ajoutée dans le vecteur de frames de l'instance de la mule (pas très propre)
 * Améliorer l'utilisation des "interactives" (récupérer le résultat et se rendre à la cellule adjacente à l'"interactive")
-* ~~Gérer les "TextInformationMessage" qui peuvent donner des informations utiles pour le debuggage~~
+* ~~Gérer les "TextInformationMessages" qui peuvent donner des informations utiles pour le debuggage~~
+* Traduire la classe "ParamsDecoder" pour un meilleur affichage des "TextInformationMessages"
