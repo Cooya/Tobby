@@ -29,12 +29,12 @@ public class FightResultExperienceData extends FightResultAdditionalData {
     	this.showExperienceForGuild = BooleanByteWrapper.getFlag(b, 4);
     	this.showExperienceForMount = BooleanByteWrapper.getFlag(b, 5);
     	this.isIncarnationExperience = BooleanByteWrapper.getFlag(b, 6);
-    	this.experience = buffer.readVarLong().toNumber();
-    	this.experienceLevelFloor = buffer.readVarLong().toNumber();
-    	this.experienceNextLevelFloor = buffer.readVarLong().toNumber();
-    	this.experienceFightDelta = buffer.readVarLong().toNumber();
-    	this.experienceForGuild = buffer.readVarLong().toNumber();
-    	this.experienceForMount = buffer.readVarLong().toNumber();
+    	this.experience = buffer.readVarLong();
+    	this.experienceLevelFloor = buffer.readVarLong();
+    	this.experienceNextLevelFloor = buffer.readVarLong();
+    	this.experienceFightDelta = buffer.readVarLong();
+    	this.experienceForGuild = buffer.readVarLong();
+    	this.experienceForMount = buffer.readVarLong();
     	this.rerollExperienceMul = buffer.readByte();
     }
 }

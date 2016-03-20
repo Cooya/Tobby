@@ -2,6 +2,7 @@ package gamedata.d2o.modules;
 
 import gamedata.d2o.GameData;
 
+// ce n'est pas un fichier d2o
 public class AmbientSound extends PlaylistSound {
     public static final int AMBIENT_TYPE_ROLEPLAY = 1;
     public static final int AMBIENT_TYPE_AMBIENT = 2;

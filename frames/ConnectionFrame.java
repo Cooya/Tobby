@@ -1,12 +1,16 @@
 package frames;
 
+import gamedata.character.CharacterBaseInformations;
+
 import java.util.Hashtable;
 
 import controller.CharacterController;
 import main.Emulation;
+import main.FatalError;
 import main.Instance;
 import messages.Message;
 import messages.connection.AuthenticationTicketMessage;
+import messages.connection.BasicCharactersListMessage;
 import messages.connection.CharacterSelectedSuccessMessage;
 import messages.connection.CharacterSelectionMessage;
 import messages.connection.CharactersListMessage;
@@ -15,11 +19,11 @@ import messages.connection.HelloConnectMessage;
 import messages.connection.IdentificationFailedMessage;
 import messages.connection.IdentificationMessage;
 import messages.connection.IdentificationSuccessMessage;
-import messages.connection.RawDataMessage;
 import messages.connection.SelectedServerDataMessage;
 import messages.connection.ServerSelectionMessage;
 import messages.connection.ServerStatusUpdateMessage;
 import messages.connection.ServersListMessage;
+import messages.security.RawDataMessage;
 
 public class ConnectionFrame extends Frame {
 	private Instance instance;
@@ -90,20 +94,38 @@ public class ConnectionFrame extends Frame {
 				instance.outPush(CLRM);
 				return true;
 			case 151 : // CharactersListMessage
-			case 6475 : // BasicCharactersListMessage
 				CharactersListMessage CLM = new CharactersListMessage(msg);
-				this.character.infos.characterId = CLM.id.toNumber();
 				CharacterSelectionMessage CSM = new CharacterSelectionMessage();
-				CSM.serialize(CLM);
+				for(CharacterBaseInformations character : CLM.characters)
+					CSM.id = character.id; // on suppose qu'il n'y a qu'un seul perso sur le compte
+				
+				System.out.println(CSM.id);
+				
+				this.character.infos.characterId = CSM.id;
+				CSM.serialize();
+				instance.outPush(CSM);
+				return true;
+			case 6475 : // BasicCharactersListMessage
+				BasicCharactersListMessage BCLM = new BasicCharactersListMessage(msg);
+				BCLM.deserialize();
+				CSM = new CharacterSelectionMessage();
+				for(CharacterBaseInformations character : BCLM.characters)
+					CSM.id = character.id; // on suppose qu'il n'y a qu'un seul perso sur le compte
+				this.character.infos.characterId = CSM.id;
+				CSM.serialize();
 				instance.outPush(CSM);
 				return true;
 			case 153 : // CharacterSelectedSuccessMessage
 				CharacterSelectedSuccessMessage CSSM = new CharacterSelectedSuccessMessage(msg);
 				this.character.infos.characterName = CSSM.infos.name;
 				this.character.infos.level = CSSM.infos.level;
+				this.character.infos.setBreed(CSSM.infos.breed);
 				this.instance.log.graphicalFrame.setNameLabel(this.character.infos.characterName, this.character.infos.level);
 				this.instance.endOfConnection();
+				this.character.infos.isConnected = true;
 				return true;
+			case 5836 : // CharacterSelectedErrorMessage
+				throw new FatalError("Error at the character selection.");
 		}
 		return false;
 	}

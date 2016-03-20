@@ -1,5 +1,6 @@
 package gamedata.d2o.modules;
 
+import gamedata.d2i.I18n;
 import gamedata.d2o.GameData;
 import gamedata.d2o.GameDataFileAccessor;
 
@@ -40,7 +41,7 @@ public class MapPosition {
     public int subAreaId;
     public int worldMap;
     public boolean hasPriorityOnWorldmap;
-    //private String _name;
+    private String _name;
     private SubArea _subArea;
     
     public synchronized static MapPosition getMapPositionById(int id) {
@@ -73,13 +74,11 @@ public class MapPosition {
     	return null;
     }
     
-    /*
     public String getName() {
     	if(this._name == null)
     		this._name = I18n.getText(this.nameId);
     	return this._name;
     }
-    */
     
     public SubArea getSubArea() {
         if (this._subArea == null)

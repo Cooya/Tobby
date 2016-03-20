@@ -85,9 +85,9 @@ public class CharacterCharacteristicsInformations {
 	public int probationTime = 0;
 
 	public CharacterCharacteristicsInformations(ByteArray buffer) {
-		this.experience = buffer.readVarLong().toNumber();
-		this.experienceLevelFloor = buffer.readVarLong().toNumber();
-		this.experienceNextLevelFloor = buffer.readVarLong().toNumber();
+		this.experience = buffer.readVarLong();
+		this.experienceLevelFloor = buffer.readVarLong();
+		this.experienceNextLevelFloor = buffer.readVarLong();
 		this.kamas = buffer.readInt();
 		this.statsPoints = buffer.readVarShort();
 		this.additionnalPoints = buffer.readVarShort();

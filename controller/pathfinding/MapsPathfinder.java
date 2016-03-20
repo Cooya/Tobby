@@ -50,9 +50,7 @@ class MapsPathfinder extends Pathfinder {
 	}
 	
 	private class MapNode extends LightMapNode {
-		private MapZones zones;
-		private Vector<Cell> currentZone;
-		private Vector<Cell> outgoingPossibilities;
+		private Vector<Cell> outgoingPossibilities; // au maximum 4 (pour chaque direction)
 		
 		protected MapNode(Map map, int lastDirection, PathNode parent, int incomingCellId) {
 			super(map.id, lastDirection, parent);
@@ -63,11 +61,11 @@ class MapsPathfinder extends Pathfinder {
 			this.x = mp.posX;
 			this.y = mp.posY;
 			this.outgoingCellId = -1;
-			if(lastDirection != -1)
-				setCurrentCell();
+			if(parent != null)
+				setParentOugoingCell();
 			else { // cellule de départ et d'arrivée
 				if(incomingCellId == -1) // création de path à distance
-					this.currentZone = this.zones.getZone(getFirstAccessibleCellId()); // pas très fiable
+					this.currentZone = this.zones.getZone(getFirstAccessibleCellId()); // pas fiable à 100%
 				else
 					this.currentZone = this.zones.getZone(incomingCellId); // s'applique aussi au noeud de destination, mais cela ne change rien
 			}
@@ -79,13 +77,15 @@ class MapsPathfinder extends Pathfinder {
 			this(MapsCache.loadMap(mapId), lastDirection, parent, incomingCellId);
 		}
 		
-		private void setCurrentCell() {
+		// ajoute au vecteur des possibilités de sortie de la map parente une cellule de sortie pour 
+		// accéder à la map fille (et détermine ainsi la zone courante de cette dernière)
+		private void setParentOugoingCell() {
 			Cell cell;
 			Vector<Cell> parentCurrentZone = ((MapNode) this.parent).currentZone;
 			if(parentCurrentZone == null)
 				throw new FatalError("Invalid parent current cell.");
 			for(Cell parentCell : parentCurrentZone)
-				if(parentCell.allowsChangementMap() && isOutgoingPossibility(parentCell.id, this.lastDirection)) {
+				if(parentCell.allowsChangementMap() && isOutgoingPossibility(parentCell.id, this.lastDirection) && !isForbiddenPossibility(parentCell.id)) {
 					cell = getNewCellAfterMapChangement(parentCell.id, this.lastDirection);
 					if(cell.isAccessibleDuringRP()) {
 						//System.out.println(toString() + " " + Pathfinder.directionToString(this.lastDirection) + " " + directionCellId + " " + cell);
@@ -96,6 +96,7 @@ class MapsPathfinder extends Pathfinder {
 				}
 		}
 		
+		// retourne l'id de la première cellule accessible de la map pour les noeuds sans parent
 		private int getFirstAccessibleCellId() {
 			for(Cell cell : this.map.cells)
 				if(cell.isAccessibleDuringRP())
@@ -103,6 +104,7 @@ class MapsPathfinder extends Pathfinder {
 			throw new FatalError("Map without available cell ! Impossible !");
 		}
 		
+		// détermine la cellule d'arrivée après un changement de map
 		private Cell getNewCellAfterMapChangement(int srcId, int direction) {
 			switch(direction) {
 				case Map.RIGHT : return this.map.cells.get(srcId + 1 - (Map.WIDTH - 1));
@@ -113,48 +115,12 @@ class MapsPathfinder extends Pathfinder {
 			throw new FatalError("Invalid direction for changing map.");
 		}
 		
-		private boolean isOutgoingPossibility(int cellId, int direction) {
-			switch(direction) {
-				case Map.LEFT : return cellId % Map.WIDTH == 0;
-				case Map.RIGHT : return (cellId + 1) % Map.WIDTH == 0;
-				case Map.UP : return cellId < 28;
-				case Map.DOWN : return cellId > 532;
-				default : throw new FatalError("Invalid direction for changing map.");
-			}
-		}
-		
-		private int getOutgoingCellId() {
-			Cell middleCell;
-			switch(this.direction) {
-				case Map.RIGHT : middleCell = this.map.cells.get(MIDDLE_RIGHT_CELL); break;
-				case Map.DOWN : middleCell = this.map.cells.get(MIDDLE_DOWN_CELL); break;
-				case Map.LEFT : middleCell = this.map.cells.get(MIDDLE_LEFT_CELL); break;
-				case Map.UP : middleCell = this.map.cells.get(MIDDLE_UP_CELL); break;
-				default : throw new FatalError("Invalid direction for changing map.");
-			}	
-			
-			Cell nearestCell = this.currentZone.firstElement();
-			double shortestDistance = Cell.distanceBetween(nearestCell, middleCell);
-			double currentDistance;
-			for(Cell cell : this.currentZone) {
-				if(cell.allowsChangementMap()) {
-					currentDistance = Cell.distanceBetween(cell, middleCell);
-					if(currentDistance == 0)
-						return cell.id;
-					if(currentDistance < shortestDistance) {
-						shortestDistance = currentDistance;
-						nearestCell = cell;
-					}
-				}
-			}
-			return nearestCell.id;
-		}
-		
+		// détermine la cellule de sortie de ce noeud
 		@Override
 		protected void setNode() {
 			for(Cell cell : this.outgoingPossibilities)
 				if(isOutgoingPossibility(cell.id, this.direction)) {
-					this.outgoingCellId = getOutgoingCellId();
+					this.outgoingCellId = getOutgoingCellId(this.direction);
 					break;
 				}
 		}

@@ -23,10 +23,6 @@ public class RoleplayContext {
 	
 	public synchronized void newContextActors(Vector<GameRolePlayActorInformations> actors) {
 		this.actors = actors;
-		
-		for(GameRolePlayActorInformations actor : actors)
-			if(actor.contextualId == this.character.infos.characterId)
-				this.character.infos.characterName = ((GameRolePlayNamedActorInformations) actor).name;
 		for(GameRolePlayActorInformations actor : actors)
 			if(actor.contextualId == this.character.infos.characterId) {
 				this.character.infos.currentCellId = actor.disposition.cellId;

@@ -15,7 +15,7 @@ public class ExchangeRequestedTradeMessage extends ExchangeRequestedMessage {
 	private void deserialize() {
 		ByteArray buffer = new ByteArray(this.content);
 		super.deserialize(buffer);
-		this.source = buffer.readVarLong().toNumber();
-		this.target = buffer.readVarLong().toNumber();
+		this.source = buffer.readVarLong();
+		this.target = buffer.readVarLong();
 	}
 }

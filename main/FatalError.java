@@ -7,11 +7,11 @@ public class FatalError extends Error {
 	
 	public FatalError(String str) {
 		new Exception(str).printStackTrace();
-		Controller.restartInstance();
+		Controller.deconnectInstance(str);
 	}
 	
 	public FatalError(Exception e) {
 		e.printStackTrace();
-		Controller.restartInstance();
+		Controller.deconnectInstance(e.getMessage());
 	}
 }

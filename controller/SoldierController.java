@@ -1,5 +1,6 @@
 package controller;
 
+import gamedata.character.PlayerStatusEnum;
 import main.Instance;
 import messages.context.GameContextReadyMessage;
 import messages.fights.GameFightJoinRequestMessage;
@@ -8,11 +9,7 @@ public class SoldierController extends FighterController {
 	protected CaptainController captain;
 
 	public SoldierController(Instance instance, String login, String password, int serverId) {
-		super(instance, login, password, serverId);
-	}
-	
-	public void setCaptain(CaptainController captain) {
-		this.captain = captain;
+		super(instance, login, password, serverId, 0);
 	}
 	
 	private void followCaptain() {
@@ -36,7 +33,7 @@ public class SoldierController extends FighterController {
 	
 	public void run() {
 		waitState(CharacterState.IS_LOADED);
-		
+		changePlayerStatus(PlayerStatusEnum.PLAYER_STATUS_AVAILABLE); // pour pouvoir être invité dans le groupe
 		if(inState(CharacterState.IN_FIGHT)) { // reprise de combat
 			GameContextReadyMessage GCRM = new GameContextReadyMessage(); // je ne sais pas à quoi sert ce message
 			GCRM.serialize(this.infos.currentMap.id);
@@ -45,9 +42,8 @@ public class SoldierController extends FighterController {
 		}
 		if(inState(CharacterState.IN_PARTY))
 			leaveGroup();
-		captain.newRecruit(this);
 		waitState(CharacterState.IN_PARTY);
-		changePlayerStatus();
+		changePlayerStatus(PlayerStatusEnum.PLAYER_STATUS_AFK);
 		
 		while(!isInterrupted()) {
 			followCaptain();
@@ -61,7 +57,7 @@ public class SoldierController extends FighterController {
 				}
 			}
 			else if(this.captain.inState(CharacterState.NEED_TO_EMPTY_INVENTORY))
-				goToExchangeWithMule(true);
+				goToExchangeWithMule();
 		}
 		System.out.println("Thread controller of instance with id = " + this.instance.id + " terminated.");
 	}

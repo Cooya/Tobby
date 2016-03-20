@@ -34,7 +34,7 @@ public class Pathfinding {
 	
 	// met à jour la position du personnage
 	public void updatePosition(Map map, int currentCellId) {
-		this.mapNode = new LightMapNode(map);
+		this.mapNode = new LightMapNode(map, currentCellId);
 		this.currentCellId = currentCellId;
 	}
 	
@@ -43,10 +43,11 @@ public class Pathfinding {
 		this.currentCellId = currentCellId;
 	}
 	
-	// modifie l'aire cible
+	// modifie l'aire cible et calcule si nécessaire un chemin vers cette aire
 	public void setArea(int areaId) {
 		this.areaId = areaId;
-		this.currentMapsPath = PathsCache.toArea(this.areaId, this.mapNode.map.id, this.currentCellId);
+		if(this.mapNode.map.subareaId != areaId)
+			this.currentMapsPath = PathsCache.toArea(this.areaId, this.mapNode.map.id, this.currentCellId);
 	}
 	
 	// modifie la map cible
@@ -96,7 +97,7 @@ public class Pathfinding {
 		// priorité à la direction opposée
 		Map map = MapsCache.loadMap(neighbours.get(this.lastDirection));
 		if(map != null && map.mapType == 0 && map.subareaId == mapNode.map.subareaId) {
-			int mapChangementCell = mapNode.getMapChangementCell(this.lastDirection);
+			int mapChangementCell = mapNode.getOutgoingCellId(this.lastDirection);
 			if(mapChangementCell != -1)
 				return new Direction(this.lastDirection, mapChangementCell);
 		}
@@ -111,7 +112,7 @@ public class Pathfinding {
 			map = MapsCache.loadMap(neighbours.get(randomDirection));
 			if(map != null && map.mapType == 0 && map.subareaId == mapNode.map.subareaId) {
 				this.lastDirection = randomDirection;
-				int mapChangementCell = mapNode.getMapChangementCell(this.lastDirection);
+				int mapChangementCell = mapNode.getOutgoingCellId(this.lastDirection);
 				if(mapChangementCell != -1)
 					return new Direction(this.lastDirection, mapChangementCell);
 					
@@ -119,7 +120,7 @@ public class Pathfinding {
 			neighbours.remove(randomDirection);
 		}
 		this.lastDirection = incomingDirection;
-		return new Direction(this.lastDirection, mapNode.getMapChangementCell(this.lastDirection));
+		return new Direction(this.lastDirection, mapNode.getOutgoingCellId(this.lastDirection));
 	}
 	
 	private int getOppositeDirection(int direction) {

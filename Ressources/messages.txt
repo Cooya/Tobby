@@ -22,6 +22,8 @@
 170 SetCharacterRestrictionsMessage
 175 AtlasPointsInformations
 176 BasicNoOperationMessage
+180 BasicWhoIsMessage
+181 BasicWhoIsRequestMessage
 182 BasicPingMessage
 183 BasicPongMessage
 189 SystemMessageDisplayMessage
@@ -163,6 +165,7 @@
 5996 GameRolePlayPlayerLifeStatusMessage
 6019 ChallengeResultMessage
 6022 ChallengeInfoMessage
+6029 AccountLoggingKickedMessage
 6034 ObjectsDeletedMessage
 6036 StorageObjectsUpdateMessage
 6054 PartyUpdateLightMessage
@@ -180,6 +183,9 @@
 6123 ChallengeTargetUpdateMessage
 6129 ExchangeStartedWithPodsMessage
 6132 GameActionFightNoSpellCastMessage
+6134 PopupWarningMessage
+6154 CheckFileRequestMessage
+6156 CheckFileMessage
 6160 GuildMemberWarnOnConnectionStateMessage
 6162 InventoryContentAndPresetMessage
 6174 IdentificationFailedBannedMessage
@@ -211,6 +217,7 @@
 6317 SequenceNumberMessage
 6321 CharacterExperienceGainMessage
 6322 FighterStatsListMessage
+6330 GameActionFightCastOnTargetRequestMessage
 6334 ObjectAveragePricesGetMessage
 6339 CharacterCapabilitiesMessage
 6340 ServerSettingsMessage

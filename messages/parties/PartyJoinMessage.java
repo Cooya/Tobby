@@ -29,7 +29,7 @@ public class PartyJoinMessage extends AbstractPartyMessage {
 		ByteArray buffer = new ByteArray(this.content);
 		super.deserialize(buffer);
 		this.partyType = buffer.readByte();
-        this.partyLeaderId = buffer.readVarLong().toNumber();
+        this.partyLeaderId = buffer.readVarLong();
         this.maxParticipants = buffer.readByte();
         int nb = buffer.readShort();
         for(int i = 0; i < nb; ++i)

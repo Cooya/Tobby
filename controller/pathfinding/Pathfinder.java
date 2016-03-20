@@ -58,9 +58,9 @@ abstract class Pathfinder {
 		path = new Path();
 		int direction = -2;
 		while(currentNode != null) {
-			if(direction != -2) // le noeud d'arrivée n'a pas de direction
-				currentNode.direction = direction;
-			currentNode.setNode();
+			if(direction != -2) // -2 correspond au noeud d'arrivée
+				currentNode.direction = direction; // on fixe la direction du noeud grâce à la propriété "lastDirection" du noeud fils
+			currentNode.setNode(); // on fixe la cellule du sortie du noeud (uniquement pour les chemins de maps)
 			direction = currentNode.lastDirection;
 			path.addNode(currentNode);
 			currentNode = currentNode.parent;

@@ -12,7 +12,7 @@ public class GameActionFightCastRequestMessage extends Message {
 		super();
 	}
 
-	public void serialize(int spellId, short cellId, int instanceId) {
+	public void serialize(int spellId, int cellId, int instanceId) {
 		ByteArray buffer = new ByteArray();
 		buffer.writeVarShort(spellId);
 		buffer.writeShort(cellId);

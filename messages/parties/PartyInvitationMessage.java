@@ -22,8 +22,8 @@ public class PartyInvitationMessage extends AbstractPartyMessage {
     	this.partyType = buffer.readByte();
     	this.partyName = buffer.readUTF();
     	this.maxParticipants = buffer.readByte();
-    	this.fromId = buffer.readVarLong().toNumber();
+    	this.fromId = buffer.readVarLong();
     	this.fromName = buffer.readUTF();
-    	this.toId = buffer.readVarLong().toNumber();
+    	this.toId = buffer.readVarLong();
     }
 }

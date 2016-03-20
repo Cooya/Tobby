@@ -1,6 +1,7 @@
 package gui;
 
 import gui.Model.Account;
+import gui.View.FighterOptionsPanel;
 import gui.View.LoginPanel;
 
 import java.awt.event.ActionEvent;
@@ -9,6 +10,7 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.util.Vector;
 
 import javax.swing.AbstractButton;
 import javax.swing.JInternalFrame;
@@ -17,6 +19,7 @@ import javax.swing.JOptionPane;
 import javax.swing.event.InternalFrameEvent;
 import javax.swing.event.InternalFrameListener;
 
+import main.Emulation;
 import main.Instance;
 import main.Log;
 
@@ -69,27 +72,51 @@ public class Controller {
 		return null;
 	}
 	
-	private synchronized static void createInstance(Account account) {
+	private synchronized static void createMuleInstance(Account account) {
+		Emulation.runLauncherIfNecessary();
 		CharacterFrame frame = new CharacterFrame(account.id, account.login);
 		view.addCharacterFrame(frame);
 		frame.addInternalFrameListener(new CharacterFrameListener());
 		frame.setVisible(true);
-		model.createInstance(account, frame);
+		model.createMuleInstance(account, frame);
+	}
+	
+	private synchronized static void createFighterInstance(Account account, int areaId) {
+		Emulation.runLauncherIfNecessary();
+		CharacterFrame frame = new CharacterFrame(account.id, account.login);
+		view.addCharacterFrame(frame);
+		frame.addInternalFrameListener(new CharacterFrameListener());
+		frame.setVisible(true);
+		model.createFighterInstance(account, areaId, frame);
 	}
 
+	// méthode déclenchée par la fermeture d'une frame graphique
 	private synchronized static void killInstance(JInternalFrame graphicalFrame) {
 		int instanceId = view.getInstance(graphicalFrame).id;
 		view.removeCharacterFrame(graphicalFrame);
 		Instance instance = model.removeInstance(instanceId);
-		instance.interruptThreads();
+		if(instance != null)
+			instance.interruptThreads();
 	}
 	
-	public static void restartInstance() {
+	// méthode déclenchée lors d'une erreur critique (la frame graphique reste présente)
+	public static void deconnectInstance(String reason) {
 		Instance instance = model.getCurrentInstance();
+		instance.log.p(reason);
 		instance.interruptThreads();
-		// TODO
+		model.removeInstance(instance.id);
 	}
-
+	
+	// méthode déclenchée lors de la connexion d'un modérateur (les frames graphiques restent présentes)
+	public static void deconnectAllInstances(String reason) {
+		Vector<Instance> instances = model.getConnectedInstances();
+		for(Instance instance : instances) {
+			instance.log.p(reason);
+			instance.interruptThreads();
+			model.removeInstance(instance.id);
+		}
+	}
+	
 	private static class StartListener implements ActionListener {
 		private StartListener(AbstractButton button) {
 			button.addActionListener(this);
@@ -115,7 +142,7 @@ public class Controller {
 			if(login.isEmpty() || password.isEmpty() || serverId == 0)
 				JOptionPane.showMessageDialog(null, "Missing informations.", "Erreur", JOptionPane.ERROR_MESSAGE);
 			else {
-				loginPanel.dispose();
+				this.loginPanel.dispose();
 				Account account = model.getAccount(login);
 				if(account == null) {
 					account = model.createAccount(1, login, password, serverId);
@@ -132,7 +159,10 @@ public class Controller {
 					view.accountsMenu.add(item);
 					new AccountItemListener(item);
 				}
-				createInstance(account);
+				if(account.type != 0)
+					new FighterOptionsPanelListener(view.createFighterOptionsPanel(), account);
+				else
+					createMuleInstance(account);
 			}
 		}
 	}
@@ -173,8 +203,32 @@ public class Controller {
 
 		public void actionPerformed(ActionEvent e) {
 			Account account = model.getAccount(this.accountItem.getText().split(" ")[0]);
-			if(account != null)
-				createInstance(account);
+			if(account != null) {
+				if(account.type != 0)
+					new FighterOptionsPanelListener(view.createFighterOptionsPanel(), account);
+				else
+					createMuleInstance(account);
+			}
+		}
+	}
+	
+	private static class FighterOptionsPanelListener implements ActionListener {
+		private FighterOptionsPanel fighterOptionsPanel;
+		private Account account;
+		
+		private FighterOptionsPanelListener(FighterOptionsPanel fighterOptionsPanel, Account account) {
+			this.fighterOptionsPanel = fighterOptionsPanel;
+			this.account = account;
+			this.fighterOptionsPanel.submitButton.addActionListener(this);
+		}
+
+		public void actionPerformed(ActionEvent event) {
+			if(this.fighterOptionsPanel.isLoneWolf.isSelected())
+				account.type = 1; // combattant solitaire
+			else
+				account.type = 2; // combattant en groupe
+			createFighterInstance(account, this.fighterOptionsPanel.getSelectedAreaId());
+			this.fighterOptionsPanel.dispose();
 		}
 	}
 }

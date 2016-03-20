@@ -3,37 +3,44 @@ package controller.informations;
 import java.util.HashMap;
 import java.util.Vector;
 
+import main.FatalError;
 import gamedata.character.CharacterCharacteristicsInformations;
+import gamedata.character.Elements;
 import gamedata.character.SpellItem;
 import gamedata.d2p.ankama.Map;
 
 public class CharacterInformations {
+	public boolean isConnected;
 	public String login;
 	public String password;
 	public int serverId;
 	public String characterName;
 	public double characterId;
+	public int status;
 	public int currentCellId;
 	public int currentDirection;
 	public Map currentMap;
 	public int regenRate;
 	public int weight;
 	public int weightMax;
+	private int breed;
 	public int level;
-	public int element;
 	public CharacterCharacteristicsInformations stats;
 	public HashMap<Integer,SpellItem> spellList; 
-	public int spellToUpgrade;
+	public int attackSpell;
+	public int attackSpellActionPoints;
+	public int element;
 	public int fightsWonCounter;
 	public int fightsLostCounter;
 	public int mapsTravelled;
 	
-	public CharacterInformations(String login, String password, int serverId, int element) {
+	public CharacterInformations(String login, String password, int serverId) {
+		this.isConnected = false;
 		this.login = login;
 		this.password = password;
 		this.serverId = serverId;
-		this.element = element;
-		this.spellToUpgrade = 161; // flèche magique
+		this.status = 1; // statut inconnu
+		this.attackSpell = 161; // flèche magique
 		this.mapsTravelled = 1;
 	}
 	
@@ -53,5 +60,21 @@ public class CharacterInformations {
 		spellList = new HashMap<Integer, SpellItem>();
 		for(SpellItem spellItem : spells)
 			spellList.put(spellItem.spellId, spellItem);
+	}
+	
+	public void setBreed(int breed) {
+		this.breed = breed;
+		if(this.breed == 9) { // crâ
+			this.attackSpell = 161; // flèche magique
+			this.attackSpellActionPoints = 4;
+			this.element = Elements.intelligence;
+		}
+		else if(this.breed == 10) { // sadida
+			this.attackSpell = 183; // ronce
+			this.attackSpellActionPoints = 3;
+			this.element = Elements.strength;
+		}
+		else
+			throw new FatalError("Unhandled breed character.");
 	}
 }

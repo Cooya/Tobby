@@ -33,8 +33,6 @@ public class NetworkInterface extends Thread {
 			this.instance.log.p("Connection to game server, waiting response...");
 			connectionToServer(gameServerIP, Main.SERVER_PORT);
 			this.instance.log.p("Deconnected from game server.");
-			if(!isInterrupted())
-				throw new FatalError("Deconnected from game server.");
 		}
 		System.out.println("Thread receiver of instance with id = " + instance.id + " terminated.");
 	}
@@ -59,7 +57,9 @@ public class NetworkInterface extends Thread {
 				}
 				continue;
 			} catch(Exception e) {
-				break;
+				if(isInterrupted()) // si la connexion a été coupée côté client
+					break;
+				throw new FatalError("Deconnected from server."); // si la connexion a été coupée côté serveur
 			}
 			if(DEBUG)
 				this.instance.log.p(bytesReceived + " bytes received from server.");
@@ -68,7 +68,7 @@ public class NetworkInterface extends Thread {
 		this.serverCo.close();
 	}
 	
-	public void processMsgStack(LinkedList<Message> msgStack) {
+	private void processMsgStack(LinkedList<Message> msgStack) {
 		Message msg;
 		while((msg = msgStack.poll()) != null) {
 			latency.updateLatency();
@@ -77,8 +77,14 @@ public class NetworkInterface extends Thread {
 		}
 	}
 	
-	public void setGameServerIP(String gameServerIP) {
+	protected void setGameServerIP(String gameServerIP) {
 		this.gameServerIP = gameServerIP;
+	}
+	
+	// on coupe la connexion côté client
+	protected void closeReceiver() {
+		interrupt();
+		this.serverCo.close();
 	}
 	
 	class Sender extends Thread {

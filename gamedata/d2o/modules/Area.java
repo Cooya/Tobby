@@ -1,13 +1,18 @@
 package gamedata.d2o.modules;
 
+import gamedata.d2i.I18n;
 import gamedata.d2o.GameData;
+import gamedata.d2o.GameDataFileAccessor;
 
-import java.awt.Rectangle;
 import java.util.Arrays;
 
 public class Area {
 	public static final String MODULE = "Areas";
     private static Area[] _allAreas;
+    
+	static {
+		GameDataFileAccessor.getInstance().init(MODULE);
+	}
 
     public int id;
     public int nameId;
@@ -17,7 +22,7 @@ public class Area {
     public Rectangle bounds;
     public int worldmapId;
     public boolean hasWorldMap;
-    //private String _name;
+    private String _name;
     private SuperArea _superArea;
     private boolean _hasVisibleSubAreas;
     private boolean _hasVisibleSubAreasInitialized;
@@ -38,13 +43,11 @@ public class Area {
     	return _allAreas;
     }
     
-    /*
     public String getName() {
     	if(this._name == null)
     		this._name = I18n.getText(this.nameId);
     	return this._name;
     }
-    */
     
     public SuperArea getSuperArea() {
     	if(this._superArea == null)

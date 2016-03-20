@@ -22,7 +22,7 @@ public class PartyMemberInFightMessage extends AbstractPartyMessage {
 		ByteArray buffer = new ByteArray(this.content);
 		super.deserialize(buffer);
 		this.reason = buffer.readByte();
-		this.memberId = buffer.readVarLong().toNumber();
+		this.memberId = buffer.readVarLong();
 		this.memberAccountId = buffer.readInt();
 		this.memberName = buffer.readUTF();
 		this.fightId = buffer.readInt();

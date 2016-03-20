@@ -1,4 +1,4 @@
-package messages.gamestarting;
+package messages.security;
 
 import utilities.ByteArray;
 import main.Emulation;

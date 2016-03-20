@@ -263,7 +263,7 @@ public class ProtocolTypeManager {
 			Constructor<?> cons = c.getConstructors()[0];
 			try {
 				o = cons.newInstance(buffer);
-			} catch (Exception e) {
+			} catch(Exception e) {
 				e.printStackTrace();
 			}
 			return o;

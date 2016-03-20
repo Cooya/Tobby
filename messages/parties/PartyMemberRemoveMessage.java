@@ -14,6 +14,6 @@ public class PartyMemberRemoveMessage extends AbstractPartyEventMessage {
 	private void deserialize() {
 		ByteArray buffer = new ByteArray(this.content);
 		super.deserialize(buffer);
-        this.leavingPlayerId = buffer.readVarLong().toNumber();
+        this.leavingPlayerId = buffer.readVarLong();
 	}
 }

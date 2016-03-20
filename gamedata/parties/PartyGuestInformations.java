@@ -18,8 +18,8 @@ public class PartyGuestInformations {
     public Vector<PartyCompanionBaseInformations> companions;
 
     public PartyGuestInformations(ByteArray buffer) {
-        this.guestId = buffer.readVarLong().toNumber();
-        this.hostId = buffer.readVarLong().toNumber();
+        this.guestId = buffer.readVarLong();
+        this.hostId = buffer.readVarLong();
         this.name = buffer.readUTF();
         this.guestLook = new EntityLook(buffer);
         this.breed = buffer.readByte();

@@ -2,14 +2,15 @@ package controller;
 
 import java.util.Hashtable;
 
-import gamedata.character.Elements;
-import gamedata.character.PlayerStatusEnum;
 import gamedata.d2p.ankama.Map;
 import controller.informations.CharacterInformations;
 import controller.informations.RoleplayContext;
 import main.FatalError;
 import main.Instance;
+import main.Main;
+import messages.character.BasicWhoIsRequestMessage;
 import messages.character.PlayerStatusUpdateRequestMessage;
+import messages.exchanges.ExchangePlayerRequestMessage;
 import messages.interactions.InteractiveUseRequestMessage;
 import messages.parties.PartyLeaveRequestMessage;
 import messages.synchronisation.BasicPingMessage;
@@ -26,7 +27,7 @@ public abstract class CharacterController extends Thread {
 		super(login + "/controller");
 		this.instance = instance;
 		this.states = new Hashtable<CharacterState, Boolean>();
-		this.infos = new CharacterInformations(login, password, serverId, Elements.intelligence);
+		this.infos = new CharacterInformations(login, password, serverId);
 		this.roleplayContext = new RoleplayContext(this);
 		this.mvt = new MovementController(this);
 		
@@ -46,9 +47,9 @@ public abstract class CharacterController extends Thread {
 		this.partyId = partyId;
 	}
 	
-	protected void changePlayerStatus() {
+	protected void changePlayerStatus(int status) {
 		PlayerStatusUpdateRequestMessage PSURM = new PlayerStatusUpdateRequestMessage();
-		PSURM.serialize(PlayerStatusEnum.PLAYER_STATUS_AFK);
+		PSURM.serialize(status);
 		this.instance.outPush(PSURM);
 		this.instance.log.p("Passing in away mode.");
 	}
@@ -78,6 +79,27 @@ public abstract class CharacterController extends Thread {
 		this.instance.outPush(PLRM);
 		this.instance.log.p("Leaving group request sent.");
 		waitState(CharacterState.NOT_IN_PARTY);
+	}
+	
+	// fonction à améliorer (obtenir le résultat de la demande)
+	protected boolean exchangeDemand(double characterId) { // timeout de 5 secondes si demande pas acceptée
+		waitState(CharacterState.IS_FREE);
+		ExchangePlayerRequestMessage EPRM = new ExchangePlayerRequestMessage();
+		EPRM.serialize(characterId, 1, this.instance.id);
+		this.instance.outPush(EPRM);
+		this.instance.log.p("Sending exchange demand.");
+		return waitState(CharacterState.IN_EXCHANGE); // retourne le résultat de la demande d'échange (avec timeout)
+	}
+	
+	// envoie une requête WHOIS pour savoir si le modérateur du serveur est en ligne
+	protected void checkIfModeratorIsOnline(String moderatorName) {
+		BasicWhoIsRequestMessage BWIRM = new BasicWhoIsRequestMessage();
+		BWIRM.verbose = true;
+		BWIRM.search = moderatorName;
+		BWIRM.serialize();
+		this.instance.outPush(BWIRM);
+		this.instance.log.p("Checking if moderator is online.");
+		waitState(CharacterState.WHOIS_RESPONSE);
 	}
 	
 	// seul le thread de traitement entre ici
@@ -162,6 +184,16 @@ public abstract class CharacterController extends Thread {
 				condition = new Condition(state);
 				isEvent = true;
 				break;
+			case SPELL_CASTED : // event
+				this.instance.log.p("Waiting for result of spell cast.");
+				condition = new Condition(state);
+				isEvent = true;
+				break;
+			case WHOIS_RESPONSE : // event
+				this.instance.log.p("Waiting for WHOIS response.");
+				condition = new Condition(state);
+				isEvent = true;
+				break;
 			case NEW_ACTOR_IN_FIGHT : // event avec contrainte
 				this.instance.log.p("Waiting for soldier join fight.");
 				condition = new Condition(state);
@@ -182,10 +214,10 @@ public abstract class CharacterController extends Thread {
 	private synchronized boolean waitFor(Condition condition) {
 		boolean infiniteWaiting = condition.timeout == 0;
 		if(infiniteWaiting)
-			condition.timeout = 1000 * 60 * 5; // 5 minutes
+			condition.timeout = 120000; // 2 minutes
 		long startTime = System.currentTimeMillis();
 		long currentTime;
-		while(true) {
+		while(!isInterrupted()) { // n'entre même pas dans la boucle si le thread est en cours d'interruption
 			while((currentTime = System.currentTimeMillis() - startTime) < condition.timeout) {
 				if(!condition.type) {
 					if(this.states.get(condition.expectedState) == condition.expectedValueForExpectedState)
@@ -204,7 +236,9 @@ public abstract class CharacterController extends Thread {
 				}
 			}
 			if(infiniteWaiting) {
-				sendPingRequest();
+				//sendPingRequest();
+				if(this.infos.isConnected)
+					checkIfModeratorIsOnline(Main.MODERATOR_NAME); // requête effectuée toutes les 2 minutes
 				startTime = System.currentTimeMillis();
 			}
 			else {
@@ -212,6 +246,7 @@ public abstract class CharacterController extends Thread {
 				return false; // si on ne l'a pas reçu à temps
 			}
 		}
+		return false;
 	}
 
 	private static class Condition {
@@ -245,7 +280,6 @@ public abstract class CharacterController extends Thread {
 			this.otherState = null;
 			this.type = false;
 		}
-		
 		
 		private void addSecondState(CharacterState state, boolean expectedValue) {
 			this.otherState = state;

@@ -10,10 +10,16 @@ public class Main {
 	public static final String AUTH_SERVER_IP = "213.248.126.39";
 	public static final int SERVER_PORT = 5555;
 	public static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("HH:mm:ss:SSS");
+	public static String MODERATOR_NAME = "[Alkalino]";
 	
-	public static void main(String[] args) {	
-		Emulation.runLauncher();
+	public static void main(String[] args) {
 		Controller.runApp();
+		
+		//for(SubArea subArea : SubArea.getAllSubArea())
+			//System.out.println(subArea.getName() + " " + subArea.id + subArea.getWorldMap().getName());
+		
+		//Map map = MapsCache.loadMap(154010884);
+		//System.out.println(map.subareaId);
 		
 		/*
 		MapPosition mp = MapPosition.getMapPositionById(84805636);

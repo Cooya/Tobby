@@ -16,7 +16,7 @@ public class InteractiveUsedMessage extends Message {
 	
 	private void deserialize() {
 		ByteArray buffer = new ByteArray(this.content);
-		this.entityId = buffer.readVarLong().toNumber();
+		this.entityId = buffer.readVarLong();
 		this.elemId = buffer.readVarInt();
 		this.skillId = buffer.readVarShort();
 		this.duration = buffer.readVarShort();

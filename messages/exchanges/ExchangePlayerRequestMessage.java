@@ -2,7 +2,6 @@ package messages.exchanges;
 
 import main.Emulation;
 import utilities.ByteArray;
-import utilities.Int64;
 
 public class ExchangePlayerRequestMessage extends ExchangeRequestMessage {
 	public double target;
@@ -14,7 +13,7 @@ public class ExchangePlayerRequestMessage extends ExchangeRequestMessage {
 	public void serialize(double target, int exchangeType, int instanceId) {
 		ByteArray buffer = new ByteArray();
 		super.serialize(buffer, exchangeType);
-		buffer.writeVarLong(Int64.fromNumber(target));
+		buffer.writeVarLong(target);
 		completeInfos(Emulation.hashMessage(buffer, instanceId));
 	}
 }

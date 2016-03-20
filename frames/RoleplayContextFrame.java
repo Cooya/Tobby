@@ -1,21 +1,33 @@
 package frames;
 
+import java.io.File;
+import java.security.MessageDigest;
+
+import utilities.ByteArray;
 import controller.CharacterController;
 import controller.CharacterState;
 import controller.FighterController;
+import gamedata.context.TextInformationTypeEnum;
+import gamedata.d2i.I18n;
+import gamedata.d2o.modules.InfoMessage;
 import gamedata.d2o.modules.MapPosition;
 import gamedata.d2p.MapsCache;
 import gui.Controller;
 import main.FatalError;
 import main.Instance;
 import main.InterClientKeyManager;
+import main.Main;
 import messages.EmptyMessage;
 import messages.Message;
+import messages.character.BasicWhoIsMessage;
 import messages.character.CharacterLevelUpMessage;
 import messages.character.CharacterStatsListMessage;
 import messages.character.InventoryWeightMessage;
 import messages.character.LifePointsRegenBeginMessage;
+import messages.character.PlayerStatusUpdateMessage;
 import messages.character.SpellListMessage;
+import messages.connection.ChannelEnablingMessage;
+import messages.connection.PrismsListRegisterMessage;
 import messages.context.CurrentMapMessage;
 import messages.context.GameContextCreateMessage;
 import messages.context.GameContextRemoveElementMessage;
@@ -23,15 +35,17 @@ import messages.context.GameMapMovementMessage;
 import messages.context.GameRolePlayShowActorMessage;
 import messages.context.MapComplementaryInformationsDataMessage;
 import messages.context.MapInformationsRequestMessage;
+import messages.context.TextInformationMessage;
 import messages.exchanges.ExchangeLeaveMessage;
 import messages.exchanges.ExchangeRequestedTradeMessage;
-import messages.gamestarting.ChannelEnablingMessage;
-import messages.gamestarting.ClientKeyMessage;
-import messages.gamestarting.PrismsListRegisterMessage;
 import messages.parties.PartyAcceptInvitationMessage;
 import messages.parties.PartyInvitationMessage;
 import messages.parties.PartyJoinMessage;
 import messages.parties.PartyMemberInFightMessage;
+import messages.security.CheckFileMessage;
+import messages.security.CheckFileRequestMessage;
+import messages.security.ClientKeyMessage;
+import messages.security.PopupWarningMessage;
 
 public class RoleplayContextFrame extends Frame {
 	private Instance instance;
@@ -44,6 +58,49 @@ public class RoleplayContextFrame extends Frame {
 
 	public boolean processMessage(Message msg) {
 		switch(msg.getId()) {
+			case 180 : // BasicWhoIsMessage
+				this.instance.log.p("Whois response received.");
+				BasicWhoIsMessage BWIM = new BasicWhoIsMessage(msg);
+				if(BWIM.playerName == Main.MODERATOR_NAME && BWIM.playerState != 0)
+					Controller.deconnectAllInstances("The moderator is online.");
+				else
+					this.character.updateState(CharacterState.WHOIS_RESPONSE, true);
+				return true;
+			case 780 : // TextInformationMessage
+				TextInformationMessage TIM = new TextInformationMessage(msg);
+				if(TIM.msgType == 1 && TIM.msgId == 245) // limite de 200 combats par jour atteinte
+					Controller.deconnectInstance("Limit of 200 fights per day reached.");
+				else {
+					InfoMessage infoMessage = InfoMessage.getInfoMessageById((TIM.msgType * 10000) + TIM.msgId);
+					int textId;
+					Object[] parameters;
+					if(infoMessage != null) {
+						textId = infoMessage.textId;
+						if(TIM.parameters.size() > 0) {
+							String parameter = TIM.parameters.get(0);
+							if(parameter != null && parameter.indexOf("~") == -1)
+								parameters = parameter.split("~");
+							else
+								parameters = (String[]) TIM.parameters.toArray();
+						}
+					}
+					else {
+						this.instance.log.p("Information message " + (TIM.msgType * 10000 + TIM.msgId) + " cannot be found.");
+						if(TIM.msgType == TextInformationTypeEnum.TEXT_INFORMATION_ERROR)
+							textId = InfoMessage.getInfoMessageById(10231).textId;
+						else
+							textId = InfoMessage.getInfoMessageById(207).textId;
+						parameters = new String[1];
+						parameters[0] = TIM.msgId;
+					}
+					String messageContent = I18n.getText(textId);
+					if(messageContent != null)
+						//this.instance.log.p(ParamsDecoder.applyParams(msgContent, parameters));
+						this.instance.log.p(messageContent);
+					else
+						this.instance.log.p("There is no message for id " + (TIM.msgType * 10000 + TIM.msgId) + ".");
+				}
+				return true;	
 			case 6471 : // CharacterLoadingCompleteMessage
 				this.instance.log.graphicalFrame.setFightsWonLabel(0);
 				this.instance.log.graphicalFrame.setFightsLostLabel(0);
@@ -156,6 +213,13 @@ public class RoleplayContextFrame extends Frame {
 					this.instance.log.p("Inventory weight maximum almost reached, need to empty.");
 				}
 				return true;
+			case 6386 : // PlayerStatusUpdateMessage
+				PlayerStatusUpdateMessage PSUM = new PlayerStatusUpdateMessage(msg);
+				if(PSUM.playerId == this.character.infos.characterId) {
+					this.character.infos.status = PSUM.status.statusId;
+					this.instance.log.p("New status : " + this.character.infos.status + ".");
+				}
+				return true;
 			case 5523 : // ExchangeRequestedTradeMessage
 				ExchangeRequestedTradeMessage ERTM = new ExchangeRequestedTradeMessage(msg);
 				this.character.roleplayContext.actorDemandingExchange = ERTM.source;
@@ -208,6 +272,54 @@ public class RoleplayContextFrame extends Frame {
 				this.character.setPartyId(0);
 				this.character.updateState(CharacterState.IN_PARTY, false);
 				this.instance.log.p("Party left.");
+				return true;
+			case 6134 : // PopupWarningMessage
+				PopupWarningMessage PWM = new PopupWarningMessage(msg);
+				this.instance.log.p("Popup received by " + PWM.author + " that contains : \"" + PWM.content + "\".");
+				try {
+					Thread.sleep(PWM.lockDuration * 1000); // attendre le nombre de secondes indiqué
+				} catch (InterruptedException e) {
+					Thread.currentThread().interrupt();
+				}
+				return true;
+			case 6154 : // CheckFileRequestMessage
+				CheckFileRequestMessage CFRM = new CheckFileRequestMessage(msg);
+				this.instance.log.p("Request for check file \"" + CFRM.filename + "\" received.");
+				CheckFileMessage CFM = new CheckFileMessage();
+				MessageDigest md;
+				try {
+					md = MessageDigest.getInstance("MD5");
+					byte[] filenameBytes = CFRM.filename.getBytes("UTF-8");
+					CFM.filenameHash = new String(md.digest(filenameBytes), "UTF-8");
+				} catch(Exception e) {
+					throw new FatalError(e);
+				}
+				File file = new File(CFRM.filename);
+				if(file == null || !file.exists())
+					CFM.value = "-1";
+				else {
+					ByteArray buffer = ByteArray.fileToByteArray(CFRM.filename);
+					if(buffer == null)
+						CFM.value = "-1";
+					if(CFM.value.equals("")) {
+						if(CFRM.type == 0)
+							CFM.value = String.valueOf(buffer.getSize());
+						else if(CFRM.type == 1)
+							try {
+								CFM.value = new String(md.digest(buffer.bytes()), "UTF-8");
+							} catch(Exception e) {
+								throw new FatalError(e);
+							}
+					}
+				}
+				CFM.type = CFRM.type;
+				this.instance.outPush(CFM);
+				this.instance.log.p(CFM.filenameHash);
+				this.instance.log.p(String.valueOf(CFM.type));
+				this.instance.log.p(CFM.value);
+				return true;
+			case 6029 : // AccountLoggingKickedMessage
+				this.instance.log.p("Banned by a moderator.");
 				return true;
 		}
 		return false;

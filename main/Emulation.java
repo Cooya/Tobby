@@ -8,7 +8,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import messages.Message;
 import messages.connection.HelloConnectMessage;
 import messages.connection.IdentificationSuccessMessage;
-import messages.connection.RawDataMessage;
+import messages.security.RawDataMessage;
 import utilities.ByteArray;
 import utilities.Processes;
 
@@ -22,7 +22,7 @@ public class Emulation {
 	private static Reader reader = new Reader();
 	private static Lock lock = new ReentrantLock();
 
-	public static void runLauncher() {
+	public static void runLauncherIfNecessary() {
 		if(!Processes.inProcess("adl.exe"))
 			try {
 				Instance.log("Running AS launcher.");
@@ -112,7 +112,7 @@ public class Emulation {
 		ByteArray array;
 		while(true) {
 			try {
-				Instance.log("Asking to hash message.");
+				//Instance.log("Asking to hash message.");
 				size = launcherCo.receive(buffer, 10000);
 				if(size <= 0) {
 					lock.unlock();
@@ -132,7 +132,7 @@ public class Emulation {
 				throw new FatalError(e);
 			}
 		}
-		Instance.log("Message hashed, " + size + " bytes received.");
+		//Instance.log("Message hashed, " + size + " bytes received.");
 		lock.unlock();
 		return new ByteArray(array.bytesFromPos());
 	}

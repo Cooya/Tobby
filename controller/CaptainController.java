@@ -1,10 +1,14 @@
 package controller;
 
+import gamedata.character.PlayerStatusEnum;
 import gamedata.d2p.ankama.Map;
 
 import java.util.Vector;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import main.Instance;
+import main.Main;
 import messages.context.GameContextReadyMessage;
 import messages.parties.PartyInvitationRequestMessage;
 
@@ -12,29 +16,44 @@ public class CaptainController extends FighterController {
 	private Vector<SoldierController> squad;
 	private Vector<SoldierController> recruits;
 	private int teamLevel;
+	private static Lock lock = new ReentrantLock();
 	
-	public CaptainController(Instance instance, String login, String password, int serverId) {
-		super(instance, login, password, serverId);
+	public CaptainController(Instance instance, String login, String password, int serverId, int areaId) {
+		super(instance, login, password, serverId, areaId);
 		this.squad = new Vector<SoldierController>(7);
 		this.recruits = new Vector<SoldierController>();
 		this.teamLevel = 0;
 	}
 	
-	@Override
+	@Override // indique à tous les soldats de l'escouade que le capitaine a changé de map
 	public void updatePosition(Map map, int cellId) {
 		super.updatePosition(map, cellId);
 		broadcastEventToSquad();
 	}
 	
-	protected synchronized void newRecruit(SoldierController recruit) {
+	// ajoute une nouvelle recrue à la liste des recrues en attente d'être recruté par le capitaine
+	public synchronized void newRecruit(SoldierController recruit) {
+		lock.lock();
 		this.recruits.add(recruit);
-		this.instance.log.p("Recruit " + recruit.infos.characterName + " added to the recruits list.");
+		this.instance.log.p("Recruit " + recruit.infos.login + " added to the recruits list.");
+		lock.unlock();
 	}
 	
+	// retire un soldat de l'escouade
+	public synchronized void removeSoldierFromSquad(SoldierController soldier) {
+		lock.lock();
+		this.squad.remove(soldier);
+		this.instance.log.p("Recruit " + soldier.infos.login + " removed from the squad.");
+		lock.unlock();
+	}
+	
+	// parcourt la liste des recrues et les invite à rejoindre l'escouade (avec attente d'acceptation de l'invitation)
 	private synchronized void integrateRecruits() {
+		lock.lock();
 		if(this.recruits.size() == 0)
 			return;
 		for(SoldierController recruit : recruits) {
+			recruit.waitState(CharacterState.IS_LOADED);
 			this.squad.add(recruit);
 			recruit.captain = this;
 			this.teamLevel += recruit.infos.level;
@@ -42,65 +61,23 @@ public class CaptainController extends FighterController {
 			PIRM.name = recruit.infos.characterName;
 			PIRM.serialize();
 			this.instance.outPush(PIRM);
-			waitState(CharacterState.NEW_PARTY_MEMBER);
-			updateState(CharacterState.NEW_PARTY_MEMBER, false);
-			this.instance.log.p("Recruit " + recruit.infos.characterName + " joined the party.");
+			if(waitState(CharacterState.NEW_PARTY_MEMBER))
+				this.instance.log.p("Recruit " + recruit.infos.characterName + " joined the party.");
 		}
 		this.recruits.clear();
-		updateFightArea();
+		lock.unlock();
+		changePlayerStatus(PlayerStatusEnum.PLAYER_STATUS_AFK); // pour repasser en mode absent
+		setFightArea(this.teamLevel);
 	}
 	
+	// indique à tous les soldats de l'escouade que le capitaine a effectué une action
 	private void broadcastEventToSquad() {
 		for(SoldierController soldier : squad)
 			soldier.updateState(CharacterState.CAPTAIN_ACT, true);
 	}
 	
-	private void updateFightArea() {	
-		if(teamLevel < 5) {
-			this.areaId = 450;
-			this.monsterGroupMaxSize = 2;
-		}
-		else if(teamLevel < 10) {
-			this.areaId = 450;
-			this.monsterGroupMaxSize = 3;
-		}
-		else if(teamLevel < 25) {
-			this.areaId = 445;
-			this.monsterGroupMaxSize = 3;
-		}
-		else if(teamLevel < 40) {
-			this.areaId = 92;
-			this.monsterGroupMaxSize = 2;
-		}
-		else if(teamLevel < 70) {
-			this.areaId = 92;
-			this.monsterGroupMaxSize = 3;
-		}
-		else if(teamLevel < 100) {
-			this.areaId = 92;
-			this.monsterGroupMaxSize = 5;
-		}
-		else if(teamLevel < 180) {
-			this.areaId = 95;
-			this.monsterGroupMaxSize = 4;
-		}
-		else if(teamLevel < 250) {
-			this.areaId = 95;
-			this.monsterGroupMaxSize = 5;
-		}
-		else {
-			this.areaId = 95;
-			this.monsterGroupMaxSize = 6;
-		}
-		this.mvt.setArea(this.areaId);
-		// 92 -> contour d'Astrub
-		// 95 -> pious d'Astrub
-		// 442 -> lac d'Incarnam
-		// 445 -> pâturages d'Incarnam
-		// 450 -> route des âmes d'Incarnam
-	}
-	
-	private void emptyInventoryIfNecessary() {
+	@Override
+	protected void emptyInventoryIfNecessary() {
 		boolean need = false;
 		if(inState(CharacterState.NEED_TO_EMPTY_INVENTORY))
 			need = true;
@@ -113,12 +90,12 @@ public class CaptainController extends FighterController {
 			this.instance.log.p("Need to empty inventory.");
 			updateState(CharacterState.NEED_TO_EMPTY_INVENTORY, true);
 			broadcastEventToSquad();
-			waitState(CharacterState.MULE_AVAILABLE);
-			goToExchangeWithMule(true);
+			goToExchangeWithMule();
 		}
 	}
 	
-	private void regenerateLife() {
+	@Override
+	protected void regenerateLife() {
 		int currentMissingLife;
 		int maxMissingLife = this.infos.missingLife();
 		for(CharacterController teamMate : this.squad) {
@@ -152,8 +129,10 @@ public class CaptainController extends FighterController {
 					return;
 	}
 	
+	@Override
 	public void run() {
 		waitState(CharacterState.IS_LOADED); // attendre l'entrée en jeu
+		checkIfModeratorIsOnline(Main.MODERATOR_NAME);
 		this.teamLevel += this.infos.level;
 		
 		if(inState(CharacterState.IN_FIGHT)) { // reprise de combat
@@ -162,10 +141,11 @@ public class CaptainController extends FighterController {
 			this.instance.outPush(GCRM);
 			fight(true);
 		}
-		changePlayerStatus();
+		
 		if(inState(CharacterState.IN_PARTY))
 			leaveGroup();
-		updateFightArea();
+		changePlayerStatus(PlayerStatusEnum.PLAYER_STATUS_AFK);
+		setFightArea(this.teamLevel);
 		
 		while(!isInterrupted()) {
 			waitState(CharacterState.IS_LOADED); // important
@@ -186,8 +166,7 @@ public class CaptainController extends FighterController {
 			regenerateLife();
 			
 			while(!isInterrupted()) { // boucle recherche & combat
-				// on attend que l'escouade complète soit sur la map
-				waitSoldiers();
+				waitSoldiers(); // on attend que l'escouade complète soit sur la map
 				
 				// combats
 				if(lookForAndLaunchFight()) {
@@ -195,6 +174,7 @@ public class CaptainController extends FighterController {
 						broadcastEventToSquad();
 						waitSoldiersInFight();
 						fight(false);
+						checkIfModeratorIsOnline(Main.MODERATOR_NAME);
 						break;
 					}
 				}

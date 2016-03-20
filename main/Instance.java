@@ -1,6 +1,5 @@
 package main;
 
-import java.util.Date;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -27,23 +26,24 @@ public class Instance extends Thread {
 	private Vector<Frame> frames;
 	private ConcurrentLinkedQueue<Message> output;
 	private ConcurrentLinkedQueue<Message> input;
-	private Date lastActivity;
 	public Thread[] threads;
 	public int id;
 	public Log log;
 	
-	public Instance(int id, int type, String login, String password, int serverId, CharacterFrame graphicalFrame) {
+	public Instance(int id, int type, String login, String password, int serverId, int areaId, CharacterFrame graphicalFrame) {
 		super(login + "/process");
 		this.id = id;
 		
 		// initialisation des différents acteurs
 		this.log = new Log(login, graphicalFrame);
 		this.net = new NetworkInterface(this, login);
-		if(type == 0)
+		if(type == 0) // mule
 			this.character = new MuleController(this, login, password, serverId);
-		else if(type == 1)
-			this.character = new CaptainController(this, login, password, serverId);
-		else
+		else if(type == 1) // combattant solitaire
+			this.character = new FighterController(this, login, password, serverId, areaId);
+		else if(type == 2) // capitaine
+			this.character = new CaptainController(this, login, password, serverId, areaId);
+		else // soldat
 			this.character = new SoldierController(this, login, password, serverId);
 		this.frames = new Vector<Frame>();
 		this.output = new ConcurrentLinkedQueue<Message>();
@@ -76,7 +76,10 @@ public class Instance extends Thread {
 	// destruction des threads de l'instance depuis la GUI
 	public void interruptThreads() {
 		for(Thread thread : this.threads)
-			thread.interrupt();
+			if(thread instanceof NetworkInterface)
+				((NetworkInterface) thread).closeReceiver();
+			else
+				thread.interrupt();
 	}
 	
 	public synchronized void inPush(Message msg) {
@@ -94,8 +97,6 @@ public class Instance extends Thread {
 	}
 	
 	public Message outPull() {
-		this.lastActivity = new Date();
-		this.log.graphicalFrame.setLastActivityLabel(this.lastActivity);
 		//this.log.p(this.output.size() + " message(s) in the output queue.");
 		return this.output.poll();
 	}
@@ -142,8 +143,12 @@ public class Instance extends Thread {
 		}
 	}
 	
-	public void setCaptain(Instance captain) {
-		((SoldierController) this.character).setCaptain((CaptainController) captain.character); 
+	public void newRecruit(Instance recruit) {
+		((CaptainController) this.character).newRecruit((SoldierController) recruit.character);
+	}
+	
+	public void removeSoldier(Instance soldier) {
+		((CaptainController) this.character).removeSoldierFromSquad((SoldierController) soldier.character);
 	}
 	
 	public Latency getLatency() {

@@ -24,19 +24,23 @@ public class GameDataClassDefinition {
 	
 	public Object read(String str, ByteArray array) {
 		Object o = null;
-		try {
-			o = this._class.newInstance();
+			try {
+				o = this._class.newInstance();
+			} catch(Exception e) {
+				e.printStackTrace();
+				return null;
+			}
 			for(GameDataField field : this._fields) {
 				Field f = getField(o.getClass(), field.name);
 				field.readData.setAccessible(true);
-				f.set(o, field.readData.invoke(field, str, array, 0));
+				try {
+					f.set(o, field.readData.invoke(field, str, array, 0));
+				} catch(Exception e) {
+					//e.printStackTrace();
+				}
 			}
 			if(o instanceof IPostInit)
 				((IPostInit) o).postInit();
-		} catch(Exception e) {
-			e.printStackTrace();
-			System.exit(1);
-		}
 		return o;
 	}
 	

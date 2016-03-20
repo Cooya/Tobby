@@ -1,7 +1,9 @@
 package controller;
 
 import gamedata.character.Elements;
+import gamedata.character.PlayerStatusEnum;
 import gamedata.context.GameRolePlayGroupMonsterInformations;
+import gamedata.d2o.modules.SubArea;
 import gamedata.fight.GameFightMonsterInformations;
 
 import java.util.Vector;
@@ -9,56 +11,43 @@ import java.util.Vector;
 import controller.informations.FightContext;
 import main.FatalError;
 import main.Instance;
+import main.Main;
 import messages.EmptyMessage;
 import messages.character.SpellUpgradeRequestMessage;
 import messages.character.StatsUpgradeRequestMessage;
+import messages.context.GameContextReadyMessage;
 import messages.context.GameRolePlayAttackMonsterRequestMessage;
 import messages.exchanges.ExchangeObjectMoveKamaMessage;
-import messages.exchanges.ExchangePlayerRequestMessage;
 import messages.exchanges.ExchangeReadyMessage;
-import messages.fights.GameActionFightCastRequestMessage;
+import messages.fights.GameActionFightCastOnTargetRequestMessage;
 import messages.fights.GameFightReadyMessage;
 import messages.fights.GameFightTurnFinishMessage;
 
-public abstract class FighterController extends CharacterController {
-	protected int areaId;
-	protected int monsterGroupMaxSize;
-	private MuleController mule;
+public class FighterController extends CharacterController {
 	public FightContext fightContext;
+	protected int areaId;
+	protected int monsterGroupMinSize;
+	protected int monsterGroupMaxSize;
+	private boolean areaIsFixed;
+	private MuleController mule;
 
-	public FighterController(Instance instance, String login, String password, int serverId) {
+	public FighterController(Instance instance, String login, String password, int serverId, int areaId) {
 		super(instance, login, password, serverId);
 		this.fightContext = new FightContext(this);
+		this.monsterGroupMinSize = 1;
+		this.areaIsFixed = areaId != 0;
+		if(this.areaIsFixed) {
+			this.areaId = areaId;
+			this.monsterGroupMaxSize = 8;
+		}
+		else
+			this.monsterGroupMaxSize = 3;
 	}
 	
 	public void setMule(MuleController mule) {
 		this.mule = mule;
 	}
-	
-	@SuppressWarnings("unused")
-	private void regenerateLife() {
-		waitState(CharacterState.IS_LOADED);
-		
-		int missingLife = this.infos.missingLife();
-		this.instance.log.p("Missing life : " + missingLife + " life points.");
-		if(missingLife > 0) {
-			this.instance.log.p("Break for life regeneration.");
-			try {
-				sleep(this.infos.regenRate * 100 * missingLife); // on attend de récupérer toute sa vie
-			} catch(Exception e) {
-				interrupt();
-				return;
-			}
-			this.infos.stats.lifePoints = this.infos.stats.maxLifePoints;
-			this.instance.log.graphicalFrame.setLifeLabel(this.infos.stats.lifePoints, this.infos.stats.maxLifePoints);
-		}
-	}
-	
-	
-	
-	
-	//
-	
+
 	protected void upgradeStatsAndSpell() {
 		if(!inState(CharacterState.LEVEL_UP))
 			return;
@@ -71,15 +60,14 @@ public abstract class FighterController extends CharacterController {
 		this.instance.log.p("Increase stat : " + Elements.intelligence + " of " + this.infos.stats.statsPoints + " points.");
 	}
 	
-	
 	private void upgradeSpell() {
-		int spellId = infos.spellToUpgrade;
+		int spellId = infos.attackSpell;
 		if(infos.spellList.get(spellId) != null && canUpgradeSpell(spellId)) {
 			infos.spellList.get(spellId).spellLevel++;
 			SpellUpgradeRequestMessage SURM = new SpellUpgradeRequestMessage();
 			SURM.serialize(spellId, infos.spellList.get(spellId).spellLevel);
 			instance.outPush(SURM);
-			this.instance.log.p("Increase spell \"Flèche Magique\" to level " + infos.spellList.get(161).spellLevel);
+			this.instance.log.p("Increasing attack spell to level " + infos.spellList.get(spellId).spellLevel + ".");
 		}
 	}
 
@@ -105,19 +93,13 @@ public abstract class FighterController extends CharacterController {
 		return 0;
 	}
 	
-	
-	
-	//
-	
-	
-	
 	protected boolean lookForAndLaunchFight() {
 		waitState(CharacterState.IS_LOADED);
 		
 		this.instance.log.p("Searching for monster group to fight.");
 		int monsterGroupSize;
 		for(GameRolePlayGroupMonsterInformations monsterGroup : this.roleplayContext.getMonsterGroups()) {
-			monsterGroupSize = getMonsterGroupSize(monsterGroup);
+			monsterGroupSize = monsterGroup.staticInfos.underlings.size() + 1;
 			if(monsterGroupSize <= this.monsterGroupMaxSize) {
 				this.instance.log.p("Going to take a monster group of size " + monsterGroupSize + " on cell id " + monsterGroup.disposition.cellId + ".");
 				if(!this.mvt.moveTo(monsterGroup.disposition.cellId, false)) // groupe de monstres inatteignable
@@ -133,10 +115,6 @@ public abstract class FighterController extends CharacterController {
 		return false;
 	}
 	
-	private int getMonsterGroupSize(GameRolePlayGroupMonsterInformations monsterGroup) {
-		return 1 + monsterGroup.staticInfos.underlings.size();
-	}
-	
 	protected void fight(boolean fightRecovery) {
 		if(!fightRecovery) { // si c'est un combat tout frais
 			GameFightReadyMessage GFRM = new GameFightReadyMessage();
@@ -147,8 +125,14 @@ public abstract class FighterController extends CharacterController {
 			waitState(CharacterState.IN_GAME_TURN); // attente du début du prochain tour ou de la fin du combat
 			if(!inState(CharacterState.IN_FIGHT))
 				break;
-			launchSpell();
-
+			Vector<GameFightMonsterInformations> aliveMonsters = this.fightContext.getAliveMonsters();
+			this.instance.log.p(aliveMonsters.size() + " alive monster(s) remaining.");
+			for(GameFightMonsterInformations aliveMonster : aliveMonsters) {
+				if(this.fightContext.self.stats.actionPoints >= this.infos.attackSpellActionPoints)
+					castSpellOverMonster(aliveMonster);
+				else
+					break;
+			}
 			if(inState(CharacterState.IN_FIGHT)) {
 				GameFightTurnFinishMessage GFTFM = new GameFightTurnFinishMessage();
 				GFTFM.serialize();
@@ -167,44 +151,66 @@ public abstract class FighterController extends CharacterController {
 		}
 	}
 
-	private void launchSpell() {
-		Vector<GameFightMonsterInformations> aliveMonsters = this.fightContext.getAliveMonsters();
-		for(GameFightMonsterInformations aliveMonster : aliveMonsters) {
-			if(this.fightContext.self.stats.actionPoints >= 4) {
-				this.instance.log.p("Launching a spell.");
-				GameActionFightCastRequestMessage GAFCRM = new GameActionFightCastRequestMessage();
-				GAFCRM.serialize(161, (short) aliveMonster.disposition.cellId, this.instance.id);
-				instance.outPush(GAFCRM);	
-			}
-			else
-				break;
-			try {
-				sleep(1000); // important pour le moment sinon bug
-			} catch(InterruptedException e) {
-				interrupt();
-				return;
-			}
+	private void castSpellOverMonster(GameFightMonsterInformations monster) {
+		this.instance.log.p("Trying to cast a spell over a monster.");
+		GameActionFightCastOnTargetRequestMessage GAFCOTRM = new GameActionFightCastOnTargetRequestMessage();
+		GAFCOTRM.spellId = this.infos.attackSpell;
+		GAFCOTRM.targetId = monster.contextualId;
+		GAFCOTRM.serialize();
+		instance.outPush(GAFCOTRM);
+		/*
+		GameActionFightCastRequestMessage GAFCRM = new GameActionFightCastRequestMessage();
+		GAFCRM.serialize(this.infos.spellToUpgrade, monster.disposition.cellId, this.instance.id);
+		instance.outPush(GAFCRM);
+		*/
+		waitState(CharacterState.SPELL_CASTED); // on attend le résultat du sort lancé
+		try {
+			Thread.sleep(1000); // nécessaire sinon kick par le serveur
+		} catch(Exception e) {
+			interrupt();
+			return;
 		}
 	}
 	
-	protected void goToExchangeWithMule(boolean giveKamas) {
+	protected void regenerateLife() {
 		waitState(CharacterState.IS_LOADED);
 		
-		if(this.infos.currentMap.id != this.mule.waitingMapId)
+		int missingLife = this.infos.missingLife();
+		this.instance.log.p("Missing life : " + missingLife + " life points.");
+		if(missingLife > 0) {
+			this.instance.log.p("Break for life regeneration.");
+			try {
+				sleep(this.infos.regenRate * 100 * missingLife); // on attend de récupérer toute sa vie
+			} catch(Exception e) {
+				interrupt();
+				return;
+			}
+			this.infos.stats.lifePoints = this.infos.stats.maxLifePoints;
+			this.instance.log.graphicalFrame.setLifeLabel(this.infos.stats.lifePoints, this.infos.stats.maxLifePoints);
+		}
+	}
+	
+	protected void emptyInventoryIfNecessary() {
+		if(inState(CharacterState.NEED_TO_EMPTY_INVENTORY)) {
+			this.instance.log.p("Need to empty inventory.");
+			goToExchangeWithMule();
+		}
+	}
+	
+	// fonction à améliorer
+	protected void goToExchangeWithMule() {
+		waitState(CharacterState.MULE_AVAILABLE);
+		waitState(CharacterState.IS_LOADED);
+		
+		if(!isInterrupted() && this.infos.currentMap.id != this.mule.waitingMapId)
 			this.mvt.goTo(this.mule.waitingMapId);
 		
 		waitState(CharacterState.IS_LOADED);
 		
 		while(!isInterrupted() && !inState(CharacterState.IN_EXCHANGE)) {
-			if(!this.roleplayContext.actorIsOnMap(this.mule.infos.characterId)) { // si la mule n'est pas sur la map
+			if(!this.roleplayContext.actorIsOnMap(this.mule.infos.characterId)) // si la mule n'est pas sur la map
 				waitState(CharacterState.NEW_ACTOR_ON_MAP); // on attend qu'elle arrive
-				updateState(CharacterState.NEW_ACTOR_ON_MAP, false);
-			}
-			ExchangePlayerRequestMessage EPRM = new ExchangePlayerRequestMessage(); // demande d'échange
-			EPRM.serialize(this.mule.infos.characterId, 1, this.instance.id);
-			this.instance.outPush(EPRM);
-			this.instance.log.p("Sending exchange demand.");
-			waitState(CharacterState.IN_EXCHANGE); // attendre l'acceptation de l'échange (avec timeout)
+			exchangeDemand(this.mule.infos.characterId);
 		}
 		
 		EmptyMessage EM = new EmptyMessage("ExchangeObjectTransfertAllFromInvMessage"); // on transfère tous les objets
@@ -235,77 +241,100 @@ public abstract class FighterController extends CharacterController {
 			throw new FatalError("Exchange with mule has failed.");	
 	}
 	
-	@SuppressWarnings("unused")
-	private void updateFightArea() {
-		if(this.infos.level < 8) {
-			this.areaId = 450; // route des âmes d'Incarnam
-			this.monsterGroupMaxSize = 3;
-		}
-		else if(this.infos.level < 25) {
-			this.areaId = 445; // pâturages d'Incarnam
-			this.monsterGroupMaxSize = 3;
-		}
-		else if(this.infos.level < 30) {
-			this.areaId = 92; // contour d'Astrub
-			this.monsterGroupMaxSize = 1;
-		}
-		else {
-			this.areaId = 92; // contour d'Astrub
+	protected void setFightArea(int level) {
+		if(this.areaIsFixed)
+			return;
+		
+		if(level < 5) {
+			this.areaId = 450;
 			this.monsterGroupMaxSize = 2;
 		}
-		this.mvt.setArea(this.areaId);
-		
+		else if(level < 10) {
+			this.areaId = 450;
+			this.monsterGroupMaxSize = 3;
+		}
+		else if(level < 25) {
+			this.areaId = 445;
+			this.monsterGroupMaxSize = 3;
+		}
+		else if(level < 40) {
+			this.areaId = 92;
+			this.monsterGroupMaxSize = 2;
+		}
+		else if(level < 70) {
+			this.areaId = 92;
+			this.monsterGroupMaxSize = 3;
+		}
+		else if(level < 100) {
+			this.areaId = 92;
+			this.monsterGroupMaxSize = 5;
+		}
+		else if(level < 160) {
+			this.areaId = 95;
+			this.monsterGroupMaxSize = 3;
+		}
+		else if(level < 200) {
+			this.areaId = 95;
+			this.monsterGroupMaxSize = 4;
+		}
+		else if(level < 250) {
+			this.areaId = 95;
+			this.monsterGroupMaxSize = 5;
+		}
+		else {
+			this.areaId = 95;
+			this.monsterGroupMaxSize = 6;
+		}
+		this.instance.log.graphicalFrame.setAreaLabel(SubArea.getSubAreaById(this.areaId).getName());
+		// 92 -> contour d'Astrub
 		// 95 -> pious d'Astrub
 		// 442 -> lac d'Incarnam
+		// 443 -> forêt d'Incarnam
+		// 445 -> pâturages d'Incarnam
+		// 450 -> route des âmes d'Incarnam
 	}
 	
-	/*
+	@Override
 	public void run() {
-		waitState(CharacterState.IS_FREE);
-		changePlayerStatus();
-		updateFightArea();
-		 
+		waitState(CharacterState.IS_LOADED); // attendre l'entrée en jeu
+		checkIfModeratorIsOnline(Main.MODERATOR_NAME);
+		
 		if(inState(CharacterState.IN_FIGHT)) { // reprise de combat
 			GameContextReadyMessage GCRM = new GameContextReadyMessage(); // je ne sais pas à quoi sert ce message
 			GCRM.serialize(this.infos.currentMap.id);
 			this.instance.outPush(GCRM);
 			fight(true);
 		}
+		changePlayerStatus(PlayerStatusEnum.PLAYER_STATUS_AFK);
+		setFightArea(this.infos.level);
 		
 		while(!isInterrupted()) {
-			waitState(CharacterState.IS_FREE); // important
+			waitState(CharacterState.IS_LOADED); // important
 			
-			// besoin d'aller voir la mule
-			while(!isInterrupted() && inState(CharacterState.NEED_TO_EMPTY_INVENTORY)) {
-				if(waitState(CharacterState.MULE_AVAILABLE))
-					goToExchangeWithMule(true);
-				else
-					sendPingRequest(); // pour rester connecté
-			}
+			// besoin de mettre à jour ses caractéristiques ou/et ses sorts ?
+			upgradeStatsAndSpell();
 			
-			// besoin de mettre à jour ses caractéristiques, ses sorts et son aire de combat
-			if(inState(CharacterState.LEVEL_UP)) {
-				upgradeSpell();
-				upgradeStats();
-				updateFightArea();
-			}
+			// besoin d'aller voir la mule ?
+			emptyInventoryIfNecessary();
 			
-			// besoin d'aller dans l'aire de combat
+			// besoin d'aller dans l'aire de combat ?
 			this.mvt.goToArea(this.areaId);
 			
-			// besoin de récupérer sa vie
+			// besoin de récupérer sa vie ?
 			regenerateLife();
 			
-			// combats
-			if(lookForAndLaunchFight()) {
-				if(waitState(CharacterState.IN_FIGHT)) // on vérifie si le combat a bien été lancé (avec timeout)
-					fight(false);
-			}
-			else
-				if(!isInterrupted())
+			while(!isInterrupted()) { // boucle recherche & combat
+				if(lookForAndLaunchFight()) { // lancement de combat
+					if(waitState(CharacterState.IN_FIGHT)) { // on vérifie si le combat a bien été lancé (avec timeout)
+						fight(false);
+						checkIfModeratorIsOnline(Main.MODERATOR_NAME);
+						break;
+					}
+				}
+				else
 					this.mvt.changeMap();
+			}
 		}
 		System.out.println("Thread controller of instance with id = " + this.instance.id + " terminated.");
 	}
-	*/
 }

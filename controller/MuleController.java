@@ -2,18 +2,20 @@ package controller;
 
 import gui.Controller;
 import main.Instance;
+import main.Main;
 import messages.EmptyMessage;
 import messages.exchanges.ExchangeReadyMessage;
 import messages.interactions.NpcDialogReplyMessage;
 import messages.interactions.NpcGenericActionRequestMessage;
 
 public class MuleController extends CharacterController {
+	private static final int BANK_INSIDE_MAP_ID = 83887104;
+	private static final int BANK_OUTSIDE_MAP_ID = 84674566;
 	protected int waitingMapId;
 	
 	public MuleController(Instance instance, String login, String password, int serverId) {
 		super(instance, login, password, serverId);
-		//this.waitingMapId = 153879299; // temporaire bien sûr
-		this.waitingMapId = 84674566; // banque d'Astrub
+		this.waitingMapId = BANK_OUTSIDE_MAP_ID; // banque d'Astrub
 	}
 	
 	private void processExchange() {
@@ -39,8 +41,8 @@ public class MuleController extends CharacterController {
 		}
 	}
 	
-	protected void returnTripToAstrubBank() {
-		this.mvt.goTo(84674566); // map où se situe la banque
+	private void returnTripToAstrubBank() {
+		this.mvt.goTo(BANK_OUTSIDE_MAP_ID); // map où se situe la banque
 		
 		useInteractive(317, 465440, 140242); // porte de la banque
 		
@@ -88,7 +90,10 @@ public class MuleController extends CharacterController {
 		}
 		
 		updateState(CharacterState.NEED_TO_EMPTY_INVENTORY, false);
+		goOutAstrubBank();
+	}
 	
+	private void goOutAstrubBank() {
 		this.mvt.moveTo(396, false); // on sort de la banque
 		updateState(CharacterState.IS_LOADED, false); // important (porte de la banque)
 	}
@@ -99,8 +104,12 @@ public class MuleController extends CharacterController {
 		return false;
 	}
 	
+	@Override
 	public void run() {
 		while(!isInterrupted() && waitState(CharacterState.IS_FREE)) { // attente d'état importante afin de laisser le temps aux pods de se mettre à jour après un échange
+			checkIfModeratorIsOnline(Main.MODERATOR_NAME);
+			if(this.infos.currentMap.id == BANK_INSIDE_MAP_ID) // si le perso est dans la banque (lancement de l'instance)
+				goOutAstrubBank();
 			if(needToGoBank(0.5f)) { // + de 50% de l'inventaire occupé
 				updateState(CharacterState.NEED_TO_EMPTY_INVENTORY, true);
 				this.instance.log.p("Need to go to empty inventory at Astrub bank.");

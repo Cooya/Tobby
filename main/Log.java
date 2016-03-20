@@ -25,7 +25,7 @@ public class Log {
 	}
 	
 	public void p(String msgDirection, Message msg) { // pour la réception et l'envoi de messages
-		if(Thread.interrupted())
+		if(Thread.currentThread().isInterrupted())
 			return;
 		
 		String str = "";
@@ -54,7 +54,7 @@ public class Log {
 	}
 	
 	public void p(String str) {
-		if(Thread.interrupted())
+		if(Thread.currentThread().isInterrupted())
 			return;
 		
 		if(DEBUG)

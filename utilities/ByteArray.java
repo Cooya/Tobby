@@ -291,14 +291,14 @@ public class ByteArray {
 	}
 
 	public void writeUTF(String utf) {
-		writeShort((short) utf.length());
+		writeShort(utf.length());
 		writeUTFBytes(utf);
 	}
 
 	public void writeUTFBytes(String utf) {
 		int length = utf.length();
 		for(int i = 0; i < length; ++i)
-			writeByte((byte) utf.charAt(i));
+			writeByte(utf.charAt(i));
 	}
 
 	public int readVarInt() {
@@ -347,7 +347,7 @@ public class ByteArray {
 		return var1;
 	}
 	
-	public Int64 readVarLong() {
+	public double readVarLong() {
 		int var3 = 0;
 		Int64 var2 = new Int64();
 		int var4 = 0;
@@ -355,34 +355,37 @@ public class ByteArray {
 			var3 = readByte();
 			if(var4 == 28)
 				break;
-			if(var3 >= 128) {
+			if(var3 >= 128)
 				var2.low = var2.low | (var3 & 127) << var4;
-				var4 += 7;
-				continue;
+			else {
+				var2.low = var2.low | (var3 << var4);
+				return var2.toNumber();
 			}
-			var2.low = var2.low | var3 << var4;
-			return var2;
+			var4 += 7;
 		}
 		if(var3 >= 128) {
 			var3 = var3 & 127;
-			var2.low = var2.low | var3 << var4;
+			var2.low = var2.low | (var3 << var4);
 			var2.high = var3 >>> 4;
-			var4 = 3;
-			while(true) {
-				var3 = readByte();
-				if(var4 < 32)
-					if(var3 >= 128)
-						var2.high = var2.high | (var3 & 127) << var4;
-					else
-						break;
-				var4 = var4 + 7;
-			}
-			var2.high = var2.high | var3 << var4;
-			return var2;
 		}
-		var2.low = var2.low | var3 << var4;
-		var2.high = var3 >>> 4;
-		return var2;
+		else {
+			var2.low = var2.low | (var3 << var4);
+			var2.high = var3 >>> 4;
+			return var2.toNumber();
+		}
+		var4 = 3;
+		while(true) {
+			var3 = readByte();
+			if(var4 < 32)
+				if(var3 >= 128)
+					var2.high = var2.high | ((var3 & 127) << var4);
+				else {
+					var2.high = var2.high | (var3 << var4);
+					break;
+				}
+			var4 = var4 + 7;
+		}
+		return var2.toNumber();
 	}
 
 	public void writeVarInt(int i) {
@@ -427,9 +430,9 @@ public class ByteArray {
 		writeBytes(var2);
 	}
 
-	public void writeVarLong(Int64 db) {
+	public void writeVarLong(double d) {
 		int var3 = 0;
-		Int64 var2 = db;
+		Int64 var2 = Int64.fromNumber(d);
 		if(var2.low == 0)
 			writeInt32((int) var2.low);
 		else {

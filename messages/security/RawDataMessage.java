@@ -1,4 +1,4 @@
-package messages.connection;
+package messages.security;
 
 import java.io.FileOutputStream;
 

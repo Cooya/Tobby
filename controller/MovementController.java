@@ -31,11 +31,6 @@ public class MovementController {
 		this.pathfinding.updatePosition(cellId);
 	}
 	
-	protected void setArea(int areaId) {
-		this.character.waitState(CharacterState.IS_LOADED); // attendre le refresh des infos
-		this.pathfinding.setArea(areaId);
-	}
-	
 	 // changement de cellule
 	protected boolean moveTo(int targetId, boolean changeMap) {
 		this.character.waitState(CharacterState.IS_FREE);
@@ -97,12 +92,7 @@ public class MovementController {
 	}
 	
 	// définition d'une aire de destination et de parcours
-	protected void defineArea(int areaId) {
-		this.character.waitState(CharacterState.IS_LOADED); // attendre le refresh des infos
-		if(this.character.infos.currentMap.subareaId == areaId) { // déjà sur l'aire
-			this.character.instance.log.p("Already on the target area.");
-			return;
-		}
+	private void defineArea(int areaId) {
 		this.character.instance.log.p("Going from map " + this.character.infos.currentMap.id + " to area " + areaId + ".");
 		boolean isInIncarnam = mapIsInIncarnam(this.character.infos.currentMap);
 		if(areaIsInIncarnam(areaId)) {
@@ -114,7 +104,8 @@ public class MovementController {
 				goDownToAstrub();
 		}
 		
-		setArea(areaId);
+		this.character.waitState(CharacterState.IS_LOADED); // attendre le refresh des infos
+		this.pathfinding.setArea(areaId);
 	}
 	
 	// déplacement vers une cible fixe
@@ -133,6 +124,12 @@ public class MovementController {
 	
 	// déplacement vers la plus proche map d'une aire
 	protected void goToArea(int areaId) {
+		this.character.waitState(CharacterState.IS_LOADED); // attendre le refresh des infos
+		if(this.character.infos.currentMap.subareaId == areaId) { // déjà sur l'aire
+			this.pathfinding.setArea(areaId); // pas besoin du calcul du chemin
+			this.character.instance.log.p("Already on the target area.");
+			return;
+		}
 		defineArea(areaId);
 		Direction direction;
 		while((direction = this.pathfinding.nextDirectionForReachTarget()) != null)
@@ -167,7 +164,7 @@ public class MovementController {
 		this.character.instance.log.p("Going down to Astrub.");
 		defineTargetMap(153880835); // map où se situe le pnj
 		Direction direction;
-		while(!Thread.interrupted() && (direction = this.pathfinding.nextDirectionForReachTarget()) != null)
+		while(!Thread.currentThread().isInterrupted() && (direction = this.pathfinding.nextDirectionForReachTarget()) != null)
 			changeMap(direction);
 		
 		this.character.waitState(CharacterState.IS_LOADED); // important
@@ -205,7 +202,7 @@ public class MovementController {
 		this.character.instance.log.p("Going up to Incarnam.");
 		defineTargetMap(84674054); // map où se situe la statue Féca
 		Direction direction;
-		while(!Thread.interrupted() && (direction = this.pathfinding.nextDirectionForReachTarget()) != null)
+		while(!Thread.currentThread().isInterrupted() && (direction = this.pathfinding.nextDirectionForReachTarget()) != null)
 			changeMap(direction);
 		this.character.useInteractive(375, 489378, 168278); // utilisation de la statue Féca
 	}
