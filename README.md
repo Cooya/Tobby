@@ -12,7 +12,7 @@
 * Améliorer les échanges et les dialogues avec les PNJ (suppression de "sleeps" peu propres)
 * Supprimer à terme les boucles infinies lors de l'attente d'états
 * Ajouter, lors de la recherche d'un chemin vers une map distante, une cellule cible pour la map cible (ça évitera de se retrouver de l'autre côté d'une muraille par rapport au capitaine par exemple)
-* Mettre à jour l'aire de combat à chaque level up (que ce soit seul ou en groupe)
+* ~~Mettre à jour l'aire de combat à chaque level up (que ce soit seul ou en groupe)~~
 
 ### Bugs à résoudre ###
 
@@ -31,6 +31,7 @@
 * ~~Mode absent qui ne fonctionne pas pour le capitaine (probablement à cause du fait qu'il est chef de groupe)~~
 * ~~Chemin de maps calculé trop souvent (il prend du temps donc à optimiser)~~
 * **Au bout d'un moment, un message n'est pas envoyé (ou n'est pas reçu par le serveur), de ce fait, le bot est kické**
+* **Latence au lancement d'une CharacterFrame (et même des fois, plantage de la CharacterFrame)
 
 ### Échanges ###
 
@@ -66,3 +67,4 @@
 * Améliorer l'utilisation des "interactives" (récupérer le résultat et se rendre à la cellule adjacente à l'"interactive")
 * ~~Gérer les "TextInformationMessages" qui peuvent donner des informations utiles pour le debuggage~~
 * Traduire la classe "ParamsDecoder" pour un meilleur affichage des "TextInformationMessages"
+* Ajouter l'encodage "UTF-8" dans les CharacterFrames (pour afficher les accents)
