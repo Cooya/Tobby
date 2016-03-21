@@ -31,7 +31,7 @@
 * ~~Mode absent qui ne fonctionne pas pour le capitaine (probablement à cause du fait qu'il est chef de groupe)~~
 * ~~Chemin de maps calculé trop souvent (il prend du temps donc à optimiser)~~
 * **Au bout d'un moment, un message n'est pas envoyé (ou n'est pas reçu par le serveur), de ce fait, le bot est kické**
-* **Latence au lancement d'une CharacterFrame (et même des fois, plantage de la CharacterFrame)
+* **Latence au lancement d'une CharacterFrame (et même des fois, plantage de la CharacterFrame)**
 
 ### Échanges ###
 
