@@ -44,7 +44,7 @@ public class MuleController extends CharacterController {
 	private void returnTripToAstrubBank() {
 		this.mvt.goTo(BANK_OUTSIDE_MAP_ID); // map où se situe la banque
 		
-		useInteractive(317, 465440, 140242); // porte de la banque
+		useInteractive(317, 465440, 140242, true); // porte de la banque
 		
 		waitState(CharacterState.IS_LOADED);
 		NpcGenericActionRequestMessage NGARM = new NpcGenericActionRequestMessage();

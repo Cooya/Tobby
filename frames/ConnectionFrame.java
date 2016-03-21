@@ -98,9 +98,6 @@ public class ConnectionFrame extends Frame {
 				CharacterSelectionMessage CSM = new CharacterSelectionMessage();
 				for(CharacterBaseInformations character : CLM.characters)
 					CSM.id = character.id; // on suppose qu'il n'y a qu'un seul perso sur le compte
-				
-				System.out.println(CSM.id);
-				
 				this.character.infos.characterId = CSM.id;
 				CSM.serialize();
 				instance.outPush(CSM);

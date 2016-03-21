@@ -55,6 +55,7 @@
 719 GameFightTurnEndMessage
 720 GameFightEndMessage
 740 GameFightHumanReadyStateMessage
+745 GameRolePlayFreeSoulRequestMessage
 780 TextInformationMessage
 801 ChatSmileyMessage
 851 ChatClientPrivateMessage

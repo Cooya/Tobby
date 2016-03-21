@@ -204,7 +204,7 @@ public class MovementController {
 		Direction direction;
 		while(!Thread.currentThread().isInterrupted() && (direction = this.pathfinding.nextDirectionForReachTarget()) != null)
 			changeMap(direction);
-		this.character.useInteractive(375, 489378, 168278); // utilisation de la statue Féca
+		this.character.useInteractive(375, 489378, 168278, true); // utilisation de la statue Féca
 	}
 	
 	private static boolean mapIsInIncarnam(Map map) {

@@ -1,6 +1,6 @@
 package controller;
 
-import gamedata.character.Elements;
+import gamedata.character.PlayerLifeStatusEnum;
 import gamedata.character.PlayerStatusEnum;
 import gamedata.context.GameRolePlayGroupMonsterInformations;
 import gamedata.d2o.modules.SubArea;
@@ -48,19 +48,16 @@ public class FighterController extends CharacterController {
 		this.mule = mule;
 	}
 
-	protected void upgradeStatsAndSpell() {
-		if(!inState(CharacterState.LEVEL_UP))
+	protected void levelUpManager() {
+		if(!waitState(CharacterState.LEVEL_UP))
 			return;
 		waitState(CharacterState.IS_LOADED);
 		upgradeSpell();
-		StatsUpgradeRequestMessage SURM = new StatsUpgradeRequestMessage();
-		SURM.serialize(this.infos.element, calculateMaxStatsPoints());
-		instance.outPush(SURM);
-		updateState(CharacterState.LEVEL_UP, false);
-		this.instance.log.p("Increase stat : " + Elements.intelligence + " of " + this.infos.stats.statsPoints + " points.");
+		increaseStats();
+		setFightArea(this.infos.level);
 	}
 	
-	private void upgradeSpell() {
+	protected void upgradeSpell() {
 		int spellId = infos.attackSpell;
 		if(infos.spellList.get(spellId) != null && canUpgradeSpell(spellId)) {
 			infos.spellList.get(spellId).spellLevel++;
@@ -76,6 +73,13 @@ public class FighterController extends CharacterController {
 		if(level < 5)
 			return infos.stats.spellsPoints >= level;
 		return false;
+	}
+	
+	protected void increaseStats() {
+		StatsUpgradeRequestMessage SURM = new StatsUpgradeRequestMessage();
+		SURM.serialize(this.infos.element, calculateMaxStatsPoints());
+		instance.outPush(SURM);
+		this.instance.log.p("Increase stat : " + this.infos.element + ".");
 	}
 	
 	private int calculateMaxStatsPoints() {
@@ -294,10 +298,26 @@ public class FighterController extends CharacterController {
 		// 450 -> route des âmes d'Incarnam
 	}
 	
+	protected void riseIfNecessary() {
+		if(this.infos.healthState == PlayerLifeStatusEnum.STATUS_TOMBSTONE) {
+			EmptyMessage msg = new EmptyMessage("GameRolePlayFreeSoulRequestMessage");
+			this.instance.outPush(msg);
+			updateState(CharacterState.IS_LOADED, false);
+			useInteractive(287, 479466, 152192, false);
+			try {
+				Thread.sleep(2000); // temporaire
+			} catch(Exception e) {
+				interrupt();
+			}
+		}
+	}
+	
 	@Override
 	public void run() {
 		waitState(CharacterState.IS_LOADED); // attendre l'entrée en jeu
 		checkIfModeratorIsOnline(Main.MODERATOR_NAME);
+		changePlayerStatus(PlayerStatusEnum.PLAYER_STATUS_AFK);
+		setFightArea(this.infos.level);
 		
 		if(inState(CharacterState.IN_FIGHT)) { // reprise de combat
 			GameContextReadyMessage GCRM = new GameContextReadyMessage(); // je ne sais pas à quoi sert ce message
@@ -305,14 +325,15 @@ public class FighterController extends CharacterController {
 			this.instance.outPush(GCRM);
 			fight(true);
 		}
-		changePlayerStatus(PlayerStatusEnum.PLAYER_STATUS_AFK);
-		setFightArea(this.infos.level);
 		
 		while(!isInterrupted()) {
 			waitState(CharacterState.IS_LOADED); // important
 			
+			// besoin de renaître au phénix ?
+			riseIfNecessary();
+			
 			// besoin de mettre à jour ses caractéristiques ou/et ses sorts ?
-			upgradeStatsAndSpell();
+			levelUpManager();
 			
 			// besoin d'aller voir la mule ?
 			emptyInventoryIfNecessary();

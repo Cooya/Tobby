@@ -1,6 +1,6 @@
 package gamedata.character;
 
-public class PlayerStatusEnum {
+public abstract class PlayerStatusEnum {
     public static final int PLAYER_STATUS_OFFLINE = 0;
     public static final int PLAYER_STATUS_UNKNOWN = 1;
     public static final int PLAYER_STATUS_AVAILABLE = 10;

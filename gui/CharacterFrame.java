@@ -26,6 +26,7 @@ public class CharacterFrame extends JInternalFrame {
 	private static final String CELL_LABEL = "Cell id : ";
 	private static final String NAME_LABEL = "Name : ";
 	private static final String LIFE_LABEL = "Life : ";
+	private static final String ENERGY_LABEL = "Energy : ";
 	private static final String WEIGHT_LABEL = "Weight : ";
 	private static final String EXPERIENCE_LABEL = "Experience : ";
 	private static final String KAMAS_LABEL = "Kamas number : ";
@@ -39,6 +40,7 @@ public class CharacterFrame extends JInternalFrame {
 	private JLabel mapLabel;
 	private JLabel cellLabel;
 	private JLabel lifeLabel;
+	private JLabel energyLabel;
 	private JLabel weightLabel;
 	private JLabel experienceLabel;
 	private JLabel kamasLabel;
@@ -61,6 +63,7 @@ public class CharacterFrame extends JInternalFrame {
 		cellLabel = new JLabel(CELL_LABEL + UNKNOWN);
 		nameLabel = new JLabel(NAME_LABEL + UNKNOWN);
 		lifeLabel = new JLabel(LIFE_LABEL + UNKNOWN);
+		energyLabel = new JLabel(ENERGY_LABEL + UNKNOWN);
 		weightLabel = new JLabel(WEIGHT_LABEL + UNKNOWN);
 		experienceLabel = new JLabel(EXPERIENCE_LABEL + UNKNOWN);
 		kamasLabel = new JLabel(KAMAS_LABEL + UNKNOWN);
@@ -80,6 +83,7 @@ public class CharacterFrame extends JInternalFrame {
 		informationsPanel.add(mapLabel);
 		informationsPanel.add(cellLabel);
 		informationsPanel.add(lifeLabel);
+		informationsPanel.add(energyLabel);
 		informationsPanel.add(weightLabel);
 		informationsPanel.add(experienceLabel);
 		informationsPanel.add(kamasLabel);
@@ -139,5 +143,9 @@ public class CharacterFrame extends JInternalFrame {
 
 	public void setAreaLabel(String areaName) {
 		this.areaLabel.setText(AREA_LABEL + "\"" + areaName + "\"");
+	}
+
+	public void setEnergyLabel(int energyPoints, int maxEnergyPoints) {
+		this.energyLabel.setText(ENERGY_LABEL + energyPoints + "/" + maxEnergyPoints);
 	}
 }

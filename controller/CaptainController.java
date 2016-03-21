@@ -17,20 +17,25 @@ public class CaptainController extends FighterController {
 	private Vector<SoldierController> recruits;
 	private int teamLevel;
 	private static Lock lock = new ReentrantLock();
-	
+
 	public CaptainController(Instance instance, String login, String password, int serverId, int areaId) {
 		super(instance, login, password, serverId, areaId);
 		this.squad = new Vector<SoldierController>(7);
 		this.recruits = new Vector<SoldierController>();
 		this.teamLevel = 0;
 	}
-	
+
 	@Override // indique à tous les soldats de l'escouade que le capitaine a changé de map
 	public void updatePosition(Map map, int cellId) {
 		super.updatePosition(map, cellId);
 		broadcastEventToSquad();
 	}
-	
+
+	// "évènement" émis depuis les soldats
+	protected void soldierHasLevelUp() {
+		setFightArea(++this.teamLevel);
+	}
+
 	// ajoute une nouvelle recrue à la liste des recrues en attente d'être recruté par le capitaine
 	public synchronized void newRecruit(SoldierController recruit) {
 		lock.lock();
@@ -38,7 +43,7 @@ public class CaptainController extends FighterController {
 		this.instance.log.p("Recruit " + recruit.infos.login + " added to the recruits list.");
 		lock.unlock();
 	}
-	
+
 	// retire un soldat de l'escouade
 	public synchronized void removeSoldierFromSquad(SoldierController soldier) {
 		lock.lock();
@@ -46,7 +51,7 @@ public class CaptainController extends FighterController {
 		this.instance.log.p("Recruit " + soldier.infos.login + " removed from the squad.");
 		lock.unlock();
 	}
-	
+
 	// parcourt la liste des recrues et les invite à rejoindre l'escouade (avec attente d'acceptation de l'invitation)
 	private synchronized void integrateRecruits() {
 		lock.lock();
@@ -69,13 +74,23 @@ public class CaptainController extends FighterController {
 		changePlayerStatus(PlayerStatusEnum.PLAYER_STATUS_AFK); // pour repasser en mode absent
 		setFightArea(this.teamLevel);
 	}
-	
+
 	// indique à tous les soldats de l'escouade que le capitaine a effectué une action
 	private void broadcastEventToSquad() {
 		for(SoldierController soldier : squad)
 			soldier.updateState(CharacterState.CAPTAIN_ACT, true);
 	}
-	
+
+	@Override
+	protected void levelUpManager() {
+		if(!waitState(CharacterState.LEVEL_UP))
+			return;
+		waitState(CharacterState.IS_LOADED);
+		upgradeSpell();
+		increaseStats();
+		setFightArea(++this.teamLevel);
+	}
+
 	@Override
 	protected void emptyInventoryIfNecessary() {
 		boolean need = false;
@@ -93,7 +108,7 @@ public class CaptainController extends FighterController {
 			goToExchangeWithMule();
 		}
 	}
-	
+
 	@Override
 	protected void regenerateLife() {
 		int currentMissingLife;
@@ -113,7 +128,7 @@ public class CaptainController extends FighterController {
 			}
 		}		
 	}
-	
+
 	private void waitSoldiers() {
 		this.instance.log.p("Waiting for complete team be on the map.");
 		for(CharacterController soldier : this.squad)
@@ -128,46 +143,49 @@ public class CaptainController extends FighterController {
 				if(!waitState(CharacterState.NEW_ACTOR_IN_FIGHT)) // fin de la phase de préparation ou interruption
 					return;
 	}
-	
+
 	@Override
 	public void run() {
 		waitState(CharacterState.IS_LOADED); // attendre l'entrée en jeu
 		checkIfModeratorIsOnline(Main.MODERATOR_NAME);
 		this.teamLevel += this.infos.level;
-		
+
 		if(inState(CharacterState.IN_FIGHT)) { // reprise de combat
 			GameContextReadyMessage GCRM = new GameContextReadyMessage(); // je ne sais pas à quoi sert ce message
 			GCRM.serialize(this.infos.currentMap.id);
 			this.instance.outPush(GCRM);
 			fight(true);
 		}
-		
+
 		if(inState(CharacterState.IN_PARTY))
 			leaveGroup();
 		changePlayerStatus(PlayerStatusEnum.PLAYER_STATUS_AFK);
 		setFightArea(this.teamLevel);
-		
+
 		while(!isInterrupted()) {
 			waitState(CharacterState.IS_LOADED); // important
-			
+
 			// recrues en attente ?
 			integrateRecruits();
-			
+
+			// besoin de renaître au phénix ?
+			riseIfNecessary();
+
 			// besoin de mettre à jour ses caractéristiques ou/et ses sorts ?
-			upgradeStatsAndSpell();
-			
+			levelUpManager();
+
 			// besoin d'aller voir la mule ?
 			emptyInventoryIfNecessary();
-			
+
 			// besoin d'aller dans l'aire de combat ?
 			this.mvt.goToArea(this.areaId);
-			
+
 			// besoin de récupérer sa vie ?
 			regenerateLife();
-			
+
 			while(!isInterrupted()) { // boucle recherche & combat
 				waitSoldiers(); // on attend que l'escouade complète soit sur la map
-				
+
 				// combats
 				if(lookForAndLaunchFight()) {
 					if(waitState(CharacterState.IN_FIGHT)) { // on vérifie si le combat a bien été lancé (avec timeout)

@@ -7,7 +7,6 @@ public class EmptyMessage extends Message {
 	}
 }
 
-
 /* Game starting :
  * FriendsGetListMessage
  * IgnoredGetListMessage

@@ -22,6 +22,7 @@ import messages.Message;
 import messages.character.BasicWhoIsMessage;
 import messages.character.CharacterLevelUpMessage;
 import messages.character.CharacterStatsListMessage;
+import messages.character.GameRolePlayPlayerLifeStatusMessage;
 import messages.character.InventoryWeightMessage;
 import messages.character.LifePointsRegenBeginMessage;
 import messages.character.PlayerStatusUpdateMessage;
@@ -158,6 +159,7 @@ public class RoleplayContextFrame extends Frame {
 			case 500 : // CharacterStatsListMessage
 				CharacterStatsListMessage CSLM = new CharacterStatsListMessage(msg);
 				this.character.infos.stats = CSLM.stats;
+				this.instance.log.graphicalFrame.setEnergyLabel(this.character.infos.stats.energyPoints, this.character.infos.stats.maxEnergyPoints);
 				this.instance.log.graphicalFrame.setKamasLabel(this.character.infos.stats.kamas);
 				this.instance.log.graphicalFrame.setExperienceLabel((int) this.character.infos.stats.experience, (int) this.character.infos.stats.experienceNextLevelFloor);
 				return true;
@@ -219,6 +221,10 @@ public class RoleplayContextFrame extends Frame {
 					this.character.infos.status = PSUM.status.statusId;
 					this.instance.log.p("New status : " + this.character.infos.status + ".");
 				}
+				return true;
+			case 5669 : // GameRolePlayPlayerLifeStatusMessage
+				GameRolePlayPlayerLifeStatusMessage GRPPLSM = new GameRolePlayPlayerLifeStatusMessage(msg);
+				this.character.infos.healthState = GRPPLSM.state;
 				return true;
 			case 5523 : // ExchangeRequestedTradeMessage
 				ExchangeRequestedTradeMessage ERTM = new ExchangeRequestedTradeMessage(msg);

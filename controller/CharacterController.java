@@ -5,7 +5,6 @@ import java.util.Hashtable;
 import gamedata.d2p.ankama.Map;
 import controller.informations.CharacterInformations;
 import controller.informations.RoleplayContext;
-import main.FatalError;
 import main.Instance;
 import main.Main;
 import messages.character.BasicWhoIsRequestMessage;
@@ -61,7 +60,7 @@ public abstract class CharacterController extends Thread {
 		this.instance.log.p("Sending a ping request to server for stay connected.");
 	}
 	
-	protected void useInteractive(int besideCellId, int elemId, int skillInstanceUid) {
+	protected void useInteractive(int besideCellId, int elemId, int skillInstanceUid, boolean withMapChangement) {
 		if(!this.mvt.moveTo(besideCellId, false))
 			return;
 		waitState(CharacterState.IS_LOADED);
@@ -69,7 +68,8 @@ public abstract class CharacterController extends Thread {
 		IURM.serialize(elemId, skillInstanceUid, this.instance.id);
 		this.instance.outPush(IURM);
 		this.instance.log.p("Interactive used.");
-		updateState(CharacterState.IS_LOADED, false);
+		if(withMapChangement)
+			updateState(CharacterState.IS_LOADED, false);
 	}
 	
 	protected void leaveGroup() {
@@ -200,10 +200,18 @@ public abstract class CharacterController extends Thread {
 				condition.addConstraint(CharacterState.IN_GAME_TURN, true);
 				isEvent = true;
 				break;
-			case LEVEL_UP : // état non attendu
-				throw new FatalError("Unexpected waiting state : " + state + ".");
-			case NEED_TO_EMPTY_INVENTORY : // état non attendu
-				throw new FatalError("Unexpected waiting state : " + state + ".");
+			case LEVEL_UP : // état ponctuel
+				if(this.states.get(state)) {
+					this.states.put(state, false);
+					return true;
+				}
+				return false;
+			case NEED_TO_EMPTY_INVENTORY : // état ponctuel
+				if(this.states.get(state)) {
+					this.states.put(state, false);
+					return true;
+				}
+				return false;
 		}
 		boolean result = waitFor(condition);
 		if(isEvent)

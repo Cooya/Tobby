@@ -31,6 +31,16 @@ public class SoldierController extends FighterController {
 		this.instance.log.p("Request for join fight sent.");
 	}
 	
+	@Override
+	protected void levelUpManager() {
+		if(!waitState(CharacterState.LEVEL_UP))
+			return;
+		waitState(CharacterState.IS_LOADED);
+		upgradeSpell();
+		increaseStats();
+		this.captain.soldierHasLevelUp(); // met à jour le niveau de l'escouade et donc possiblement l'aire de combat 
+	}
+	
 	public void run() {
 		waitState(CharacterState.IS_LOADED);
 		changePlayerStatus(PlayerStatusEnum.PLAYER_STATUS_AVAILABLE); // pour pouvoir être invité dans le groupe
@@ -45,7 +55,8 @@ public class SoldierController extends FighterController {
 		waitState(CharacterState.IN_PARTY);
 		changePlayerStatus(PlayerStatusEnum.PLAYER_STATUS_AFK);
 		
-		while(!isInterrupted()) {
+		while(!isInterrupted()) { // boucle déplacements + combats
+			riseIfNecessary(); // besoin de renaître au phénix ?
 			followCaptain();
 			waitState(CharacterState.CAPTAIN_ACT);
 			if(this.captain.inState(CharacterState.IN_FIGHT)) {
@@ -53,7 +64,7 @@ public class SoldierController extends FighterController {
 				joinFight();
 				if(waitState(CharacterState.IN_FIGHT)) {
 					fight(false);
-					upgradeStatsAndSpell();
+					levelUpManager();
 				}
 			}
 			else if(this.captain.inState(CharacterState.NEED_TO_EMPTY_INVENTORY))

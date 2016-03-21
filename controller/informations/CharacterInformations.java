@@ -6,6 +6,7 @@ import java.util.Vector;
 import main.FatalError;
 import gamedata.character.CharacterCharacteristicsInformations;
 import gamedata.character.Elements;
+import gamedata.character.PlayerLifeStatusEnum;
 import gamedata.character.SpellItem;
 import gamedata.d2p.ankama.Map;
 
@@ -16,6 +17,7 @@ public class CharacterInformations {
 	public int serverId;
 	public String characterName;
 	public double characterId;
+	public int healthState;
 	public int status;
 	public int currentCellId;
 	public int currentDirection;
@@ -40,6 +42,7 @@ public class CharacterInformations {
 		this.password = password;
 		this.serverId = serverId;
 		this.status = 1; // statut inconnu
+		this.healthState = PlayerLifeStatusEnum.STATUS_ALIVE_AND_KICKING;
 		this.attackSpell = 161; // flèche magique
 		this.mapsTravelled = 1;
 	}
