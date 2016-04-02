@@ -4,9 +4,9 @@ import java.io.File;
 import java.security.MessageDigest;
 
 import utilities.ByteArray;
-import controller.CharacterController;
 import controller.CharacterState;
-import controller.FighterController;
+import controller.characters.Character;
+import controller.characters.Fighter;
 import gamedata.context.TextInformationTypeEnum;
 import gamedata.d2i.I18n;
 import gamedata.d2o.modules.InfoMessage;
@@ -50,9 +50,9 @@ import messages.security.PopupWarningMessage;
 
 public class RoleplayContextFrame extends Frame {
 	private Instance instance;
-	private CharacterController character;
+	private Character character;
 
-	public RoleplayContextFrame(Instance instance, CharacterController character) {
+	public RoleplayContextFrame(Instance instance, Character character) {
 		this.instance = instance;
 		this.character = character;
 	}
@@ -72,6 +72,7 @@ public class RoleplayContextFrame extends Frame {
 				if(TIM.msgType == 1 && TIM.msgId == 245) // limite de 200 combats par jour atteinte
 					Controller.deconnectInstance("Limit of 200 fights per day reached.");
 				else {
+					this.instance.log.p("Text information received, reading...");
 					InfoMessage infoMessage = InfoMessage.getInfoMessageById((TIM.msgType * 10000) + TIM.msgId);
 					int textId;
 					Object[] parameters;
@@ -135,8 +136,8 @@ public class RoleplayContextFrame extends Frame {
 					this.character.updateState(CharacterState.IN_FIGHT, false);
 					this.character.updateState(CharacterState.IN_GAME_TURN, false);
 					this.instance.quitFightContext();
-					if(this.character instanceof FighterController)
-						((FighterController) this.character).fightContext.clearFightContext();
+					if(this.character instanceof Fighter)
+						((Fighter) this.character).fightContext.clearFightContext();
 				}
 				else if(GCCM.context == 2) {
 					this.character.updateState(CharacterState.IS_LOADED, false);
@@ -195,7 +196,7 @@ public class RoleplayContextFrame extends Frame {
 					this.character.infos.currentCellId = position;
 					this.instance.log.p("Next cell id after movement : " + position + ".");
 					this.instance.log.graphicalFrame.setCellLabel(String.valueOf(this.character.infos.currentCellId));
-					this.character.updatePosition(this.character.infos.currentCellId);
+					this.character.mvt.updatePosition(this.character.infos.currentCellId);
 					this.character.updateState(CharacterState.CAN_MOVE, true);
 				}
 				return true;
@@ -222,7 +223,7 @@ public class RoleplayContextFrame extends Frame {
 					this.instance.log.p("New status : " + this.character.infos.status + ".");
 				}
 				return true;
-			case 5669 : // GameRolePlayPlayerLifeStatusMessage
+			case 5996 : // GameRolePlayPlayerLifeStatusMessage
 				GameRolePlayPlayerLifeStatusMessage GRPPLSM = new GameRolePlayPlayerLifeStatusMessage(msg);
 				this.character.infos.healthState = GRPPLSM.state;
 				return true;
@@ -262,7 +263,7 @@ public class RoleplayContextFrame extends Frame {
 			case 5576 : // PartyJoinMessage
 				PartyJoinMessage PJM = new PartyJoinMessage(msg);
 				this.instance.log.p("Party joined.");
-				this.character.setPartyId(PJM.partyId);
+				this.character.infos.partyId = PJM.partyId;
 				this.character.updateState(CharacterState.IN_PARTY, true);
 				return true;
 			case 6306 : // PartyNewMemberMessage
@@ -275,7 +276,7 @@ public class RoleplayContextFrame extends Frame {
 				return true;
 			case 5594 : // PartyLeaveMessage
 			case 6261 : // PartyDeletedMessage
-				this.character.setPartyId(0);
+				this.character.infos.partyId = 0;
 				this.character.updateState(CharacterState.IN_PARTY, false);
 				this.instance.log.p("Party left.");
 				return true;

@@ -1,4 +1,4 @@
-package controller;
+package controller.characters;
 
 import gamedata.character.PlayerStatusEnum;
 import gamedata.d2p.ankama.Map;
@@ -7,22 +7,27 @@ import java.util.Vector;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import controller.CharacterState;
+import controller.api.FightAPI;
 import main.Instance;
 import main.Main;
 import messages.context.GameContextReadyMessage;
 import messages.parties.PartyInvitationRequestMessage;
 
-public class CaptainController extends FighterController {
-	private Vector<SoldierController> squad;
-	private Vector<SoldierController> recruits;
+public class Captain extends Fighter {
+	private Lock lock;
+	private Vector<Soldier> squad;
+	private Vector<Soldier> recruits;
 	private int teamLevel;
-	private static Lock lock = new ReentrantLock();
+	private FightAPI fight;
 
-	public CaptainController(Instance instance, String login, String password, int serverId, int areaId) {
-		super(instance, login, password, serverId, areaId);
-		this.squad = new Vector<SoldierController>(7);
-		this.recruits = new Vector<SoldierController>();
+	public Captain(Instance instance, String login, String password, int serverId, int breed, int areaId) {
+		super(instance, login, password, serverId, breed);
+		this.lock = new ReentrantLock();
+		this.squad = new Vector<Soldier>(7);
+		this.recruits = new Vector<Soldier>();
 		this.teamLevel = 0;
+		this.fight = new FightAPI(this, areaId);
 	}
 
 	@Override // indique à tous les soldats de l'escouade que le capitaine a changé de map
@@ -30,37 +35,75 @@ public class CaptainController extends FighterController {
 		super.updatePosition(map, cellId);
 		broadcastEventToSquad();
 	}
-
-	// "évènement" émis depuis les soldats
-	protected void soldierHasLevelUp() {
-		setFightArea(++this.teamLevel);
+	
+	public void updateTeamLevel() {
+		this.fight.updateFightArea(++this.teamLevel);
+	}
+	
+	private void lifeManager() {
+		int currentMissingLife;
+		int maxMissingLife = this.infos.missingLife();
+		for(Character teamMate : this.squad) {
+			currentMissingLife = teamMate.infos.missingLife();
+			if(currentMissingLife > maxMissingLife)
+				maxMissingLife = currentMissingLife;
+		}
+		if(maxMissingLife > 0) {
+			this.instance.log.p("Break for life regeneration.");
+			try {
+				Thread.sleep(this.infos.regenRate * 100 * maxMissingLife); // on attend de récupérer toute sa vie
+			} catch(Exception e) {
+				interrupt();
+				return;
+			}
+		}		
+	}
+	
+	private void inventoryManager() {
+		boolean need = false;
+		if(this.inState(CharacterState.NEED_TO_EMPTY_INVENTORY))
+			need = true;
+		if(!need) {
+			for(Character soldier : this.squad)
+				if(soldier.inState(CharacterState.NEED_TO_EMPTY_INVENTORY))
+					need = true;
+		}
+		if(need) {
+			this.instance.log.p("Need to empty inventory.");
+			this.updateState(CharacterState.NEED_TO_EMPTY_INVENTORY, true);
+			broadcastEventToSquad();
+			this.social.goToExchange(this.mule);
+		}
 	}
 
 	// ajoute une nouvelle recrue à la liste des recrues en attente d'être recruté par le capitaine
-	public synchronized void newRecruit(SoldierController recruit) {
-		lock.lock();
+	public void newRecruit(Soldier recruit) {
+		this.lock.lock();
 		this.recruits.add(recruit);
+		this.lock.unlock();
 		this.instance.log.p("Recruit " + recruit.infos.login + " added to the recruits list.");
-		lock.unlock();
 	}
 
 	// retire un soldat de l'escouade
-	public synchronized void removeSoldierFromSquad(SoldierController soldier) {
-		lock.lock();
+	public void removeSoldierFromSquad(Soldier soldier) {
+		this.lock.lock();
 		this.squad.remove(soldier);
+		this.lock.unlock();
+		this.teamLevel -= soldier.infos.level;
+		this.fight.updateFightArea(this.teamLevel);
 		this.instance.log.p("Recruit " + soldier.infos.login + " removed from the squad.");
-		lock.unlock();
 	}
 
 	// parcourt la liste des recrues et les invite à rejoindre l'escouade (avec attente d'acceptation de l'invitation)
-	private synchronized void integrateRecruits() {
-		lock.lock();
+	private void integrateRecruits() {
 		if(this.recruits.size() == 0)
 			return;
-		for(SoldierController recruit : recruits) {
+		for(Soldier recruit : recruits) {
 			recruit.waitState(CharacterState.IS_LOADED);
+			this.lock.lock();
 			this.squad.add(recruit);
-			recruit.captain = this;
+			this.lock.unlock();
+			recruit.setCaptain(this);
 			this.teamLevel += recruit.infos.level;
 			PartyInvitationRequestMessage PIRM = new PartyInvitationRequestMessage();
 			PIRM.name = recruit.infos.characterName;
@@ -70,75 +113,26 @@ public class CaptainController extends FighterController {
 				this.instance.log.p("Recruit " + recruit.infos.characterName + " joined the party.");
 		}
 		this.recruits.clear();
-		lock.unlock();
-		changePlayerStatus(PlayerStatusEnum.PLAYER_STATUS_AFK); // pour repasser en mode absent
-		setFightArea(this.teamLevel);
+		this.social.changePlayerStatus(PlayerStatusEnum.PLAYER_STATUS_AFK); // pour repasser en mode absent
+		this.fight.updateFightArea(this.teamLevel);
 	}
 
 	// indique à tous les soldats de l'escouade que le capitaine a effectué une action
 	private void broadcastEventToSquad() {
-		for(SoldierController soldier : squad)
+		for(Soldier soldier : squad)
 			soldier.updateState(CharacterState.CAPTAIN_ACT, true);
 	}
 
-	@Override
-	protected void levelUpManager() {
-		if(!waitState(CharacterState.LEVEL_UP))
-			return;
-		waitState(CharacterState.IS_LOADED);
-		upgradeSpell();
-		increaseStats();
-		setFightArea(++this.teamLevel);
-	}
-
-	@Override
-	protected void emptyInventoryIfNecessary() {
-		boolean need = false;
-		if(inState(CharacterState.NEED_TO_EMPTY_INVENTORY))
-			need = true;
-		if(!need) {
-			for(CharacterController soldier : this.squad)
-				if(soldier.inState(CharacterState.NEED_TO_EMPTY_INVENTORY))
-					need = true;
-		}
-		if(need) {
-			this.instance.log.p("Need to empty inventory.");
-			updateState(CharacterState.NEED_TO_EMPTY_INVENTORY, true);
-			broadcastEventToSquad();
-			goToExchangeWithMule();
-		}
-	}
-
-	@Override
-	protected void regenerateLife() {
-		int currentMissingLife;
-		int maxMissingLife = this.infos.missingLife();
-		for(CharacterController teamMate : this.squad) {
-			currentMissingLife = teamMate.infos.missingLife();
-			if(currentMissingLife > maxMissingLife)
-				maxMissingLife = currentMissingLife;
-		}
-		if(maxMissingLife > 0) {
-			this.instance.log.p("Break for life regeneration.");
-			try {
-				sleep(this.infos.regenRate * 100 * maxMissingLife); // on attend de récupérer toute sa vie
-			} catch(Exception e) {
-				interrupt();
-				return;
-			}
-		}		
-	}
-
-	private void waitSoldiers() {
+	private void waitSoldiersOnMap() {
 		this.instance.log.p("Waiting for complete team be on the map.");
-		for(CharacterController soldier : this.squad)
+		for(Character soldier : this.squad)
 			while(!this.roleplayContext.actorIsOnMap(soldier.infos.characterId))
 				waitState(CharacterState.NEW_ACTOR_ON_MAP);
 	}
 
 	private void waitSoldiersInFight() {
 		this.instance.log.p("Waiting for complete team be in the fight.");
-		for(CharacterController soldier : this.squad)
+		for(Character soldier : this.squad)
 			while(!this.fightContext.inFight(soldier.infos.characterId))
 				if(!waitState(CharacterState.NEW_ACTOR_IN_FIGHT)) // fin de la phase de préparation ou interruption
 					return;
@@ -154,13 +148,13 @@ public class CaptainController extends FighterController {
 			GameContextReadyMessage GCRM = new GameContextReadyMessage(); // je ne sais pas à quoi sert ce message
 			GCRM.serialize(this.infos.currentMap.id);
 			this.instance.outPush(GCRM);
-			fight(true);
+			this.fight.fightManager(true);
 		}
 
 		if(inState(CharacterState.IN_PARTY))
-			leaveGroup();
-		changePlayerStatus(PlayerStatusEnum.PLAYER_STATUS_AFK);
-		setFightArea(this.teamLevel);
+			this.social.leaveGroup();
+		this.social.changePlayerStatus(PlayerStatusEnum.PLAYER_STATUS_AFK);
+		this.fight.updateFightArea(this.teamLevel);
 
 		while(!isInterrupted()) {
 			waitState(CharacterState.IS_LOADED); // important
@@ -169,29 +163,29 @@ public class CaptainController extends FighterController {
 			integrateRecruits();
 
 			// besoin de renaître au phénix ?
-			riseIfNecessary();
+			this.fight.rebirthManager();
 
 			// besoin de mettre à jour ses caractéristiques ou/et ses sorts ?
-			levelUpManager();
+			this.fight.levelUpManager();
 
 			// besoin d'aller voir la mule ?
-			emptyInventoryIfNecessary();
+			inventoryManager();
 
 			// besoin d'aller dans l'aire de combat ?
-			this.mvt.goToArea(this.areaId);
+			this.mvt.goToArea(this.fight.getFightAreaId());
 
 			// besoin de récupérer sa vie ?
-			regenerateLife();
+			lifeManager();
 
 			while(!isInterrupted()) { // boucle recherche & combat
-				waitSoldiers(); // on attend que l'escouade complète soit sur la map
+				waitSoldiersOnMap(); // on attend que l'escouade complète soit sur la map
 
 				// combats
-				if(lookForAndLaunchFight()) {
+				if(this.fight.fightSearchManager()) {
 					if(waitState(CharacterState.IN_FIGHT)) { // on vérifie si le combat a bien été lancé (avec timeout)
 						broadcastEventToSquad();
 						waitSoldiersInFight();
-						fight(false);
+						this.fight.fightManager(false);
 						checkIfModeratorIsOnline(Main.MODERATOR_NAME);
 						break;
 					}

@@ -5,16 +5,16 @@ import gamedata.fight.GameFightMonsterInformations;
 
 import java.util.Vector;
 
-import controller.CharacterController;
+import controller.characters.Character;
 
 public class FightContext {
-	private CharacterController character;
+	private Character character;
 	public GameFightFighterInformations self;
 	public Vector<GameFightFighterInformations> fighters;
 	public Vector<Integer> positionsForChallengers;
 	public Vector<Integer> positionsForDefenders;
 	
-	public FightContext(CharacterController character) {
+	public FightContext(Character character) {
 		this.character = character;
 	}
 	

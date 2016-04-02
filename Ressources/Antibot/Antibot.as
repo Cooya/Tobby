@@ -121,6 +121,8 @@ package {
 			if(Kernel == null)
 				return;
 			var worker:Object = Kernel["getWorker"]();
+			if(worker == null)
+				return;
 			var LoginValidationAction:Class = getDefinitionByName("com.ankamagames.dofus.logic.connection.actions.LoginValidationAction") as Class;
 			var AuthentificationFrame:Class = getDefinitionByName("com.ankamagames.dofus.logic.connection.frames.AuthentificationFrame") as Class;
 			if(worker.contains(AuthentificationFrame)) {

@@ -8,7 +8,6 @@ import messages.synchronisation.BasicPingMessage;
 import utilities.ByteArray;
 
 public class NetworkInterface extends Thread {
-	private static final boolean DEBUG = false;
 	private Instance instance;
 	private Reader reader;
 	private Connection.Client serverCo;
@@ -61,8 +60,7 @@ public class NetworkInterface extends Thread {
 					break;
 				throw new FatalError("Deconnected from server."); // si la connexion a été coupée côté serveur
 			}
-			if(DEBUG)
-				this.instance.log.p(bytesReceived + " bytes received from server.");
+			this.instance.log.p(bytesReceived + " bytes received from server.");
 			processMsgStack(reader.processBuffer(new ByteArray(buffer, bytesReceived)));
 		}
 		this.serverCo.close();

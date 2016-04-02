@@ -1,8 +1,8 @@
 package main;
 
-import java.text.SimpleDateFormat;
-
 import gui.Controller;
+
+import java.text.SimpleDateFormat;
 
 public class Main {
 	public static final String DLL_LOCATION = "Ressources/DLLInjector/No.Ankama.dll";
@@ -15,11 +15,14 @@ public class Main {
 	public static void main(String[] args) {
 		Controller.runApp();
 		
+		//new Sniffer();
+		
 		//for(SubArea subArea : SubArea.getAllSubArea())
 			//System.out.println(subArea.getName() + " " + subArea.id + subArea.getWorldMap().getName());
 		
-		//Map map = MapsCache.loadMap(154010884);
-		//System.out.println(map.subareaId);
+		//Map map = MapsCache.loadMap(84675590);
+		//for(Cell cell : map.cells)
+			//System.out.println(cell.id + " " + cell.getNonWalkableDuringRP());
 		
 		/*
 		MapPosition mp = MapPosition.getMapPositionById(84805636);

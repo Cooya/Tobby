@@ -7,9 +7,10 @@ import gui.View.LoginPanel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Set;
 import java.util.Vector;
 
 import javax.swing.AbstractButton;
@@ -25,44 +26,25 @@ import main.Log;
 
 public class Controller {
 	private static final String accountsFilePath = "Ressources/accounts.txt";
-	private static View view = new View();
-	private static Model model = new Model();
-	
-	static {
-		try {
-			BufferedReader buffer = new BufferedReader(new FileReader(accountsFilePath));
-			String line;
-			Account account;
-			JMenuItem item;
-			while((line = buffer.readLine()) != null) {
-				if(!line.equals("")) {
-					account = model.createAccount(line);
-					if(account.type == 0)
-						item = new JMenuItem(account.login + " (mule)");
-					else
-						item = new JMenuItem(account.login);
-					view.accountsListItems.add(item);
-					view.accountsMenu.add(item);
-					new AccountItemListener(item);
-				}
-			}
-			buffer.close();
-		} catch(Exception e) {
-			e.printStackTrace();
-		}
-	}
+	private static final String EOL = System.getProperty("line.separator");
+	private static View view;
+	private static Model model;
 
+	// point d'entrée de l'application graphique
 	public static void runApp() {
+		view = new View();
+		model = new Model();
+		loadAccountsFile();
 		new StartListener(view.menuItem);
 	}
-	
+
 	public static boolean isWorkmate(double characterId) {
 		for(Instance instance : model.getConnectedInstances())
 			if(instance.getCharacterId() == characterId)
 				return true;
 		return false;
 	}
-	
+
 	public static Log getLog() {
 		Thread currentThread = Thread.currentThread();
 		for(Instance instance : model.getConnectedInstances())
@@ -72,22 +54,14 @@ public class Controller {
 		return null;
 	}
 	
-	private synchronized static void createMuleInstance(Account account) {
+	// création d'une instance (passage au modèle)
+	private synchronized static void createInstance(Account account, int areaId) {
 		Emulation.runLauncherIfNecessary();
 		CharacterFrame frame = new CharacterFrame(account.id, account.login);
 		view.addCharacterFrame(frame);
 		frame.addInternalFrameListener(new CharacterFrameListener());
 		frame.setVisible(true);
-		model.createMuleInstance(account, frame);
-	}
-	
-	private synchronized static void createFighterInstance(Account account, int areaId) {
-		Emulation.runLauncherIfNecessary();
-		CharacterFrame frame = new CharacterFrame(account.id, account.login);
-		view.addCharacterFrame(frame);
-		frame.addInternalFrameListener(new CharacterFrameListener());
-		frame.setVisible(true);
-		model.createFighterInstance(account, areaId, frame);
+		model.createInstance(account, areaId, frame);
 	}
 
 	// méthode déclenchée par la fermeture d'une frame graphique
@@ -98,7 +72,7 @@ public class Controller {
 		if(instance != null)
 			instance.interruptThreads();
 	}
-	
+
 	// méthode déclenchée lors d'une erreur critique (la frame graphique reste présente)
 	public static void deconnectInstance(String reason) {
 		Instance instance = model.getCurrentInstance();
@@ -106,7 +80,7 @@ public class Controller {
 		instance.interruptThreads();
 		model.removeInstance(instance.id);
 	}
-	
+
 	// méthode déclenchée lors de la connexion d'un modérateur (les frames graphiques restent présentes)
 	public static void deconnectAllInstances(String reason) {
 		Vector<Instance> instances = model.getConnectedInstances();
@@ -117,6 +91,54 @@ public class Controller {
 		}
 	}
 	
+	protected static void exit() {
+		saveAccountsInFile();
+		System.exit(0);
+	}
+
+	// chargement de la liste des comptes dans le fichier texte "accounts.txt"
+	private static void loadAccountsFile() {
+		try {
+			BufferedReader buffer = new BufferedReader(new FileReader(accountsFilePath));
+			String line;
+			Account account;
+			JMenuItem item;
+			while((line = buffer.readLine()) != null) {
+				if(!line.equals("")) {
+					account = model.createAccount(line);
+					if(account.behaviour < 10)
+						item = new JMenuItem(account.login + " (salesman)");
+					else
+						item = new JMenuItem(account.login + " (fighter)");
+					view.accountsListItems.add(item);
+					view.accountsMenu.add(item);
+					new AccountItemListener(item);
+				}
+			}
+			buffer.close();
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	// sauvegarde de la liste des comptes dans le fichier texte "accounts.txt" (effectuée à la fermeture de l'application)
+	private static void saveAccountsInFile() {
+		Set<Account> accounts = model.getAllAccounts();
+		String str = "";
+		for(Account account : accounts)
+			str += account.behaviour + " " + account.login + " " + account.password + " " + account.serverId + EOL;
+		FileWriter fileWriter;
+		try {
+			fileWriter = new FileWriter(accountsFilePath, false);
+			fileWriter.write(str);
+			fileWriter.close();
+		} catch(IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	// écoute du clic du bouton "load account" dans le menu déroulant
+	// => lancement de la boîte de dialogue pour la création d'un nouveau compte
 	private static class StartListener implements ActionListener {
 		private StartListener(AbstractButton button) {
 			button.addActionListener(this);
@@ -127,6 +149,8 @@ public class Controller {
 		}
 	}
 
+	// écoute du bouton "Run" dans la boîte de dialogue de création de nouveau de compte
+	// => création d'un compte, ajout dans le fichier texte et lancement de la boîte de dialogue des options de combat
 	private static class ConnectionListener implements ActionListener {
 		private LoginPanel loginPanel;
 
@@ -139,34 +163,25 @@ public class Controller {
 			String login = this.loginPanel.loginField.getText();
 			String password = this.loginPanel.passwordField.getText();
 			int serverId = Integer.parseInt(this.loginPanel.serverField.getText());
+			int characterType = this.loginPanel.getSelectedType();
 			if(login.isEmpty() || password.isEmpty() || serverId == 0)
 				JOptionPane.showMessageDialog(null, "Missing informations.", "Erreur", JOptionPane.ERROR_MESSAGE);
 			else {
 				this.loginPanel.dispose();
-				Account account = model.getAccount(login);
+				Account account = model.getAccount(login); // si le compte existe déjà
 				if(account == null) {
-					account = model.createAccount(1, login, password, serverId);
-					try {
-						BufferedWriter buffer = new BufferedWriter(new FileWriter(accountsFilePath, true));
-						buffer.newLine();
-						buffer.write("1 " + login + " " + password + " " + serverId);
-						buffer.close();
-					} catch(Exception e) {
-						e.printStackTrace();
-					}
+					account = model.createAccount(characterType, login, password, serverId);
 					JMenuItem item = new JMenuItem(login);
 					view.accountsListItems.add(item);
 					view.accountsMenu.add(item);
 					new AccountItemListener(item);
 				}
-				if(account.type != 0)
-					new FighterOptionsPanelListener(view.createFighterOptionsPanel(), account);
-				else
-					createMuleInstance(account);
+				new FighterOptionsPanelListener(view.createFighterOptionsPanel(account.behaviour, model.nextFighterWillBe()), account); // affichage des options de combat éventuelles
 			}
 		}
 	}
 
+	// fermeture d'une CharacterFrame
 	private static class CharacterFrameListener implements InternalFrameListener {
 
 		@Override
@@ -193,6 +208,8 @@ public class Controller {
 		public void internalFrameOpened(InternalFrameEvent arg0) {}
 	}
 
+	// écoute du bouton de lancement rapide d'un compte dans la liste des comptes du menu déroulant
+	// => lancement de la boîte de dialogue des options de combat
 	private static class AccountItemListener implements ActionListener {
 		private JMenuItem accountItem;
 
@@ -203,19 +220,17 @@ public class Controller {
 
 		public void actionPerformed(ActionEvent e) {
 			Account account = model.getAccount(this.accountItem.getText().split(" ")[0]);
-			if(account != null) {
-				if(account.type != 0)
-					new FighterOptionsPanelListener(view.createFighterOptionsPanel(), account);
-				else
-					createMuleInstance(account);
-			}
+			if(account != null)
+				new FighterOptionsPanelListener(view.createFighterOptionsPanel(account.behaviour, model.nextFighterWillBe()), account);
 		}
 	}
-	
+
+	// écoute du bouton "Go" dans la boîte de dialogue des options de combat
+	// => lancement d'une instance
 	private static class FighterOptionsPanelListener implements ActionListener {
 		private FighterOptionsPanel fighterOptionsPanel;
 		private Account account;
-		
+
 		private FighterOptionsPanelListener(FighterOptionsPanel fighterOptionsPanel, Account account) {
 			this.fighterOptionsPanel = fighterOptionsPanel;
 			this.account = account;
@@ -223,11 +238,8 @@ public class Controller {
 		}
 
 		public void actionPerformed(ActionEvent event) {
-			if(this.fighterOptionsPanel.isLoneWolf.isSelected())
-				account.type = 1; // combattant solitaire
-			else
-				account.type = 2; // combattant en groupe
-			createFighterInstance(account, this.fighterOptionsPanel.getSelectedAreaId());
+			account.behaviour = this.fighterOptionsPanel.getSelectedBehaviour();
+			createInstance(account, this.fighterOptionsPanel.getSelectedAreaId());
 			this.fighterOptionsPanel.dispose();
 		}
 	}

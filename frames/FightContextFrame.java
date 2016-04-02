@@ -3,7 +3,7 @@ package frames;
 import gamedata.fight.FightResultListEntry;
 import gamedata.fight.FightResultPlayerListEntry;
 import controller.CharacterState;
-import controller.FighterController;
+import controller.characters.Fighter;
 import main.Instance;
 import messages.Message;
 import messages.fights.GameActionAcknowledgementMessage;
@@ -18,9 +18,9 @@ import messages.fights.SequenceEndMessage;
 
 public class FightContextFrame extends Frame {
 	private Instance instance;
-	private FighterController fighter;
+	private Fighter fighter;
 
-	public FightContextFrame(Instance instance, FighterController fighter) {
+	public FightContextFrame(Instance instance, Fighter fighter) {
 		this.instance = instance;
 		this.fighter = fighter;
 	}

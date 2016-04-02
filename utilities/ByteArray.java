@@ -67,6 +67,7 @@ public class ByteArray {
 			newArray[i] = array[i];
 		for(int j = 0; j < this.array.length; ++j, ++i)
 			newArray[i] = this.array[j];
+		this.array = newArray;
 		this.pos = 0;
 		this.size += array.length;
 	}

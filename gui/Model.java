@@ -3,9 +3,10 @@ package gui;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.Vector;
 
-import main.FatalError;
+import controller.CharacterBehaviour;
 import main.Instance;
 
 public class Model {
@@ -23,28 +24,29 @@ public class Model {
 		this.incompleteFightGroupIndex = 0;
 	}
 	
-	protected void createMuleInstance(Account account, CharacterFrame frame) {
-		if(account.type != 0)
-			throw new FatalError("Invalid account type.");
-		Instance newInstance = new Instance(account.id, account.type, account.login, account.password, account.serverId, 0, frame);
-		for(Instance instance : this.instances.values())
-			if(instance != null)
-				instance.setMule(newInstance);
-		this.mule = newInstance;
-		this.instances.put(account, newInstance);
-	}
-	
-	protected void createFighterInstance(Account account, int areaId, CharacterFrame frame) {
-		if(account.type == 0)
-			throw new FatalError("Invalid account type.");
+	// crée, stocke et lance les instances
+	protected void createInstance(Account account, int areaId, CharacterFrame frame) {
 		Instance newInstance;
-		if(account.type == 1) // combattant solitaire
-			newInstance = new Instance(account.id, account.type, account.login, account.password, account.serverId, areaId, frame);
-		else // combattant en groupe
-			newInstance = newFighter(account, areaId, frame);
-		if(this.mule != null) // mule connectée
-			newInstance.setMule(this.mule);
-		this.instances.put(account, newInstance);
+		if(account.behaviour == CharacterBehaviour.WAITING_MULE) {
+			newInstance = new Instance(account.id, account.behaviour, account.login, account.password, account.serverId, areaId, frame);
+			for(Instance instance : this.instances.values())
+				if(instance != null)
+					instance.setMule(newInstance); // on met à jour la mule dans toutes les autres instances
+			this.mule = newInstance;
+		}
+		else if(account.behaviour == CharacterBehaviour.TRAINING_MULE || account.behaviour == CharacterBehaviour.LONE_WOLF) {
+			newInstance = new Instance(account.id, account.behaviour, account.login, account.password, account.serverId, areaId, frame);
+			if(this.mule != null) // si la mule est connectée
+				newInstance.setMule(this.mule); // on la met à jour dans la nouvelle instance créée
+		}
+		else if(account.behaviour == CharacterBehaviour.SELLER)
+			newInstance = null; // à implémenter
+		else { // combattants en groupe (capitaines ou soldats)
+			newInstance = newSquadFighter(account, areaId, frame);
+			if(this.mule != null) // si la mule est connectée
+				newInstance.setMule(this.mule); // on la met à jour dans la nouvelle instance créée
+		}
+		this.instances.put(account, newInstance); // ajout dans la table des instances
 	}
 	
 	protected Vector<Instance> getConnectedInstances() {
@@ -72,7 +74,7 @@ public class Model {
 			if(account.id == instanceId) {
 				instance = this.instances.get(account);
 				this.instances.put(account, null);
-				isMule = account.type == 0;
+				isMule = account.behaviour == CharacterBehaviour.WAITING_MULE;
 				break;
 			}
 		if(isMule) {
@@ -93,8 +95,8 @@ public class Model {
 		return account;
 	}
 	
-	protected Account createAccount(int type, String login, String password, int serverId) {
-		Account account = new Account(this.instances.size(), type, login, password, serverId);
+	protected Account createAccount(int behaviour, String login, String password, int serverId) {
+		Account account = new Account(this.instances.size(), behaviour, login, password, serverId);
 		this.instances.put(account, null);
 		return account;
 	}
@@ -106,12 +108,25 @@ public class Model {
 		return null;
 	}
 	
-	private Instance newFighter(Account account, int areaId, CharacterFrame frame) {
+	protected Set<Account> getAllAccounts() {
+		return this.instances.keySet();
+	}
+	
+	// détermine si le prochain combattant sera un capitaine ou un soldat
+	protected int nextFighterWillBe() {
+		int incompleteFightGroupSize = this.fightGroups.get(this.incompleteFightGroupIndex).size();
+		if(incompleteFightGroupSize == 0)
+			return CharacterBehaviour.CAPTAIN;
+		else
+			return CharacterBehaviour.SOLDIER;
+	}
+	
+	private Instance newSquadFighter(Account account, int areaId, CharacterFrame frame) {
 		Vector<Instance> incompleteFightGroup = this.fightGroups.get(this.incompleteFightGroupIndex);
 		Instance newFighter;
-		if(incompleteFightGroup.size() == 0) // captain
+		if(incompleteFightGroup.size() == 0) // capitaine
 			newFighter = new Instance(account.id, 2, account.login, account.password, account.serverId, areaId, frame);
-		else { // soldier
+		else { // soldat
 			newFighter = new Instance(account.id, 3, account.login, account.password, account.serverId, 0, frame);
 			incompleteFightGroup.firstElement().newRecruit(newFighter); // on ajoute ce nouveau soldat aux recrues du capitaine
 		}
@@ -147,14 +162,14 @@ public class Model {
 	
 	protected static class Account {
 		protected int id;
-		protected int type;
+		protected int behaviour;
 		protected String login;
 		protected String password;
 		protected int serverId;
 		
-		protected Account(int id, int type, String login, String password, int serverId) {
+		protected Account(int id, int behaviour, String login, String password, int serverId) {
 			this.id = id;
-			this.type = type;
+			this.behaviour = behaviour;
 			this.login = login;
 			this.password = password;
 			this.serverId = serverId;

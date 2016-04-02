@@ -1,7 +1,5 @@
 package main;
 
-import gui.CharacterFrame;
-
 import java.util.LinkedList;
 
 import messages.Message;
@@ -17,13 +15,14 @@ public class Sniffer extends Thread {
 	private static Connection.Client serverCo;
 	private static boolean mustDeconnectClient = false;
 	private static Log log;
+	private static Thread serverCoThread;
 	
-	public Sniffer(CharacterFrame graphicalFrame) throws Exception {
+	public Sniffer() {
+		log = new Log("Sniffer", null);
 		launch();
-		log = new Log("Sniffer", graphicalFrame);
 	}
 	
-	private void launch() throws Exception {
+	private void launch() {
 		log.p("Waiting for " + dofusExe +" process...");
 		while(!Processes.inProcess(dofusExe))
 			try {
@@ -44,25 +43,36 @@ public class Sniffer extends Thread {
 		
 		byte[] buffer = new byte[Main.BUFFER_DEFAULT_SIZE];
 		int bytesReceived = 0;
-		
-		while((bytesReceived = clientCo.receive(buffer)) != -1) {
-			processMsgStack(reader.processBuffer(new ByteArray(buffer, bytesReceived)), "s");
-			serverCo.send(ByteArray.trimBuffer(buffer, bytesReceived));
+		try {
+			while((bytesReceived = clientCo.receive(buffer)) != -1) {
+				processMsgStack(reader.processBuffer(new ByteArray(buffer, bytesReceived)), "s");
+				serverCo.send(ByteArray.trimBuffer(buffer, bytesReceived));
+			}
+		} catch(Exception e) {
+			e.printStackTrace();
 		}
 		
 		log.p("Waiting client reconnection...");
 		clientCo.waitClient();
 		log.p("Dofus client reconnected.");
+		synchronized(this) {
+			serverCoThread.notify();
+		}
 		
-		while((bytesReceived = clientCo.receive(buffer)) != -1) {
-			processMsgStack(reader.processBuffer(new ByteArray(buffer, bytesReceived)), "s");
-			serverCo.send(ByteArray.trimBuffer(buffer, bytesReceived));
+		try {
+			while((bytesReceived = clientCo.receive(buffer)) != -1) {
+				processMsgStack(reader.processBuffer(new ByteArray(buffer, bytesReceived)), "s");
+				serverCo.send(ByteArray.trimBuffer(buffer, bytesReceived));
+			}
+		} catch(Exception e) {
+			e.printStackTrace();
 		}
 		log.p("Dofus client deconnected from sniffer server.");
 		clientCo.close();
 	}
 	
 	public void run() { // connexion au serveur officiel
+		serverCoThread = this;
 		byte[] buffer = new byte[Main.BUFFER_DEFAULT_SIZE];
 		int bytesReceived = 0;
 		
@@ -81,6 +91,13 @@ public class Sniffer extends Thread {
 		serverCo.close();
 		log.p("Deconnected from authentification server.");
 		
+		synchronized(this) {
+			try {
+				wait();
+			} catch(InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
 		if(gameServerAddress != null) {
 			log.p("Connecting to game server, waiting response...");
 			serverCo = new Connection.Client(gameServerAddress, Main.SERVER_PORT);

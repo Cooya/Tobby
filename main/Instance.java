@@ -3,12 +3,14 @@ package main;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import controller.CharacterController;
+import controller.CharacterBehaviour;
 import controller.CharacterState;
-import controller.FighterController;
-import controller.CaptainController;
-import controller.MuleController;
-import controller.SoldierController;
+import controller.characters.Captain;
+import controller.characters.Character;
+import controller.characters.Fighter;
+import controller.characters.LoneFighter;
+import controller.characters.Mule;
+import controller.characters.Soldier;
 import messages.Message;
 import frames.ConnectionFrame;
 import frames.DialogContextFrame;
@@ -16,46 +18,52 @@ import frames.FightContextFrame;
 import frames.Frame;
 import frames.RoleplayContextFrame;
 import frames.SynchronisationFrame;
+import gamedata.character.BreedEnum;
 import gui.CharacterFrame;
 import gui.Controller;
 
 public class Instance extends Thread {
-	private static Instance instanceInConnection;
-	private NetworkInterface net;
-	private CharacterController character;
-	private Vector<Frame> frames;
-	private ConcurrentLinkedQueue<Message> output;
-	private ConcurrentLinkedQueue<Message> input;
-	public Thread[] threads;
-	public int id;
-	public Log log;
+	private static Instance instanceInConnection; // instance en cours de connexion
 	
-	public Instance(int id, int type, String login, String password, int serverId, int areaId, CharacterFrame graphicalFrame) {
+	public int id; // identifiant de l'instance
+	public Log log; // gestion des logs (fichier + historique graphique)
+	public Thread[] threads; // tableau contenant les 4 threads de l'instance
+	private NetworkInterface net; // gestion de la connexion réseau
+	private Character character; // contrôleur de l'instance
+	private Vector<Frame> frames; // conteneur des frames de traitement des messages
+	private ConcurrentLinkedQueue<Message> output; // file des messages qui doivent être envoyé
+	private ConcurrentLinkedQueue<Message> input; // file des messages reçus qui doivent être traité
+	
+	public Instance(int id, int behaviour, String login, String password, int serverId, int areaId, CharacterFrame graphicalFrame) {
 		super(login + "/process");
 		this.id = id;
 		
-		// initialisation des différents acteurs
+		// sélection du comportement de l'instance (à laisser en premier)
+		switch(behaviour) {
+			case CharacterBehaviour.WAITING_MULE : this.character = new Mule(this, login, password, serverId, BreedEnum.Sadida); break;
+			case CharacterBehaviour.TRAINING_MULE : throw new FatalError("Not implemented yet !");
+			case CharacterBehaviour.SELLER : throw new FatalError("Not implemented yet !");
+			case CharacterBehaviour.LONE_WOLF : this.character = new LoneFighter(this, login, password, serverId, BreedEnum.Cra, areaId); break;
+			case CharacterBehaviour.CAPTAIN : this.character = new Captain(this, login, password, serverId, BreedEnum.Cra, areaId); break;
+			case CharacterBehaviour.SOLDIER : this.character = new Soldier(this, login, password, serverId, BreedEnum.Cra); break;
+			default : throw new FatalError("Unknown behaviour.");
+		}
+		
+		// initialisation des différents modules
 		this.log = new Log(login, graphicalFrame);
 		this.net = new NetworkInterface(this, login);
-		if(type == 0) // mule
-			this.character = new MuleController(this, login, password, serverId);
-		else if(type == 1) // combattant solitaire
-			this.character = new FighterController(this, login, password, serverId, areaId);
-		else if(type == 2) // capitaine
-			this.character = new CaptainController(this, login, password, serverId, areaId);
-		else // soldat
-			this.character = new SoldierController(this, login, password, serverId);
 		this.frames = new Vector<Frame>();
 		this.output = new ConcurrentLinkedQueue<Message>();
 		this.input = new ConcurrentLinkedQueue<Message>();
 		
+		// création des frames de traitement des messages
 		this.frames.add(new ConnectionFrame(this, character));
 		this.frames.add(new SynchronisationFrame(this));
 		this.frames.add(new RoleplayContextFrame(this, character));
-		if(type == 0)
+		if(behaviour == CharacterBehaviour.WAITING_MULE || behaviour == CharacterBehaviour.SELLER)
 			this.frames.add(null); // pour avoir le même nombre de frames que les combattants (pas propre)
 		else
-			this.frames.add(new FightContextFrame(this, (FighterController) this.character));
+			this.frames.add(new FightContextFrame(this, (Fighter) this.character));
 		this.frames.add(new DialogContextFrame(this, character));
 		this.frames.get(0).isActive = true; // activation de la ConnectionFrame
 		
@@ -65,10 +73,10 @@ public class Instance extends Thread {
 		this.threads[1] = this.net.sender;
 		this.threads[2] = this.character;
 		this.threads[3] = this;
-		this.start(); // gestion des frames
-		this.net.start(); // réception
-		this.net.sender.start(); // envoi
-		this.character.start(); // contrôleur
+		this.start();
+		this.net.start();
+		this.net.sender.start();
+		this.character.start();
 		
 		Instance.log("Instance with id = " + this.id + " started.");
 	}
@@ -97,7 +105,6 @@ public class Instance extends Thread {
 	}
 	
 	public Message outPull() {
-		//this.log.p(this.output.size() + " message(s) in the output queue.");
 		return this.output.poll();
 	}
 	
@@ -134,21 +141,21 @@ public class Instance extends Thread {
 	
 	public void setMule(Instance mule) {
 		if(mule == null) {
-			((FighterController) this.character).setMule(null);
+			((Fighter) this.character).mule = null;
 			this.character.updateState(CharacterState.MULE_AVAILABLE, false);
 		}
 		else {
-			((FighterController) this.character).setMule((MuleController) mule.character);
+			((Fighter) this.character).mule = (Mule) mule.character;
 			this.character.updateState(CharacterState.MULE_AVAILABLE, true);
 		}
 	}
 	
 	public void newRecruit(Instance recruit) {
-		((CaptainController) this.character).newRecruit((SoldierController) recruit.character);
+		((Captain) this.character).newRecruit((Soldier) recruit.character);
 	}
 	
 	public void removeSoldier(Instance soldier) {
-		((CaptainController) this.character).removeSoldierFromSquad((SoldierController) soldier.character);
+		((Captain) this.character).removeSoldierFromSquad((Soldier) soldier.character);
 	}
 	
 	public Latency getLatency() {
@@ -172,7 +179,7 @@ public class Instance extends Thread {
 		if(log != null)
 			log.p(direction, msg);
 		else
-			throw new FatalError("Invalid thread.");
+			System.out.println(msg);
 	}
 	
 	public void waitForConnection() {

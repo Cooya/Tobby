@@ -1,7 +1,9 @@
-package controller;
+package controller.api;
 
 import java.util.Vector;
 
+import controller.CharacterState;
+import controller.characters.Character;
 import controller.pathfinding.Pathfinding;
 import controller.pathfinding.Pathfinding.Direction;
 import gamedata.d2p.MapsCache;
@@ -12,27 +14,27 @@ import messages.context.GameMapMovementRequestMessage;
 import messages.interactions.NpcDialogReplyMessage;
 import messages.interactions.NpcGenericActionRequestMessage;
 
-public class MovementController {
-	private CharacterController character;
+public class MovementAPI {
+	private Character character;
 	private Pathfinding pathfinding;
 	
-	public MovementController(CharacterController character) {
+	public MovementAPI(Character character) {
 		this.character = character;
 		this.pathfinding = new Pathfinding();
 	}
 	
 	// refresh des infos par le thread de traitement
-	protected void updatePosition(Map map, int cellId) {
+	public void updatePosition(Map map, int cellId) {
 		this.pathfinding.updatePosition(map, cellId);
 	}
 
 	// refresh des infos par le thread de traitement
-	protected void updatePosition(int cellId) {
+	public void updatePosition(int cellId) {
 		this.pathfinding.updatePosition(cellId);
 	}
 	
 	 // changement de cellule
-	protected boolean moveTo(int targetId, boolean changeMap) {
+	public boolean moveTo(int targetId, boolean changeMap) {
 		this.character.waitState(CharacterState.IS_FREE);
 
 		if(this.character.infos.currentCellId == targetId) { // déjà sur la cellule cible
@@ -70,7 +72,7 @@ public class MovementController {
 	}
 	
 	// définition d'une map de destination
-	protected void defineTargetMap(int mapId) {
+	public void defineTargetMap(int mapId) {
 		this.character.waitState(CharacterState.IS_LOADED); // attendre le refresh des infos
 		if(this.character.infos.currentMap.id == mapId) { // déjà sur la map cible
 			this.character.instance.log.p("Already on the target map.");
@@ -92,7 +94,7 @@ public class MovementController {
 	}
 	
 	// définition d'une aire de destination et de parcours
-	private void defineArea(int areaId) {
+	public void defineArea(int areaId) {
 		this.character.instance.log.p("Going from map " + this.character.infos.currentMap.id + " to area " + areaId + ".");
 		boolean isInIncarnam = mapIsInIncarnam(this.character.infos.currentMap);
 		if(areaIsInIncarnam(areaId)) {
@@ -109,7 +111,7 @@ public class MovementController {
 	}
 	
 	// déplacement vers une cible fixe
-	protected void goTo(int mapId) {
+	public void goTo(int mapId) {
 		defineTargetMap(mapId);
 		Direction direction;
 		while((direction = this.pathfinding.nextDirectionForReachTarget()) != null)
@@ -117,13 +119,13 @@ public class MovementController {
 	}
 	
 	// déplacement vers une cible se déplaçant
-	protected void dynamicGoTo(int mapId) {
+	public void dynamicGoTo(int mapId) {
 		defineTargetMap(mapId);
 		this.changeMap(this.pathfinding.nextDirectionForReachTarget());
 	}
 	
 	// déplacement vers la plus proche map d'une aire
-	protected void goToArea(int areaId) {
+	public void goToArea(int areaId) {
 		this.character.waitState(CharacterState.IS_LOADED); // attendre le refresh des infos
 		if(this.character.infos.currentMap.subareaId == areaId) { // déjà sur l'aire
 			this.pathfinding.setArea(areaId); // pas besoin du calcul du chemin
@@ -137,12 +139,12 @@ public class MovementController {
 	}
 	
 	// fonction réservée aux parcours d'aires
-	protected boolean changeMap() {
+	public boolean changeMap() {
 		return changeMap(this.pathfinding.nextDirectionInArea());
 	}
 	
 	// fonction réservée aux chemins à destination fixe
-	private boolean changeMap(Direction direction) {
+	public boolean changeMap(Direction direction) {
 		if(direction == null || !moveTo(direction.outgoingCellId, true))
 			return false;
 		
@@ -204,7 +206,7 @@ public class MovementController {
 		Direction direction;
 		while(!Thread.currentThread().isInterrupted() && (direction = this.pathfinding.nextDirectionForReachTarget()) != null)
 			changeMap(direction);
-		this.character.useInteractive(375, 489378, 168278, true); // utilisation de la statue Féca
+		this.character.interaction.useInteractive(375, 489378, 168278, true); // utilisation de la statue Féca
 	}
 	
 	private static boolean mapIsInIncarnam(Map map) {

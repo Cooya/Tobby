@@ -10,14 +10,14 @@ import messages.Message;
 
 public class Log {
 	private static final boolean DEBUG = false;
-	private static String LOG_PATH = System.getProperty("user.dir") + "/Ressources/";
-	private static String EOL = System.getProperty("line.separator");
+	private static final String LOG_PATH = System.getProperty("user.dir") + "/Ressources/Logs/";
+	private static final String EOL = System.getProperty("line.separator");
 	private PrintWriter writer;
 	public CharacterFrame graphicalFrame;
 	
 	public Log(String characterName, CharacterFrame graphicalFrame) {
 		try {
-			writer = new PrintWriter(LOG_PATH + characterName + "_log.txt", "UTF-8");
+			writer = new PrintWriter(LOG_PATH + characterName + ".txt", "UTF-8");
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
@@ -47,8 +47,8 @@ public class Log {
 		else
 			str += "Size : " + size + " byte" + EOL;
 		*/
-		if(name == null)
-			graphicalFrame.appendText("[" + Main.DATE_FORMAT.format(new Date()) + "] " + str, Color.BLACK);
+		if(name == null && this.graphicalFrame != null)
+			this.graphicalFrame.appendText("[" + Main.DATE_FORMAT.format(new Date()) + "] " + str, Color.BLACK);
 		writer.println("[" + Main.DATE_FORMAT.format(new Date()) + "] " + str);
 		writer.flush();
 	}
@@ -57,10 +57,12 @@ public class Log {
 		if(Thread.currentThread().isInterrupted())
 			return;
 		
-		if(DEBUG)
-			graphicalFrame.appendText("[" + Main.DATE_FORMAT.format(new Date()) + "] " + str + EOL, Color.BLACK);
-		else
-			graphicalFrame.appendText("[" + Main.DATE_FORMAT.format(new Date()) + "] " + str, Color.BLACK);
+		if(this.graphicalFrame != null) {
+			if(DEBUG)
+				graphicalFrame.appendText("[" + Main.DATE_FORMAT.format(new Date()) + "] " + str + EOL, Color.BLACK);
+			else
+				graphicalFrame.appendText("[" + Main.DATE_FORMAT.format(new Date()) + "] " + str, Color.BLACK);
+		}
 		writer.println("[" + Main.DATE_FORMAT.format(new Date()) + "] " + str);
 		writer.flush();
 	}

@@ -10,6 +10,10 @@ public class CharacterSelectionMessage extends Message {
 		super();
 	}
 	
+	public void serialize(ByteArray buffer) {
+		buffer.writeVarLong(this.id);
+	}
+	
 	public void serialize() {
 		ByteArray buffer = new ByteArray();
 		buffer.writeVarLong(this.id);

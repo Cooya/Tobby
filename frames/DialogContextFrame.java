@@ -1,16 +1,16 @@
 package frames;
 
-import controller.CharacterController;
 import controller.CharacterState;
+import controller.characters.Character;
 import main.Instance;
 import messages.Message;
 import messages.exchanges.ExchangeIsReadyMessage;
 
 public class DialogContextFrame extends Frame {
 	private Instance instance;
-	private CharacterController character;
+	private Character character;
 	
-	public DialogContextFrame(Instance instance, CharacterController character) {
+	public DialogContextFrame(Instance instance, Character character) {
 		this.instance = instance;
 		this.character = character;
 	}

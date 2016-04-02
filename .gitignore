@@ -7,7 +7,7 @@ Ressources/Antibot/DofusInvoker.swf
 Ressources/Antibot/SharedDefinitions.swf
 Ressources/Antibot/log4as.xml
 Ressources/accounts.txt
-Ressources/*_log.txt
+Ressources/Logs/
 Others/
 .classpath
 .project

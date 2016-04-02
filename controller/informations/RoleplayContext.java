@@ -7,17 +7,17 @@ import gamedata.context.GameRolePlayNamedActorInformations;
 import java.util.Iterator;
 import java.util.Vector;
 
-import controller.CharacterController;
+import controller.characters.Character;
 
 public class RoleplayContext {
-	private CharacterController character;
+	private Character character;
 	private Vector<GameRolePlayActorInformations> actors;
 	public double actorDemandingExchange;
 	public boolean lastFightOutcome;
 	public boolean lastExchangeOutcome;
 	public int currentCaptainFightId;
 	
-	public RoleplayContext(CharacterController CC) {
+	public RoleplayContext(Character CC) {
 		this.character = CC;
 	}
 	

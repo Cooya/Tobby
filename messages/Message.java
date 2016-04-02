@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 
 import main.FatalError;
-import main.Instance;
 import utilities.BiMap;
 import utilities.ByteArray;
 
@@ -14,7 +13,7 @@ public class Message {
 	
 	static  {
 		try {
-			Instance.log("Loading informations from messages file.");
+			//Instance.log("Loading informations from messages file.");
 			BufferedReader buffer = new BufferedReader(new FileReader(messagesFilePath));
 			String[] splitLine;
 			String line = buffer.readLine();

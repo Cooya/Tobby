@@ -1,19 +1,32 @@
-package controller;
+package controller.characters;
 
+import controller.CharacterState;
+import controller.api.FightAPI;
 import gamedata.character.PlayerStatusEnum;
 import main.Instance;
 import messages.context.GameContextReadyMessage;
 import messages.fights.GameFightJoinRequestMessage;
 
-public class SoldierController extends FighterController {
-	protected CaptainController captain;
+public class Soldier extends Fighter {
+	private FightAPI fight;
+	private Captain captain;
 
-	public SoldierController(Instance instance, String login, String password, int serverId) {
-		super(instance, login, password, serverId, 0);
+	public Soldier(Instance instance, String login, String password, int serverId, int breed) {
+		super(instance, login, password, serverId, breed);
+		this.fight = new FightAPI(this);
+	}
+	
+	public Captain getCaptain() {
+		return this.captain;
+	}
+	
+	protected void setCaptain(Captain captain) {
+		this.captain = captain;
 	}
 	
 	private void followCaptain() {
 		waitState(CharacterState.IS_LOADED); // attendre le refresh des infos
+		
 		while(this.infos.currentMap.id != this.captain.infos.currentMap.id) {
 			this.mvt.dynamicGoTo(this.captain.infos.currentMap.id);
 			waitState(CharacterState.IS_LOADED); // attendre le refresh des infos
@@ -31,44 +44,34 @@ public class SoldierController extends FighterController {
 		this.instance.log.p("Request for join fight sent.");
 	}
 	
-	@Override
-	protected void levelUpManager() {
-		if(!waitState(CharacterState.LEVEL_UP))
-			return;
-		waitState(CharacterState.IS_LOADED);
-		upgradeSpell();
-		increaseStats();
-		this.captain.soldierHasLevelUp(); // met à jour le niveau de l'escouade et donc possiblement l'aire de combat 
-	}
-	
 	public void run() {
 		waitState(CharacterState.IS_LOADED);
-		changePlayerStatus(PlayerStatusEnum.PLAYER_STATUS_AVAILABLE); // pour pouvoir être invité dans le groupe
+		this.social.changePlayerStatus(PlayerStatusEnum.PLAYER_STATUS_AVAILABLE); // pour pouvoir être invité dans le groupe
 		if(inState(CharacterState.IN_FIGHT)) { // reprise de combat
 			GameContextReadyMessage GCRM = new GameContextReadyMessage(); // je ne sais pas à quoi sert ce message
 			GCRM.serialize(this.infos.currentMap.id);
 			this.instance.outPush(GCRM);
-			fight(true);
+			this.fight.fightManager(true);
 		}
 		if(inState(CharacterState.IN_PARTY))
-			leaveGroup();
+			this.social.leaveGroup();
 		waitState(CharacterState.IN_PARTY);
-		changePlayerStatus(PlayerStatusEnum.PLAYER_STATUS_AFK);
+		this.social.changePlayerStatus(PlayerStatusEnum.PLAYER_STATUS_AFK);
 		
 		while(!isInterrupted()) { // boucle déplacements + combats
-			riseIfNecessary(); // besoin de renaître au phénix ?
+			this.fight.rebirthManager(); // besoin de renaître au phénix ?
 			followCaptain();
 			waitState(CharacterState.CAPTAIN_ACT);
 			if(this.captain.inState(CharacterState.IN_FIGHT)) {
 				waitState(CharacterState.FIGHT_LAUNCHED);
 				joinFight();
 				if(waitState(CharacterState.IN_FIGHT)) {
-					fight(false);
-					levelUpManager();
+					this.fight.fightManager(false);
+					this.fight.levelUpManager();
 				}
 			}
 			else if(this.captain.inState(CharacterState.NEED_TO_EMPTY_INVENTORY))
-				goToExchangeWithMule();
+				this.social.goToExchange(this.mule);
 		}
 		System.out.println("Thread controller of instance with id = " + this.instance.id + " terminated.");
 	}

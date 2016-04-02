@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Vector;
 
 import main.FatalError;
+import gamedata.character.BreedEnum;
 import gamedata.character.CharacterCharacteristicsInformations;
 import gamedata.character.Elements;
 import gamedata.character.PlayerLifeStatusEnum;
@@ -12,6 +13,7 @@ import gamedata.d2p.ankama.Map;
 
 public class CharacterInformations {
 	public boolean isConnected;
+	public boolean firstSelection;
 	public String login;
 	public String password;
 	public int serverId;
@@ -25,26 +27,29 @@ public class CharacterInformations {
 	public int regenRate;
 	public int weight;
 	public int weightMax;
-	private int breed;
 	public int level;
 	public CharacterCharacteristicsInformations stats;
-	public HashMap<Integer,SpellItem> spellList; 
+	public HashMap<Integer, SpellItem> spellList; 
 	public int attackSpell;
 	public int attackSpellActionPoints;
 	public int element;
 	public int fightsWonCounter;
 	public int fightsLostCounter;
 	public int mapsTravelled;
+	public int partyId;
+	private int breed;
 	
-	public CharacterInformations(String login, String password, int serverId) {
+	public CharacterInformations(String login, String password, int serverId, int breed) {
+		this.firstSelection = false;
 		this.isConnected = false;
 		this.login = login;
 		this.password = password;
 		this.serverId = serverId;
 		this.status = 1; // statut inconnu
 		this.healthState = PlayerLifeStatusEnum.STATUS_ALIVE_AND_KICKING;
-		this.attackSpell = 161; // flèche magique
 		this.mapsTravelled = 1;
+		this.partyId = -1;
+		setBreed(breed);
 	}
 	
 	public int missingLife() {
@@ -65,14 +70,18 @@ public class CharacterInformations {
 			spellList.put(spellItem.spellId, spellItem);
 	}
 	
-	public void setBreed(int breed) {
+	public int getBreed() {
+		return this.breed;
+	}
+	
+	private void setBreed(int breed) {
 		this.breed = breed;
-		if(this.breed == 9) { // crâ
+		if(this.breed == BreedEnum.Cra) { // crâ
 			this.attackSpell = 161; // flèche magique
 			this.attackSpellActionPoints = 4;
 			this.element = Elements.intelligence;
 		}
-		else if(this.breed == 10) { // sadida
+		else if(this.breed == BreedEnum.Sadida) { // sadida
 			this.attackSpell = 183; // ronce
 			this.attackSpellActionPoints = 3;
 			this.element = Elements.strength;
