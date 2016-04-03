@@ -13,6 +13,8 @@
 * Supprimer à terme les boucles infinies lors de l'attente d'états
 * Ajouter, lors de la recherche d'un chemin vers une map distante, une cellule cible pour la map cible (ça évitera de se retrouver de l'autre côté d'une muraille par rapport au capitaine par exemple)
 * ~~Mettre à jour l'aire de combat à chaque level up (que ce soit seul ou en groupe)~~
+* Créer une API pour les "squads"
+* Création automatique de personnage dans les comptes vides
 
 ### Bugs à résoudre ###
 
@@ -23,15 +25,15 @@
 * ~~Déconnexion intempestive pour une raison inconnue (en combat ou en mouvement)~~
 * ~~"None possible path found" sur les maps séparées par un "mur" d'obstacles~~
 * ~~Problème d'accès concurrents dans la classe RoleplayContext (et peut-être aussi dans FightContext)~~
-* Chemins de maps possiblement erronés des fois, à vérifier sur le long terme
 * ~~Cellules dans le coin des maps ne permettant de changer de map que d'un seul côté (donc problème quand on veut aller vers l'autre côté)~~
 * Exceptions en double (FatalError) -> inévitable je pense
 * Temps mort à la création d'un chemin de maps vers une aire -> probablement normal (calcul de dizaines de chemins de maps)
 * **Launcher qui finit par s'écrouler au bout d'un certain temps**
 * ~~Mode absent qui ne fonctionne pas pour le capitaine (probablement à cause du fait qu'il est chef de groupe)~~
 * ~~Chemin de maps calculé trop souvent (il prend du temps donc à optimiser)~~
-* **Au bout d'un moment, un message n'est pas envoyé (ou n'est pas reçu par le serveur), de ce fait, le bot est kické**
-* **Latence au lancement d'une CharacterFrame (et même des fois, plantage de la CharacterFrame)**
+* ~~**Au bout d'un moment, un message n'est pas envoyé (ou n'est pas reçu par le serveur), de ce fait, le bot est kické**~~
+* ~~**Latence au lancement d'une CharacterFrame (et même des fois, plantage de la CharacterFrame)**~~
+* **Erreur de frame nulle lors de certains lancements du launcher**
 
 ### Échanges ###
 
@@ -39,13 +41,6 @@
 * ~~Vérifier si l'échange a été un succès ou pas du côté combattant~~
 * ~~Ajouter les kamas lors de l'échange (fighter -> mule)~~
 * ~~Si la demande d'échange a échoué (cible occupée ou pas encore chargée complètement sur la map), la relancer lorsque la cible sera disponible~~
-
-### Interface graphique ###
-
-* "Scroll down" automatique qui s'arrête
-* Ajouter la couleur dans les logs des CharacterFrames
-* Padding à ajouter autour des logs des CharacterFrames
-* ~~Améliorer le rafraichissement des informations dans les CharacterFrames (trop lourd actuellement)~~
 
 ### Groupes de combat ###
 
@@ -57,6 +52,14 @@
 * ~~Déconnecter un combattant lorsqu'il a atteint la limite de 200 combats par jour (traitement du "TextInformationMessage" reçu)~~
 * Promouvoir un soldat lorsque le capitaine du groupe est déconnecté
 
+### Interface graphique ###
+
+* "Scroll down" automatique qui s'arrête
+* Ajouter la couleur dans les logs des CharacterFrames
+* Padding à ajouter autour des logs des CharacterFrames
+* ~~Améliorer le rafraichissement des informations dans les CharacterFrames (trop lourd actuellement)~~
+* Ajouter l'encodage "UTF-8" dans les CharacterFrames (pour afficher les accents)
+
 ### Facultatif ###
 
 * ~~Envoyer le message "GameContextReadyMessage"~~
@@ -67,4 +70,3 @@
 * Améliorer l'utilisation des "interactives" (récupérer le résultat et se rendre à la cellule adjacente à l'"interactive")
 * ~~Gérer les "TextInformationMessages" qui peuvent donner des informations utiles pour le debuggage~~
 * Traduire la classe "ParamsDecoder" pour un meilleur affichage des "TextInformationMessages"
-* Ajouter l'encodage "UTF-8" dans les CharacterFrames (pour afficher les accents)
