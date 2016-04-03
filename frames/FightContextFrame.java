@@ -87,8 +87,10 @@ public class FightContextFrame extends Frame {
 			case 719 : // GameFightTurnEndMessage
 				GameFightTurnEndMessage GFTEM = new GameFightTurnEndMessage(msg);
 				GFTEM.deserialize();
-				if(GFTEM.fighterId == this.fighter.infos.characterId)
+				if(GFTEM.fighterId == this.fighter.infos.characterId) {
+					this.fighter.updateState(CharacterState.IN_GAME_TURN, false);
 					this.instance.log.p("End of my game turn.");
+				}
 				return true;
 			case 720 : // GameFightEndMessage
 				GameFightEndMessage GFEM = new GameFightEndMessage(msg);

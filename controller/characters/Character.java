@@ -143,14 +143,15 @@ public abstract class Character extends Thread {
 			condition = new Condition(state);
 			isEvent = true;
 			break;
-		case SPELL_CASTED : // event
-			this.instance.log.p("Waiting for result of spell cast.");
-			condition = new Condition(state);
-			isEvent = true;
-			break;
 		case WHOIS_RESPONSE : // event
 			this.instance.log.p("Waiting for WHOIS response.");
 			condition = new Condition(state);
+			isEvent = true;
+			break;
+		case SPELL_CASTED : // event avec contrainte
+			this.instance.log.p("Waiting for result of spell cast.");
+			condition = new Condition(state);
+			condition.addConstraint(CharacterState.IN_GAME_TURN, false);
 			isEvent = true;
 			break;
 		case NEW_ACTOR_IN_FIGHT : // event avec contrainte

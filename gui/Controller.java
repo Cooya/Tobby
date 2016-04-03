@@ -93,6 +93,7 @@ public class Controller {
 	
 	protected static void exit() {
 		saveAccountsInFile();
+		Emulation.killLauncher();
 		System.exit(0);
 	}
 

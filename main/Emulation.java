@@ -21,6 +21,7 @@ public class Emulation {
 	private static Connection.Server clientDofusCo;
 	private static Reader reader = new Reader();
 	private static Lock lock = new ReentrantLock();
+	private static Process launcherProcess;
 
 	public static void runLauncherIfNecessary() {
 		if(!Processes.inProcess("adl.exe"))
@@ -31,12 +32,16 @@ public class Emulation {
 				if(!Processes.fileExists(ANTIBOT_PATH))
 					throw new FatalError("Antibot not found.");
 				else
-					Runtime.getRuntime().exec(ADL_PATH + " " + ANTIBOT_PATH);
+					launcherProcess = Runtime.getRuntime().exec(ADL_PATH + " " + ANTIBOT_PATH);
 			} catch(Exception e) {
 				throw new FatalError(e);
 			}
 		else
 			Instance.log("AS launcher already in process.");
+	}
+	
+	public static void killLauncher() {
+		launcherProcess.destroy();
 	}
 	
 	public static Message emulateServer(String login, String password, HelloConnectMessage HCM, IdentificationSuccessMessage ISM, RawDataMessage RDM, int instanceId) {

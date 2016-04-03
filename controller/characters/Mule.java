@@ -38,11 +38,12 @@ public class Mule extends Character {
 			if(needToGoBank(0.1f)) { // + de 10% de l'inventaire occupé
 				updateState(CharacterState.NEED_TO_EMPTY_INVENTORY, true);
 				this.instance.log.p("Need to go to empty inventory at Astrub bank.");
-				if(inState(CharacterState.PENDING_DEMAND))
+				if(inState(CharacterState.PENDING_DEMAND)) // TODO -> il peut y avoir un problème de pods ici
 					if(this.social.processExchangeDemand(this.roleplayContext.actorDemandingExchange))
 						this.social.acceptExchangeAsReceiver();
 				this.mvt.goTo(BANK_OUTSIDE_MAP_ID); // map où se situe la banque
 				this.interaction.useInteractive(317, 465440, 140242, true); // porte de la banque
+				this.interaction.emptyInventoryInBank();
 				updateState(CharacterState.NEED_TO_EMPTY_INVENTORY, false);
 				goOutAstrubBank(); // on sort de la banque
 			}

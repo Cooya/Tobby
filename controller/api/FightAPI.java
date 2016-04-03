@@ -131,7 +131,7 @@ public class FightAPI {
 			Vector<GameFightMonsterInformations> aliveMonsters = this.fighter.fightContext.getAliveMonsters();
 			this.fighter.instance.log.p(aliveMonsters.size() + " alive monster(s) remaining.");
 			for(GameFightMonsterInformations aliveMonster : aliveMonsters) {
-				if(this.fighter.fightContext.self.stats.actionPoints >= this.fighter.infos.attackSpellActionPoints)
+				if(this.fighter.inState(CharacterState.IN_GAME_TURN) && this.fighter.fightContext.self.stats.actionPoints >= this.fighter.infos.attackSpellActionPoints)
 					castSpellOverMonster(aliveMonster);
 				else
 					break;
