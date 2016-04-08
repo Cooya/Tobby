@@ -29,7 +29,7 @@
 * ~~Problème d'accès concurrents dans la classe RoleplayContext (et peut-être aussi dans FightContext)~~
 * ~~Cellules dans le coin des maps ne permettant de changer de map que d'un seul côté (donc problème quand on veut aller vers l'autre côté)~~
 * Exceptions en double (FatalError) -> inévitable je pense
-* ~~**Launcher qui finit par s'écrouler au bout d'un certain temps**
+* ~~**Launcher qui finit par s'écrouler au bout d'un certain temps**~~
 * ~~Mode absent qui ne fonctionne pas pour le capitaine (probablement à cause du fait qu'il est chef de groupe)~~
 * ~~Chemin de maps calculé trop souvent (il prend du temps donc à optimiser)~~
 * ~~**Au bout d'un moment, un message n'est pas envoyé (ou n'est pas reçu par le serveur), de ce fait, le bot est kické**~~
