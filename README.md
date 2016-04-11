@@ -8,7 +8,6 @@
 * ~~Ajouter des critères pour le choix des groupes de monstres à combattre~~
 * ~~Mettre à jour l'aire de combat à chaque level up (que ce soit seul ou en groupe)~~
 * ~~**Améliorer les échanges et les dialogues avec les PNJ (suppression de "sleeps" peu propres)**~~
-* ~~Implémenter la vente de ressources~~
 * Améliorer l'IA de combat
 * Implémenter la lecture des valeurs négatives dans la classe ByteArray (bug du readVarShort...)
 * Optimiser l'envoi des paquets (avec création de variables locales dans les frames) -> très lourd à faire
@@ -16,6 +15,7 @@
 * Ajouter, lors de la recherche d'un chemin vers une map distante, une cellule cible pour la map cible (ça évitera de se retrouver de l'autre côté d'une muraille par rapport au capitaine par exemple)
 * Créer une API pour les "squads"
 * Création automatique de personnage dans les comptes vides
+* **Implémenter la vente de ressources**
 * Implémenter le personnage "vendeur"
 
 ### Bugs à résoudre ###
