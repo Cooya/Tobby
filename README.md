@@ -8,14 +8,14 @@
 * ~~Ajouter des critères pour le choix des groupes de monstres à combattre~~
 * ~~Mettre à jour l'aire de combat à chaque level up (que ce soit seul ou en groupe)~~
 * ~~**Améliorer les échanges et les dialogues avec les PNJ (suppression de "sleeps" peu propres)**~~
+* ~~Supprimer à terme les boucles infinies lors de l'attente d'états~~
+* **Création automatique de personnage dans les comptes vides**
+* **Implémenter la vente de ressources**
 * Améliorer l'IA de combat
 * Implémenter la lecture des valeurs négatives dans la classe ByteArray (bug du readVarShort...)
 * Optimiser l'envoi des paquets (avec création de variables locales dans les frames) -> très lourd à faire
-* Supprimer à terme les boucles infinies lors de l'attente d'états
 * Ajouter, lors de la recherche d'un chemin vers une map distante, une cellule cible pour la map cible (ça évitera de se retrouver de l'autre côté d'une muraille par rapport au capitaine par exemple)
 * Créer une API pour les "squads"
-* Création automatique de personnage dans les comptes vides
-* **Implémenter la vente de ressources**
 * Implémenter le personnage "vendeur"
 
 ### Bugs à résoudre ###
@@ -35,7 +35,7 @@
 * ~~**Au bout d'un moment, un message n'est pas envoyé (ou n'est pas reçu par le serveur), de ce fait, le bot est kické**~~
 * ~~**Latence au lancement d'une CharacterFrame (et même des fois, plantage de la CharacterFrame)**~~
 * ~~**Erreur de frame nulle lors de certains lancements du launcher**~~
-* **Pertes de connexion avec le serveur**
+* **Pertes de connexion avec le serveur ("connection reset")**
 
 ### Échanges ###
 
@@ -50,7 +50,7 @@
 * ~~Gérer le cas où un soldat se déconnecte (reconnexion ou suppression du vecteur de soldats)~~
 * ~~Déconnecter un combattant lorsqu'il a atteint la limite de 200 combats par jour (traitement du "TextInformationMessage" reçu)~~
 * ~~La mule a du mal à enchaîner les échanges avec plusieurs combattants à la suite~~
-* Améliorer l'intégration d'un soldat au groupe (pas bien fait et actuellement trop long)
+* ~~Améliorer l'intégration d'un soldat au groupe (pas bien fait et actuellement trop long)~~
 * Optimiser la régénération de la vie (beaucoup de pertes de temps actuellement)
 * Promouvoir un soldat lorsque le capitaine du groupe est déconnecté
 
