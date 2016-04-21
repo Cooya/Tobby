@@ -24,5 +24,6 @@ public class CharacterCreationRequestMessage extends Message {
 		for(int i : this.colors)
 			buffer.writeInt(i);
 		buffer.writeVarShort(this.cosmeticId);
+		super.completeInfos(buffer);
 	}
 }

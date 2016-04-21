@@ -13,12 +13,16 @@ public class Main {
 	public static String MODERATOR_NAME = "[Alkalino]";
 	
 	public static void main(String[] args) {
-		Controller.runApp();
-		
+		Controller.getInstance();
 		//new Sniffer();
 		
-		//for(SubArea subArea : SubArea.getAllSubArea())
-			//System.out.println(subArea.getName() + " " + subArea.id + subArea.getWorldMap().getName());
+		/*
+		byte[] bytes = null;
+		for(SubArea subArea : SubArea.getAllSubArea()) {
+			bytes = new String(subArea.getName() + " " + subArea.id + " " + subArea.getArea().getName() + " " + subArea.getArea().id).getBytes();
+			System.out.println(new String(bytes, StandardCharsets.UTF_8));
+		}
+		*/
 		
 		//Map map = MapsCache.loadMap(84675590);
 		//for(Cell cell : map.cells)

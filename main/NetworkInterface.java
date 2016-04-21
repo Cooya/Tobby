@@ -1,5 +1,7 @@
 package main;
 
+import gui.Controller;
+
 import java.net.SocketTimeoutException;
 import java.util.LinkedList;
 
@@ -33,7 +35,8 @@ public class NetworkInterface extends Thread {
 			connectionToServer(gameServerIP, Main.SERVER_PORT);
 			this.instance.log.p("Deconnected from game server.");
 		}
-		System.out.println("Thread receiver of instance with id = " + instance.id + " terminated.");
+		Log.info("Thread receiver of instance with id = " + instance.id + " terminated.");
+		Controller.getInstance().threadTerminated();
 	}
 	
 	private void connectionToServer(String IP, int port) {
@@ -43,10 +46,12 @@ public class NetworkInterface extends Thread {
 		this.serverCo = new Connection.Client(IP, port);
 		while(!isInterrupted()) {
 			try {
+				this.instance.log.p("DEBUG : Waiting for reception.");
 				if((bytesReceived = this.serverCo.receive(buffer)) == -1)
 					break;
 				canPing = false;
 			} catch(SocketTimeoutException e) {
+				this.instance.log.p("DEBUG : SocketTimeoutException");
 				if(canPing) {
 					BasicPingMessage ping = new BasicPingMessage();
 					ping.serialize(true);
@@ -58,9 +63,9 @@ public class NetworkInterface extends Thread {
 			} catch(Exception e) {
 				if(isInterrupted()) // si la connexion a été coupée côté client
 					break;
-				throw new FatalError("Deconnected from server."); // si la connexion a été coupée côté serveur
+				throw new FatalError(e); // si la connexion a été coupée côté serveur
 			}
-			this.instance.log.p(bytesReceived + " bytes received from server.");
+			this.instance.log.p("DEBUG : " + bytesReceived + " bytes received from server.");
 			processMsgStack(reader.processBuffer(new ByteArray(buffer, bytesReceived)));
 		}
 		this.serverCo.close();
@@ -94,25 +99,24 @@ public class NetworkInterface extends Thread {
 			Message msg;
 			while (!isInterrupted()) {
 				if((msg = instance.outPull()) != null) {
-					//instance.log.p("Message pulled from the output queue.");
 					latency.setLatestSent();
 					serverCo.send(msg.makeRaw());
 					instance.log.p("s", msg);
 				}
 				else
 					try {
-						//instance.log.p("None message to pull from the output queue.");
+						instance.log.p("DEBUG : Waiting for sending.");
 						wait();
 					} catch(Exception e) {
 						interrupt();
 					}
 			}
-			System.out.println("Thread sender of instance with id = " + instance.id + " terminated.");
+			Log.info("Thread sender of instance with id = " + instance.id + " terminated.");
+			Controller.getInstance().threadTerminated();
 		}
 		
 		public synchronized void wakeUp() {
 			notify();
-			//instance.log.p("Sender waking up.");
 		}
 	}
 }

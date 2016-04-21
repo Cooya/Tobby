@@ -102,6 +102,7 @@
 5508 ExchangeAcceptMessage
 5509 ExchangeIsReadyMessage
 5511 ExchangeReadyMessage
+5513 ExchangeErrorMessage
 5537 KamasUpdateMessage
 5520 ExchangeObjectMoveKamaMessage
 5521 ExchangeKamaModifiedMessage
@@ -162,6 +163,7 @@
 5773 ExchangePlayerRequestMessage
 5809 JobExperienceMultiUpdateMessage
 5816 BasicLatencyStatsRequestMessage
+5824 PaddockPropertiesMessage
 5825 GameActionFightSummonMessage
 5828 GameActionFightDodgePointLossMessage
 5834 SpellForgottenMessage
@@ -244,6 +246,7 @@
 6367 TitlesAndOrnamentsListMessage
 6372 CheckIntegrityMessage
 6383 FriendGuildWarnOnAchievementCompleteStateMessage
+6384 InteractiveUseErrorMessage
 6386 PlayerStatusUpdateMessage
 6387 PlayerStatusUpdateRequestMessage
 6434 ServerSessionConstantsMessage

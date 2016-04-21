@@ -2,16 +2,13 @@ package controller.api;
 
 import gamedata.character.PlayerLifeStatusEnum;
 import gamedata.context.GameRolePlayGroupMonsterInformations;
-import gamedata.d2o.modules.SubArea;
 import gamedata.fight.GameFightMonsterInformations;
 
 import java.util.Vector;
 
 import controller.CharacterState;
 import controller.FightOptions;
-import controller.characters.Captain;
 import controller.characters.Fighter;
-import controller.characters.Soldier;
 import messages.EmptyMessage;
 import messages.character.SpellUpgradeRequestMessage;
 import messages.character.StatsUpgradeRequestMessage;
@@ -39,36 +36,25 @@ public class FightAPI {
 
 	public void updateFightArea(int level) {
 		this.fightOptions.updateFightArea(level);
-		this.fighter.instance.log.graphicalFrame.setAreaLabel(SubArea.getSubAreaById(this.fightOptions.getFightAreaId()).getName());
+		this.fighter.instance.log.graphicalFrame.setAreaLabel(this.fightOptions.getFightAreaId());
 	}
 
 	public void levelUpManager() {
-		if(!this.fighter.waitState(CharacterState.LEVEL_UP))
+		if(!this.fighter.inState(CharacterState.LEVEL_UP))
 			return;
 		this.fighter.waitState(CharacterState.IS_LOADED);
 		upgradeSpell();
 		increaseStats();
-		if(this.fighter instanceof Soldier)
-			((Soldier) this.fighter).getCaptain().updateTeamLevel(); // met à jour le niveau de l'escouade et donc possiblement l'aire de combat 
-		else if(this.fighter instanceof Captain)
-			((Captain) this.fighter).updateTeamLevel();
-		else
-			updateFightArea(this.fighter.infos.level);
+		this.fighter.partyManager.incPartyLevel();
 	}
 
 	public void lifeManager() {
 		this.fighter.waitState(CharacterState.IS_LOADED);
 
 		int missingLife = this.fighter.infos.missingLife();
-		this.fighter.instance.log.p("Missing life : " + missingLife + " life points.");
 		if(missingLife > 0) {
-			this.fighter.instance.log.p("Break for life regeneration.");
-			try {
-				Thread.sleep(this.fighter.infos.regenRate * 100 * missingLife); // on attend de récupérer toute sa vie
-			} catch(Exception e) {
-				Thread.currentThread().interrupt();
-				return;
-			}
+			this.fighter.instance.log.p("Break for life regeneration, " + missingLife + " life points missing.");
+			this.fighter.waitState(CharacterState.IN_REGENERATION, this.fighter.infos.regenRate * 100 * missingLife);
 			this.fighter.infos.stats.lifePoints = this.fighter.infos.stats.maxLifePoints;
 			this.fighter.instance.log.graphicalFrame.setLifeLabel(this.fighter.infos.stats.lifePoints, this.fighter.infos.stats.maxLifePoints);
 		}
@@ -91,7 +77,7 @@ public class FightAPI {
 	public void inventoryManager() {
 		if(this.fighter.inState(CharacterState.NEED_TO_EMPTY_INVENTORY)) {
 			this.fighter.instance.log.p("Need to empty inventory.");
-			this.fighter.social.goToExchange(this.fighter.mule);
+			this.fighter.social.goToExchangeWithMule();
 		}
 	}
 
@@ -206,12 +192,11 @@ public class FightAPI {
 		GAFCRM.serialize(this.infos.spellToUpgrade, monster.disposition.cellId, this.instance.id);
 		instance.outPush(GAFCRM);
 		 */
-		this.fighter.waitState(CharacterState.SPELL_CASTED); // on attend le résultat du sort lancé
+		this.fighter.waitState(CharacterState.SPELL_CASTED);
 		try {
 			Thread.sleep(1000); // nécessaire sinon kick par le serveur
 		} catch(Exception e) {
 			Thread.currentThread().interrupt();
-			return;
 		}
 	}
 }

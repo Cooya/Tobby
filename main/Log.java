@@ -2,7 +2,6 @@ package main;
 
 import gui.CharacterFrame;
 
-import java.awt.Color;
 import java.io.PrintWriter;
 import java.util.Date;
 
@@ -10,9 +9,12 @@ import messages.Message;
 
 public class Log {
 	private static final boolean DEBUG = false;
+	private static final int WRITE_INTERVAL = 10;
 	private static final String LOG_PATH = System.getProperty("user.dir") + "/Ressources/Logs/";
 	private static final String EOL = System.getProperty("line.separator");
 	private PrintWriter writer;
+	private String writeBuffer;
+	private int writeCounter;
 	public CharacterFrame graphicalFrame;
 	
 	public Log(String characterName, CharacterFrame graphicalFrame) {
@@ -21,6 +23,8 @@ public class Log {
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
+		this.writeBuffer = "";
+		this.writeCounter = 0;
 		this.graphicalFrame = graphicalFrame;
 	}
 	
@@ -48,9 +52,8 @@ public class Log {
 			str += "Size : " + size + " byte" + EOL;
 		*/
 		if(name == null && this.graphicalFrame != null)
-			this.graphicalFrame.appendText("[" + Main.DATE_FORMAT.format(new Date()) + "] " + str, Color.BLACK);
-		writer.println("[" + Main.DATE_FORMAT.format(new Date()) + "] " + str);
-		writer.flush();
+			this.graphicalFrame.appendText("[" + Main.DATE_FORMAT.format(new Date()) + "] " + str);
+		writeIntoLogFile("[" + Main.DATE_FORMAT.format(new Date()) + "] " + str + EOL);
 	}
 	
 	public void p(String str) {
@@ -59,11 +62,35 @@ public class Log {
 		
 		if(this.graphicalFrame != null) {
 			if(DEBUG)
-				graphicalFrame.appendText("[" + Main.DATE_FORMAT.format(new Date()) + "] " + str + EOL, Color.BLACK);
+				graphicalFrame.appendText("[" + Main.DATE_FORMAT.format(new Date()) + "] " + str + EOL);
 			else
-				graphicalFrame.appendText("[" + Main.DATE_FORMAT.format(new Date()) + "] " + str, Color.BLACK);
+				graphicalFrame.appendText("[" + Main.DATE_FORMAT.format(new Date()) + "] " + str);
 		}
-		writer.println("[" + Main.DATE_FORMAT.format(new Date()) + "] " + str);
-		writer.flush();
+		writeIntoLogFile("[" + Main.DATE_FORMAT.format(new Date()) + "] " + str + EOL);
+	}
+	
+	public static void err(String msg) {
+		syso("ERROR : " + msg);
+	}
+	
+	public static void info(String msg) {
+		syso("INFO : " + msg);
+	}
+	
+	private synchronized static void syso(String msg) {
+		System.out.println(msg);
+	}
+	
+	public void flushBuffer() {
+		this.writer.print(this.writeBuffer);
+		this.writer.flush();
+		this.writeBuffer = "";
+		this.writeCounter = 0;
+	}
+	
+	private void writeIntoLogFile(String msg) {
+		this.writeBuffer += msg;
+		if(++this.writeCounter == WRITE_INTERVAL)
+			flushBuffer();
 	}
 }

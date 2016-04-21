@@ -2,7 +2,7 @@ package messages.character;
 
 import java.util.Vector;
 
-import gamedata.character.SpellItem;
+import gamedata.inventory.SpellItem;
 import messages.Message;
 import utilities.ByteArray;
 

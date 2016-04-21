@@ -6,12 +6,12 @@ public class FatalError extends Error {
 	private static final long serialVersionUID = -293840118247954992L;
 	
 	public FatalError(String str) {
-		new Exception(str).printStackTrace();
-		Controller.deconnectInstance(str);
+		super(str);
+		Controller.getInstance().deconnectCurrentInstance(str, true, true);
 	}
 	
 	public FatalError(Exception e) {
-		e.printStackTrace();
-		Controller.deconnectInstance(e.getMessage());
+		super(e);
+		Controller.getInstance().deconnectCurrentInstance(e.getMessage(), true, true);
 	}
 }

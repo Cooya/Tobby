@@ -17,12 +17,9 @@ import messages.fights.GameFightTurnReadyMessage;
 import messages.fights.SequenceEndMessage;
 
 public class FightContextFrame extends Frame {
-	private Instance instance;
-	private Fighter fighter;
 
-	public FightContextFrame(Instance instance, Fighter fighter) {
-		this.instance = instance;
-		this.fighter = fighter;
+	public FightContextFrame(Instance instance, Fighter character) {
+		super(instance, character);
 	}
 
 	public boolean processMessage(Message msg) {
@@ -40,8 +37,8 @@ public class FightContextFrame extends Frame {
 				return true;
 			case 5864 : // GameFightShowFighterMessage
 				GameFightShowFighterMessage GFSFM = new GameFightShowFighterMessage(msg);
-				this.fighter.fightContext.newFighter(GFSFM.informations);
-				this.fighter.updateState(CharacterState.NEW_ACTOR_IN_FIGHT, true);
+				((Fighter) this.character).fightContext.newFighter(GFSFM.informations);
+				this.character.updateState(CharacterState.NEW_ACTOR_IN_FIGHT, true);
 				return true;
 			case 715 : // GameFightTurnReadyRequestMessage
 				GameFightTurnReadyMessage GFTRM = new GameFightTurnReadyMessage(true);
@@ -51,34 +48,34 @@ public class FightContextFrame extends Frame {
 				return true;
 			case 6465 : // GameFightTurnStartPlayingMessage
 				this.instance.log.p("Begin of my game turn.");
-				this.fighter.updateState(CharacterState.IN_GAME_TURN, true);
+				this.character.updateState(CharacterState.IN_GAME_TURN, true);
 				return true;
 			case 5921 : // GameFightSynchronizeMessage
 				GameFightSynchronizeMessage GFSM = new GameFightSynchronizeMessage(msg);
-				GFSM.deserialize();
-				this.fighter.fightContext.setFightContext(GFSM.fighters);
+				Fighter fighter = (Fighter) this.character;
+				fighter.fightContext.setFightContext(GFSM.fighters);
 				this.instance.log.p("Fight context set.");
 				//this.instance.log.p("Life points : " + this.fighter.fightContext.self.stats.lifePoints + "/" + this.fighter.fightContext.self.stats.maxLifePoints + ".");
-				this.instance.log.graphicalFrame.setLifeLabel(this.fighter.fightContext.self.stats.lifePoints, this.fighter.fightContext.self.stats.maxLifePoints);
+				this.instance.log.graphicalFrame.setLifeLabel(fighter.fightContext.self.stats.lifePoints, fighter.fightContext.self.stats.maxLifePoints);
 				return true;
 			case 1010 : // GameActionFightSpellCastMessage
 				GameActionFightSpellCastMessage GAFSCM = new GameActionFightSpellCastMessage(msg);
-				if(GAFSCM.sourceId == this.fighter.infos.characterId)
-					this.fighter.updateState(CharacterState.SPELL_CASTED, true);
+				if(GAFSCM.sourceId == this.character.infos.characterId)
+					this.character.updateState(CharacterState.SPELL_CASTED, true);
 				return true;
 			case 6132 : // GameActionFightNoSpellCastMessage
-				this.fighter.updateState(CharacterState.SPELL_CASTED, true);
+				this.character.updateState(CharacterState.SPELL_CASTED, true);
 				return true;
 			case 1030 : // GameActionFightPointsVariationMessage
 				GameActionFightPointsVariationMessage GAFPVM = new GameActionFightPointsVariationMessage(msg);
 				GAFPVM.deserialize();
-				if(this.fighter.fightContext.self != null)
-					this.fighter.fightContext.self.stats.actionPoints -= GAFPVM.delta;
+				if(((Fighter) this.character).fightContext.self != null)
+					((Fighter) this.character).fightContext.self.stats.actionPoints -= GAFPVM.delta;
 				return true;
 			case 956 : // SequenceEndMessage
 				SequenceEndMessage SEM = new SequenceEndMessage(msg);
 				SEM.deserialize();
-				if(SEM.authorId == this.fighter.infos.characterId) {
+				if(SEM.authorId == this.character.infos.characterId) {
 					GameActionAcknowledgementMessage GAAM = new GameActionAcknowledgementMessage(true, SEM.actionId);
 					GAAM.serialize();
 					instance.outPush(GAAM);
@@ -87,16 +84,16 @@ public class FightContextFrame extends Frame {
 			case 719 : // GameFightTurnEndMessage
 				GameFightTurnEndMessage GFTEM = new GameFightTurnEndMessage(msg);
 				GFTEM.deserialize();
-				if(GFTEM.fighterId == this.fighter.infos.characterId) {
-					this.fighter.updateState(CharacterState.IN_GAME_TURN, false);
+				if(GFTEM.fighterId == this.character.infos.characterId) {
+					this.character.updateState(CharacterState.IN_GAME_TURN, false);
 					this.instance.log.p("End of my game turn.");
 				}
 				return true;
 			case 720 : // GameFightEndMessage
 				GameFightEndMessage GFEM = new GameFightEndMessage(msg);
 				for(FightResultListEntry result : GFEM.results)
-					if(result instanceof FightResultPlayerListEntry && ((FightResultPlayerListEntry) result).id == this.fighter.infos.characterId) {
-						this.fighter.roleplayContext.lastFightOutcome = result.outcome == 2; // 2 = gagné, 0 = perdu
+					if(result instanceof FightResultPlayerListEntry && ((FightResultPlayerListEntry) result).id == this.character.infos.characterId) {
+						this.character.roleplayContext.lastFightOutcome = result.outcome == 2; // 2 = gagné, 0 = perdu
 						break;
 					}	
 				this.instance.log.p("End of fight.");

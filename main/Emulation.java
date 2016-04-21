@@ -1,5 +1,7 @@
 package main;
 
+import gui.Controller;
+
 import java.net.SocketTimeoutException;
 import java.util.LinkedList;
 import java.util.concurrent.locks.Lock;
@@ -15,6 +17,7 @@ import utilities.Processes;
 public class Emulation {
 	private static final String ADL_PATH = "C:/PROGRA~2/AdobeAIRSDK/bin/adl.exe";
 	private static final String ANTIBOT_PATH = System.getProperty("user.dir") + "/Ressources/Antibot/application.xml";
+	private static final String LAUNCHER_PROCESS_NAME = "adl.exe";
 	private static final int launcherPort = 5554;
 	private static final int serverPort = 5555;
 	private static Connection.Client launcherCo;
@@ -23,10 +26,10 @@ public class Emulation {
 	private static Lock lock = new ReentrantLock();
 	private static Process launcherProcess;
 
-	public static void runLauncherIfNecessary() {
-		if(!Processes.inProcess("adl.exe"))
+	public static void runLauncher() {
+		if(!Processes.inProcess(LAUNCHER_PROCESS_NAME))
 			try {
-				Instance.log("Running AS launcher.");
+				Log.info("Running AS launcher.");
 				if(!Processes.fileExists(ADL_PATH))
 					throw new FatalError("AIR debug executable not found.");
 				if(!Processes.fileExists(ANTIBOT_PATH))
@@ -37,11 +40,31 @@ public class Emulation {
 				throw new FatalError(e);
 			}
 		else
-			Instance.log("AS launcher already in process.");
+			Log.info("AS launcher already in process.");
 	}
 	
 	public static void killLauncher() {
-		launcherProcess.destroy();
+		if(launcherCo != null) {
+			launcherCo.close(); // on coupe la connexion
+			launcherCo = null;
+			Log.info("Connection to AS launcher closed.");
+		}
+		if(launcherProcess != null) // et on tue le processus
+			launcherProcess.destroy();
+		else if(Processes.inProcess(LAUNCHER_PROCESS_NAME))
+			Processes.killProcess(LAUNCHER_PROCESS_NAME);
+	}
+	
+	public static void restartLauncher() {
+		killLauncher();
+		while(Processes.inProcess(LAUNCHER_PROCESS_NAME))
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		Log.info("AS launcher process killed.");
+		runLauncher();
 	}
 	
 	public static Message emulateServer(String login, String password, HelloConnectMessage HCM, IdentificationSuccessMessage ISM, RawDataMessage RDM, int instanceId) {
@@ -96,8 +119,12 @@ public class Emulation {
 			Thread.sleep(2000);
 			lock.unlock();
 			return CIM;
+		} catch(InterruptedException e) {
+			clientDofusCo.close();
+			lock.unlock();
+			return null;
 		} catch(Exception e) {
-			Instance.log("Interaction with Dofus client failed, deconnection.");
+			Instance.log("Interaction with Dofus client has failed, deconnection.");
 			clientDofusCo.close();
 			lock.unlock();
 			throw new FatalError(e);
@@ -131,7 +158,9 @@ public class Emulation {
 				break;
 			} catch(SocketTimeoutException e) {
 				lock.unlock();
-				throw new FatalError("Timeout for launcher response. Connection lost with the launcher.");
+				Log.err("Timeout for launcher response, connection lost with the launcher.");
+				Controller.getInstance().deconnectAllInstances("Connection lost with the launcher.", true, true);
+				return null;
 			} catch(Exception e) {
 				lock.unlock();
 				throw new FatalError(e);
@@ -152,7 +181,7 @@ public class Emulation {
 			throw new FatalError(e);
 		}
 		if(buffer[0] == 0)
-			Processes.injectDLL(Main.DLL_LOCATION, "adl.exe");
+			Processes.injectDLL(Main.DLL_LOCATION, LAUNCHER_PROCESS_NAME);
 	}
 	
 	private static Message processMsgStack(LinkedList<Message> msgStack) {

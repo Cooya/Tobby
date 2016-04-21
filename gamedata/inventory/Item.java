@@ -1,5 +1,10 @@
 package gamedata.inventory;
 
+import utilities.ByteArray;
+
 public class Item {
-	// classe vide
+	
+	public Item(ByteArray buffer) {
+		
+	}
 }

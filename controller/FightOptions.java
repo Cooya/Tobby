@@ -1,23 +1,39 @@
 package controller;
 
+import gamedata.d2o.modules.SubArea;
+
+import java.nio.charset.StandardCharsets;
+import java.util.Collection;
 import java.util.Hashtable;
 
+import utilities.BiMap;
 import main.FatalError;
 
 // 92 -> contour d'Astrub
-// 95 -> pious d'Astrub
+// 95 -> cité d'Astrub
+// 97 -> forêt d'Astrub
+// 98 -> champs d'Astrub
+// 101 -> coin des tofus
+// 173 -> prairies d'Astrub
 // 442 -> lac d'Incarnam
 // 443 -> forêt d'Incarnam
+// 444 -> champs d'Incarnam
 // 445 -> pâturages d'Incarnam
 // 450 -> route des âmes d'Incarnam
 
 public class FightOptions {
-	private static final int[] fightAreasId = {92, 95, 442, 443, 445, 450};
+	private static BiMap<Integer, String> areaTable = new BiMap<Integer, String>(Integer.class, String.class);
+	private static final int[] fightAreasId = {92, 95, 97, 98, 101, 173, 442, 443, 444, 445, 450};
 	private static final int[][] fightAreasRawParameters = {
 		{40, 80, 120, 160, 200, 250, 300},
 		{40, 80, 120, 160, 200, 250, 300},
+		{60, 100, 140, 180, 220, 270, 320},
+		{40, 80, 120, 160, 200, 250, 300},
+		{30, 60, 100, 150, 200, 250, 300},
+		{40, 80, 120, 160, 200, 250, 300},
 		{10, 15},
 		{15, 20},
+		{10, 15},
 		{10, 15},
 		{1, 5}
 	};
@@ -31,6 +47,33 @@ public class FightOptions {
 	static {
 		for(int i = 0; i < fightAreasId.length; ++i)
 			fightAreasParameters.put(fightAreasId[i], fightAreasRawParameters[i]);
+		fillAreaTable();
+	}
+	
+	public static String getAreaNameFromId(int areaId) {
+		String areaName = (String) areaTable.get(areaId);
+		if(areaName == null)
+			throw new FatalError("Unhandled area.");
+		return areaName;
+	}
+	
+	public static int getAreaIdFromName(String areaName) {
+		int areaId = (int) areaTable.get(areaName);
+		if(areaId == 0) // équivalent de null
+			throw new FatalError("Unhandled area.");
+		return areaId;
+	}
+	
+	public static Collection<String> getAreaNames() {
+		return areaTable.values();
+	}
+	
+	private static void fillAreaTable() {
+		SubArea subArea;
+		for(int subAreaId : fightAreasId) {
+			subArea = SubArea.getSubAreaById(subAreaId);
+			areaTable.put(subArea.id, new String(((subArea.getName() + " (" + subArea.getArea().getName() + ")").getBytes()), StandardCharsets.UTF_8));
+		}
 	}
 
 	private boolean areaIsFixed;

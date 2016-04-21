@@ -35,19 +35,17 @@ import messages.connection.ServersListMessage;
 import messages.security.RawDataMessage;
 
 public class ConnectionFrame extends Frame {
+	private static final int MAX_PLAYER_COLOR = 5;
 	//private static final int maleSadidaMinCosmeticId = 0x9101;
 	private static final int femaleSadidaMinCosmeticId = 0x9901;
 	//private static final int maleCraMinCosmeticId = 0x8101;
 	private static final int femaleCraMinCosmeticId = 0x8901;
 	private static final int cosmeticIdBound = 0x0100; // 256
 	
-	private Instance instance;
-	private Character character;
 	private Hashtable<String, Object> usefulInfos = new Hashtable<String, Object>();
 	
 	public ConnectionFrame(Instance instance, Character character) {
-		this.instance = instance;
-		this.character = character;
+		super(instance, character);
 	}
 	
 	public boolean processMessage(Message msg) {
@@ -186,6 +184,7 @@ public class ConnectionFrame extends Frame {
 				this.instance.log.graphicalFrame.setNameLabel(this.character.infos.characterName, this.character.infos.level);
 				this.instance.endOfConnection();
 				this.character.infos.isConnected = true;
+				this.instance.startCharacterController();
 				return true;
 			case 5836 : // CharacterSelectedErrorMessage
 				throw new FatalError("Error at the character selection.");
@@ -214,10 +213,11 @@ public class ConnectionFrame extends Frame {
 	}
 	
 	private Vector<Integer> getRandomColorVector() {
-		Vector<Integer> colors = new Vector<Integer>(5);
-		Random random = new Random();
-		for(int i = 0; i < 5; ++i)
-			colors.setElementAt(random.nextInt(16777215), i);
+		Vector<Integer> colors = new Vector<Integer>(MAX_PLAYER_COLOR);
+		//Random random = new Random();
+		for(int i = 0; i < MAX_PLAYER_COLOR; ++i)
+			//colors.add(random.nextInt(16777215));
+			colors.add(-1);
 		return colors;
 	}
 	

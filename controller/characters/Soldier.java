@@ -3,13 +3,19 @@ package controller.characters;
 import controller.CharacterState;
 import controller.api.FightAPI;
 import gamedata.character.PlayerStatusEnum;
+import gui.Controller;
 import main.Instance;
+import main.Log;
 import messages.context.GameContextReadyMessage;
 import messages.fights.GameFightJoinRequestMessage;
 
 public class Soldier extends Fighter {
 	private FightAPI fight;
 	private Captain captain;
+	
+	// booléens accessibles pour le capitaine (états du soldat)
+	protected boolean waitingPartyInvitation;
+	protected boolean readyForFight;
 
 	public Soldier(Instance instance, String login, String password, int serverId, int breed) {
 		super(instance, login, password, serverId, breed);
@@ -22,6 +28,11 @@ public class Soldier extends Fighter {
 	
 	protected void setCaptain(Captain captain) {
 		this.captain = captain;
+	}
+	
+	// informe le capitaine d'une action effectué par le soldat
+	private void informCaptain() {
+		this.captain.updateState(CharacterState.SOLDIER_ACT, true);
 	}
 	
 	private void followCaptain() {
@@ -38,7 +49,7 @@ public class Soldier extends Fighter {
 		
 		GameFightJoinRequestMessage GFJRM = new GameFightJoinRequestMessage();
 		GFJRM.fighterId = this.captain.infos.characterId;
-		GFJRM.fightId = this.roleplayContext.currentCaptainFightId;
+		GFJRM.fightId = this.partyManager.getFightId();
 		GFJRM.serialize();
 		this.instance.outPush(GFJRM);
 		this.instance.log.p("Request for join fight sent.");
@@ -46,33 +57,55 @@ public class Soldier extends Fighter {
 	
 	public void run() {
 		waitState(CharacterState.IS_LOADED);
-		this.social.changePlayerStatus(PlayerStatusEnum.PLAYER_STATUS_AVAILABLE); // pour pouvoir être invité dans le groupe
-		if(inState(CharacterState.IN_FIGHT)) { // reprise de combat
-			GameContextReadyMessage GCRM = new GameContextReadyMessage(); // je ne sais pas à quoi sert ce message
+		
+		// reprise de combat à la connexion
+		if(inState(CharacterState.IN_FIGHT)) {
+			GameContextReadyMessage GCRM = new GameContextReadyMessage();
 			GCRM.serialize(this.infos.currentMap.id);
 			this.instance.outPush(GCRM);
 			this.fight.fightManager(true);
 		}
+		
+		// si on était déjà dans un groupe, on le quitte
 		if(inState(CharacterState.IN_PARTY))
-			this.social.leaveGroup();
+			this.partyManager.leaveParty();
+		
+		// on passe en mode disponible pour pouvoir être invité dans un groupe
+		this.social.changePlayerStatus(PlayerStatusEnum.PLAYER_STATUS_AVAILABLE);
+		
+		// on informe le capitain qu'on est prêt et on attend la demande d'invitation de groupe puis on passe en mode absent
+		this.waitingPartyInvitation = true;
+		informCaptain();
 		waitState(CharacterState.IN_PARTY);
+		this.waitingPartyInvitation = false;
 		this.social.changePlayerStatus(PlayerStatusEnum.PLAYER_STATUS_AFK);
 		
-		while(!isInterrupted()) { // boucle déplacements + combats
+		// boucle déplacements + combats
+		while(!isInterrupted() && !inState(CharacterState.SHOULD_DECONNECT)) {
 			this.fight.rebirthManager(); // besoin de renaître au phénix ?
 			followCaptain();
+			this.readyForFight = true;
+			informCaptain();
 			waitState(CharacterState.CAPTAIN_ACT);
 			if(this.captain.inState(CharacterState.IN_FIGHT)) {
 				waitState(CharacterState.FIGHT_LAUNCHED);
 				joinFight();
 				if(waitState(CharacterState.IN_FIGHT)) {
+					this.readyForFight = false;
 					this.fight.fightManager(false);
 					this.fight.levelUpManager();
 				}
 			}
-			else if(this.captain.inState(CharacterState.NEED_TO_EMPTY_INVENTORY))
-				this.social.goToExchange(this.mule);
+			else if(this.captain.inState(CharacterState.NEED_TO_EMPTY_INVENTORY)) {
+				if(inventoryIsSoHeavy(0.1f))
+					this.social.goToExchangeWithMule();
+				else // annule l'état broadcasté par le capitaine
+					updateState(CharacterState.NEED_TO_EMPTY_INVENTORY, false);
+			}
 		}
-		System.out.println("Thread controller of instance with id = " + this.instance.id + " terminated.");
+		if(inState(CharacterState.SHOULD_DECONNECT))
+			this.instance.deconnectionOrder(true);
+		Log.info("Thread controller of instance with id = " + this.instance.id + " terminated.");
+		Controller.getInstance().threadTerminated();
 	}
 }

@@ -1,5 +1,6 @@
 package frames;
 
+import controller.characters.Character;
 import main.Instance;
 import main.Latency;
 import messages.Message;
@@ -7,11 +8,11 @@ import messages.synchronisation.BasicLatencyStatsMessage;
 import messages.synchronisation.SequenceNumberMessage;
 
 public class SynchronisationFrame extends Frame {
-	private Instance instance;
 	private int sequenceNumber;
 	//private int basicNoOperationMsgCounter;
 	
-	public SynchronisationFrame(Instance instance) {
+	public SynchronisationFrame(Instance instance, Character character) {
+		super(instance, character);
 		this.instance = instance;
 		this.sequenceNumber = 1;
 		//this.basicNoOperationMsgCounter = 0;

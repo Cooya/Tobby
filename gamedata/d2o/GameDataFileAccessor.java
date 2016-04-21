@@ -105,7 +105,7 @@ public class GameDataFileAccessor {
     	return this._counter.get(str);
     }
     
-    public Object getObject(String str, int i) {
+    public synchronized Object getObject(String str, int i) {
     	if(this._indexes == null || !this._indexes.containsKey(str))
     		return null;
     	if(!this._indexes.get(str).containsKey(i))
@@ -113,10 +113,16 @@ public class GameDataFileAccessor {
     	int pos = this._indexes.get(str).get(i);
     	this._streams.get(str).setPos(pos);
     	pos = this._streams.get(str).readInt();
-    	return this._classes.get(str).get(pos).read(str, this._streams.get(str));
+    	Hashtable<Integer, GameDataClassDefinition> classDefsTable = this._classes.get(str);
+    	if(classDefsTable == null)
+    		return null;
+    	GameDataClassDefinition gameDataClassDefinition = classDefsTable.get(pos);
+    	if(gameDataClassDefinition == null)
+    		return null;
+    	return gameDataClassDefinition.read(str, this._streams.get(str));
     }
     
-    public Object[] getObjects(String str) {
+    public synchronized Object[] getObjects(String str) {
     	if(this._counter == null || !this._counter.containsKey(str))
     		return null;
     	int nb = this._counter.get(str);

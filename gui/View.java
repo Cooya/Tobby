@@ -6,8 +6,7 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.util.Enumeration;
-import java.util.Hashtable;
+import java.util.Collection;
 import java.util.Vector;
 
 import javax.swing.BoxLayout;
@@ -28,30 +27,29 @@ import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 
 import controller.CharacterBehaviour;
+import controller.FightOptions;
 
 public class View {
 	private JFrame frame;
 	private JDesktopPane desktopPane;
-	protected Vector<CharacterFrame> charactersFrame;
-	protected JMenuItem menuItem;
-	protected Vector<JMenuItem> accountsListItems;
-	protected JMenu accountsMenu;
-	protected LoginPanel loginPanel;
-	private JMenuBar menuBar;
+	private Vector<CharacterFrame> charactersFrame;
+	protected JButton loadAccountButton;
+	protected JMenu accountsListMenu;
+	protected JMenu squadsListMenu;
 
 	protected View() {
 		this.charactersFrame = new Vector<CharacterFrame>();
+		
+		this.loadAccountButton = new JButton("Load account");
+		new Controller.LoadAccountListener(this.loadAccountButton);
+		this.accountsListMenu = new JMenu("Accounts list");
+		this.squadsListMenu = new JMenu("Squads list");
+		
 
-		menuItem = new JMenuItem("Load account");
-		accountsMenu = new JMenu("Accounts list");
-		accountsListItems = new Vector<JMenuItem>();
-
-		JMenu menu = new JMenu("Start");
-		menu.add(menuItem);
-		menu.add(accountsMenu);
-
-		menuBar = new JMenuBar();
-		menuBar.add(menu);
+		JMenuBar menuBar = new JMenuBar();
+		menuBar.add(this.loadAccountButton);
+		menuBar.add(this.accountsListMenu);
+		menuBar.add(this.squadsListMenu);
 
 		desktopPane = new JDesktopPane();
 		desktopPane.setDragMode(JDesktopPane.OUTLINE_DRAG_MODE);
@@ -66,20 +64,42 @@ public class View {
 			@Override
 			public void windowClosing(WindowEvent event) {
 				frame.dispose();
-				Controller.exit();
+				Controller.getInstance().exit();
 			}
 		});
 		frame.setVisible(true);
 	}
-
-	protected LoginPanel createLoginPanel() {
-		return new LoginPanel("Login panel");
+	
+	protected void newAccountItem(String login, int behaviour) {
+		JMenuItem item;
+		if(behaviour < 10)
+			item = new JMenuItem(login + " (salesman)");
+		else
+			item = new JMenuItem(login + " (fighter)");
+		this.accountsListMenu.add(item);
+		new Controller.AccountItemListener(item);
 	}
-
-	protected FighterOptionsPanel createFighterOptionsPanel(int behaviour, int nextFighterBehaviour) {
-		return new FighterOptionsPanel("Fighter options panel", behaviour, nextFighterBehaviour);
+	
+	protected void newSquadItem(String squadName, int size) {
+		JMenuItem item = new JMenuItem(squadName + " (" + size + ")");
+		this.squadsListMenu.add(item);
+		new Controller.SquadItemListener(item);
 	}
-
+	
+	protected CharacterFrame getInstance(JInternalFrame graphicalFrame) {
+		for(CharacterFrame frame : this.charactersFrame)
+			if(frame == graphicalFrame)
+				return frame;
+		return null;
+	}
+	
+	protected CharacterFrame getCharacterFrame(int instanceId) {
+		for(CharacterFrame frame : this.charactersFrame)
+			if(frame.id == instanceId)
+				return frame;
+		return null;
+	}
+	
 	protected void addCharacterFrame(CharacterFrame frame) {
 		boolean posTaken;
 
@@ -112,13 +132,14 @@ public class View {
 		this.charactersFrame.remove(frame);
 	}
 
-	protected CharacterFrame getInstance(JInternalFrame graphicalFrame) {
-		for(CharacterFrame frame : this.charactersFrame)
-			if(frame == graphicalFrame)
-				return frame;
-		return null;
+	protected LoginPanel createLoginPanel() {
+		return new LoginPanel("Login panel");
 	}
 
+	protected FighterOptionsPanel createFighterOptionsPanel(int behaviour, int nextFighterBehaviour) {
+		return new FighterOptionsPanel("Fighter options panel", behaviour, nextFighterBehaviour);
+	}
+	
 	// boîte de dialogue permettant d'ajouter un nouveau compte
 	protected class LoginPanel extends JFrame implements ActionListener {
 		private static final long serialVersionUID = 5372329190332625490L;
@@ -208,7 +229,7 @@ public class View {
 		private JPanel areasPanel; // élément affichable ou non
 		public JButton submitButton;
 
-		// variable utile
+		// variable utile pour l'affichage des aires de combat ou non
 		private int nextFighterBehaviour; // si ce sera un capitaine ou un soldat
 
 		private FighterOptionsPanel(String title, int behaviour, int nextFighterBehaviour) {
@@ -217,8 +238,8 @@ public class View {
 			if(behaviour == CharacterBehaviour.CAPTAIN || behaviour == CharacterBehaviour.SOLDIER)
 				behaviour = this.nextFighterBehaviour;
 			this.selectedBehaviour = behaviour;
-
-			if(behaviour < 10) { // zone des salesmen
+			
+			if(behaviour < 10 && nextFighterBehaviour != -1) { // zone des salesmen
 				this.isWaitingMule = new JRadioButton("Waiting mule", behaviour == CharacterBehaviour.WAITING_MULE);
 				this.isWaitingMule.setActionCommand(String.valueOf(CharacterBehaviour.WAITING_MULE));
 				this.isWaitingMule.addActionListener(this);
@@ -244,7 +265,10 @@ public class View {
 			}
 			else { // zone des combattants
 				JPanel loneWolfPanel = new JPanel();
-				loneWolfPanel.add(new JLabel("Lone wolf"));
+				if(nextFighterBehaviour != -1) // lancement d'un seul combattant à la fois
+					loneWolfPanel.add(new JLabel("Lone wolf"));
+				else // lancement d'une escouade
+					loneWolfPanel.add(new JLabel("Lone wolves"));
 				this.isLoneWolf = new JCheckBox();
 				this.isLoneWolf.setSelected(this.selectedBehaviour == CharacterBehaviour.LONE_WOLF);
 				this.isLoneWolf.addItemListener(this);
@@ -254,10 +278,10 @@ public class View {
 			}
 
 			// création de la liste des aires
-			Enumeration<String> areaStrings = AreaTable.table.keys();
+			Collection<String> areaNames = FightOptions.getAreaNames();
 			DefaultListModel<String> model = new DefaultListModel<String>();
-			while(areaStrings.hasMoreElements())
-				model.addElement(areaStrings.nextElement());
+			for(String name : areaNames)
+				model.addElement(name);
 
 			// création graphique de la liste des aires
 			this.areasPanel = new JPanel();
@@ -275,7 +299,7 @@ public class View {
 			add(submitPanel);
 
 			// mise en place de la boîte de dialogue
-			setSize(300, 300);
+			setSize(300, 350);
 			setLocationRelativeTo(null);
 			getContentPane().setLayout(new BoxLayout(getContentPane(), BoxLayout.PAGE_AXIS));
 			setVisible(true);
@@ -284,7 +308,7 @@ public class View {
 		protected int getSelectedAreaId() {
 			if(this.areaList.getSelectedValue() == null)
 				return 0;
-			return AreaTable.table.get(this.areaList.getSelectedValue());
+			return FightOptions.getAreaIdFromName(this.areaList.getSelectedValue());
 		}
 
 		protected int getSelectedBehaviour() {
@@ -294,7 +318,8 @@ public class View {
 		private void displayAreasPanel() {
 			if(this.selectedBehaviour == CharacterBehaviour.TRAINING_MULE ||
 					this.selectedBehaviour == CharacterBehaviour.LONE_WOLF ||
-					this.selectedBehaviour == CharacterBehaviour.CAPTAIN) {
+					this.selectedBehaviour == CharacterBehaviour.CAPTAIN ||
+					this.selectedBehaviour == -1) {
 				if(this.areasPanel.isValid()) // déjà affiché
 					return;
 				add(this.areasPanel);
@@ -309,35 +334,22 @@ public class View {
 			repaint();
 		}
 
-		@Override
+		@Override // callback appelé lors d'un clic sur un bouton radio des comportements
 		public void actionPerformed(ActionEvent event) {
 			this.selectedBehaviour = Integer.valueOf(event.getActionCommand());
 			displayAreasPanel();
 		}
 
-		@Override
+		@Override // callback appelé lors d'un clic sur la checkbox de choix de comportement solitaire ou en groupe
 		public void itemStateChanged(ItemEvent event) {
 			if(event.getItemSelectable() == this.isLoneWolf) {
 				if(this.isLoneWolf.isSelected())
 					this.selectedBehaviour = CharacterBehaviour.LONE_WOLF;
 				else
-					this.selectedBehaviour = nextFighterBehaviour;
-				displayAreasPanel();
+					this.selectedBehaviour = this.nextFighterBehaviour;
+				if(this.nextFighterBehaviour != -1)
+					displayAreasPanel();
 			}
-		}
-	}
-
-	private static class AreaTable {
-		private static Hashtable<String, Integer> table = new Hashtable<String, Integer>();
-
-		static {
-			table.put("Contour d'Astrub", 92);
-			table.put("Cité d'Astrub", 95);
-			table.put("Lac d'Incarnam", 442);
-			table.put("Forêt d'Incarnam", 443);
-			table.put("Champs d'Incarnam", 444);
-			table.put("Pâturages d'Incarnam", 445);
-			table.put("Route des âmes d'Incarnam", 450);
 		}
 	}
 }

@@ -7,6 +7,7 @@ import utilities.ByteArray;
 import controller.CharacterState;
 import controller.characters.Character;
 import controller.characters.Fighter;
+import gamedata.DialogTypeEnum;
 import gamedata.context.TextInformationTypeEnum;
 import gamedata.d2i.I18n;
 import gamedata.d2o.modules.InfoMessage;
@@ -15,7 +16,6 @@ import gamedata.d2p.MapsCache;
 import gui.Controller;
 import main.FatalError;
 import main.Instance;
-import main.InterClientKeyManager;
 import main.Main;
 import messages.EmptyMessage;
 import messages.Message;
@@ -36,25 +36,28 @@ import messages.context.GameMapMovementMessage;
 import messages.context.GameRolePlayShowActorMessage;
 import messages.context.MapComplementaryInformationsDataMessage;
 import messages.context.MapInformationsRequestMessage;
+import messages.context.SystemMessageDisplayMessage;
 import messages.context.TextInformationMessage;
+import messages.exchanges.ExchangeIsReadyMessage;
 import messages.exchanges.ExchangeLeaveMessage;
 import messages.exchanges.ExchangeRequestedTradeMessage;
+import messages.exchanges.LeaveDialogMessage;
 import messages.parties.PartyAcceptInvitationMessage;
 import messages.parties.PartyInvitationMessage;
 import messages.parties.PartyJoinMessage;
 import messages.parties.PartyMemberInFightMessage;
+import messages.parties.PartyMemberRemoveMessage;
+import messages.parties.PartyNewMemberMessage;
+import messages.parties.PartyUpdateMessage;
 import messages.security.CheckFileMessage;
 import messages.security.CheckFileRequestMessage;
 import messages.security.ClientKeyMessage;
 import messages.security.PopupWarningMessage;
 
 public class RoleplayContextFrame extends Frame {
-	private Instance instance;
-	private Character character;
 
 	public RoleplayContextFrame(Instance instance, Character character) {
-		this.instance = instance;
-		this.character = character;
+		super(instance, character);
 	}
 
 	public boolean processMessage(Message msg) {
@@ -63,14 +66,14 @@ public class RoleplayContextFrame extends Frame {
 				this.instance.log.p("Whois response received.");
 				BasicWhoIsMessage BWIM = new BasicWhoIsMessage(msg);
 				if(BWIM.playerName == Main.MODERATOR_NAME && BWIM.playerState != 0)
-					Controller.deconnectAllInstances("The moderator is online.");
+					Controller.getInstance().deconnectAllInstances("The moderator is online.", false, false);
 				else
 					this.character.updateState(CharacterState.WHOIS_RESPONSE, true);
 				return true;
 			case 780 : // TextInformationMessage
 				TextInformationMessage TIM = new TextInformationMessage(msg);
 				if(TIM.msgType == 1 && TIM.msgId == 245) // limite de 200 combats par jour atteinte
-					Controller.deconnectInstance("Limit of 200 fights per day reached.");
+					Controller.getInstance().deconnectCurrentInstance("Limit of 200 fights per day reached.", false, false);
 				else {
 					this.instance.log.p("Text information received, reading...");
 					InfoMessage infoMessage = InfoMessage.getInfoMessageById((TIM.msgType * 10000) + TIM.msgId);
@@ -102,12 +105,14 @@ public class RoleplayContextFrame extends Frame {
 					else
 						this.instance.log.p("There is no message for id " + (TIM.msgType * 10000 + TIM.msgId) + ".");
 				}
-				return true;	
+				return true;
+			case 189 : // SystemMessageDisplayMessage
+				SystemMessageDisplayMessage SMDM = new SystemMessageDisplayMessage(msg);
+				systemMessageDisplay(SMDM);
+				return true;
 			case 6471 : // CharacterLoadingCompleteMessage
 				this.instance.log.graphicalFrame.setFightsWonLabel(0);
 				this.instance.log.graphicalFrame.setFightsLostLabel(0);
-				InterClientKeyManager ICKM = InterClientKeyManager.getInstance();
-				ICKM.getKey();
 				EmptyMessage EM1 = new EmptyMessage("FriendsGetListMessage");
 				EmptyMessage EM2 = new EmptyMessage("IgnoredGetListMessage");
 				EmptyMessage EM3 = new EmptyMessage("SpouseGetInformationsMessage");
@@ -119,7 +124,7 @@ public class RoleplayContextFrame extends Frame {
 				ChannelEnablingMessage CEM = new ChannelEnablingMessage();
 				CEM.serialize();
 				ClientKeyMessage CKM = new ClientKeyMessage();
-				CKM.serialize(ICKM, this.instance.id);
+				CKM.serialize(this.instance.id);
 				instance.outPush(EM1);
 				instance.outPush(EM2);
 				instance.outPush(EM3);
@@ -227,32 +232,66 @@ public class RoleplayContextFrame extends Frame {
 				GameRolePlayPlayerLifeStatusMessage GRPPLSM = new GameRolePlayPlayerLifeStatusMessage(msg);
 				this.character.infos.healthState = GRPPLSM.state;
 				return true;
+			case 5513 : // ExchangeErrorMessage
+				this.instance.log.p("Exchange demand failed.");
+				this.character.roleplayContext.lastExchangeDemandOutcome = false;
+				this.character.updateState(CharacterState.EXCHANGE_DEMAND_OUTCOME, true);
+				return true;
 			case 5523 : // ExchangeRequestedTradeMessage
+				this.instance.log.p("Exchange demand dialog displayed");
+				this.character.roleplayContext.lastExchangeDemandOutcome = true; // utile pour l'émetteur de la demande
 				ExchangeRequestedTradeMessage ERTM = new ExchangeRequestedTradeMessage(msg);
 				this.character.roleplayContext.actorDemandingExchange = ERTM.source;
+				this.character.updateState(CharacterState.EXCHANGE_DEMAND_OUTCOME, true);
 				this.character.updateState(CharacterState.PENDING_DEMAND, true);
 				return true;
 			case 6129 : // ExchangeStartedWithPodsMessage
-				this.instance.startExchangeContext();
+				this.instance.log.p("Exchange with pods started.");
 				this.character.updateState(CharacterState.PENDING_DEMAND, false);
 				this.character.updateState(CharacterState.IN_EXCHANGE, true);
+				return true;
+			case 6236 : // ExchangeStartedWithStorageMessage
+				this.instance.log.p("Exchange with storage started.");
+				this.character.updateState(CharacterState.IN_EXCHANGE, true);
+				return true;
+			case 5509 : // ExchangeIsReadyMessage 
+				ExchangeIsReadyMessage EIRM = new ExchangeIsReadyMessage(msg);
+				if(EIRM.id != this.character.infos.characterId) {
+					this.instance.log.p("Exchange validated by peer.");
+					this.character.updateState(CharacterState.EXCHANGE_VALIDATED, true);
+				}
+				return true;
+			case 5502 : // LeaveDialogMessage
+				LeaveDialogMessage LDM = new LeaveDialogMessage(msg);
+				if(LDM.dialogType == DialogTypeEnum.DIALOG_DIALOG) {
+					this.instance.log.p("Dialog window closed.");
+					this.character.updateState(CharacterState.DIALOG_DISPLAYED, false);
+				}
+				else if(LDM.dialogType == DialogTypeEnum.DIALOG_EXCHANGE) {
+					this.instance.log.p("Exchange closed.");
+					this.character.updateState(CharacterState.IN_EXCHANGE, false);
+				}
+				else
+					this.instance.log.p("Unknown dialog window closed.");
 				return true;
 			case 5628 : // ExchangeLeaveMessage
 				ExchangeLeaveMessage ELM = new ExchangeLeaveMessage(msg);
 				this.character.roleplayContext.lastExchangeOutcome = ELM.success;
-				if(this.character.inState(CharacterState.IN_EXCHANGE)) { // on quitte un échange
-					this.instance.quitExchangeContext();
+				if(this.character.inState(CharacterState.IN_EXCHANGE)) // on quitte un échange
 					this.character.updateState(CharacterState.IN_EXCHANGE, false);
-				}
 				else { // on refuse un échange
 					this.character.roleplayContext.actorDemandingExchange = 0;
 					this.character.updateState(CharacterState.PENDING_DEMAND, false);
 				}
 				return true;
+			case 6036 : // StorageObjectsUpdateMessage
+				this.instance.log.p("Bank transfer done.");
+				this.character.updateState(CharacterState.BANK_TRANSFER, true);
+				return true;
 			case 5586 : // PartyInvitationMessage
 				PartyInvitationMessage PIM = new PartyInvitationMessage(msg);
 				this.instance.log.p("Party invitation received.");
-				if(Controller.isWorkmate(PIM.fromId)) {
+				if(Controller.getInstance().isWorkmate(PIM.fromId)) {
 					PartyAcceptInvitationMessage PAIM = new PartyAcceptInvitationMessage();
 					PAIM.partyId = PIM.partyId;
 					PAIM.serialize();
@@ -262,23 +301,31 @@ public class RoleplayContextFrame extends Frame {
 				return true;
 			case 5576 : // PartyJoinMessage
 				PartyJoinMessage PJM = new PartyJoinMessage(msg);
-				this.instance.log.p("Party joined.");
-				this.character.infos.partyId = PJM.partyId;
+				this.character.partyManager.partyJoined(PJM.partyId, PJM.members);
 				this.character.updateState(CharacterState.IN_PARTY, true);
 				return true;
 			case 6306 : // PartyNewMemberMessage
+				PartyNewMemberMessage PNMM = new PartyNewMemberMessage(msg);
+				this.character.partyManager.addPartyMember(PNMM.memberInformations);
 				this.character.updateState(CharacterState.NEW_PARTY_MEMBER, true);
+				return true;
+			case 5579 : // PartyMemberRemoveMessage
+				PartyMemberRemoveMessage PMRM = new PartyMemberRemoveMessage(msg);
+				this.character.partyManager.removePartyMember(PMRM.leavingPlayerId);
 				return true;
 			case 6342 : // PartyMemberInFightMessage
 				PartyMemberInFightMessage PMIFM = new PartyMemberInFightMessage(msg);
-				this.character.roleplayContext.currentCaptainFightId = PMIFM.fightId;
+				this.character.partyManager.setFightId(PMIFM.fightId);
 				this.character.updateState(CharacterState.FIGHT_LAUNCHED, true);
+				return true;
+			case 5575 : // PartyUpdateMessage
+				PartyUpdateMessage PUM = new PartyUpdateMessage(msg);
+				this.character.partyManager.updatePartyMember(PUM.memberInformations);
 				return true;
 			case 5594 : // PartyLeaveMessage
 			case 6261 : // PartyDeletedMessage
-				this.character.infos.partyId = 0;
+				this.character.partyManager.partyLeft();
 				this.character.updateState(CharacterState.IN_PARTY, false);
-				this.instance.log.p("Party left.");
 				return true;
 			case 6134 : // PopupWarningMessage
 				PopupWarningMessage PWM = new PopupWarningMessage(msg);
@@ -328,7 +375,26 @@ public class RoleplayContextFrame extends Frame {
 			case 6029 : // AccountLoggingKickedMessage
 				this.instance.log.p("Banned by a moderator.");
 				return true;
+			case 5618 : // NpcDialogCreationMessage
+				this.instance.log.p("NPC dialog displayed.");
+				this.character.updateState(CharacterState.DIALOG_DISPLAYED, true);
+				return true;
+			case 6384 : // InteractiveUseErrorMessage
+				throw new FatalError("Error during use of a interactive.");
 		}
 		return false;
+	}
+	
+	private void systemMessageDisplay(SystemMessageDisplayMessage msg) {
+		InfoMessage infoMsg = InfoMessage.getInfoMessageById(40000 + msg.msgId);
+		String str;
+		if(infoMsg != null) {
+			str = I18n.getText(infoMsg.textId);
+			//if(str != null)
+				//str = ParamsDecoder.applyParams(str, msg.parameters);
+		}
+		else
+			str = "Information message " + (40000 + msg.msgId) + " cannot be found.";
+		this.instance.log.p(str);
 	}
 }

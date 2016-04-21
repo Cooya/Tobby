@@ -14,8 +14,8 @@ public class RoleplayContext {
 	private Vector<GameRolePlayActorInformations> actors;
 	public double actorDemandingExchange;
 	public boolean lastFightOutcome;
+	public boolean lastExchangeDemandOutcome;
 	public boolean lastExchangeOutcome;
-	public int currentCaptainFightId;
 	
 	public RoleplayContext(Character CC) {
 		this.character = CC;

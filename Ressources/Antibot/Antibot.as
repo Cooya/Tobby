@@ -21,9 +21,10 @@ package {
 		private var hashFunctionsArray:Array = new Array();
 		private var clients:Array;
 		private var loader:Loader;
-		private var clientIsLoaded:Boolean = false;
+		//private var clientIsLoaded:Boolean = false;
 
 		public function Antibot() : void {
+			loadClient();
 			runServer();
 		}
 
@@ -35,9 +36,10 @@ package {
 			lc.allowLoadBytesCodeExecution = true;
 			loader.load(new URLRequest("DofusInvoker.swf"), lc); // chargement du client officiel
 			addChild(loader);
-			clientIsLoaded = true;
+			//clientIsLoaded = true;
 		}
 
+		/*
 		private function unloadClient() : void {
 			trace("Unloading client...");
 			loader.unloadAndStop();
@@ -45,6 +47,7 @@ package {
 			loader = null;
 			clientIsLoaded = false;
 		}
+		*/
 		
 		private function runServer() : void {
 			clients = new Array();
@@ -87,8 +90,8 @@ package {
         	var hashFunctionId:int;
         	var id:int = socket.readByte();
         	if(id == 1) { // demande de simulation d'une authentification à partir du client officiel
-        		if(!clientIsLoaded)
-        			loadClient();
+        		//if(!clientIsLoaded)
+        		//loadClient();
         		trace("Simulating authentification on official client.");
         		var username:String = socket.readUTF();
         		var password:String = socket.readUTF();

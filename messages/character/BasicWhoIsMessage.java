@@ -17,6 +17,7 @@ public class BasicWhoIsMessage extends Message {
     public String playerName = "";
     public double playerId = 0;
     public int areaId = 0;
+    public int serverId = 0;
     public Vector<AbstractSocialGroupInfos> socialGroups;
     public boolean verbose = false;
     public int playerState = 99;
@@ -38,6 +39,7 @@ public class BasicWhoIsMessage extends Message {
 		this.playerName = buffer.readUTF();
 		this.playerId = buffer.readVarLong();
 		this.areaId = buffer.readShort();
+		this.serverId = buffer.readShort();
 		int nb = buffer.readShort();
 		for(int i = 0; i < nb; ++i)
 			this.socialGroups.add((AbstractSocialGroupInfos) ProtocolTypeManager.getInstance(buffer.readShort(), buffer));

@@ -97,6 +97,10 @@ public class Message {
 	public int getId() {
 		return this.id;
 	}
+	
+	public String getName() {
+		return get(this.id);
+	}
 
 	public int getLenOfSize() {
 		return this.lenofsize;
@@ -138,6 +142,9 @@ public class Message {
 	}
 	
 	protected void completeInfos(ByteArray buffer) {
+		if(buffer == null)
+			return;
+		
 		this.size = buffer.getSize();
 		this.lenofsize = computeLenOfSize(this.size);
 		if(this.size > 0)

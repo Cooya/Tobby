@@ -8,8 +8,8 @@ import gamedata.character.BreedEnum;
 import gamedata.character.CharacterCharacteristicsInformations;
 import gamedata.character.Elements;
 import gamedata.character.PlayerLifeStatusEnum;
-import gamedata.character.SpellItem;
 import gamedata.d2p.ankama.Map;
+import gamedata.inventory.SpellItem;
 
 public class CharacterInformations {
 	public boolean isConnected;
@@ -36,7 +36,6 @@ public class CharacterInformations {
 	public int fightsWonCounter;
 	public int fightsLostCounter;
 	public int mapsTravelled;
-	public int partyId;
 	private int breed;
 	
 	public CharacterInformations(String login, String password, int serverId, int breed) {
@@ -48,7 +47,6 @@ public class CharacterInformations {
 		this.status = 1; // statut inconnu
 		this.healthState = PlayerLifeStatusEnum.STATUS_ALIVE_AND_KICKING;
 		this.mapsTravelled = 1;
-		this.partyId = -1;
 		setBreed(breed);
 	}
 	

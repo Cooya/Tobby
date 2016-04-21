@@ -14,6 +14,7 @@ public class ObjectItem extends Item {
 	public int quantity = 0;
 
 	public ObjectItem(ByteArray buffer) {
+		super(buffer);
 		this.effects = new Vector<ObjectEffect>();
 		this.position = buffer.readByte();
 		this.objectGID = buffer.readVarShort();

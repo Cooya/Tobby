@@ -1,9 +1,11 @@
 package controller.characters;
 
 import gamedata.character.PlayerStatusEnum;
+import gui.Controller;
 import controller.CharacterState;
 import controller.api.FightAPI;
 import main.Instance;
+import main.Log;
 import main.Main;
 import messages.context.GameContextReadyMessage;
 
@@ -47,7 +49,7 @@ public class LoneFighter extends Fighter {
 			// besoin de récupérer sa vie ?
 			this.fight.lifeManager();
 			
-			while(!isInterrupted()) { // boucle recherche & combat
+			while(!isInterrupted() && !inState(CharacterState.SHOULD_DECONNECT)) { // boucle recherche & combat
 				if(this.fight.fightSearchManager()) { // lancement de combat
 					if(waitState(CharacterState.IN_FIGHT)) { // on vérifie si le combat a bien été lancé (avec timeout)
 						this.fight.fightManager(false);
@@ -58,7 +60,13 @@ public class LoneFighter extends Fighter {
 				else
 					this.mvt.changeMap();
 			}
+			
+			if(inState(CharacterState.SHOULD_DECONNECT)) {
+				this.instance.deconnectionOrder(true);
+				break;
+			}
 		}
-		System.out.println("Thread controller of instance with id = " + this.instance.id + " terminated.");
+		Log.info("Thread controller of instance with id = " + this.instance.id + " terminated.");
+		Controller.getInstance().threadTerminated();
 	}
 }

@@ -1,6 +1,6 @@
 package gui;
 
-import java.awt.Color;
+import java.util.Vector;
 
 import javax.swing.BoxLayout;
 import javax.swing.JInternalFrame;
@@ -11,11 +11,14 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.text.DefaultCaret;
 
+import controller.FightOptions;
+
 public class CharacterFrame extends JInternalFrame {
 	protected static final int FRAME_SIZE = 400;
 	private static final long serialVersionUID = 2448473860592287858L;
 	private static String EOL = System.getProperty("line.separator");
 	protected int id;
+	private Vector<String> logVector;
 	private	JTabbedPane tabbedPane;
 	private	JPanel textAreaPanel;
 	private	JPanel informationsPanel;
@@ -55,6 +58,7 @@ public class CharacterFrame extends JInternalFrame {
 	public CharacterFrame(int id, String login) {
 		super(login, true, true, true, true);
 		this.id = id;
+		this.logVector = new Vector<String>();
 		setSize(FRAME_SIZE, FRAME_SIZE);	
 		tabbedPane = new JTabbedPane();
 		textAreaPanel = new JPanel();
@@ -97,8 +101,17 @@ public class CharacterFrame extends JInternalFrame {
 		add(tabbedPane);
 	}
 
-	public void appendText(String text, Color color) {
-		this.textArea.append(text + EOL);
+	public synchronized void appendText(String text) {
+		this.logVector.add(text + EOL);
+		if(this.logVector.size() > 1000) {
+			for(int i = 0; i < 500; ++i)
+				this.logVector.remove(i);
+			this.textArea.setText("");
+			for(String str : this.logVector)
+				this.textArea.append(str);
+		}
+		else
+			this.textArea.append(text + EOL);
 	}
 	
 	public void setNameLabel(String name, int level) {
@@ -141,8 +154,8 @@ public class CharacterFrame extends JInternalFrame {
 		this.mapsTravelledLabel.setText(MAPS_TRAVELLED_LABEL + mapsTravelledCounter);
 	}
 
-	public void setAreaLabel(String areaName) {
-		this.areaLabel.setText(AREA_LABEL + "\"" + areaName + "\"");
+	public void setAreaLabel(int areaId) {
+		this.areaLabel.setText(AREA_LABEL + "\"" + FightOptions.getAreaNameFromId(areaId) + "\"");
 	}
 
 	public void setEnergyLabel(int energyPoints, int maxEnergyPoints) {

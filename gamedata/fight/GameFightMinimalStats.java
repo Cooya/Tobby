@@ -40,6 +40,7 @@ public class GameFightMinimalStats {
 	public int dodgePMLostProbability = 0;
 	public int tackleBlock = 0;
 	public int tackleEvade = 0;
+	public int fixedDamageReflection = 0;
 	public int invisibilityState = 0;
 
 	public GameFightMinimalStats(ByteArray buffer) {
@@ -54,11 +55,11 @@ public class GameFightMinimalStats {
 		this.maxMovementPoints = buffer.readVarShort();
 		this.summoner = buffer.readDouble();
 		this.summoned = buffer.readBoolean();
-		this.neutralElementResistPercent = buffer.readVarInt();
-		this.earthElementResistPercent = buffer.readVarInt();
-		this.waterElementResistPercent = buffer.readVarInt();
-		this.airElementResistPercent = buffer.readVarInt();          
-		this.fireElementResistPercent = buffer.readVarInt();
+		this.neutralElementResistPercent = buffer.readVarShort();
+		this.earthElementResistPercent = buffer.readVarShort();
+		this.waterElementResistPercent = buffer.readVarShort();
+		this.airElementResistPercent = buffer.readVarShort();          
+		this.fireElementResistPercent = buffer.readVarShort();
 		this.neutralElementReduction = buffer.readVarShort();
 		this.earthElementReduction = buffer.readVarShort();
 		this.waterElementReduction = buffer.readVarShort();
@@ -80,6 +81,7 @@ public class GameFightMinimalStats {
 		this.dodgePMLostProbability = buffer.readVarShort();
 		this.tackleBlock = buffer.readVarShort();
 		this.tackleEvade = buffer.readVarShort();
+		this.fixedDamageReflection = buffer.readVarShort();
 		this.invisibilityState = buffer.readByte();
 	}
 }

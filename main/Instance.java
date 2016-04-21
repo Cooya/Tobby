@@ -13,7 +13,6 @@ import controller.characters.Mule;
 import controller.characters.Soldier;
 import messages.Message;
 import frames.ConnectionFrame;
-import frames.DialogContextFrame;
 import frames.FightContextFrame;
 import frames.Frame;
 import frames.RoleplayContextFrame;
@@ -34,7 +33,8 @@ public class Instance extends Thread {
 	private ConcurrentLinkedQueue<Message> output; // file des messages qui doivent être envoyé
 	private ConcurrentLinkedQueue<Message> input; // file des messages reçus qui doivent être traité
 	
-	public Instance(int id, int behaviour, String login, String password, int serverId, int areaId, CharacterFrame graphicalFrame) {
+	// constructeur lors d'une reconnexion (log déjà instancié)
+	public Instance(int id, int behaviour, String login, String password, int serverId, int areaId, Log log) {
 		super(login + "/process");
 		this.id = id;
 		
@@ -50,7 +50,7 @@ public class Instance extends Thread {
 		}
 		
 		// initialisation des différents modules
-		this.log = new Log(login, graphicalFrame);
+		this.log = log;
 		this.net = new NetworkInterface(this, login);
 		this.frames = new Vector<Frame>();
 		this.output = new ConcurrentLinkedQueue<Message>();
@@ -58,36 +58,79 @@ public class Instance extends Thread {
 		
 		// création des frames de traitement des messages
 		this.frames.add(new ConnectionFrame(this, character));
-		this.frames.add(new SynchronisationFrame(this));
+		this.frames.add(new SynchronisationFrame(this, character));
 		this.frames.add(new RoleplayContextFrame(this, character));
 		if(behaviour == CharacterBehaviour.WAITING_MULE || behaviour == CharacterBehaviour.SELLER)
 			this.frames.add(null); // pour avoir le même nombre de frames que les combattants (pas propre)
 		else
 			this.frames.add(new FightContextFrame(this, (Fighter) this.character));
-		this.frames.add(new DialogContextFrame(this, character));
 		this.frames.get(0).isActive = true; // activation de la ConnectionFrame
 		
-		// lancement des threads
+		// initialisation des threads
 		this.threads = new Thread[4];
 		this.threads[0] = this.net;
 		this.threads[1] = this.net.sender;
 		this.threads[2] = this.character;
 		this.threads[3] = this;
-		this.start();
-		this.net.start();
-		this.net.sender.start();
-		this.character.start();
 		
-		Instance.log("Instance with id = " + this.id + " started.");
+		// lancement de la thread de traitement (qui va lancer les autres threads le moment venu)
+		this.start();
+		
+		Log.info("Instance with id = " + this.id + " started.");
 	}
 	
-	// destruction des threads de l'instance depuis la GUI
-	public void interruptThreads() {
-		for(Thread thread : this.threads)
-			if(thread instanceof NetworkInterface)
-				((NetworkInterface) thread).closeReceiver();
-			else
-				thread.interrupt();
+	// constructeur classique
+	public Instance(int id, int behaviour, String login, String password, int serverId, int areaId, CharacterFrame graphicalFrame) {
+		this(id, behaviour, login, password, serverId, areaId, new Log(login, graphicalFrame));
+	}
+	
+	public void startCharacterController() {
+		this.character.start();
+	}
+	
+	// TODO -> pas terrible (implémentation d'une instance à refaire ?)
+	public Character getCharacter() {
+		return this.character;
+	}
+	
+	public Latency getLatency() {
+		return net.latency;
+	}
+	
+	public void setGameServerIP(String gameServerIP) {
+		this.net.setGameServerIP(gameServerIP);
+	}
+	
+	public void newRecruit(Instance recruit) {
+		((Captain) this.character).newRecruit((Soldier) recruit.character);
+	}
+	
+	public static void log(String msg) {
+		Log log = Controller.getInstance().getLog();
+		if(log != null)
+			log.p(msg);
+		else
+			Log.err(msg);
+	}
+	
+	public static void log(String direction, Message msg) {
+		Log log = Controller.getInstance().getLog();
+		if(log != null)
+			log.p(direction, msg);
+		else
+			Log.err(msg.toString());
+	}
+	
+	// destruction des threads de l'instance depuis la GUI (forcée ou non)
+	public void deconnectionOrder(boolean forced) {
+		if(forced) {
+			this.threads[1].interrupt(); // on interrompt d'abord le sender pour éviter une exception
+			((NetworkInterface) this.threads[0]).closeReceiver();
+			this.threads[2].interrupt();
+			this.threads[3].interrupt();
+		}
+		else
+			this.character.updateState(CharacterState.SHOULD_DECONNECT, true);
 	}
 	
 	public synchronized void inPush(Message msg) {
@@ -111,6 +154,10 @@ public class Instance extends Thread {
 	public synchronized void run() {
 		waitForConnection(); // attente de fin de connexion de l'instance précédente
 		
+		// lancement des threads de l'interface réseau et du contrôleur du personnage
+		this.net.start();
+		this.net.sender.start();
+		
 		Message msg;
 		while(!isInterrupted()) {
 			if((msg = inPull()) != null) {
@@ -132,54 +179,8 @@ public class Instance extends Thread {
 				Main.class.notify();
 			}
 		}
-		System.out.println("Thread process of instance with id = " + this.id + " terminated.");
-	}
-	
-	public void setGameServerIP(String gameServerIP) {
-		this.net.setGameServerIP(gameServerIP);
-	}
-	
-	public void setMule(Instance mule) {
-		if(mule == null) {
-			((Fighter) this.character).mule = null;
-			this.character.updateState(CharacterState.MULE_AVAILABLE, false);
-		}
-		else {
-			((Fighter) this.character).mule = (Mule) mule.character;
-			this.character.updateState(CharacterState.MULE_AVAILABLE, true);
-		}
-	}
-	
-	public void newRecruit(Instance recruit) {
-		((Captain) this.character).newRecruit((Soldier) recruit.character);
-	}
-	
-	public void removeSoldier(Instance soldier) {
-		((Captain) this.character).removeSoldierFromSquad((Soldier) soldier.character);
-	}
-	
-	public Latency getLatency() {
-		return net.latency;
-	}
-	
-	public double getCharacterId() {
-		return this.character.infos.characterId;
-	}
-	
-	public static void log(String msg) {
-		Log log = Controller.getLog();
-		if(log != null)
-			log.p(msg);
-		else
-			System.out.println(msg);
-	}
-	
-	public static void log(String direction, Message msg) {
-		Log log = Controller.getLog();
-		if(log != null)
-			log.p(direction, msg);
-		else
-			System.out.println(msg);
+		Log.info("Thread process of instance with id = " + this.id + " terminated.");
+		Controller.getInstance().threadTerminated();
 	}
 	
 	public void waitForConnection() {
@@ -214,15 +215,5 @@ public class Instance extends Thread {
 	public void quitFightContext() {
 		this.frames.get(3).isActive = false;
 		this.log.p("Fight context frame deactivated.");
-	}
-	
-	public void startExchangeContext() {
-		this.frames.get(4).isActive = true;
-		this.log.p("Dialog context frame activated.");
-	}
-	
-	public void quitExchangeContext() {
-		this.frames.get(4).isActive = false;
-		this.log.p("Dialog context frame deactivated.");
 	}
 }

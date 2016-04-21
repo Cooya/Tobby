@@ -18,13 +18,15 @@ public interface Connection {
 		private OutputStream outputStream;
 		
 		public Client(String serverIP, int port) {
-			try {
-				this.client = new Socket(serverIP, port);
-				this.inputStream = this.client.getInputStream();
-				this.outputStream = this.client.getOutputStream();
-			} catch(Exception e) {
-				throw new FatalError(e);
-			}
+			while(true)
+				try {
+					this.client = new Socket(serverIP, port);
+					this.inputStream = this.client.getInputStream();
+					this.outputStream = this.client.getOutputStream();
+					break;
+				} catch(Exception e) {
+					e.printStackTrace();
+				}
 		}
 		
 		public Client(Socket client) {
