@@ -9,14 +9,11 @@
 * ~~Mettre à jour l'aire de combat à chaque level up (que ce soit seul ou en groupe)~~
 * ~~**Améliorer les échanges et les dialogues avec les PNJ (suppression de "sleeps" peu propres)**~~
 * ~~Supprimer à terme les boucles infinies lors de l'attente d'états~~
-* **Création automatique de personnage dans les comptes vides**
+* ~~**Création automatique de personnage dans les comptes vides**~~
 * **Implémenter la vente de ressources**
-* Améliorer l'IA de combat
-* Implémenter la lecture des valeurs négatives dans la classe ByteArray (bug du readVarShort...)
-* Optimiser l'envoi des paquets (avec création de variables locales dans les frames) -> très lourd à faire
-* Ajouter, lors de la recherche d'un chemin vers une map distante, une cellule cible pour la map cible (ça évitera de se retrouver de l'autre côté d'une muraille par rapport au capitaine par exemple)
-* Créer une API pour les "squads"
+* Déserialiser automatiquement un message reçu
 * Implémenter le personnage "vendeur"
+* Créer une API pour les "squads"
 
 ### Bugs à résoudre ###
 
@@ -54,7 +51,7 @@
 * Optimiser la régénération de la vie (beaucoup de pertes de temps actuellement)
 * Promouvoir un soldat lorsque le capitaine du groupe est déconnecté
 
-### Interface graphique ###
+### Interface graphique (facultatif) ###
 
 * ~~Améliorer le rafraichissement des informations dans les CharacterFrames (trop lourd actuellement)~~
 * "Scroll down" automatique qui s'arrête
@@ -68,7 +65,7 @@
 * ~~Éviter de repartir sur l'aire de combat lorsqu'on est full pods~~
 * ~~Gérer les "TextInformationMessages" qui peuvent donner des informations utiles pour le debuggage~~
 * Optimiser le pathfinder (changements de direction)
-* Améliorer la réflexion
-* Correction de la frame nulle ajoutée dans le vecteur de frames de l'instance de la mule (pas très propre)
 * Améliorer l'utilisation des "interactives" (récupérer le résultat et se rendre à la cellule adjacente à l'"interactive")
 * Traduire la classe "ParamsDecoder" pour un meilleur affichage des "TextInformationMessages" et des "SystemMessageDisplayMessages"
+* Améliorer l'IA de combat
+* Ajouter, lors de la recherche d'un chemin vers une map distante, une cellule cible pour la map cible (ça évitera de se retrouver de l'autre côté d'une muraille par rapport au capitaine par exemple)
