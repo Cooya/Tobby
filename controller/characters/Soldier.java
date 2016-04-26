@@ -2,7 +2,7 @@ package controller.characters;
 
 import controller.CharacterState;
 import controller.api.FightAPI;
-import gamedata.character.PlayerStatusEnum;
+import gamedata.enums.PlayerStatusEnum;
 import gui.Controller;
 import main.Instance;
 import main.Log;

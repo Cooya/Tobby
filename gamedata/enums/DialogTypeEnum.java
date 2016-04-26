@@ -1,6 +1,6 @@
-package gamedata;
+package gamedata.enums;
 
-public class DialogTypeEnum {
+public abstract class DialogTypeEnum {
 	public static final int DIALOG_BOOK = 0;
     public static final int DIALOG_DIALOG = 1;
     public static final int DIALOG_LOCKABLE = 2;

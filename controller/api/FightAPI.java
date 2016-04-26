@@ -1,7 +1,7 @@
 package controller.api;
 
-import gamedata.character.PlayerLifeStatusEnum;
 import gamedata.context.GameRolePlayGroupMonsterInformations;
+import gamedata.enums.PlayerLifeStatusEnum;
 import gamedata.fight.GameFightMonsterInformations;
 
 import java.util.Vector;
@@ -10,7 +10,7 @@ import controller.CharacterState;
 import controller.FightOptions;
 import controller.characters.Fighter;
 import messages.EmptyMessage;
-import messages.character.SpellUpgradeRequestMessage;
+import messages.character.SpellModifyRequestMessage;
 import messages.character.StatsUpgradeRequestMessage;
 import messages.context.GameRolePlayAttackMonsterRequestMessage;
 import messages.fights.GameActionFightCastOnTargetRequestMessage;
@@ -91,7 +91,7 @@ public class FightAPI {
 			monsterGroupSize = monsterGroup.staticInfos.underlings.size() + 1;
 			if(monsterGroupSize <= monsterGroupMaxSize) {
 				this.fighter.instance.log.p("Going to take a monster group of size " + monsterGroupSize + " on cell id " + monsterGroup.disposition.cellId + ".");
-				if(!this.fighter.mvt.moveTo(monsterGroup.disposition.cellId, false)) // groupe de monstres inatteignable
+				if(!this.fighter.mvt.moveTo(monsterGroup.disposition.cellId)) // groupe de monstres inatteignable
 					continue;
 				this.fighter.instance.log.p("Sending attack request.");
 				GameRolePlayAttackMonsterRequestMessage GRPAMRM = new GameRolePlayAttackMonsterRequestMessage();
@@ -144,9 +144,11 @@ public class FightAPI {
 		int spellId = this.fighter.infos.attackSpell;
 		if(this.fighter.infos.spellList.get(spellId) != null && canUpgradeSpell(spellId)) {
 			this.fighter.infos.spellList.get(spellId).spellLevel++;
-			SpellUpgradeRequestMessage SURM = new SpellUpgradeRequestMessage();
-			SURM.serialize(spellId, this.fighter.infos.spellList.get(spellId).spellLevel);
-			this.fighter.instance.outPush(SURM);
+			SpellModifyRequestMessage SMRM = new SpellModifyRequestMessage();
+			SMRM.spellId = spellId;
+			SMRM.spellLevel = this.fighter.infos.spellList.get(spellId).spellLevel;
+			SMRM.serialize();
+			this.fighter.instance.outPush(SMRM);
 			this.fighter.instance.log.p("Increasing attack spell to level " + this.fighter.infos.spellList.get(spellId).spellLevel + ".");
 		}
 	}

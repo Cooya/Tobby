@@ -33,11 +33,11 @@ public class SelectedServerDataMessage extends Message {
 		ByteArray buffer = new ByteArray();
 	    buffer.writeVarShort(this.serverId);
 	    buffer.writeUTF(this.address);
-	    buffer.writeShort((short) this.port);
+	    buffer.writeShort(this.port);
 	    buffer.writeBoolean(this.canCreateNewCharacter);
 	    buffer.writeVarInt(this.ticket.length);
 	    for(int i = 0; i < this.ticket.length; ++i)
-	    	buffer.writeByte((byte) this.ticket[i]);
+	    	buffer.writeByte(this.ticket[i]);
 	    
 	    completeInfos(buffer);
     }

@@ -67,7 +67,7 @@ public class FilesManager {
 						if(account != null)
 							squad.add(account);
 						else
-							Log.err("Unknown login : \"" + line + "\".");
+							Log.warn("Unknown login : \"" + line + "\".");
 					}
 				}
 				else { // ligne vide

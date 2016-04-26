@@ -132,12 +132,13 @@ public abstract class Character extends Thread {
 			case NOT_IN_PARTY : // état abstrait inverse (abstrait = qui n'exste pas)
 				this.instance.log.p("Waiting for leaving party.");
 				condition = new Condition(CharacterState.IN_PARTY, false, 30000);
+				forbiddenTimeout = true;
 				break;
-			case IN_FIGHT : // attente avec timeout
+			case IN_FIGHT : // attente avec timeout autorisé
 				this.instance.log.p("Waiting for fight beginning.");
 				condition = new Condition(state, 5000);
 				break;
-			case IN_EXCHANGE : // attente avec timeout
+			case IN_EXCHANGE : // attente avec timeout autorisé
 				this.instance.log.p("Waiting for exchange acceptance.");
 				condition = new Condition(state, 5000);
 				break;
@@ -158,7 +159,7 @@ public abstract class Character extends Thread {
 				condition = new Condition(state, 0);
 				isEvent = true;
 				break;
-			case EXCHANGE_VALIDATED : // event
+			case EXCHANGE_VALIDATED : // event (inutilisé actuellement)
 				this.instance.log.p("Waiting for exchange validation.");
 				condition = new Condition(state, 60000);
 				condition.addConstraint(CharacterState.SHOULD_DECONNECT, true); // tant qu'on ne reçoit pas d'ordre de déconnexion

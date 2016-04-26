@@ -1,6 +1,6 @@
-package gamedata.character;
+package gamedata.enums;
 
-public class BreedEnum {
+public abstract class BreedEnum {
     public static final int UNDEFINED = 0;
     public static final int Feca = 1;
     public static final int Osamodas = 2;

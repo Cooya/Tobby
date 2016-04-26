@@ -13,9 +13,10 @@ public class SpellListMessage extends Message {
 	public SpellListMessage(Message msg) {
 		super(msg);
 		spells = new Vector<SpellItem>();
+		deserialize();
 	}
 
-	public void deserialize() {
+	private void deserialize() {
 		ByteArray buffer = new ByteArray(content);
 		this.spellPrevisualization = buffer.readBoolean();
 		int nb = buffer.readShort();

@@ -56,7 +56,7 @@ public class Encryption {
 		buffer.writeUTFBytes(salt);
 		randomAESKey = generateRandomAESKey();
 		buffer.writeBytes(randomAESKey);
-		buffer.writeByte((byte) login.length());
+		buffer.writeByte(login.length());
 		buffer.writeUTFBytes(login);
 		buffer.writeUTFBytes(password);
 		

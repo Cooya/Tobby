@@ -15,7 +15,7 @@ public class InteractionAPI {
 	}
 
 	public void useInteractive(int besideCellId, int elemId, int skillInstanceUid, boolean withMapChangement) {
-		if(!this.character.mvt.moveTo(besideCellId, false))
+		if(!this.character.mvt.moveTo(besideCellId))
 			return;
 
 		this.character.waitState(CharacterState.IS_FREE);

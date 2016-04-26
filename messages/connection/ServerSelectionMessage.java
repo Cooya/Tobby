@@ -11,7 +11,7 @@ public class ServerSelectionMessage extends Message {
 	
 	public void serialize(int serverId) {
 		ByteArray buffer = new ByteArray();
-		buffer.writeByte((byte) serverId); 
+		buffer.writeByte(serverId); 
 		
 		completeInfos(buffer);
 	}

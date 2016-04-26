@@ -7,20 +7,19 @@ import utilities.ByteArray;
 import controller.CharacterState;
 import controller.characters.Character;
 import controller.characters.Fighter;
-import gamedata.DialogTypeEnum;
-import gamedata.context.TextInformationTypeEnum;
 import gamedata.d2i.I18n;
 import gamedata.d2o.modules.InfoMessage;
 import gamedata.d2o.modules.MapPosition;
 import gamedata.d2p.MapsCache;
+import gamedata.enums.TextInformationTypeEnum;
 import gui.Controller;
 import main.FatalError;
 import main.Instance;
 import main.Main;
 import messages.EmptyMessage;
-import messages.Message;
 import messages.character.BasicWhoIsMessage;
 import messages.character.CharacterLevelUpMessage;
+import messages.character.CharacterLoadingCompleteMessage;
 import messages.character.CharacterStatsListMessage;
 import messages.character.GameRolePlayPlayerLifeStatusMessage;
 import messages.character.InventoryWeightMessage;
@@ -33,22 +32,14 @@ import messages.context.CurrentMapMessage;
 import messages.context.GameContextCreateMessage;
 import messages.context.GameContextRemoveElementMessage;
 import messages.context.GameMapMovementMessage;
+import messages.context.GameMapNoMovementMessage;
 import messages.context.GameRolePlayShowActorMessage;
 import messages.context.MapComplementaryInformationsDataMessage;
 import messages.context.MapInformationsRequestMessage;
 import messages.context.SystemMessageDisplayMessage;
 import messages.context.TextInformationMessage;
-import messages.exchanges.ExchangeIsReadyMessage;
-import messages.exchanges.ExchangeLeaveMessage;
-import messages.exchanges.ExchangeRequestedTradeMessage;
-import messages.exchanges.LeaveDialogMessage;
-import messages.parties.PartyAcceptInvitationMessage;
-import messages.parties.PartyInvitationMessage;
-import messages.parties.PartyJoinMessage;
-import messages.parties.PartyMemberInFightMessage;
-import messages.parties.PartyMemberRemoveMessage;
-import messages.parties.PartyNewMemberMessage;
-import messages.parties.PartyUpdateMessage;
+import messages.interactions.InteractiveUseErrorMessage;
+import messages.security.AccountLoggingKickedMessage;
 import messages.security.CheckFileMessage;
 import messages.security.CheckFileRequestMessage;
 import messages.security.ClientKeyMessage;
@@ -59,334 +50,53 @@ public class RoleplayContextFrame extends Frame {
 	public RoleplayContextFrame(Instance instance, Character character) {
 		super(instance, character);
 	}
-
-	public boolean processMessage(Message msg) {
-		switch(msg.getId()) {
-			case 180 : // BasicWhoIsMessage
-				this.instance.log.p("Whois response received.");
-				BasicWhoIsMessage BWIM = new BasicWhoIsMessage(msg);
-				if(BWIM.playerName == Main.MODERATOR_NAME && BWIM.playerState != 0)
-					Controller.getInstance().deconnectAllInstances("The moderator is online.", false, false);
-				else
-					this.character.updateState(CharacterState.WHOIS_RESPONSE, true);
-				return true;
-			case 780 : // TextInformationMessage
-				TextInformationMessage TIM = new TextInformationMessage(msg);
-				if(TIM.msgType == 1 && TIM.msgId == 245) // limite de 200 combats par jour atteinte
-					Controller.getInstance().deconnectCurrentInstance("Limit of 200 fights per day reached.", false, false);
-				else {
-					this.instance.log.p("Text information received, reading...");
-					InfoMessage infoMessage = InfoMessage.getInfoMessageById((TIM.msgType * 10000) + TIM.msgId);
-					int textId;
-					Object[] parameters;
-					if(infoMessage != null) {
-						textId = infoMessage.textId;
-						if(TIM.parameters.size() > 0) {
-							String parameter = TIM.parameters.get(0);
-							if(parameter != null && parameter.indexOf("~") == -1)
-								parameters = parameter.split("~");
-							else
-								parameters = (String[]) TIM.parameters.toArray();
-						}
-					}
-					else {
-						this.instance.log.p("Information message " + (TIM.msgType * 10000 + TIM.msgId) + " cannot be found.");
-						if(TIM.msgType == TextInformationTypeEnum.TEXT_INFORMATION_ERROR)
-							textId = InfoMessage.getInfoMessageById(10231).textId;
-						else
-							textId = InfoMessage.getInfoMessageById(207).textId;
-						parameters = new String[1];
-						parameters[0] = TIM.msgId;
-					}
-					String messageContent = I18n.getText(textId);
-					if(messageContent != null)
-						//this.instance.log.p(ParamsDecoder.applyParams(msgContent, parameters));
-						this.instance.log.p(messageContent);
-					else
-						this.instance.log.p("There is no message for id " + (TIM.msgType * 10000 + TIM.msgId) + ".");
-				}
-				return true;
-			case 189 : // SystemMessageDisplayMessage
-				SystemMessageDisplayMessage SMDM = new SystemMessageDisplayMessage(msg);
-				systemMessageDisplay(SMDM);
-				return true;
-			case 6471 : // CharacterLoadingCompleteMessage
-				this.instance.log.graphicalFrame.setFightsWonLabel(0);
-				this.instance.log.graphicalFrame.setFightsLostLabel(0);
-				EmptyMessage EM1 = new EmptyMessage("FriendsGetListMessage");
-				EmptyMessage EM2 = new EmptyMessage("IgnoredGetListMessage");
-				EmptyMessage EM3 = new EmptyMessage("SpouseGetInformationsMessage");
-				EmptyMessage EM4 = new EmptyMessage("GameContextCreateRequestMessage");
-				//EmptyMessage EM5 = new EmptyMessage("ObjectAveragePricesGetMessage");
-				EmptyMessage EM6 = new EmptyMessage("QuestListRequestMessage");
-				PrismsListRegisterMessage PLRM = new PrismsListRegisterMessage();
-				PLRM.serialize();
-				ChannelEnablingMessage CEM = new ChannelEnablingMessage();
-				CEM.serialize();
-				ClientKeyMessage CKM = new ClientKeyMessage();
-				CKM.serialize(this.instance.id);
-				instance.outPush(EM1);
-				instance.outPush(EM2);
-				instance.outPush(EM3);
-				instance.outPush(CKM);
-				instance.outPush(EM4);
-				//instance.outPush(EM5);
-				instance.outPush(EM6);
-				instance.outPush(PLRM);
-				instance.outPush(CEM);
-				return true;
-			case 200 : // GameContextCreateMessage
-				GameContextCreateMessage GCCM = new GameContextCreateMessage(msg);
-				if(GCCM.context == 1 && this.character.inState(CharacterState.IN_FIGHT)) {
-					this.character.updateState(CharacterState.IN_FIGHT, false);
-					this.character.updateState(CharacterState.IN_GAME_TURN, false);
-					this.instance.quitFightContext();
-					if(this.character instanceof Fighter)
-						((Fighter) this.character).fightContext.clearFightContext();
-				}
-				else if(GCCM.context == 2) {
-					this.character.updateState(CharacterState.IS_LOADED, false);
-					this.character.updateState(CharacterState.IN_FIGHT, true);
-					this.instance.startFightContext();
-				}
-				return true;
-			case 1200 : // SpellListMessage
-				SpellListMessage SLM = new SpellListMessage(msg);
-				SLM.deserialize();
-				this.character.infos.loadSpellList(SLM.spells);
-				return true;	
-			case 220 : // CurrentMapMessage
-				CurrentMapMessage CMM = new CurrentMapMessage(msg);
-				this.character.infos.currentMap = MapsCache.loadMap(CMM.mapId);
-				MapInformationsRequestMessage MIRM = new MapInformationsRequestMessage();
-				MIRM.serialize(this.character.infos.currentMap.id);
-				instance.outPush(MIRM);
-				return true;
-			case 500 : // CharacterStatsListMessage
-				CharacterStatsListMessage CSLM = new CharacterStatsListMessage(msg);
-				this.character.infos.stats = CSLM.stats;
-				this.instance.log.graphicalFrame.setEnergyLabel(this.character.infos.stats.energyPoints, this.character.infos.stats.maxEnergyPoints);
-				this.instance.log.graphicalFrame.setKamasLabel(this.character.infos.stats.kamas);
-				this.instance.log.graphicalFrame.setExperienceLabel((int) this.character.infos.stats.experience, (int) this.character.infos.stats.experienceNextLevelFloor);
-				return true;
-			case 5670 : // CharacterLevelUpMessage
-				CharacterLevelUpMessage CLUM = new CharacterLevelUpMessage(msg);
-				this.character.infos.level = CLUM.newLevel;
-				this.instance.log.graphicalFrame.setNameLabel(this.character.infos.characterName, this.character.infos.level);
-				this.character.updateState(CharacterState.LEVEL_UP, true);
-				return true;
-			case 226 : // MapComplementaryInformationsDataMessage
-				MapComplementaryInformationsDataMessage MCIDM = new MapComplementaryInformationsDataMessage(msg);
-				this.character.roleplayContext.newContextActors(MCIDM.actors);
-				this.instance.log.p("Current map : " + MapPosition.getMapPositionById(this.character.infos.currentMap.id) + ".\nCurrent cell id : " + this.character.infos.currentCellId + ".\nCurrent area id : " + this.character.infos.currentMap.subareaId + ".");
-				this.instance.log.graphicalFrame.setMapLabel(String.valueOf(MapPosition.getMapPositionById(this.character.infos.currentMap.id)));
-				this.instance.log.graphicalFrame.setCellLabel(String.valueOf(this.character.infos.currentCellId));
-				this.character.updatePosition(this.character.infos.currentMap, this.character.infos.currentCellId);
-				this.character.updateState(CharacterState.IS_LOADED, true);
-				return true;
-			case 5632 : // GameRolePlayShowActorMessage
-				GameRolePlayShowActorMessage GRPSAM = new GameRolePlayShowActorMessage(msg);
-				this.character.roleplayContext.addContextActor(GRPSAM.informations);
-				this.character.updateState(CharacterState.NEW_ACTOR_ON_MAP, true);
-				return true;
-			case 251 : // GameContextRemoveElementMessage
-				GameContextRemoveElementMessage GCREM = new GameContextRemoveElementMessage(msg);
-				this.character.roleplayContext.removeContextActor(GCREM.id);
-				return true;
-			case 951 : // GameMapMovementMessage
-				GameMapMovementMessage GMMM = new GameMapMovementMessage(msg);
-				int position = GMMM.keyMovements.lastElement();
-				this.character.roleplayContext.updateContextActorPosition(GMMM.actorId, position);
-				if(GMMM.actorId == this.character.infos.characterId) {
-					this.character.infos.currentCellId = position;
-					this.instance.log.p("Next cell id after movement : " + position + ".");
-					this.instance.log.graphicalFrame.setCellLabel(String.valueOf(this.character.infos.currentCellId));
-					this.character.mvt.updatePosition(this.character.infos.currentCellId);
-					this.character.updateState(CharacterState.CAN_MOVE, true);
-				}
-				return true;
-			case 5684 : // LifePointsRegenBeginMessage
-				LifePointsRegenBeginMessage LPRBM = new LifePointsRegenBeginMessage(msg);
-				this.character.infos.regenRate = LPRBM.regenRate;
-				return true;
-			case 954 : // GameMapNoMovementMessage
-				throw new FatalError("Movement refused by server.");
-			case 3009 : // InventoryWeightMessage
-				InventoryWeightMessage IWM = new InventoryWeightMessage(msg);
-				this.character.infos.weight = IWM.weight;
-				this.character.infos.weightMax = IWM.weightMax;
-				this.instance.log.graphicalFrame.setWeightLabel(this.character.infos.weight, this.character.infos.weightMax);
-				if(this.character.infos.weightMaxAlmostReached()) {
-					this.character.updateState(CharacterState.NEED_TO_EMPTY_INVENTORY, true);
-					this.instance.log.p("Inventory weight maximum almost reached, need to empty.");
-				}
-				return true;
-			case 6386 : // PlayerStatusUpdateMessage
-				PlayerStatusUpdateMessage PSUM = new PlayerStatusUpdateMessage(msg);
-				if(PSUM.playerId == this.character.infos.characterId) {
-					this.character.infos.status = PSUM.status.statusId;
-					this.instance.log.p("New status : " + this.character.infos.status + ".");
-				}
-				return true;
-			case 5996 : // GameRolePlayPlayerLifeStatusMessage
-				GameRolePlayPlayerLifeStatusMessage GRPPLSM = new GameRolePlayPlayerLifeStatusMessage(msg);
-				this.character.infos.healthState = GRPPLSM.state;
-				return true;
-			case 5513 : // ExchangeErrorMessage
-				this.instance.log.p("Exchange demand failed.");
-				this.character.roleplayContext.lastExchangeDemandOutcome = false;
-				this.character.updateState(CharacterState.EXCHANGE_DEMAND_OUTCOME, true);
-				return true;
-			case 5523 : // ExchangeRequestedTradeMessage
-				this.instance.log.p("Exchange demand dialog displayed");
-				this.character.roleplayContext.lastExchangeDemandOutcome = true; // utile pour l'émetteur de la demande
-				ExchangeRequestedTradeMessage ERTM = new ExchangeRequestedTradeMessage(msg);
-				this.character.roleplayContext.actorDemandingExchange = ERTM.source;
-				this.character.updateState(CharacterState.EXCHANGE_DEMAND_OUTCOME, true);
-				this.character.updateState(CharacterState.PENDING_DEMAND, true);
-				return true;
-			case 6129 : // ExchangeStartedWithPodsMessage
-				this.instance.log.p("Exchange with pods started.");
-				this.character.updateState(CharacterState.PENDING_DEMAND, false);
-				this.character.updateState(CharacterState.IN_EXCHANGE, true);
-				return true;
-			case 6236 : // ExchangeStartedWithStorageMessage
-				this.instance.log.p("Exchange with storage started.");
-				this.character.updateState(CharacterState.IN_EXCHANGE, true);
-				return true;
-			case 5509 : // ExchangeIsReadyMessage 
-				ExchangeIsReadyMessage EIRM = new ExchangeIsReadyMessage(msg);
-				if(EIRM.id != this.character.infos.characterId) {
-					this.instance.log.p("Exchange validated by peer.");
-					this.character.updateState(CharacterState.EXCHANGE_VALIDATED, true);
-				}
-				return true;
-			case 5502 : // LeaveDialogMessage
-				LeaveDialogMessage LDM = new LeaveDialogMessage(msg);
-				if(LDM.dialogType == DialogTypeEnum.DIALOG_DIALOG) {
-					this.instance.log.p("Dialog window closed.");
-					this.character.updateState(CharacterState.DIALOG_DISPLAYED, false);
-				}
-				else if(LDM.dialogType == DialogTypeEnum.DIALOG_EXCHANGE) {
-					this.instance.log.p("Exchange closed.");
-					this.character.updateState(CharacterState.IN_EXCHANGE, false);
-				}
-				else
-					this.instance.log.p("Unknown dialog window closed.");
-				return true;
-			case 5628 : // ExchangeLeaveMessage
-				ExchangeLeaveMessage ELM = new ExchangeLeaveMessage(msg);
-				this.character.roleplayContext.lastExchangeOutcome = ELM.success;
-				if(this.character.inState(CharacterState.IN_EXCHANGE)) // on quitte un échange
-					this.character.updateState(CharacterState.IN_EXCHANGE, false);
-				else { // on refuse un échange
-					this.character.roleplayContext.actorDemandingExchange = 0;
-					this.character.updateState(CharacterState.PENDING_DEMAND, false);
-				}
-				return true;
-			case 6036 : // StorageObjectsUpdateMessage
-				this.instance.log.p("Bank transfer done.");
-				this.character.updateState(CharacterState.BANK_TRANSFER, true);
-				return true;
-			case 5586 : // PartyInvitationMessage
-				PartyInvitationMessage PIM = new PartyInvitationMessage(msg);
-				this.instance.log.p("Party invitation received.");
-				if(Controller.getInstance().isWorkmate(PIM.fromId)) {
-					PartyAcceptInvitationMessage PAIM = new PartyAcceptInvitationMessage();
-					PAIM.partyId = PIM.partyId;
-					PAIM.serialize();
-					this.instance.outPush(PAIM);
-					this.instance.log.p("Party invitation acceptation sent.");
-				}
-				return true;
-			case 5576 : // PartyJoinMessage
-				PartyJoinMessage PJM = new PartyJoinMessage(msg);
-				this.character.partyManager.partyJoined(PJM.partyId, PJM.members);
-				this.character.updateState(CharacterState.IN_PARTY, true);
-				return true;
-			case 6306 : // PartyNewMemberMessage
-				PartyNewMemberMessage PNMM = new PartyNewMemberMessage(msg);
-				this.character.partyManager.addPartyMember(PNMM.memberInformations);
-				this.character.updateState(CharacterState.NEW_PARTY_MEMBER, true);
-				return true;
-			case 5579 : // PartyMemberRemoveMessage
-				PartyMemberRemoveMessage PMRM = new PartyMemberRemoveMessage(msg);
-				this.character.partyManager.removePartyMember(PMRM.leavingPlayerId);
-				return true;
-			case 6342 : // PartyMemberInFightMessage
-				PartyMemberInFightMessage PMIFM = new PartyMemberInFightMessage(msg);
-				this.character.partyManager.setFightId(PMIFM.fightId);
-				this.character.updateState(CharacterState.FIGHT_LAUNCHED, true);
-				return true;
-			case 5575 : // PartyUpdateMessage
-				PartyUpdateMessage PUM = new PartyUpdateMessage(msg);
-				this.character.partyManager.updatePartyMember(PUM.memberInformations);
-				return true;
-			case 5594 : // PartyLeaveMessage
-			case 6261 : // PartyDeletedMessage
-				this.character.partyManager.partyLeft();
-				this.character.updateState(CharacterState.IN_PARTY, false);
-				return true;
-			case 6134 : // PopupWarningMessage
-				PopupWarningMessage PWM = new PopupWarningMessage(msg);
-				this.instance.log.p("Popup received by " + PWM.author + " that contains : \"" + PWM.content + "\".");
-				try {
-					Thread.sleep(PWM.lockDuration * 1000); // attendre le nombre de secondes indiqué
-				} catch (InterruptedException e) {
-					Thread.currentThread().interrupt();
-				}
-				return true;
-			case 6154 : // CheckFileRequestMessage
-				CheckFileRequestMessage CFRM = new CheckFileRequestMessage(msg);
-				this.instance.log.p("Request for check file \"" + CFRM.filename + "\" received.");
-				CheckFileMessage CFM = new CheckFileMessage();
-				MessageDigest md;
-				try {
-					md = MessageDigest.getInstance("MD5");
-					byte[] filenameBytes = CFRM.filename.getBytes("UTF-8");
-					CFM.filenameHash = new String(md.digest(filenameBytes), "UTF-8");
-				} catch(Exception e) {
-					throw new FatalError(e);
-				}
-				File file = new File(CFRM.filename);
-				if(file == null || !file.exists())
-					CFM.value = "-1";
-				else {
-					ByteArray buffer = ByteArray.fileToByteArray(CFRM.filename);
-					if(buffer == null)
-						CFM.value = "-1";
-					if(CFM.value.equals("")) {
-						if(CFRM.type == 0)
-							CFM.value = String.valueOf(buffer.getSize());
-						else if(CFRM.type == 1)
-							try {
-								CFM.value = new String(md.digest(buffer.bytes()), "UTF-8");
-							} catch(Exception e) {
-								throw new FatalError(e);
-							}
-					}
-				}
-				CFM.type = CFRM.type;
-				this.instance.outPush(CFM);
-				this.instance.log.p(CFM.filenameHash);
-				this.instance.log.p(String.valueOf(CFM.type));
-				this.instance.log.p(CFM.value);
-				return true;
-			case 6029 : // AccountLoggingKickedMessage
-				this.instance.log.p("Banned by a moderator.");
-				return true;
-			case 5618 : // NpcDialogCreationMessage
-				this.instance.log.p("NPC dialog displayed.");
-				this.character.updateState(CharacterState.DIALOG_DISPLAYED, true);
-				return true;
-			case 6384 : // InteractiveUseErrorMessage
-				throw new FatalError("Error during use of a interactive.");
-		}
-		return false;
+	
+	protected void process(BasicWhoIsMessage BWIM) {
+		this.instance.log.p("Whois response received.");
+		if(BWIM.playerName == Main.MODERATOR_NAME && BWIM.playerState != 0)
+			Controller.getInstance().deconnectAllInstances("The moderator is online.", false, false);
+		else
+			this.character.updateState(CharacterState.WHOIS_RESPONSE, true);
 	}
 	
-	private void systemMessageDisplay(SystemMessageDisplayMessage msg) {
-		InfoMessage infoMsg = InfoMessage.getInfoMessageById(40000 + msg.msgId);
+	protected void process(TextInformationMessage TIM) {
+		if(TIM.msgType == 1 && TIM.msgId == 245) // limite de 200 combats par jour atteinte
+			Controller.getInstance().deconnectCurrentInstance("Limit of 200 fights per day reached.", false, false);
+		else {
+			this.instance.log.p("Text information received, reading...");
+			InfoMessage infoMessage = InfoMessage.getInfoMessageById((TIM.msgType * 10000) + TIM.msgId);
+			int textId;
+			Object[] parameters;
+			if(infoMessage != null) {
+				textId = infoMessage.textId;
+				if(TIM.parameters.size() > 0) {
+					String parameter = TIM.parameters.get(0);
+					if(parameter != null && parameter.indexOf("~") == -1)
+						parameters = parameter.split("~");
+					else
+						parameters = (String[]) TIM.parameters.toArray();
+				}
+			}
+			else {
+				this.instance.log.p("Information message " + (TIM.msgType * 10000 + TIM.msgId) + " cannot be found.");
+				if(TIM.msgType == TextInformationTypeEnum.TEXT_INFORMATION_ERROR)
+					textId = InfoMessage.getInfoMessageById(10231).textId;
+				else
+					textId = InfoMessage.getInfoMessageById(207).textId;
+				parameters = new String[1];
+				parameters[0] = TIM.msgId;
+			}
+			String messageContent = I18n.getText(textId);
+			if(messageContent != null)
+				//this.instance.log.p(ParamsDecoder.applyParams(msgContent, parameters));
+				this.instance.log.p(messageContent);
+			else
+				this.instance.log.p("There is no message for id " + (TIM.msgType * 10000 + TIM.msgId) + ".");
+		}
+	}
+	
+	protected void process(SystemMessageDisplayMessage SMDM) {
+		InfoMessage infoMsg = InfoMessage.getInfoMessageById(40000 + SMDM.msgId);
 		String str;
 		if(infoMsg != null) {
 			str = I18n.getText(infoMsg.textId);
@@ -394,7 +104,182 @@ public class RoleplayContextFrame extends Frame {
 				//str = ParamsDecoder.applyParams(str, msg.parameters);
 		}
 		else
-			str = "Information message " + (40000 + msg.msgId) + " cannot be found.";
+			str = "Information message " + (40000 + SMDM.msgId) + " cannot be found.";
 		this.instance.log.p(str);
+	}
+	
+	protected void process(CharacterLoadingCompleteMessage CLCM) {
+		this.instance.log.graphicalFrame.setFightsWonLabel(0);
+		this.instance.log.graphicalFrame.setFightsLostLabel(0);
+		EmptyMessage EM1 = new EmptyMessage("FriendsGetListMessage");
+		EmptyMessage EM2 = new EmptyMessage("IgnoredGetListMessage");
+		EmptyMessage EM3 = new EmptyMessage("SpouseGetInformationsMessage");
+		EmptyMessage EM4 = new EmptyMessage("GameContextCreateRequestMessage");
+		//EmptyMessage EM5 = new EmptyMessage("ObjectAveragePricesGetMessage");
+		EmptyMessage EM6 = new EmptyMessage("QuestListRequestMessage");
+		PrismsListRegisterMessage PLRM = new PrismsListRegisterMessage();
+		PLRM.serialize();
+		ChannelEnablingMessage CEM = new ChannelEnablingMessage();
+		CEM.serialize();
+		ClientKeyMessage CKM = new ClientKeyMessage();
+		CKM.serialize(this.instance.id);
+		instance.outPush(EM1);
+		instance.outPush(EM2);
+		instance.outPush(EM3);
+		instance.outPush(CKM);
+		instance.outPush(EM4);
+		//instance.outPush(EM5);
+		instance.outPush(EM6);
+		instance.outPush(PLRM);
+		instance.outPush(CEM);
+	}
+	
+	protected void process(GameContextCreateMessage GCCM) {
+		if(GCCM.context == 1 && this.character.inState(CharacterState.IN_FIGHT)) {
+			this.character.updateState(CharacterState.IN_FIGHT, false);
+			this.character.updateState(CharacterState.IN_GAME_TURN, false);
+			if(this.character instanceof Fighter)
+				((Fighter) this.character).fightContext.clearFightContext();
+		}
+		else if(GCCM.context == 2) {
+			this.character.updateState(CharacterState.IS_LOADED, false);
+			this.character.updateState(CharacterState.IN_FIGHT, true);
+		}
+	}
+	
+	protected void process(SpellListMessage SLM) {
+		this.character.infos.loadSpellList(SLM.spells);
+	}
+	
+	protected void process(CurrentMapMessage CMM) {
+		this.character.infos.currentMap = MapsCache.loadMap(CMM.mapId);
+		MapInformationsRequestMessage MIRM = new MapInformationsRequestMessage();
+		MIRM.serialize(this.character.infos.currentMap.id);
+		instance.outPush(MIRM);
+	}
+	
+	protected void process(CharacterStatsListMessage CSLM) {
+		this.character.infos.stats = CSLM.stats;
+		this.instance.log.graphicalFrame.setEnergyLabel(this.character.infos.stats.energyPoints, this.character.infos.stats.maxEnergyPoints);
+		this.instance.log.graphicalFrame.setKamasLabel(this.character.infos.stats.kamas);
+		this.instance.log.graphicalFrame.setExperienceLabel((int) this.character.infos.stats.experience, (int) this.character.infos.stats.experienceNextLevelFloor);
+	}
+	
+	protected void process(CharacterLevelUpMessage CLUM) {
+		this.character.infos.level = CLUM.newLevel;
+		this.instance.log.graphicalFrame.setNameLabel(this.character.infos.characterName, this.character.infos.level);
+		this.character.updateState(CharacterState.LEVEL_UP, true);
+	}
+	
+	protected void process(MapComplementaryInformationsDataMessage MCIDM) {
+		this.character.roleplayContext.newContextActors(MCIDM.actors);
+		this.instance.log.p("Current map : " + MapPosition.getMapPositionById(this.character.infos.currentMap.id) + ".\nCurrent cell id : " + this.character.infos.currentCellId + ".\nCurrent area id : " + this.character.infos.currentMap.subareaId + ".");
+		this.instance.log.graphicalFrame.setMapLabel(String.valueOf(MapPosition.getMapPositionById(this.character.infos.currentMap.id)));
+		this.instance.log.graphicalFrame.setCellLabel(String.valueOf(this.character.infos.currentCellId));
+		this.character.updatePosition(this.character.infos.currentMap, this.character.infos.currentCellId);
+		this.character.updateState(CharacterState.IS_LOADED, true);
+	}
+	
+	protected void process(GameRolePlayShowActorMessage GRPSAM) {
+		this.character.roleplayContext.addContextActor(GRPSAM.informations);
+		this.character.updateState(CharacterState.NEW_ACTOR_ON_MAP, true);
+	}
+	
+	protected void process(GameContextRemoveElementMessage GCREM) {
+		this.character.roleplayContext.removeContextActor(GCREM.id);
+	}
+	
+	protected void process(GameMapMovementMessage GMMM) {
+		int position = GMMM.keyMovements.lastElement();
+		this.character.roleplayContext.updateContextActorPosition(GMMM.actorId, position);
+		if(GMMM.actorId == this.character.infos.characterId) {
+			this.character.infos.currentCellId = position;
+			this.instance.log.p("Next cell id after movement : " + position + ".");
+			this.instance.log.graphicalFrame.setCellLabel(String.valueOf(this.character.infos.currentCellId));
+			this.character.mvt.updatePosition(this.character.infos.currentCellId);
+			this.character.updateState(CharacterState.CAN_MOVE, true);
+		}
+	}
+	
+	protected void process(LifePointsRegenBeginMessage LPRBM) {
+		this.character.infos.regenRate = LPRBM.regenRate;
+	}
+	
+	protected void process(InventoryWeightMessage IWM) {
+		this.character.infos.weight = IWM.weight;
+		this.character.infos.weightMax = IWM.weightMax;
+		this.instance.log.graphicalFrame.setWeightLabel(this.character.infos.weight, this.character.infos.weightMax);
+		if(this.character.infos.weightMaxAlmostReached()) {
+			this.character.updateState(CharacterState.NEED_TO_EMPTY_INVENTORY, true);
+			this.instance.log.p("Inventory weight maximum almost reached, need to empty.");
+		}
+	}
+	
+	protected void process(PlayerStatusUpdateMessage PSUM) {
+		if(PSUM.playerId == this.character.infos.characterId) {
+			this.character.infos.status = PSUM.status.statusId;
+			this.instance.log.p("New status : " + this.character.infos.status + ".");
+		}
+	}
+	
+	protected void process(GameRolePlayPlayerLifeStatusMessage GRPPLSM) {
+		this.character.infos.healthState = GRPPLSM.state;
+	}
+	
+	protected void process(PopupWarningMessage PWM) {
+		this.instance.log.p("Popup received by " + PWM.author + " that contains : \"" + PWM.content + "\".");
+		try {
+			Thread.sleep(PWM.lockDuration * 1000); // attendre le nombre de secondes indiqué
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+		}
+	}
+	
+	protected void process(CheckFileRequestMessage CFRM) {
+		this.instance.log.p("Request for check file \"" + CFRM.filename + "\" received.");
+		CheckFileMessage CFM = new CheckFileMessage();
+		MessageDigest md;
+		try {
+			md = MessageDigest.getInstance("MD5");
+			byte[] filenameBytes = CFRM.filename.getBytes("UTF-8");
+			CFM.filenameHash = new String(md.digest(filenameBytes), "UTF-8");
+		} catch(Exception e) {
+			throw new FatalError(e);
+		}
+		File file = new File(CFRM.filename);
+		if(file == null || !file.exists())
+			CFM.value = "-1";
+		else {
+			ByteArray buffer = ByteArray.fileToByteArray(CFRM.filename);
+			if(buffer == null)
+				CFM.value = "-1";
+			if(CFM.value.equals("")) {
+				if(CFRM.type == 0)
+					CFM.value = String.valueOf(buffer.getSize());
+				else if(CFRM.type == 1)
+					try {
+						CFM.value = new String(md.digest(buffer.bytes()), "UTF-8");
+					} catch(Exception e) {
+						throw new FatalError(e);
+					}
+			}
+		}
+		CFM.type = CFRM.type;
+		this.instance.outPush(CFM);
+		this.instance.log.p(CFM.filenameHash);
+		this.instance.log.p(String.valueOf(CFM.type));
+		this.instance.log.p(CFM.value);
+	}
+	
+	protected void process(GameMapNoMovementMessage GMNMM) {
+		throw new FatalError("Movement refused by server.");
+	}
+	
+	protected void process(InteractiveUseErrorMessage IUEM) {
+		throw new FatalError("Error during use of a interactive.");
+	}
+	
+	protected void process(AccountLoggingKickedMessage ALKM) {
+		throw new FatalError("Kicked from the game server.");
 	}
 }

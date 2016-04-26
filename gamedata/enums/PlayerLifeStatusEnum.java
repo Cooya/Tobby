@@ -1,4 +1,4 @@
-package gamedata.character;
+package gamedata.enums;
 
 public abstract class PlayerLifeStatusEnum {
 	public static final int STATUS_ALIVE_AND_KICKING = 0;

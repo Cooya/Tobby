@@ -1,6 +1,6 @@
-package gamedata.context;
+package gamedata.enums;
 
-public class TextInformationTypeEnum {
+public abstract class TextInformationTypeEnum {
 	public static final int TEXT_INFORMATION_MESSAGE = 0;
     public static final int TEXT_INFORMATION_ERROR = 1;
     public static final int TEXT_INFORMATION_PVP = 2;

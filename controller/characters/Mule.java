@@ -16,13 +16,13 @@ public class Mule extends Character {
 	private static final int BANK_OUTSIDE_MAP_ID = 84674566;
 	
 	private int waitingMapId;
-	private Vector<Fighter> customers;
+	private Vector<Character> customers;
 	private Lock lock;
 
 	public Mule(Instance instance, String login, String password, int serverId, int breed) {
 		super(instance, login, password, serverId, breed);
 		this.waitingMapId = BANK_OUTSIDE_MAP_ID; // banque d'Astrub
-		this.customers = new Vector<Fighter>();
+		this.customers = new Vector<Character>();
 		this.lock = new ReentrantLock();
 	}
 	
@@ -30,11 +30,11 @@ public class Mule extends Character {
 		return this.waitingMapId;
 	}
 	
-	public void newCustomer(Fighter customer) {
+	public void newCustomer(Character customer) {
 		this.lock.lock();
 		this.customers.add(customer);
 		this.lock.unlock();
-		customer.setMule(this);
+		((Fighter) customer).setMule(this);
 		customer.updateState(CharacterState.MULE_AVAILABLE, inState(CharacterState.MULE_AVAILABLE));
 		this.instance.log.p("Customer " + customer.infos.login + " added to the customers list.");
 	}
@@ -46,24 +46,32 @@ public class Mule extends Character {
 		this.lock.unlock();
 	}
 	
+	public boolean isCustomer(double characterId) {
+		for(Character customer : this.customers)
+			if(customer.infos.characterId == characterId)
+				return true;
+		return false;
+	}
+	
 	private void broadcastAvailability(boolean value) {
+		updateState(CharacterState.MULE_AVAILABLE, value);
 		this.lock.lock();
-		for(Fighter customer : this.customers)
+		for(Character customer : this.customers)
 			customer.updateState(CharacterState.MULE_AVAILABLE, value);
 		this.lock.unlock();
 	}
 	
 	private void broadcastDeconnection() {
 		this.lock.lock();
-		for(Fighter customer : this.customers) {
+		for(Character customer : this.customers) {
 			customer.updateState(CharacterState.MULE_AVAILABLE, false);
-			customer.setMule(null);
+			((Fighter) customer).setMule(null);
 		}
 		this.lock.unlock();
 	}
 
 	private void goOutAstrubBank() {
-		this.mvt.moveTo(396, false); // on sort de la banque
+		this.mvt.moveTo(396); // on sort de la banque
 		updateState(CharacterState.IS_LOADED, false); // important (porte de la banque)
 	}
 
@@ -87,10 +95,8 @@ public class Mule extends Character {
 			broadcastAvailability(true);
 			if(waitState(CharacterState.PENDING_DEMAND)) { // on attend qu'un combattant lance un échange
 				this.instance.log.p("Exchange demand received.");
-				if(this.social.processExchangeDemand(this.roleplayContext.actorDemandingExchange)) {
+				if(this.social.processExchangeDemand(this.roleplayContext.actorDemandingExchange))
 					broadcastAvailability(false);
-					this.social.acceptExchangeAsReceiver();
-				}
 			}
 		}
 		

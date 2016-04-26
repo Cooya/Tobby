@@ -3,7 +3,7 @@ package messages.character;
 import messages.Message;
 import utilities.ByteArray;
 
-public class CharacterLevelUpMessage extends Message{
+public class CharacterLevelUpMessage extends Message {
 	public int newLevel = 0;
 
 	public CharacterLevelUpMessage(Message msg) {

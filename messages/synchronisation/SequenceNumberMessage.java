@@ -11,8 +11,8 @@ public class SequenceNumberMessage extends Message {
 	
 	public void serialize(int sequenceNumber) {
 		ByteArray buffer = new ByteArray();
-		buffer.writeShort((short) sequenceNumber);
+		buffer.writeShort(sequenceNumber);
 		
-		completeInfos(buffer);
+		super.completeInfos(buffer);
 	}
 }

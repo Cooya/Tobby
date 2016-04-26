@@ -4,11 +4,11 @@ import java.util.HashMap;
 import java.util.Vector;
 
 import main.FatalError;
-import gamedata.character.BreedEnum;
 import gamedata.character.CharacterCharacteristicsInformations;
-import gamedata.character.Elements;
-import gamedata.character.PlayerLifeStatusEnum;
 import gamedata.d2p.ankama.Map;
+import gamedata.enums.BreedEnum;
+import gamedata.enums.ElementEnum;
+import gamedata.enums.PlayerLifeStatusEnum;
 import gamedata.inventory.SpellItem;
 
 public class CharacterInformations {
@@ -77,12 +77,12 @@ public class CharacterInformations {
 		if(this.breed == BreedEnum.Cra) { // crâ
 			this.attackSpell = 161; // flèche magique
 			this.attackSpellActionPoints = 4;
-			this.element = Elements.intelligence;
+			this.element = ElementEnum.intelligence;
 		}
 		else if(this.breed == BreedEnum.Sadida) { // sadida
 			this.attackSpell = 183; // ronce
 			this.attackSpellActionPoints = 3;
-			this.element = Elements.strength;
+			this.element = ElementEnum.strength;
 		}
 		else
 			throw new FatalError("Unhandled breed character.");

@@ -62,7 +62,7 @@ public class Message {
 		this.id = get(msgName);
 	}
 	
-	public Message() { // message à envoyer
+	public Message() {
 		this.id = get(getClass().getSimpleName());
 	}
 	
@@ -125,17 +125,17 @@ public class Message {
 	        return 0;
 	}
 	
-	public byte[] makeRaw() {
+	public byte[] pack() {
 		ByteArray buffer = new ByteArray(2 + this.lenofsize + this.size);
-		buffer.writeShort((short) (id << 2 | lenofsize));
+		buffer.writeShort(id << 2 | lenofsize);
 		if(this.lenofsize == 0) return buffer.bytes();
 		else if(this.lenofsize == 1)
-			buffer.writeByte((byte) this.size);
+			buffer.writeByte(this.size);
 		else if(this.lenofsize == 2)
-			buffer.writeShort((short) size);
+			buffer.writeShort(size);
 		else {
-			buffer.writeByte((byte) (this.size >> 16));
-			buffer.writeShort((short) (size & 65535));
+			buffer.writeByte(this.size >> 16);
+			buffer.writeShort(size & 65535);
 		}
 		buffer.writeBytes(this.content);
 		return buffer.bytes();

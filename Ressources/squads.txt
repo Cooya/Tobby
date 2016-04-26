@@ -2,8 +2,11 @@ team1
 maxlebgdu0
 maxlebgdu1
 maxlebgdu2
-maxlebgdu11
+maxlebgdu3
+maxlebgdu4
+maxlebgdu5
 
 team2
+maxlebgdu11
 maxlebgdu97
 maxlebgdu99

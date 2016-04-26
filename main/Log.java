@@ -4,27 +4,31 @@ import gui.CharacterFrame;
 
 import java.io.PrintWriter;
 import java.util.Date;
+import java.util.concurrent.locks.ReentrantLock;
 
 import messages.Message;
 
 public class Log {
-	private static final boolean DEBUG = false;
 	private static final int WRITE_INTERVAL = 10;
 	private static final String LOG_PATH = System.getProperty("user.dir") + "/Ressources/Logs/";
 	private static final String EOL = System.getProperty("line.separator");
 	private PrintWriter writer;
-	private String writeBuffer;
+	private StringBuilder logString;
+	private StringBuilder writeBuffer;
 	private int writeCounter;
+	private ReentrantLock lock;
 	public CharacterFrame graphicalFrame;
 	
 	public Log(String characterName, CharacterFrame graphicalFrame) {
 		try {
-			writer = new PrintWriter(LOG_PATH + characterName + ".txt", "UTF-8");
+			this.writer = new PrintWriter(LOG_PATH + characterName + ".txt", "UTF-8");
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
-		this.writeBuffer = "";
+		this.logString = new StringBuilder();
+		this.writeBuffer = new StringBuilder();
 		this.writeCounter = 0;
+		this.lock = new ReentrantLock();
 		this.graphicalFrame = graphicalFrame;
 	}
 	
@@ -32,15 +36,15 @@ public class Log {
 		if(Thread.currentThread().isInterrupted())
 			return;
 		
-		String str = "";
-		int id = msg.getId();
-		String name = Message.get(id);
+		// ajout de la date et de l'heure
+		this.logString.append("[").append(Main.DATE_FORMAT.format(new Date())).append("] ");
+		
 		//int lenofsize = msg.getLenOfSize();
 		//int size = msg.getSize();
 		if(msgDirection == "r" || msgDirection == "reception")
-			str += "Receiving message " + id + " (" + name + ")";
+			this.logString.append("Receiving message ").append(msg.getId()).append(" (").append(msg.getName()).append(")");
 		else if(msgDirection == "s" || msgDirection == "sending")
-			str += "Sending message " + id + " (" + name + ")";
+			this.logString.append("Sending message " + msg.getId() + " (" + msg.getName() + ")");
 		/*
 		if(lenofsize > 1)
 			str += "Length of size : " + lenofsize + " bytes" + EOL;
@@ -51,46 +55,46 @@ public class Log {
 		else
 			str += "Size : " + size + " byte" + EOL;
 		*/
-		if(name == null && this.graphicalFrame != null)
-			this.graphicalFrame.appendText("[" + Main.DATE_FORMAT.format(new Date()) + "] " + str);
-		writeIntoLogFile("[" + Main.DATE_FORMAT.format(new Date()) + "] " + str + EOL);
+		this.logString.append(EOL);
+		writeIntoLogFile(this.logString);
+		this.logString.setLength(0);
 	}
 	
 	public void p(String str) {
 		if(Thread.currentThread().isInterrupted())
 			return;
 		
-		if(this.graphicalFrame != null) {
-			if(DEBUG)
-				graphicalFrame.appendText("[" + Main.DATE_FORMAT.format(new Date()) + "] " + str + EOL);
-			else
-				graphicalFrame.appendText("[" + Main.DATE_FORMAT.format(new Date()) + "] " + str);
-		}
-		writeIntoLogFile("[" + Main.DATE_FORMAT.format(new Date()) + "] " + str + EOL);
-	}
-	
-	public static void err(String msg) {
-		syso("ERROR : " + msg);
+		this.logString.append("[").append(Main.DATE_FORMAT.format(new Date())).append("] ").append(str).append(EOL);
+		if(this.graphicalFrame != null)
+			graphicalFrame.appendText(this.logString);
+		writeIntoLogFile(this.logString);
+		this.logString.setLength(0);
 	}
 	
 	public static void info(String msg) {
-		syso("INFO : " + msg);
+		System.out.println("[" + Main.DATE_FORMAT.format(new Date()) + "] INFO : " + msg);
 	}
 	
-	private synchronized static void syso(String msg) {
-		System.out.println(msg);
+	public static void warn(String msg) {
+		System.out.println("[" + Main.DATE_FORMAT.format(new Date()) + "] WARNING : " + msg);
+	}
+	
+	public static void err(String msg) {
+		System.out.println("[" + Main.DATE_FORMAT.format(new Date()) + "] ERROR : " + msg);
 	}
 	
 	public void flushBuffer() {
 		this.writer.print(this.writeBuffer);
 		this.writer.flush();
-		this.writeBuffer = "";
+		this.writeBuffer.setLength(0);
 		this.writeCounter = 0;
 	}
 	
-	private void writeIntoLogFile(String msg) {
-		this.writeBuffer += msg;
+	private void writeIntoLogFile(StringBuilder msg) {
+		this.lock.lock();
+		this.writeBuffer.append(msg);
 		if(++this.writeCounter == WRITE_INTERVAL)
 			flushBuffer();
+		this.lock.unlock();
 	}
 }

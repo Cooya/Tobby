@@ -1,12 +1,11 @@
 package controller.characters;
 
-import gamedata.character.PlayerStatusEnum;
+import gamedata.enums.PlayerStatusEnum;
 import gui.Controller;
 import controller.CharacterState;
 import controller.api.FightAPI;
 import main.Instance;
 import main.Log;
-import main.Main;
 import messages.context.GameContextReadyMessage;
 
 public class LoneFighter extends Fighter {
@@ -20,7 +19,6 @@ public class LoneFighter extends Fighter {
 	@Override
 	public void run() {
 		waitState(CharacterState.IS_LOADED); // attendre l'entrée en jeu
-		checkIfModeratorIsOnline(Main.MODERATOR_NAME);
 		this.social.changePlayerStatus(PlayerStatusEnum.PLAYER_STATUS_AFK);
 		this.fight.updateFightArea(this.infos.level);
 		
@@ -53,7 +51,6 @@ public class LoneFighter extends Fighter {
 				if(this.fight.fightSearchManager()) { // lancement de combat
 					if(waitState(CharacterState.IN_FIGHT)) { // on vérifie si le combat a bien été lancé (avec timeout)
 						this.fight.fightManager(false);
-						checkIfModeratorIsOnline(Main.MODERATOR_NAME);
 						break;
 					}
 				}

@@ -28,11 +28,14 @@ public class NetworkInterface extends Thread {
 	public void run() {
 		this.instance.log.p("Connection to authentification server, waiting response...");
 		connectionToServer(Main.AUTH_SERVER_IP, Main.SERVER_PORT);
-		this.instance.log.p("Deconnected from authentification server.");
-		
-		if(!isInterrupted() && gameServerIP != null) {
+		if(!isInterrupted()) {
+			if(this.gameServerIP == null)
+				throw new FatalError("Deconnected from authentification server for unknown reason.");
+			this.instance.log.p("Deconnected from authentification server.");
 			this.instance.log.p("Connection to game server, waiting response...");
-			connectionToServer(gameServerIP, Main.SERVER_PORT);
+			connectionToServer(this.gameServerIP, Main.SERVER_PORT);
+			if(!isInterrupted())
+				throw new FatalError("Deconnected from game server for unknown reason.");
 			this.instance.log.p("Deconnected from game server.");
 		}
 		Log.info("Thread receiver of instance with id = " + instance.id + " terminated.");
@@ -46,7 +49,7 @@ public class NetworkInterface extends Thread {
 		this.serverCo = new Connection.Client(IP, port);
 		while(!isInterrupted()) {
 			try {
-				this.instance.log.p("DEBUG : Waiting for reception.");
+				//this.instance.log.p("DEBUG : Waiting for reception.");
 				if((bytesReceived = this.serverCo.receive(buffer)) == -1)
 					break;
 				canPing = false;
@@ -65,7 +68,7 @@ public class NetworkInterface extends Thread {
 					break;
 				throw new FatalError(e); // si la connexion a été coupée côté serveur
 			}
-			this.instance.log.p("DEBUG : " + bytesReceived + " bytes received from server.");
+			//this.instance.log.p("DEBUG : " + bytesReceived + " bytes received from server.");
 			processMsgStack(reader.processBuffer(new ByteArray(buffer, bytesReceived)));
 		}
 		this.serverCo.close();
@@ -100,12 +103,12 @@ public class NetworkInterface extends Thread {
 			while (!isInterrupted()) {
 				if((msg = instance.outPull()) != null) {
 					latency.setLatestSent();
-					serverCo.send(msg.makeRaw());
+					serverCo.send(msg.pack());
 					instance.log.p("s", msg);
 				}
 				else
 					try {
-						instance.log.p("DEBUG : Waiting for sending.");
+						//instance.log.p("DEBUG : Waiting for sending.");
 						wait();
 					} catch(Exception e) {
 						interrupt();

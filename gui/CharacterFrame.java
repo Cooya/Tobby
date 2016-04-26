@@ -16,7 +16,6 @@ import controller.FightOptions;
 public class CharacterFrame extends JInternalFrame {
 	protected static final int FRAME_SIZE = 400;
 	private static final long serialVersionUID = 2448473860592287858L;
-	private static String EOL = System.getProperty("line.separator");
 	protected int id;
 	private Vector<String> logVector;
 	private	JTabbedPane tabbedPane;
@@ -101,8 +100,8 @@ public class CharacterFrame extends JInternalFrame {
 		add(tabbedPane);
 	}
 
-	public synchronized void appendText(String text) {
-		this.logVector.add(text + EOL);
+	public synchronized void appendText(StringBuilder text) {
+		this.logVector.add(text.toString());
 		if(this.logVector.size() > 1000) {
 			for(int i = 0; i < 500; ++i)
 				this.logVector.remove(i);
@@ -111,7 +110,7 @@ public class CharacterFrame extends JInternalFrame {
 				this.textArea.append(str);
 		}
 		else
-			this.textArea.append(text + EOL);
+			this.textArea.append(text.toString());
 	}
 	
 	public void setNameLabel(String name, int level) {

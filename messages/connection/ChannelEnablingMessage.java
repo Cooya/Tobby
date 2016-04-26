@@ -13,9 +13,9 @@ public class ChannelEnablingMessage extends Message {
 
 	public void serialize() {
 		ByteArray buffer = new ByteArray();
-		buffer.writeByte((byte) this.channel);
+		buffer.writeByte(this.channel);
 		buffer.writeBoolean(this.enable);
 		
-		completeInfos(buffer);
+		super.completeInfos(buffer);
 	}
 }

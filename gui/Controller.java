@@ -1,5 +1,6 @@
 package gui;
 
+import frames.Processor;
 import gui.Model.Account;
 import gui.View.FighterOptionsPanel;
 import gui.View.LoginPanel;
@@ -91,28 +92,43 @@ public class Controller {
 					while(Thread.activeCount() > 1) // UI thread
 						try {
 							wait();
-						} catch(InterruptedException e) { // impossible
+						} catch(InterruptedException e) {
 							e.printStackTrace();
-							exit();
+							exit("Thread UI interrupted.");
 						}
 					
 					// réconnexion de toutes les instances si spécifié
 					if(reconnection) {
-						Emulation.restartLauncher(); // redémarrage du launcher (avec attente au moment du kill)
+						Emulation.killLauncher();
+						Emulation.runLauncher();
 						model.restartAllInstances(); // redémarrage de toutes les instances
 					}
 				}
 			});
 		} catch(InvocationTargetException | InterruptedException e) {
 			e.printStackTrace();
-			exit();
+			exit("Error during invocation of the deconnection task.");
 		}
 	}
 
-	// fonction appelée lors de la fermeture de l'application
-	protected void exit() {
+	// fonction appelée lors d'une erreur critique
+	public void exit(String reason) {
 		this.filesManager.saveAccountsInFile();
 		Emulation.killLauncher();
+		Log.err(reason);
+		System.exit(0);
+	}
+	
+	// fonction appelée à la fermeture de l'application
+	public void exit() {
+		long sum = 0;
+		for(long l : Processor.perfTest) // TODO
+			sum += l;
+		System.out.println("Average time : " + sum / Processor.perfTest.size());
+		
+		this.filesManager.saveAccountsInFile();
+		Emulation.killLauncher();
+		Log.info("Application closed by user.");
 		System.exit(0);
 	}
 	
@@ -128,15 +144,6 @@ public class Controller {
 		frame.setVisible(true);
 		this.model.createInstance(account, areaId, frame, captain);
 	}
-
-	// méthode déclenchée par la fermeture d'une frame graphique
-	private synchronized void killInstance(JInternalFrame graphicalFrame) {
-		int instanceId = this.view.getInstance(graphicalFrame).id;
-		this.view.removeCharacterFrame(graphicalFrame);
-		Instance instance = this.model.removeInstance(instanceId);
-		if(instance != null)
-			instance.deconnectionOrder(true);
-	}
 	
 	// déconnexion d'une instance avec suppression de l'instance ou non (la frame graphique reste présente)
 	private synchronized void deconnectInstance(Instance instance, String reason, boolean forced, boolean reconnection) {
@@ -145,6 +152,16 @@ public class Controller {
 		instance.deconnectionOrder(forced);
 		if(!reconnection)
 			this.model.removeInstance(instance.id);
+		// TODO -> reconnexion à implémenter
+	}
+	
+	// méthode déclenchée par la fermeture d'une frame graphique
+	private synchronized void killInstance(JInternalFrame graphicalFrame) {
+		int instanceId = this.view.getInstance(graphicalFrame).id;
+		this.view.removeCharacterFrame(graphicalFrame);
+		Instance instance = this.model.removeInstance(instanceId);
+		if(instance != null)
+			instance.deconnectionOrder(true);
 	}
 
 	// écoute du clic sur le bouton "load account"

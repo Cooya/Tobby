@@ -1,27 +1,64 @@
 package frames;
 
+import gui.Controller;
+
 import java.lang.reflect.Method;
 import java.util.Hashtable;
+import java.util.Map;
 import java.util.Vector;
 
+import utilities.Reflection;
 import controller.characters.Character;
 import main.Instance;
+import main.Log;
 import messages.Message;
 
+@SuppressWarnings("unchecked")
 public class Processor {
 	private static Vector<Class<? extends Frame>> processFrames = new Vector<Class<? extends Frame>>();
-	private static Hashtable<String, ProcessMethod> processMethods = new Hashtable<String, ProcessMethod>();
+	private static Map<String, Class<Message>> deserializationClasses = new Hashtable<String, Class<Message>>();
+	private Map<String, Process> processTable;
 	
+	public static Vector<Long> perfTest = new Vector<Long>(); // TODO
+
 	static {
-		processFrames.add(ConnectionFrame.class);
-		processFrames.add(SynchronisationFrame.class);
-		processFrames.add(FightContextFrame.class);
-		processFrames.add(FightContextFrame.class);
+		Class<?>[] classesArray;
+		
+		// récupération des différentes frames de traitement dans le package "frames"
+		try {
+			classesArray = Reflection.getClasses("frames");
+			for(Class<?> cl : classesArray)
+				if(cl.getSuperclass() == Frame.class)
+					processFrames.add((Class<? extends Frame>) cl);
+		} catch(Exception e) {
+			e.printStackTrace();
+			Controller.getInstance().exit("Impossible to load frame classes.");
+		}
+		
+		// récupération de toutes les classes de sérialisation/désérialisation des messages dans le package "messages"
+		try {
+			classesArray = Reflection.getClasses("messages");
+			for(Class<?> cl : classesArray)
+				deserializationClasses.put(cl.getSimpleName(), (Class<Message>) cl);
+		} catch(Exception e) {
+			e.printStackTrace();
+			Controller.getInstance().exit("Impossible to load deserialization classes.");
+		}
+		
+		/*
+		for(Class<? extends Frame> processFrame : processFrames) {
+			for(Method method : processFrame.getDeclaredMethods())
+				System.out.println(method);
+			System.out.println();
+		}
+		*/
 	}
-	
+
 	public Processor(Instance instance, Character character) {
+		this.processTable = new Hashtable<String, Process>();
 		Frame frame;
 		Method[] methods;
+		String msgName;
 		for(Class<? extends Frame> processFrame : processFrames) {
 			try {
 				frame = processFrame.getConstructor(Instance.class, Character.class).newInstance(instance, character);
@@ -31,33 +68,43 @@ public class Processor {
 			}
 			methods = processFrame.getDeclaredMethods();
 			for(Method method : methods)
-				processMethods.put(method.getName(), new ProcessMethod(method, frame));
+				if(method.getName().equals("process")) {
+					msgName = method.getParameterTypes()[0].getSimpleName();
+					this.processTable.put(msgName, new Process(deserializationClasses.get(msgName), frame));
+				}
 		}
 	}
 
 	public void processMessage(Message msg) {
 		String name = msg.getName();
-		if(name == null) // message inconnu
+		if(name == null) { // message inconnu
+			Log.warn("Unknown message with id = " + msg.getId() + ".");
 			return;
-		ProcessMethod processMethod = processMethods.get(msg.getName());
-		if(processMethod == null) // message n'ayant pas de traitement associé
-			return;
-		processMethod.invoke();
-	}
-	
-	private class ProcessMethod {
-		private Method method;
-		private Frame frame;
-		
-		private ProcessMethod(Method method, Frame frame) {
-			this.method = method;
-			this.frame = frame;
 		}
-		
-		private void invoke() {
+		Process process = this.processTable.get(msg.getName());
+		if(process == null) // message n'ayant pas de traitement associé
+			return;
+		process.process(msg);
+	}
+
+	private class Process {
+		private Class<Message> deserializationClass; // classe de désérialisation/sérialisation du message
+		private Frame processFrame; // frame où se situe la méthode "process()"
+
+		private Process(Class<Message> deserializationClass, Frame processFrame) {
+			this.deserializationClass = deserializationClass;
+			this.processFrame = processFrame;
+		}
+
+		private void process(Message msg) {
 			try {
-				this.method.invoke(this.frame);
-			} catch(Exception e) {
+				msg = this.deserializationClass.cast(msg);
+				msg = this.deserializationClass.getConstructor(Message.class).newInstance(msg);
+				long startTime = System.nanoTime(); 
+				this.processFrame.getClass().getDeclaredMethod("process", this.deserializationClass).invoke(processFrame, this.deserializationClass.cast(msg));
+				perfTest.add(System.nanoTime() - startTime);
+			}
+			catch(Exception e) {
 				e.printStackTrace();
 			}
 		}

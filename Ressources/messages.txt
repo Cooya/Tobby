@@ -47,6 +47,7 @@
 701 GameFightJoinRequestMessage
 702 GameFightJoinMessage
 703 GameFightPlacementPossiblePositionsMessage
+704 GameFightPlacementPositionRequestMessage
 707 GameFightOptionToggleMessage
 708 GameFightReadyMessage
 711 GameFightRemoveTeamMemberMessage
@@ -88,6 +89,7 @@
 1201 SpellUpgradeSuccessMessage
 1301 StartupActionsListMessage
 3009 InventoryWeightMessage
+3014 ObjectGroundRemovedMessage
 3016 InventoryContentMessage
 3017 ObjectGroundAddedMessage
 3023 ObjectQuantityMessage
@@ -96,6 +98,7 @@
 4001 FriendsGetListMessage
 4002 FriendsListMessage
 5001 InteractiveUseRequestMessage
+5002 InteractiveMapUpdateMessage
 5501 LeaveDialogRequestMessage
 5502 LeaveDialogMessage
 5503 SetUpdateMessage
@@ -174,6 +177,7 @@
 5925 ObjectGroundListAddedMessage
 5927 GameFightOptionStateUpdateMessage
 5937 GameRolePlayPlayerFightFriendlyRequestedMessage
+5944 ObjectGroundRemovedMultipleMessage
 5968 MountSetMessage
 5970 MountXpRatioMessage
 5996 GameRolePlayPlayerLifeStatusMessage
@@ -182,6 +186,7 @@
 6029 AccountLoggingKickedMessage
 6034 ObjectsDeletedMessage
 6036 StorageObjectsUpdateMessage
+6048 TeleportOnSameMapMessage
 6053 CinematicMessage
 6054 PartyUpdateLightMessage
 6058 AlignmentRankUpdateMessage
@@ -193,14 +198,17 @@
 6078 FriendWarnOnLevelGainStateMessage
 6084 CharacterFirstSelectionMessage
 6087 NotificationListMessage
+6090 NotificationUpdateFlagMessage
 6091 QuestStartedMessage
 6100 QueueStatusMessage
 6103 NotificationByServerMessage
 6113 GameActionFightDispellEffectMessage
+6114 GameRolePlaySpellAnimMessage
 6123 ChallengeTargetUpdateMessage
 6129 ExchangeStartedWithPodsMessage
 6132 GameActionFightNoSpellCastMessage
 6134 PopupWarningMessage
+6150 GameRolePlayDelayedActionFinishedMessage
 6154 CheckFileRequestMessage
 6156 CheckFileMessage
 6160 GuildMemberWarnOnConnectionStateMessage
@@ -216,6 +224,7 @@
 6236 ExchangeStartedWithStorageMessage
 6237 ServerExperienceModificatorMessage
 6253 RawDataMessage
+6256 PartyInvitationCancelledForGuestMessage
 6261 PartyDeletedMessage
 6265 SpouseStatusMessage
 6267 TrustStatusMessage
@@ -249,6 +258,7 @@
 6384 InteractiveUseErrorMessage
 6386 PlayerStatusUpdateMessage
 6387 PlayerStatusUpdateRequestMessage
+6425 GameRolePlayDelayedObjectUseMessage
 6434 ServerSessionConstantsMessage
 6440 PrismsListMessage
 6441 PrismsListRegisterMessage
@@ -268,3 +278,10 @@
 6613 ExchangeOfflineSoldItemsMessage
 6620 HavenBagPackListMessage
 6630 RoomAvailableUpdateMessage
+6654 SpellModifySuccessMessage
+6655 SpellModifyRequestMessage
+6658 DareSubscribedListMessage
+6663 DareCreatedListMessage
+6670 ExchangePodsModifiedMessage
+6677 DareRewardsListMessage
+6682 DareWonListMessage

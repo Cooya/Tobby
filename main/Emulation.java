@@ -1,7 +1,5 @@
 package main;
 
-import gui.Controller;
-
 import java.net.SocketTimeoutException;
 import java.util.LinkedList;
 import java.util.concurrent.locks.Lock;
@@ -25,6 +23,7 @@ public class Emulation {
 	private static Reader reader = new Reader();
 	private static Lock lock = new ReentrantLock();
 	private static Process launcherProcess;
+	private static Thread securityThread;
 
 	public static void runLauncher() {
 		if(!Processes.inProcess(LAUNCHER_PROCESS_NAME))
@@ -41,30 +40,57 @@ public class Emulation {
 			}
 		else
 			Log.info("AS launcher already in process.");
+		
+		// thread qui "secoue" le client toutes les 10 minutes
+		/*
+		securityThread = new Thread() {
+			@Override
+			public synchronized void run() {
+				while(true)
+					try {
+						wait(60000 * 10); // 10 minutes
+						shakeUpClient();
+					} catch(InterruptedException e) {
+						Log.info("Security thread terminated.");
+						return;
+					}
+			}
+		};
+		securityThread.start();
+		*/
 	}
 	
 	public static void killLauncher() {
+		// on coupe la connexion avec le launcher
+		if(securityThread != null) {
+			securityThread.interrupt();
+			securityThread = null;
+		}
 		if(launcherCo != null) {
-			launcherCo.close(); // on coupe la connexion
+			launcherCo.close();
 			launcherCo = null;
 			Log.info("Connection to AS launcher closed.");
 		}
-		if(launcherProcess != null) // et on tue le processus
+		
+		// et on tue le processus via l'objet Process ou via une commande Windows
+		if(launcherProcess != null)
 			launcherProcess.destroy();
 		else if(Processes.inProcess(LAUNCHER_PROCESS_NAME))
 			Processes.killProcess(LAUNCHER_PROCESS_NAME);
-	}
-	
-	public static void restartLauncher() {
-		killLauncher();
+		else { // processus inexistant
+			Log.info("As launcher process does not exist");
+			return;
+		}
+		
+		// on attend que le processus se termine
 		while(Processes.inProcess(LAUNCHER_PROCESS_NAME))
 			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
+				Thread.sleep(500);
+			} catch(InterruptedException e) {
 				e.printStackTrace();
+				return;
 			}
 		Log.info("AS launcher process killed.");
-		runLauncher();
 	}
 	
 	public static Message emulateServer(String login, String password, HelloConnectMessage HCM, IdentificationSuccessMessage ISM, RawDataMessage RDM, int instanceId) {
@@ -75,7 +101,7 @@ public class Emulation {
 		// simulation de l'authentification
 		ByteArray array = new ByteArray();
 		array.writeInt(1 + 2 + login.length() + 2 + password.length());
-		array.writeByte((byte) 1);
+		array.writeByte(1);
 		array.writeUTF(login);
 		array.writeUTF(password);
 		Instance.log("Sending credentials to AS launcher.");
@@ -89,7 +115,7 @@ public class Emulation {
 			clientDofusCo.waitClient();
 			Instance.log("Dofus client connected.");
 			
-			clientDofusCo.send(HCM.makeRaw());
+			clientDofusCo.send(HCM.pack());
 			Instance.log("HCM sent to Dofus client");
 			
 			byte[] buffer = new byte[Main.BUFFER_DEFAULT_SIZE];
@@ -98,21 +124,18 @@ public class Emulation {
 			Instance.log(bytesReceived + " bytes received from Dofus client.");
 			processMsgStack(reader.processBuffer(new ByteArray(buffer, bytesReceived)));
 			
-			clientDofusCo.send(ISM.makeRaw());
+			clientDofusCo.send(ISM.pack());
 			Instance.log("ISM sent to Dofus client");
-			clientDofusCo.send(RDM.makeRaw());
+			clientDofusCo.send(RDM.pack());
 			Instance.log("RDM sent to Dofus client");
 			
 			bytesReceived = clientDofusCo.receive(buffer);
 			Instance.log(bytesReceived + " bytes received from Dofus client.");
 			Message CIM = processMsgStack(reader.processBuffer(new ByteArray(buffer, bytesReceived)));
 			
-			array = new ByteArray();
-			array.writeInt(1 + 1);
-			array.writeByte((byte) 2);
-			array.writeByte((byte) instanceId);
 			Instance.log("Asking hash function to AS launcher.");
-			launcherCo.send(array.bytes());
+			byte[] bytes = {0, 0, 0, 2, 2, (byte) instanceId}; // taille (int) + id + instanceId
+			launcherCo.send(bytes);
 			
 			Instance.log("Deconnection from Dofus client.");
 			clientDofusCo.close();
@@ -135,8 +158,8 @@ public class Emulation {
 		lock.lock();
 		ByteArray bytes = new ByteArray(msg.getSize() + 2);
 		bytes.writeInt(1 + 1 + msg.getSize());
-		bytes.writeByte((byte) 3); 
-		bytes.writeByte((byte) instanceId);
+		bytes.writeByte(3); 
+		bytes.writeByte(instanceId);
 		bytes.writeBytes(msg);
 		launcherCo.send(bytes.bytes());
 		byte[] buffer = new byte[Main.BUFFER_DEFAULT_SIZE];
@@ -159,7 +182,7 @@ public class Emulation {
 			} catch(SocketTimeoutException e) {
 				lock.unlock();
 				Log.err("Timeout for launcher response, connection lost with the launcher.");
-				Controller.getInstance().deconnectAllInstances("Connection lost with the launcher.", true, true);
+				//Controller.getInstance().deconnectAllInstances("Connection lost with the launcher.", true, true);
 				return null;
 			} catch(Exception e) {
 				lock.unlock();
@@ -169,6 +192,19 @@ public class Emulation {
 		//Instance.log("Message hashed, " + size + " bytes received.");
 		lock.unlock();
 		return new ByteArray(array.bytesFromPos());
+	}
+	
+	@SuppressWarnings("unused")
+	private static void shakeUpClient() {
+		if(launcherCo == null) {
+			Log.err("Impossible to shake up the launcher, connection lost or not initialized.");
+			return;
+		}
+		Log.info("Shaking up the client.");
+		byte[] array = {0, 0, 0, 1, 4}; // nombre d'octets à envoyer (int) + identifiant de l'action à effectuer
+		lock.lock();
+		launcherCo.send(array);
+		lock.unlock();
 	}
 	
 	private static void connectToLauncher() {

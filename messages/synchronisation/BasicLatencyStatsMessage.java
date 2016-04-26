@@ -19,7 +19,7 @@ public class BasicLatencyStatsMessage extends Message {
     	this.max = max;
     	
     	ByteArray buffer = new ByteArray();
-    	buffer.writeShort((short) this.latency);
+    	buffer.writeShort(this.latency);
     	buffer.writeVarShort(this.sampleCount);
     	buffer.writeVarShort(this.max);
     	

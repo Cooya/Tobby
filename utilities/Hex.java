@@ -9,7 +9,7 @@ public class Hex {
 		if(len > 0)
 			str = "0" + str;
 		for(int i = 0; i < len; i += 2)
-			ba.writeByte((byte) Integer.parseInt(substr(str, i, 2), 16));
+			ba.writeByte(Integer.parseInt(substr(str, i, 2), 16));
 		return ba;
 	}
 	

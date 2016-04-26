@@ -1,6 +1,6 @@
-package gamedata.character;
+package gamedata.enums;
 
-public class Elements {
+public abstract class ElementEnum {
 	public static int strength = 10;
 	public static int vitality = 11;
 	public static int widsom = 12;

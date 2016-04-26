@@ -9,9 +9,10 @@ public class GameActionFightPointsVariationMessage extends AbstractGameActionMes
 
 	public GameActionFightPointsVariationMessage(Message msg) {
 		super(msg);
+		deserialize();
 	}
 
-	public void deserialize() {
+	private void deserialize() {
 		ByteArray buffer = new ByteArray(this.content);
 		super.deserialize(buffer);
 		this.targetId = buffer.readDouble();

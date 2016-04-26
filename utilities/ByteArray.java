@@ -255,8 +255,8 @@ public class ByteArray {
 	}
 	
 	public void writeBoolean(boolean b) {
-		if(b) writeByte((byte) 1);
-		else writeByte((byte) 0);
+		if(b) writeByte(1);
+		else writeByte(0);
 	}
 
 	public void writeBytes(ByteArray buffer) {
@@ -274,15 +274,15 @@ public class ByteArray {
 	}
 
 	public void writeShort(int s) {
-		writeByte((byte) (s >> 8));
-		writeByte((byte) (s & 0xff));
+		writeByte(s >> 8);
+		writeByte(s & 0xff);
 	}
 
 	public void writeInt(int i) {
-		writeByte((byte) (i >>> 24));
-		writeByte((byte) (i >>> 16));
-		writeByte((byte) (i >>> 8));
-		writeByte((byte) (i));
+		writeByte(i >>> 24);
+		writeByte(i >>> 16);
+		writeByte(i >>> 8);
+		writeByte(i);
 	}
 	
 	public void writeDouble(double d) {
@@ -393,19 +393,19 @@ public class ByteArray {
 		int var5 = 0;
 		ByteArray var2 = new ByteArray();
 		if(i >= 0 && i <= MASK_01111111) {
-			var2.writeByte((byte) i); 
+			var2.writeByte(i); 
 			writeBytes(var2);
 			return;
 		}
 		int var3 = i;
 		ByteArray var4 = new ByteArray();
 		while(var3 != 0) {
-			var4.writeByte((byte) (var3 & MASK_01111111));
+			var4.writeByte(var3 & MASK_01111111);
 			var5 = var3 & MASK_01111111;
 			var3 = var3 >>> CHUNCK_BIT_SIZE;
 				if(var3 > 0)
 					var5 = var5 | MASK_10000000;
-				var2.writeByte((byte) var5);
+				var2.writeByte(var5);
 		}
 		writeBytes(var2);
 	}
@@ -414,19 +414,19 @@ public class ByteArray {
 		int var5 = 0;
 		ByteArray var2 = new ByteArray();
 		if(s >= 0 && s <= MASK_01111111) {
-			var2.writeByte((byte) s);
+			var2.writeByte(s);
 			writeBytes(var2);
 			return;
 		}
 		int var3 = s & 65535;
 		ByteArray var4 = new ByteArray();
 		while(var3 != 0) {
-			var4.writeByte((byte) (var3 & MASK_01111111));
+			var4.writeByte(var3 & MASK_01111111);
 			var5 = var3 & MASK_01111111;
 			var3 = var3 >>> CHUNCK_BIT_SIZE;
 			if(var3 > 0)
 				var5 = var5 | MASK_10000000;
-			var2.writeByte((byte) var5);
+			var2.writeByte(var5);
 		}
 		writeBytes(var2);
 	}
@@ -439,14 +439,14 @@ public class ByteArray {
 		else {
 			var3 = 0;
 			while(var3 < 4) {
-				writeByte((byte) (var2.low & 127 | 128));
+				writeByte(var2.low & 127 | 128);
 				var2.low = var2.low >>> 7;
 				var3++;
 			}
 			if((var2.high & 268435455 << 3) == 0)
-				writeByte((byte) (var2.high << 4 | var2.low));
+				writeByte(var2.high << 4 | var2.low);
 			else {
-				writeByte((byte) ((var2.high << 4 | var2.low) & 127 | 128));
+				writeByte((var2.high << 4 | var2.low) & 127 | 128);
 				writeInt32((int) (var2.high >>> 3));
 			}
 		}
@@ -454,9 +454,9 @@ public class ByteArray {
 	
 	private void writeInt32(int i) {
 		while(i >= 128) {
-			writeByte((byte) (i & 127 | 128));
+			writeByte(i & 127 | 128);
 			i = i >>> 7;
 		}
-		writeByte((byte) i);
+		writeByte(i);
 	}
 }

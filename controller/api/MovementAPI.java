@@ -34,7 +34,7 @@ public class MovementAPI {
 	}
 	
 	 // changement de cellule
-	public boolean moveTo(int targetId, boolean changeMap) {
+	public boolean moveTo(int targetId) {
 		this.character.waitState(CharacterState.IS_FREE);
 
 		if(this.character.infos.currentCellId == targetId) { // déjà sur la cellule cible
@@ -78,6 +78,8 @@ public class MovementAPI {
 			this.character.instance.log.p("Already on the target map.");
 			return;
 		}
+		if(mapIsInCelestialTemple(this.character.infos.currentMap))
+			goOutFromCelestialTemple();
 		this.character.instance.log.p("Going from map " + this.character.infos.currentMap.id + " to map " + mapId + ".");
 		boolean isInIncarnam = mapIsInIncarnam(this.character.infos.currentMap);
 		if(mapIsInIncarnam(MapsCache.loadMap(mapId))) {
@@ -95,6 +97,9 @@ public class MovementAPI {
 	
 	// définition d'une aire de destination et de parcours
 	public void defineArea(int areaId) {
+		if(mapIsInCelestialTemple(this.character.infos.currentMap))
+			goOutFromCelestialTemple();
+		this.character.waitState(CharacterState.IS_LOADED); // attendre le refresh des infos
 		this.character.instance.log.p("Going from map " + this.character.infos.currentMap.id + " to area " + areaId + ".");
 		boolean isInIncarnam = mapIsInIncarnam(this.character.infos.currentMap);
 		if(areaIsInIncarnam(areaId)) {
@@ -126,7 +131,8 @@ public class MovementAPI {
 	
 	// déplacement vers la plus proche map d'une aire
 	public void goToArea(int areaId) {
-		this.character.waitState(CharacterState.IS_LOADED); // attendre le refresh des infos
+		if(!this.character.waitState(CharacterState.IS_LOADED)) // attendre le refresh des infos
+			return; // en cas d'interruption (c'est déjà arrivé plusieurs fois)
 		if(this.character.infos.currentMap.subareaId == areaId) { // déjà sur l'aire
 			this.pathfinding.setArea(areaId); // pas besoin du calcul du chemin
 			this.character.instance.log.p("Already on the target area.");
@@ -145,7 +151,7 @@ public class MovementAPI {
 	
 	// fonction réservée aux chemins à destination fixe
 	public boolean changeMap(Direction direction) {
-		if(direction == null || !moveTo(direction.outgoingCellId, true))
+		if(direction == null || !moveTo(direction.outgoingCellId))
 			return false;
 		
 		this.character.instance.log.p("Moving to " + Map.directionToString(direction.direction) + " map.");
@@ -162,6 +168,7 @@ public class MovementAPI {
 		return true;
 	}
 	
+	// fait descendre le personnage à Astrub depuis Incarnam
 	private void goDownToAstrub() {
 		this.character.instance.log.p("Going down to Astrub.");
 		defineTargetMap(153880835); // map où se situe le pnj
@@ -172,7 +179,7 @@ public class MovementAPI {
 		this.character.waitState(CharacterState.IS_LOADED); // important
 		
 		NpcGenericActionRequestMessage NGARM = new NpcGenericActionRequestMessage();
-		NGARM.serialize(-10001, 3, this.character.infos.currentMap.id, this.character.instance.id); // on parle au pnj
+		NGARM.serialize(-10000, 3, this.character.infos.currentMap.id, this.character.instance.id); // on parle au pnj
 		this.character.instance.outPush(NGARM);
 		
 		try {
@@ -200,6 +207,7 @@ public class MovementAPI {
 		this.character.updateState(CharacterState.IS_LOADED, false); // chargement de map
 	}
 	
+	// fait monter le personnage à Incarnam depuis Astrub
 	private void goUpToIncarnam() {
 		this.character.instance.log.p("Going up to Incarnam.");
 		defineTargetMap(84674054); // map où se situe la statue Féca
@@ -209,15 +217,26 @@ public class MovementAPI {
 		this.character.interaction.useInteractive(375, 489378, 168278, true); // utilisation de la statue Féca
 	}
 	
-	private static boolean mapIsInIncarnam(Map map) {
-		if(map.subareaId >= 422 && map.subareaId <= 450)
-			return true;
-		return false;
+	// fait sortir le personnage du temple céleste d'Incarnam
+	private void goOutFromCelestialTemple() {
+		this.character.instance.log.p("Going out from celestial temple of Incarnam.");
+		if(this.character.infos.currentMap.id == 153092354) // première salle
+			this.character.interaction.useInteractive(396, 489318, 235719, true); // escalier
+		changeMap(new Direction(Map.RIGHT, 531)); // on sort du temple
 	}
 	
+	// vérifie si la map donnée est à Incarnam ou non
+	private static boolean mapIsInIncarnam(Map map) {
+		return (map.subareaId >= 422 && map.subareaId <= 450);
+	}
+	
+	// vérifie si la map donnée est dans le temple céleste ou non
+	private static boolean mapIsInCelestialTemple(Map map) {
+		return map.id == 153092354 || map.id == 152043521;
+	}
+	
+	// vérifie si l'aire donnée est à Incarnam ou non 
 	private static boolean areaIsInIncarnam(int areaId) {
-		if(areaId >= 422 && areaId <= 450)
-			return true;
-		return false;
+		return (areaId >= 422 && areaId <= 450);
 	}
 }

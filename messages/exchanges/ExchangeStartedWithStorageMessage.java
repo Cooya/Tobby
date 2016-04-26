@@ -14,6 +14,6 @@ public class ExchangeStartedWithStorageMessage extends ExchangeStartedMessage {
 	private void deserialize() {
 		ByteArray buffer = new ByteArray(this.content);
 		super.deserialize(buffer);
-		this.storageMaxSlot = buffer.readVarInt();
+		//this.storageMaxSlot = buffer.readVarInt(); // ne peut pas être lu car c'est un négatif
 	}
 }

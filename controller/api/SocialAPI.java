@@ -1,6 +1,5 @@
 package controller.api;
 
-import gui.Controller;
 import controller.CharacterState;
 import controller.characters.Character;
 import controller.characters.Fighter;
@@ -91,14 +90,15 @@ public class SocialAPI {
 	
 	// traite une demande d'échange (acceptation ou refus)
 	public boolean processExchangeDemand(double actorIdDemandingExchange) {
-		// si ce n'est pas un collègue, on refuse l'échange avec un sleep
-		if(!Controller.getInstance().isWorkmate(actorIdDemandingExchange)) {
+		// si ce n'est pas un client, on refuse l'échange avec un sleep
+		if(!((Mule) this.character).isCustomer(actorIdDemandingExchange)) {
 			try {
 				Thread.sleep(2000); // pour faire un peu normal
 			} catch(InterruptedException e) {
 				Thread.currentThread().interrupt();
 				return false;
 			}
+			this.character.instance.log.p("Refusing exchange request received from an unknown.");
 			EmptyMessage EM = new EmptyMessage("LeaveDialogRequestMessage");
 			this.character.instance.outPush(EM);
 			return false;
@@ -108,24 +108,18 @@ public class SocialAPI {
 		// ou si le caractère (peu importe le type) a besoin de vider son inventaire, on refuse aussi
 		if((this.character instanceof Mule && !this.character.inState(CharacterState.MULE_AVAILABLE)) ||
 				this.character.inState(CharacterState.NEED_TO_EMPTY_INVENTORY)) {
+			this.character.instance.log.p("Refusing exchange request because I am busy.");
 			EmptyMessage EM = new EmptyMessage("LeaveDialogRequestMessage");
 			this.character.instance.outPush(EM);
 			return false;
 		}
 			
 		// sinon on accepte l'échange
+		this.character.instance.log.p("Accepting exchange request received from a customer.");
 		EmptyMessage EM = new EmptyMessage("ExchangeAcceptMessage"); // accepter l'échange
 		this.character.instance.outPush(EM);
+		this.character.waitState(CharacterState.IN_EXCHANGE); // important
 		return true;
-	}
-	
-	// valide un échange côté receveur des objets (mule)
-	public void acceptExchangeAsReceiver() {
-		this.character.waitState(CharacterState.EXCHANGE_VALIDATED); // attendre que l'échange soit validé
-		ExchangeReadyMessage ERM = new ExchangeReadyMessage();
-		ERM.serialize(true, 2); // car il y a eu 2 actions lors de l'échange
-		this.character.instance.outPush(ERM); // on valide de notre côté
-		this.character.instance.log.p("Exchange validated from my side.");
 	}
 	
 	// envoie une demande d'échange et attend son acceptation

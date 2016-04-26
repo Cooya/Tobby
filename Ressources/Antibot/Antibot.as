@@ -2,6 +2,7 @@ package {
 	import flash.utils.*;
 	import flash.display.Sprite;
 	import flash.display.Loader;
+	import flash.display.Shape;
 	import flash.net.Socket;
 	import flash.net.ServerSocket;
 	import flash.net.URLRequest;
@@ -82,7 +83,7 @@ package {
 				packetSize = socket.readInt();
 			if(socket.bytesAvailable == packetSize) {
 				packetSize = -1;
-				processData(socket);	
+				processData(socket);
 			}
         }
 		
@@ -115,6 +116,9 @@ package {
         		socket.writeBytes(msg, 0);
         		socket.flush();
         	}
+        	else if(id == 4) { // demande d'action pour rester "éveillé"
+        		sendLoginValidationAction("toto", "tata");
+        	}
         	else
         		trace("Invalid packet id.");
         }
@@ -126,19 +130,23 @@ package {
 			var worker:Object = Kernel["getWorker"]();
 			if(worker == null)
 				return;
-			var LoginValidationAction:Class = getDefinitionByName("com.ankamagames.dofus.logic.connection.actions.LoginValidationAction") as Class;
 			var AuthentificationFrame:Class = getDefinitionByName("com.ankamagames.dofus.logic.connection.frames.AuthentificationFrame") as Class;
 			if(worker.contains(AuthentificationFrame)) {
 				clearInterval(interval);
-				var lva:Object = LoginValidationAction["create"](username, password, false, 0);
-				worker.process(lva);
-				trace("LoginValidationAction sent.");
+				sendLoginValidationAction(username, password);
 			}
 		}
 
 		private function getHashFunction() : Function {
 			var NetworkMessage:Class = getDefinitionByName("com.ankamagames.jerakine.network.NetworkMessage") as Class;
 			return NetworkMessage.HASH_FUNCTION;
+		}
+
+		private function sendLoginValidationAction(username:String, password:String) : void {
+			var Kernel:Class = getDefinitionByName("com.ankamagames.dofus.kernel.Kernel") as Class;
+			var LoginValidationAction:Class = getDefinitionByName("com.ankamagames.dofus.logic.connection.actions.LoginValidationAction") as Class;
+			Kernel["getWorker"]().process(LoginValidationAction["create"](username, password, false, 0));
+			trace("LoginValidationAction sent.");
 		}
 
 		private function sendResetGameAction() : void {
@@ -153,6 +161,25 @@ package {
 			var QuitGameAction:Class = getDefinitionByName("com.ankamagames.dofus.logic.common.actions.QuitGameAction") as Class;
 			Kernel["getWorker"]().process(QuitGameAction["create"]());
 			trace("QuitGameAction sent.");
+		}
+
+		private function sendOpenMainMenuAction() : void {
+			var Kernel:Class = getDefinitionByName("com.ankamagames.dofus.kernel.Kernel") as Class;
+			var OpenMainMenuAction:Class = getDefinitionByName("com.ankamagames.dofus.logic.game.common.actions.OpenMainMenuAction") as Class;
+			Kernel["getWorker"]().process(OpenMainMenuAction["create"]());
+			trace("OpenMainMenuAction sent.");
+		}
+
+		private function sendLeaveDialogAction() : void {
+			/*
+			var Kernel:Class = getDefinitionByName("com.ankamagames.dofus.kernel.Kernel") as Class;
+			var LeaveDialogAction:Class = getDefinitionByName("com.ankamagames.dofus.logic.game.common.actions.GameContextQuitAction") as Class;
+			Kernel["getWorker"]().process(LeaveDialogAction["create"]());
+			*/
+			var KernelEventsManager:Class = getDefinitionByName("com.ankamagames.berilia.managers.KernelEventsManager") as Class;
+			var HookList:Class = getDefinitionByName("com.ankamagames.dofus.misc.lists.HookList") as Class;
+			KernelEventsManager["getInstance"]().processCallback(HookList["CloseContextMenu"]);
+			trace("LeaveDialogAction sent.");
 		}
 	}
 }

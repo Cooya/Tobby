@@ -25,7 +25,7 @@ class Model {
 	// crée, stocke et lance les instances
 	protected void createInstance(Account account, int areaId, CharacterFrame frame, Account captain) {
 		if(isConnected(account)) {
-			Log.err("Instance already connected.");
+			Log.info("Instance already connected.");
 			return;
 		}
 		

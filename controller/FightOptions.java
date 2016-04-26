@@ -38,10 +38,10 @@ public class FightOptions {
 		{1, 5}
 	};
 	private static int[][] xpPath = {
-		{450, 10},
-		{445, 20},
-		{443, 30},
-		{92, 9999}
+		{450, 10}, // jusqu'au niveau 10 -> route des âmes d'Incarnam
+		{445, 20}, // jusqu'au niveau 20 -> pâturages d'Incarnam
+		{443, 30}, // jusqu'au niveau 30 -> forêt d'Incarnam
+		{98, 9999} // à partir du niveau 30 -> champs d'Astrub
 	};
 	private static Hashtable<Integer, int[]> fightAreasParameters = new Hashtable<Integer, int[]>();
 	static {

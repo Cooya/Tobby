@@ -1,4 +1,4 @@
-package gamedata.character;
+package gamedata.enums;
 
 public abstract class PlayerStatusEnum {
     public static final int PLAYER_STATUS_OFFLINE = 0;

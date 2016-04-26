@@ -1,5 +1,6 @@
 package messages.connection;
 
+import main.Main;
 import messages.Message;
 import utilities.ByteArray;
 import utilities.Encryption;
@@ -15,7 +16,7 @@ public class IdentificationMessage extends Message {
 		byte[] credentials = Encryption.encryptCredentials(decryptedPublicKey, login, password, HCM.getSalt());
 		ByteArray buffer = new ByteArray();
 		buffer.writeByte(0);
-		writeVersion(buffer, 2, 34, 0, 103829, 1, 0, 1, 1);
+		writeVersion(buffer, Main.GAME_VERSION[0], Main.GAME_VERSION[1], Main.GAME_VERSION[2], Main.GAME_VERSION[3], Main.GAME_VERSION[4], 0, 1, 1);
 		buffer.writeUTF("fr");
 		buffer.writeVarInt(credentials.length);
 		

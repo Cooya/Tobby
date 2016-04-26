@@ -19,9 +19,9 @@ public class GameMapMovementRequestMessage extends Message {
 		this.mapId = mapId;
 		
 		ByteArray buffer = new ByteArray();
-		buffer.writeShort((short) this.keyMovements.size());
+		buffer.writeShort(this.keyMovements.size());
 		for(int i : this.keyMovements)
-			buffer.writeShort((short) i);
+			buffer.writeShort(i);
 		buffer.writeInt(mapId);
 		
 		completeInfos(Emulation.hashMessage(buffer, instanceId));

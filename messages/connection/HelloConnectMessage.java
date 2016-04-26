@@ -27,7 +27,7 @@ public class HelloConnectMessage extends Message {
 		int len = this.key.length;
 		buffer.writeVarInt(len);
 		for(int i = 0; i < len; ++i)
-			buffer.writeByte((byte) this.key[i]);
+			buffer.writeByte(this.key[i]);
 		
 		completeInfos(buffer);
 	}

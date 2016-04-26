@@ -11,10 +11,10 @@ public class SpellUpgradeRequestMessage extends Message {
 		super();
 	}
 
-	public void serialize(int spellId, int spellLevel) {
+	public void serialize() {
 		ByteArray buffer = new ByteArray();
-		buffer.writeVarShort(spellId);
-		buffer.writeByte(spellLevel);
-		this.completeInfos(buffer);
+		buffer.writeVarShort(this.spellId);
+		buffer.writeByte(this.spellLevel);
+		super.completeInfos(buffer);
 	}
 }

@@ -12,7 +12,7 @@ public class PrismsListRegisterMessage extends Message {
 
 	public void serialize() {
 		ByteArray buffer = new ByteArray();
-		buffer.writeByte((byte) listen); 
+		buffer.writeByte(listen); 
 		
 		completeInfos(buffer);
 	}

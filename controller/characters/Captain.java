@@ -1,7 +1,7 @@
 package controller.characters;
 
-import gamedata.character.PlayerStatusEnum;
 import gamedata.d2p.ankama.Map;
+import gamedata.enums.PlayerStatusEnum;
 import gui.Controller;
 
 import java.util.Vector;
@@ -10,7 +10,6 @@ import controller.CharacterState;
 import controller.api.FightAPI;
 import main.Instance;
 import main.Log;
-import main.Main;
 import messages.context.GameContextReadyMessage;
 import messages.parties.PartyInvitationRequestMessage;
 
@@ -131,7 +130,6 @@ public class Captain extends Fighter {
 	@Override
 	public void run() {
 		waitState(CharacterState.IS_LOADED); // attendre l'entrée en jeu
-		checkIfModeratorIsOnline(Main.MODERATOR_NAME);
 		this.fight.updateFightArea(this.infos.level);
 
 		if(inState(CharacterState.IN_FIGHT)) { // reprise de combat
@@ -175,7 +173,6 @@ public class Captain extends Fighter {
 						broadcastStateUpdate();
 						waitSoldiersInFight();
 						this.fight.fightManager(false);
-						checkIfModeratorIsOnline(Main.MODERATOR_NAME);
 						break;
 					}
 				}

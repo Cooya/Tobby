@@ -134,7 +134,7 @@ public class Pathfinding {
 		public int direction;
 		public int outgoingCellId;
 		
-		protected Direction(int direction, int outgoingCellId) {
+		public Direction(int direction, int outgoingCellId) {
 			this.direction = direction;
 			this.outgoingCellId = outgoingCellId;
 		}

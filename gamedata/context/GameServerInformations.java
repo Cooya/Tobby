@@ -1,4 +1,4 @@
-package gamedata.server;
+package gamedata.context;
 
 import utilities.ByteArray;
 

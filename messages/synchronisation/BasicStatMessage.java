@@ -12,8 +12,7 @@ public class BasicStatMessage extends Message {
 
 	public void serialize() {
 		ByteArray buffer = new ByteArray();
-		buffer.writeShort((short) statId);
-		
+		buffer.writeShort(statId);	
 		completeInfos(buffer);
 	}
 }
