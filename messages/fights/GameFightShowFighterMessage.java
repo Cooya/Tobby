@@ -3,18 +3,17 @@ package messages.fights;
 import gamedata.ProtocolTypeManager;
 import gamedata.fight.GameFightFighterInformations;
 import messages.Message;
-import utilities.ByteArray;
 
 public class GameFightShowFighterMessage extends Message {
 	public GameFightFighterInformations informations;
 
-	public GameFightShowFighterMessage(Message msg) {
-		super(msg);
-		deserialize();
+	@Override
+	public void serialize() {
+		// not implemented yet
 	}
 
-	private void deserialize() {
-		ByteArray buffer = new ByteArray(this.content);
-		this.informations = (GameFightFighterInformations) ProtocolTypeManager.getInstance(buffer.readShort(), buffer);
+	@Override
+	public void deserialize() {
+		this.informations = (GameFightFighterInformations) ProtocolTypeManager.getInstance(this.content.readShort(), this.content);
 	}
 }

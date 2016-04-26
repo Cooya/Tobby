@@ -1,15 +1,14 @@
 package messages.parties;
 
-import utilities.ByteArray;
-import messages.Message;
-
 public class AbstractPartyEventMessage extends AbstractPartyMessage {
-
-	public AbstractPartyEventMessage(Message msg) {
-		super(msg);
+	
+	@Override
+	public void serialize() {
+		// not implemented yet
 	}
 	
-	protected void deserialize(ByteArray buffer) {
-		super.deserialize(buffer);
+	@Override
+	public void deserialize() {
+		super.deserialize();
 	}
 }

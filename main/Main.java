@@ -1,7 +1,5 @@
 package main;
 
-import gui.Controller;
-
 import java.text.SimpleDateFormat;
 
 public class Main {
@@ -15,8 +13,41 @@ public class Main {
 	
 
 	public static void main(String[] args) {	
-		Controller.getInstance();
+		//Controller.getInstance();
 		//new Sniffer();
+		
+		/*
+		byte[] content = {1};
+		
+		Vector<Long> perfTest = new Vector<Long>();
+		long startTime;
+		for(int i = 0; i < 100000; ++i) {
+			startTime = System.nanoTime();
+			Message msg = new Message(182, 1, 1, content, 1);
+			BasicPingMessage BPM = new BasicPingMessage(msg);
+			perfTest.add(System.nanoTime() - startTime);
+		}
+		
+		long sum = 0;
+		for(long l : perfTest)
+			sum += l;
+		System.out.println("Average time : " + sum / perfTest.size());
+		
+		
+		perfTest = new Vector<Long>();
+		
+		for(int i = 0; i < 100000; ++i) {
+			startTime = System.nanoTime();
+			Message msg2 = new Message(182, 1, 1, content, 1);
+			BasicPingMessage BPM2 = (BasicPingMessage) msg2;
+			perfTest.add(System.nanoTime() - startTime);
+		}
+		
+		sum = 0;
+		for(long l : perfTest)
+			sum += l;
+		System.out.println("Average time : " + sum / perfTest.size());
+		*/
 		
 		/*
 		GameMapMovementRequestMessage test = new GameMapMovementRequestMessage();

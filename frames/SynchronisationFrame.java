@@ -20,14 +20,16 @@ public class SynchronisationFrame extends Frame {
 	
 	protected void process(SequenceNumberRequestMessage SNRM) {
 		SequenceNumberMessage SNM = new SequenceNumberMessage();
-		SNM.serialize(this.sequenceNumber++);
+		SNM.number = this.sequenceNumber++;
 		instance.outPush(SNM);
 	}
 	
 	protected void process(BasicLatencyStatsRequestMessage BLSRM) {
 		BasicLatencyStatsMessage BLSM = new BasicLatencyStatsMessage();
 		Latency latency = instance.getLatency();
-		BLSM.serialize(latency.latencyAvg(), latency.latencySamplesCount(), latency.latencySamplesMax(), instance.id);
+		BLSM.latency = latency.latencyAvg();
+		BLSM.sampleCount = latency.latencySamplesCount();
+		BLSM.max = latency.latencySamplesMax();
 		instance.outPush(BLSM);
 	}
 	

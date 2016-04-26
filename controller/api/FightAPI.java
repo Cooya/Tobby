@@ -9,7 +9,7 @@ import java.util.Vector;
 import controller.CharacterState;
 import controller.FightOptions;
 import controller.characters.Fighter;
-import messages.EmptyMessage;
+import messages.UnhandledMessage;
 import messages.character.SpellModifyRequestMessage;
 import messages.character.StatsUpgradeRequestMessage;
 import messages.context.GameRolePlayAttackMonsterRequestMessage;
@@ -62,8 +62,7 @@ public class FightAPI {
 	
 	public void rebirthManager() {
 		if(this.fighter.infos.healthState == PlayerLifeStatusEnum.STATUS_TOMBSTONE) {
-			EmptyMessage msg = new EmptyMessage("GameRolePlayFreeSoulRequestMessage");
-			this.fighter.instance.outPush(msg);
+			this.fighter.instance.outPush(new UnhandledMessage("GameRolePlayFreeSoulRequestMessage"));
 			this.fighter.updateState(CharacterState.IS_LOADED, false);
 			this.fighter.interaction.useInteractive(287, 479466, 152192, false);
 			try {
@@ -95,7 +94,7 @@ public class FightAPI {
 					continue;
 				this.fighter.instance.log.p("Sending attack request.");
 				GameRolePlayAttackMonsterRequestMessage GRPAMRM = new GameRolePlayAttackMonsterRequestMessage();
-				GRPAMRM.serialize(monsterGroup.contextualId);
+				GRPAMRM.monsterGroupId = monsterGroup.contextualId;
 				this.fighter.instance.outPush(GRPAMRM);
 				return true;
 			}
@@ -162,7 +161,8 @@ public class FightAPI {
 
 	private void increaseStats() {
 		StatsUpgradeRequestMessage SURM = new StatsUpgradeRequestMessage();
-		SURM.serialize(this.fighter.infos.element, calculateMaxStatsPoints());
+		SURM.statId = this.fighter.infos.element;
+		SURM.boostPoint = calculateMaxStatsPoints();
 		this.fighter.instance.outPush(SURM);
 		this.fighter.instance.log.p("Increase stat : " + this.fighter.infos.element + ".");
 	}

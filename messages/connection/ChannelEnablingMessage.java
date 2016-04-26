@@ -1,21 +1,19 @@
 package messages.connection;
 
-import utilities.ByteArray;
 import messages.Message;
 
 public class ChannelEnablingMessage extends Message {
-    public int channel = 7;
+    public int channel = 0;
     public boolean enable = false;
 
-	public ChannelEnablingMessage() {
-		super();
-	}
-
+    @Override
 	public void serialize() {
-		ByteArray buffer = new ByteArray();
-		buffer.writeByte(this.channel);
-		buffer.writeBoolean(this.enable);
-		
-		super.completeInfos(buffer);
+		this.content.writeByte(this.channel);
+		this.content.writeBoolean(this.enable);
+	}
+	
+	@Override
+	public void deserialize() {
+		// not implemented yet
 	}
 }

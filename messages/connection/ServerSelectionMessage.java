@@ -1,18 +1,17 @@
 package messages.connection;
 
-import utilities.ByteArray;
 import messages.Message;
 
 public class ServerSelectionMessage extends Message {
+	public int serverId = 0;
 	
-	public ServerSelectionMessage() {
-		super();
+	@Override
+	public void serialize() {
+		this.content.writeByte(this.serverId); 
 	}
 	
-	public void serialize(int serverId) {
-		ByteArray buffer = new ByteArray();
-		buffer.writeByte(serverId); 
-		
-		completeInfos(buffer);
+	@Override
+	public void deserialize() {
+		// not implemented yet
 	}
 }

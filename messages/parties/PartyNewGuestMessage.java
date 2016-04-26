@@ -1,20 +1,18 @@
 package messages.parties;
 
-import utilities.ByteArray;
 import gamedata.parties.PartyGuestInformations;
-import messages.Message;
 
 public class PartyNewGuestMessage extends AbstractPartyEventMessage {
 	public PartyGuestInformations guest;
-
-	public PartyNewGuestMessage(Message msg) {
-		super(msg);
-		deserialize();
+	
+	@Override
+	public void serialize() {
+		// not implemented yet
 	}
 	
-	private void deserialize() {
-		ByteArray buffer = new ByteArray(this.content);
-		super.deserialize(buffer);
-		this.guest = new PartyGuestInformations(buffer);
+	@Override
+	public void deserialize() {
+		super.deserialize();
+		this.guest = new PartyGuestInformations(this.content);
 	}
 }

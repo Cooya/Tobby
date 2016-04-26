@@ -1,19 +1,16 @@
 package messages.connection;
 
-import messages.Message;
-import utilities.ByteArray;
-
 public class CharactersListMessage extends BasicCharactersListMessage {
 	public boolean hasStartupActions = false;
 	
-	public CharactersListMessage(Message msg) {
-		super(msg);
-		deserialize();
+	@Override
+	public void serialize() {
+		// not implemented yet
 	}
 	
+	@Override
 	public void deserialize() {
-		ByteArray buffer = new ByteArray(this.content);
-		super.deserialize(buffer);
-		this.hasStartupActions = buffer.readBoolean();
+		super.deserialize();
+		this.hasStartupActions = this.content.readBoolean();
 	}
 }

@@ -1,16 +1,14 @@
 package messages.parties;
 
-import utilities.ByteArray;
-
 public class PartyLeaveRequestMessage extends AbstractPartyMessage {
-
-	public PartyLeaveRequestMessage() {
-		super();
+	
+	@Override
+	public void serialize() {
+		super.serialize();
 	}
 	
-	public void serialize() {
-		ByteArray buffer = new ByteArray();
-		super.serialize(buffer);
-		super.completeInfos(buffer);
+	@Override
+	public void deserialize() {
+		// not implemented yet
 	}
 }

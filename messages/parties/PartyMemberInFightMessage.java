@@ -1,8 +1,6 @@
 package messages.parties;
 
-import utilities.ByteArray;
 import gamedata.maps.MapCoordinatesExtended;
-import messages.Message;
 
 public class PartyMemberInFightMessage extends AbstractPartyMessage {
     public int reason = 0;
@@ -12,21 +10,21 @@ public class PartyMemberInFightMessage extends AbstractPartyMessage {
     public int fightId = 0;
     public MapCoordinatesExtended fightMap;
     public int timeBeforeFightStart = 0;
-	
-	public PartyMemberInFightMessage(Message msg) {
-		super(msg);
-		deserialize();
+    
+    @Override
+	public void serialize() {
+		// not implemented yet
 	}
 	
-	private void deserialize() {
-		ByteArray buffer = new ByteArray(this.content);
-		super.deserialize(buffer);
-		this.reason = buffer.readByte();
-		this.memberId = buffer.readVarLong();
-		this.memberAccountId = buffer.readInt();
-		this.memberName = buffer.readUTF();
-		this.fightId = buffer.readInt();
-        this.fightMap = new MapCoordinatesExtended(buffer);
-        this.timeBeforeFightStart = buffer.readVarShort();
+    @Override
+	public void deserialize() {
+		super.deserialize();
+		this.reason = this.content.readByte();
+		this.memberId = this.content.readVarLong();
+		this.memberAccountId = this.content.readInt();
+		this.memberName = this.content.readUTF();
+		this.fightId = this.content.readInt();
+        this.fightMap = new MapCoordinatesExtended(this.content);
+        this.timeBeforeFightStart = this.content.readVarShort();
 	}
 }

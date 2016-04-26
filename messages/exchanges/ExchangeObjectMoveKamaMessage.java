@@ -1,20 +1,17 @@
 package messages.exchanges;
 
-import utilities.ByteArray;
 import messages.Message;
 
 public class ExchangeObjectMoveKamaMessage extends Message {
 	public int quantity = 0;
 	
-	public ExchangeObjectMoveKamaMessage() {
-		super();
+	@Override
+	public void serialize() {
+		this.content.writeVarInt(this.quantity);
 	}
 	
-	public void serialize(int quantity) {
-		this.quantity = quantity;
-		
-		ByteArray buffer = new ByteArray();
-		buffer.writeVarInt(this.quantity);
-		super.completeInfos(buffer);
+	@Override
+	public void deserialize() {
+		// not implemented yet
 	}
 }

@@ -1,21 +1,18 @@
 package messages.exchanges;
 
-import messages.Message;
-import utilities.ByteArray;
-
 public class ExchangeRequestedTradeMessage extends ExchangeRequestedMessage {
 	public double source = 0;
 	public double target = 0;
 	
-	public ExchangeRequestedTradeMessage(Message msg) {
-		super(msg);
-		deserialize();
+	@Override
+	public void serialize() {
+		// not implemented yet
 	}
 	
-	private void deserialize() {
-		ByteArray buffer = new ByteArray(this.content);
-		super.deserialize(buffer);
-		this.source = buffer.readVarLong();
-		this.target = buffer.readVarLong();
+	@Override
+	public void deserialize() {
+		super.deserialize();
+		this.source = this.content.readVarLong();
+		this.target = this.content.readVarLong();
 	}
 }

@@ -1,18 +1,17 @@
 package messages.character;
 
 import messages.Message;
-import utilities.ByteArray;
 
 public class CharacterLevelUpMessage extends Message {
 	public int newLevel = 0;
-
-	public CharacterLevelUpMessage(Message msg) {
-		super(msg);
-		deserialize();
+	
+	@Override
+	public void serialize() {
+		// not implemented yet
 	}
 
-	private void deserialize() {
-		ByteArray buffer = new ByteArray(this.content);
-		this.newLevel = buffer.readByte();
+	@Override
+	public void deserialize() {
+		this.newLevel = this.content.readByte();
 	}
 }

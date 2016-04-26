@@ -1,24 +1,19 @@
 package messages.connection;
 
 import messages.Message;
-import utilities.ByteArray;
-import utilities.Encryption;
 
 public class AuthenticationTicketMessage extends Message {
 	public String lang;
 	public String ticket;
 	
-	public AuthenticationTicketMessage() {
-		super();
+	@Override
+	public void serialize() {
+	    this.content.writeUTF(this.lang);
+	    this.content.writeUTF(this.ticket);
 	}
 	
-	public void serialize(String lang, int[] ticket) {
-		this.lang = lang;
-		this.ticket = new String(Encryption.decodeWithAES(ByteArray.toBytes(ticket)));
-		ByteArray buffer = new ByteArray();
-	    buffer.writeUTF(this.lang);
-	    buffer.writeUTF(this.ticket);
-	    
-	    completeInfos(buffer);
+	@Override
+	public void deserialize() {
+		// not implemented yet
 	}
 }

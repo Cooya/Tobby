@@ -1,20 +1,19 @@
 package messages.character;
 
 import gamedata.character.PlayerStatus;
-import utilities.ByteArray;
 import messages.Message;
 
 public class PlayerStatusUpdateRequestMessage extends Message {
 	public PlayerStatus status;
 	
-	public PlayerStatusUpdateRequestMessage() {
-		super();
+	@Override
+	public void serialize() {
+		this.content.writeShort(415); // id de PlayerStatus
+		this.status.serialize(this.content);
 	}
 	
-	public void serialize(int statusId) {
-		ByteArray buffer = new ByteArray();
-		buffer.writeShort(415);
-		buffer.writeByte(statusId); // raccourci (PlayerStatus normalement)
-		completeInfos(buffer);
+	@Override
+	public void deserialize() {
+		// not implemented yet
 	}
 }

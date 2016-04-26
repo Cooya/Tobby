@@ -1,19 +1,17 @@
 package messages.connection;
 
-import utilities.ByteArray;
 import messages.Message;
 
 public class PrismsListRegisterMessage extends Message {
 	public int listen;
-	
-	public PrismsListRegisterMessage() {
-		super();
-	}
 
+	@Override
 	public void serialize() {
-		ByteArray buffer = new ByteArray();
-		buffer.writeByte(listen); 
-		
-		completeInfos(buffer);
+		this.content.writeByte(this.listen); 
+	}
+	
+	@Override
+	public void deserialize() {
+		// not implemented yet
 	}
 }

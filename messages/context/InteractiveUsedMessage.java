@@ -1,6 +1,5 @@
 package messages.context;
 
-import utilities.ByteArray;
 import messages.Message;
 
 public class InteractiveUsedMessage extends Message {
@@ -9,16 +8,16 @@ public class InteractiveUsedMessage extends Message {
 	public int skillId = 0;
 	public int duration = 0;
 	
-	public InteractiveUsedMessage(Message msg) {
-		super(msg);
-		deserialize();
+	@Override
+	public void serialize() {
+		// not implemented yet
 	}
 	
-	private void deserialize() {
-		ByteArray buffer = new ByteArray(this.content);
-		this.entityId = buffer.readVarLong();
-		this.elemId = buffer.readVarInt();
-		this.skillId = buffer.readVarShort();
-		this.duration = buffer.readVarShort();
+	@Override
+	public void deserialize() {
+		this.entityId = this.content.readVarLong();
+		this.elemId = this.content.readVarInt();
+		this.skillId = this.content.readVarShort();
+		this.duration = this.content.readVarShort();
 	}
 }

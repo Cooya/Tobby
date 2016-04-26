@@ -1,16 +1,17 @@
 package messages.exchanges;
 
-import utilities.ByteArray;
 import messages.Message;
 
 public class LeaveDialogMessage extends Message {
 	public int dialogType = 0;
 
-	public LeaveDialogMessage(Message msg) {
-		super(msg);
+	@Override
+	public void serialize() {
+		// not implemented yet
 	}
-	
-	protected void deserialize(ByteArray buffer) {
-		this.dialogType = buffer.readByte();
+
+	@Override
+	public void deserialize() {
+		this.dialogType = this.content.readByte();
 	}
 }

@@ -4,7 +4,13 @@ import messages.Message;
 
 public class SequenceNumberRequestMessage extends Message {
 
-	public SequenceNumberRequestMessage(Message msg) {
+	@Override
+	public void serialize() {
+		// not implemented yet
+	}
+	
+	@Override
+	public void deserialize() {
 		// not implemented yet
 	}
 }

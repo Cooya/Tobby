@@ -6,9 +6,6 @@ import gamedata.parties.PartyMemberInformations;
 
 import java.util.Vector;
 
-import messages.Message;
-import utilities.ByteArray;
-
 public class PartyJoinMessage extends AbstractPartyMessage {
     public int partyType = 0;
     public double partyLeaderId = 0;
@@ -17,27 +14,27 @@ public class PartyJoinMessage extends AbstractPartyMessage {
     public Vector<PartyGuestInformations> guests;
     public boolean restricted = false;
     public String partyName = "";
-
-	public PartyJoinMessage(Message msg) {
-		super(msg);
-		this.members = new Vector<PartyMemberInformations>();
-		this.guests = new Vector<PartyGuestInformations>();
-		deserialize();
+    
+    @Override
+	public void serialize() {
+		// not implemented yet
 	}
 	
-	private void deserialize() {
-		ByteArray buffer = new ByteArray(this.content);
-		super.deserialize(buffer);
-		this.partyType = buffer.readByte();
-        this.partyLeaderId = buffer.readVarLong();
-        this.maxParticipants = buffer.readByte();
-        int nb = buffer.readShort();
+	@Override
+	public void deserialize() {
+		super.deserialize();
+		this.members = new Vector<PartyMemberInformations>();
+		this.guests = new Vector<PartyGuestInformations>();
+		this.partyType = this.content.readByte();
+        this.partyLeaderId = this.content.readVarLong();
+        this.maxParticipants = this.content.readByte();
+        int nb = this.content.readShort();
         for(int i = 0; i < nb; ++i)
-        	this.members.add((PartyMemberInformations) ProtocolTypeManager.getInstance(buffer.readShort(), buffer));
-        nb = buffer.readShort();
+        	this.members.add((PartyMemberInformations) ProtocolTypeManager.getInstance(this.content.readShort(), this.content));
+        nb = this.content.readShort();
         for(int i = 0; i < nb; ++i)
-        	this.guests.add((PartyGuestInformations) ProtocolTypeManager.getInstance(buffer.readShort(), buffer));
-        this.restricted = buffer.readBoolean();
-        this.partyName = buffer.readUTF();
+        	this.guests.add((PartyGuestInformations) ProtocolTypeManager.getInstance(this.content.readShort(), this.content));
+        this.restricted = this.content.readBoolean();
+        this.partyName = this.content.readUTF();
 	}
 }

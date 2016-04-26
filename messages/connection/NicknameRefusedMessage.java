@@ -4,7 +4,13 @@ import messages.Message;
 
 public class NicknameRefusedMessage extends Message {
 
-	public NicknameRefusedMessage(Message msg) {
+	@Override
+	public void serialize() {
+		// not implemented yet
+	}
+	
+	@Override
+	public void deserialize() {
 		// not implemented yet
 	}
 }

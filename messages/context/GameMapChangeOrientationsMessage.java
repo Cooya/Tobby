@@ -4,22 +4,21 @@ import gamedata.context.ActorOrientation;
 
 import java.util.Vector;
 
-import utilities.ByteArray;
 import messages.Message;
 
 public class GameMapChangeOrientationsMessage extends Message {
 	public Vector<ActorOrientation> orientations;
-
-	public GameMapChangeOrientationsMessage(Message msg) {
-		super(msg);
-		this.orientations = new Vector<ActorOrientation>();
-		deserialize();
+	
+	@Override
+	public void serialize() {
+		// not implemented yet
 	}
 	
-	private void deserialize() {
-		ByteArray buffer = new ByteArray(this.content);
-		int nb = buffer.readShort();
+	@Override
+	public void deserialize() {
+		this.orientations = new Vector<ActorOrientation>();
+		int nb = this.content.readShort();
 		for(int i = 0; i < nb; ++i)
-			this.orientations.add(new ActorOrientation(buffer));
+			this.orientations.add(new ActorOrientation(this.content));
 	}
 }

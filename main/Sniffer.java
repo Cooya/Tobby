@@ -121,12 +121,12 @@ public class Sniffer extends Thread {
 			//if(direction.equals("r"))
 				//Reflection.displayMessageFields(msg);
 			if(direction.equals("r") && msg.getId() == 42) {
-				SelectedServerDataMessage SSDM = new SelectedServerDataMessage(msg);
+				SelectedServerDataMessage SSDM = (SelectedServerDataMessage) msg;
 				gameServerAddress = SSDM.address;
 				mustDeconnectClient = true;
 				if(msgStack.size() > 1)
 					throw new FatalError("Little problem !");
-				SSDM.serialize("127.0.0.1");
+				SSDM.address = "127.0.0.1";
 				clientCo.send(SSDM.pack());
 				return false;
 			}

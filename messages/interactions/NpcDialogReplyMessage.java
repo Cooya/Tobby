@@ -1,20 +1,17 @@
 package messages.interactions;
 
 import messages.Message;
-import utilities.ByteArray;
 
 public class NpcDialogReplyMessage extends Message {
 	public int replyId = 0;
 
-	public NpcDialogReplyMessage() {
-		super();
+	@Override
+	public void serialize() {
+		this.content.writeVarShort(this.replyId);
 	}
-
-	public void serialize(int replyId) {
-		this.replyId = replyId;
-
-		ByteArray buffer = new ByteArray();
-		buffer.writeVarShort(this.replyId);
-		this.completeInfos(buffer);
+	
+	@Override
+	public void deserialize() {
+		// not implemented yet
 	}
 }

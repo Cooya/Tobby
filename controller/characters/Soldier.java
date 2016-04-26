@@ -61,7 +61,7 @@ public class Soldier extends Fighter {
 		// reprise de combat à la connexion
 		if(inState(CharacterState.IN_FIGHT)) {
 			GameContextReadyMessage GCRM = new GameContextReadyMessage();
-			GCRM.serialize(this.infos.currentMap.id);
+			GCRM.mapId = this.infos.currentMap.id;
 			this.instance.outPush(GCRM);
 			this.fight.fightManager(true);
 		}

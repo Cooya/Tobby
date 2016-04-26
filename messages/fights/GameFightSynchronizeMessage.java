@@ -6,21 +6,20 @@ import gamedata.fight.GameFightFighterInformations;
 import java.util.Vector;
 
 import messages.Message;
-import utilities.ByteArray;
 
 public class GameFightSynchronizeMessage extends Message {
 	public Vector<GameFightFighterInformations> fighters;
 
-	public GameFightSynchronizeMessage(Message msg) {
-		super(msg);
-		this.fighters = new Vector<GameFightFighterInformations>();
-		deserialize();
+	@Override
+	public void serialize() {
+		// not implemented yet
 	}
-
-	private void deserialize() {
-		ByteArray buffer = new ByteArray(this.content);
-		int nb = buffer.readShort();
+	
+	@Override
+	public void deserialize() {
+		this.fighters = new Vector<GameFightFighterInformations>();
+		int nb = this.content.readShort();
 		for(int i = 0; i < nb; ++i)
-			this.fighters.add((GameFightFighterInformations) ProtocolTypeManager.getInstance(buffer.readShort(), buffer));
+			this.fighters.add((GameFightFighterInformations) ProtocolTypeManager.getInstance(this.content.readShort(), this.content));
 	}
 }

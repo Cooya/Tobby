@@ -16,7 +16,7 @@ import gui.Controller;
 import main.FatalError;
 import main.Instance;
 import main.Main;
-import messages.EmptyMessage;
+import messages.UnhandledMessage;
 import messages.character.BasicWhoIsMessage;
 import messages.character.CharacterLevelUpMessage;
 import messages.character.CharacterLoadingCompleteMessage;
@@ -111,27 +111,15 @@ public class RoleplayContextFrame extends Frame {
 	protected void process(CharacterLoadingCompleteMessage CLCM) {
 		this.instance.log.graphicalFrame.setFightsWonLabel(0);
 		this.instance.log.graphicalFrame.setFightsLostLabel(0);
-		EmptyMessage EM1 = new EmptyMessage("FriendsGetListMessage");
-		EmptyMessage EM2 = new EmptyMessage("IgnoredGetListMessage");
-		EmptyMessage EM3 = new EmptyMessage("SpouseGetInformationsMessage");
-		EmptyMessage EM4 = new EmptyMessage("GameContextCreateRequestMessage");
-		//EmptyMessage EM5 = new EmptyMessage("ObjectAveragePricesGetMessage");
-		EmptyMessage EM6 = new EmptyMessage("QuestListRequestMessage");
-		PrismsListRegisterMessage PLRM = new PrismsListRegisterMessage();
-		PLRM.serialize();
-		ChannelEnablingMessage CEM = new ChannelEnablingMessage();
-		CEM.serialize();
-		ClientKeyMessage CKM = new ClientKeyMessage();
-		CKM.serialize(this.instance.id);
-		instance.outPush(EM1);
-		instance.outPush(EM2);
-		instance.outPush(EM3);
-		instance.outPush(CKM);
-		instance.outPush(EM4);
-		//instance.outPush(EM5);
-		instance.outPush(EM6);
-		instance.outPush(PLRM);
-		instance.outPush(CEM);
+		instance.outPush(new UnhandledMessage("FriendsGetListMessage"));
+		instance.outPush(new UnhandledMessage("IgnoredGetListMessage"));
+		instance.outPush(new UnhandledMessage("SpouseGetInformationsMessage"));
+		instance.outPush(new ClientKeyMessage());
+		instance.outPush(new UnhandledMessage("GameContextCreateRequestMessage"));
+		//instance.outPush(new UnhandledMessage("ObjectAveragePricesGetMessage"));
+		instance.outPush(new UnhandledMessage("QuestListRequestMessage"));
+		instance.outPush(new PrismsListRegisterMessage());
+		instance.outPush(new ChannelEnablingMessage());
 	}
 	
 	protected void process(GameContextCreateMessage GCCM) {
@@ -154,7 +142,7 @@ public class RoleplayContextFrame extends Frame {
 	protected void process(CurrentMapMessage CMM) {
 		this.character.infos.currentMap = MapsCache.loadMap(CMM.mapId);
 		MapInformationsRequestMessage MIRM = new MapInformationsRequestMessage();
-		MIRM.serialize(this.character.infos.currentMap.id);
+		MIRM.mapId = this.character.infos.currentMap.id;
 		instance.outPush(MIRM);
 	}
 	
@@ -227,7 +215,7 @@ public class RoleplayContextFrame extends Frame {
 	}
 	
 	protected void process(PopupWarningMessage PWM) {
-		this.instance.log.p("Popup received by " + PWM.author + " that contains : \"" + PWM.content + "\".");
+		this.instance.log.p("Popup received by " + PWM.author + " that contains : \"" + PWM.content2 + "\".");
 		try {
 			Thread.sleep(PWM.lockDuration * 1000); // attendre le nombre de secondes indiqué
 		} catch (InterruptedException e) {

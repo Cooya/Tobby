@@ -1,89 +1,126 @@
 package messages;
 
+import gui.Controller;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.util.Hashtable;
+import java.util.Map;
 
 import main.FatalError;
 import utilities.BiMap;
 import utilities.ByteArray;
+import utilities.Reflection;
 
-public class Message {
-	private static final String messagesFilePath = "Ressources/messages.txt";
-	private static final BiMap<Integer, String> map = new BiMap<Integer, String>(Integer.class, String.class);
+@SuppressWarnings("unchecked")
+public abstract class Message {
+	private static final String MESSAGES_FILEPATH = "Ressources/messages.txt";
+	private static final BiMap<Integer, String> messages = new BiMap<Integer, String>(Integer.class, String.class);
+	private static final Map<String, Class<Message>> msgClasses = new Hashtable<String, Class<Message>>();
 	
-	static  {
+	static {
+		// récupération de la liste des messages (id + nom) depuis le fichier "messages.txt"
 		try {
-			//Instance.log("Loading informations from messages file.");
-			BufferedReader buffer = new BufferedReader(new FileReader(messagesFilePath));
+			BufferedReader buffer = new BufferedReader(new FileReader(MESSAGES_FILEPATH));
 			String[] splitLine;
 			String line = buffer.readLine();
 			while(line != null) {
 				splitLine = line.split(" ");
-				map.put(Integer.parseInt(splitLine[0]), splitLine[1]);
+				messages.put(Integer.parseInt(splitLine[0]), splitLine[1]);
 				line = buffer.readLine();
 			}
 			buffer.close();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	}
-	
-	protected int id;
-	protected int lenofsize;
-	protected int size;
-	protected byte[] content;
-	
-	protected int contentBytesAvailables; // nombre d'octets du contenu acquis
-	protected boolean complete;
-	
-	public Message(int id, int lenofsize, int size, byte[] content, int bytesAvailables) { // constructeur générique
-		this.id = id;
-		this.lenofsize = lenofsize;
-		this.size = size;
-		if(content != null) {
-			if(content.length == size)		
-				this.content = content;
-			else {
-				this.content = new byte[size];
-				for(int i = 0; i < content.length; ++i)
-					this.content[i] = content[i];
-			}
-		}
 		
-		this.contentBytesAvailables = bytesAvailables;
-		this.complete = bytesAvailables == size;
+		// récupération de toutes les classes de sérialisation/désérialisation des messages dans le package "messages"
+		try {
+			Class<?>[] classesArray = Reflection.getClasses("messages");
+			for(Class<?> cl : classesArray)
+				msgClasses.put(cl.getSimpleName(), (Class<Message>) cl);
+		} catch(Exception e) {
+			e.printStackTrace();
+			Controller.getInstance().exit("Error occured during loading deserialization classes.");
+		}
 	}
 	
-	public Message(Message msg) { // constructeur spécifique
-		this(msg.id, msg.lenofsize, msg.size, msg.content, msg.contentBytesAvailables);
-	}
+	private int id;
+	private int lenofsize;
+	private int size;
+	protected ByteArray content;
 	
-	public Message(String msgName) { // message vide à envoyer
+	private int contentBytesAvailables; // nombre d'octets du contenu acquis
+	private boolean isComplete;
+	
+	// constructeur pour les messages à envoyer qui n'ont pas de contenu (UnhandledMessage)
+	public Message(String msgName) {
 		this.id = get(msgName);
 	}
 	
+	// constructeur pour les messages à envoyer
 	public Message() {
 		this.id = get(getClass().getSimpleName());
+		this.content = new ByteArray();
 	}
 	
+	// sorte de méthode "factory" pour les messages reçus
+	public static Message create(int id, int lenofsize, int size, byte[] content, int bytesAvailables) {
+		Message msg;
+		String msgName = (String) messages.get(id);
+		if(msgName == null)
+			msg = new UnknownMessage();
+		else {
+			Class<? extends Message> cl = msgClasses.get(msgName);
+			if(cl == null)
+				msg = new UnhandledMessage();
+			else
+				try {
+					msg = cl.newInstance();
+				} catch(Exception e) {
+					e.printStackTrace();
+					return null;
+				}
+		}
+		msg.id = id;
+		msg.lenofsize = lenofsize;
+		msg.size = size;
+		if(content != null) {
+			if(content.length == size)		
+				msg.content = new ByteArray(content);
+			else
+				msg.content = new ByteArray(content, size);
+		}
+		
+		msg.contentBytesAvailables = bytesAvailables;
+		msg.isComplete = bytesAvailables == size;
+		return msg;
+	}
+	
+	public abstract void serialize();
+	public abstract void deserialize();
+	
 	public static String get(int id) {
-		return (String) map.get(id);
+		return (String) messages.get(id);
 	}
 	
 	public static int get(String name) {
-		Object id = map.get(name);
+		Object id = messages.get(name);
 		if(id == null)
 			throw new FatalError("Unknown message name : \"" + name + "\".");
 		return (int) id;
 	}
 	
-	@SuppressWarnings("unchecked")
-	public static Class<Message> getClass(int id) {
+	public static Class<Message> getClass(int id) { // TODO
 		try {
 			return (Class<Message>) Class.forName(get(id));
-		} catch (Exception e) {
+		} catch(Exception e) {
 			return null;
 		}
+	}
+	
+	public static Class<Message> getClassByName(String msgName) {
+		return msgClasses.get(msgName);
 	}
 	
 	public static int get(Message msg) {
@@ -110,10 +147,6 @@ public class Message {
 		return this.size;
 	}
 	
-	public byte[] getContent() {
-		return this.content;
-	}
-	
 	public static short computeLenOfSize(int size) {
 	    if(size > 65535)
 	        return 3;
@@ -126,8 +159,11 @@ public class Message {
 	}
 	
 	public byte[] pack() {
+		this.size = this.content.getSize();
+		this.lenofsize = computeLenOfSize(this.size);
+		
 		ByteArray buffer = new ByteArray(2 + this.lenofsize + this.size);
-		buffer.writeShort(id << 2 | lenofsize);
+		buffer.writeShort(this.id << 2 | this.lenofsize);
 		if(this.lenofsize == 0) return buffer.bytes();
 		else if(this.lenofsize == 1)
 			buffer.writeByte(this.size);
@@ -137,22 +173,13 @@ public class Message {
 			buffer.writeByte(this.size >> 16);
 			buffer.writeShort(size & 65535);
 		}
-		buffer.writeBytes(this.content);
+		if(this.content != null)
+			buffer.writeBytes(this.content);
 		return buffer.bytes();
 	}
 	
-	protected void completeInfos(ByteArray buffer) {
-		if(buffer == null)
-			return;
-		
-		this.size = buffer.getSize();
-		this.lenofsize = computeLenOfSize(this.size);
-		if(this.size > 0)
-			this.content = buffer.bytes();
-	}
-	
 	public boolean isComplete() {
-		return this.complete;
+		return this.isComplete;
 	}
 	
 	public int getTotalSize() {
@@ -164,11 +191,10 @@ public class Message {
 		if(buffer.length > this.size - this.contentBytesAvailables)
 			additionSize = this.size - this.contentBytesAvailables;
 		else
-			additionSize = buffer.length;	
-		for(int read = 0; read < additionSize; ++read)
-			this.content[this.contentBytesAvailables + read] = buffer[read];
+			additionSize = buffer.length;
+		this.content.writeBytes(buffer, additionSize);
 		this.contentBytesAvailables += additionSize;
-		this.complete = contentBytesAvailables == size;
+		this.isComplete = this.contentBytesAvailables == this.size;
 		return additionSize;
 	}
 }

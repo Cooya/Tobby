@@ -1,20 +1,17 @@
 package messages.context;
 
-import utilities.ByteArray;
 import messages.Message;
 
 public class ChangeMapMessage extends Message {
 	public int mapId = 0;
 	
-	public ChangeMapMessage() {
-		super();
+	@Override
+	public void serialize() {
+		this.content.writeInt(this.mapId);
 	}
 	
-	public void serialize(int mapId) {
-		this.mapId = mapId;
-		
-		ByteArray buffer = new ByteArray();
-		buffer.writeInt(mapId);
-		completeInfos(buffer);
+	@Override
+	public void deserialize() {
+		// not implemented yet
 	}
 }

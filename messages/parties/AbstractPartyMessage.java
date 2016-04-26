@@ -1,24 +1,17 @@
 package messages.parties;
 
-import utilities.ByteArray;
 import messages.Message;
 
 public class AbstractPartyMessage extends Message {
 	public int partyId = 0;
 	
-	public AbstractPartyMessage() {
-		super();
+	@Override
+	public void serialize() {
+		this.content.writeVarInt(this.partyId);
 	}
 	
-	public AbstractPartyMessage(Message msg) {
-		super(msg);
-	}
-	
-	protected void serialize(ByteArray buffer) {
-		buffer.writeVarInt(this.partyId);
-	}
-	
-	protected void deserialize(ByteArray buffer) {
-		this.partyId = buffer.readVarInt();
+	@Override
+	public void deserialize() {
+		this.partyId = this.content.readVarInt();
 	}
 }

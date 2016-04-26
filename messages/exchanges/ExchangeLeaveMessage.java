@@ -1,19 +1,16 @@
 package messages.exchanges;
 
-import utilities.ByteArray;
-import messages.Message;
-
 public class ExchangeLeaveMessage extends LeaveDialogMessage {
 	public boolean success = false;
 	
-	public ExchangeLeaveMessage(Message msg) {
-		super(msg);
-		deserialize();
+	@Override
+	public void serialize() {
+		// not implemented yet
 	}
 	
-	private void deserialize() {
-		ByteArray buffer = new ByteArray(this.content);
-		super.deserialize(buffer);
-		this.success = buffer.readBoolean();
+	@Override
+	public void deserialize() {
+		super.deserialize();
+		this.success = this.content.readBoolean();
 	}
 }

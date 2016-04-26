@@ -1,18 +1,17 @@
 package messages.connection;
 
-import utilities.ByteArray;
 import messages.Message;
 
 public class NicknameChoiceRequestMessage extends Message {
 	public String nickname = "";
 	
-	public NicknameChoiceRequestMessage() {
-		super();
+	@Override
+	public void serialize() {
+		this.content.writeUTF(this.nickname);
 	}
 	
-	public void serialize() {
-		ByteArray buffer = new ByteArray();
-		buffer.writeUTF(this.nickname);
-		super.completeInfos(buffer);
+	@Override
+	public void deserialize() {
+		// not implemented yet
 	}
 }

@@ -1,20 +1,19 @@
 package messages.character;
 
 import messages.Message;
-import utilities.ByteArray;
 
 public class SpellModifyRequestMessage extends Message {
 	public int spellId = 0;
 	public int spellLevel = 0;
 	
-	public SpellModifyRequestMessage() {
-		super();
+	@Override
+	public void serialize() {
+		this.content.writeVarShort(this.spellId);
+		this.content.writeByte(this.spellLevel);
 	}
 	
-	public void serialize() {
-		ByteArray buffer = new ByteArray();
-		buffer.writeVarShort(this.spellId);
-		buffer.writeByte(this.spellLevel);
-		super.completeInfos(buffer);
+	@Override
+	public void deserialize() {
+		// not implemented yet
 	}
 }

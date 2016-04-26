@@ -1,18 +1,17 @@
 package messages.exchanges;
 
 import messages.Message;
-import utilities.ByteArray;
 
 public class ObjectDeletedMessage extends Message {
 	public int objectUID = 0;
 
-	public ObjectDeletedMessage(Message msg) {
-		super(msg);
-		deserialize();
+	@Override
+	public void serialize() {
+		// not implemented yet
 	}
 
-	private void deserialize() {
-		ByteArray buffer = new ByteArray(this.content);
-		this.objectUID = buffer.readVarInt();
+	@Override
+	public void deserialize() {
+		this.objectUID = this.content.readVarInt();
 	}
 }

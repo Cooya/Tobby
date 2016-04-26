@@ -2,28 +2,22 @@ package messages.context;
 
 import java.util.Vector;
 
-import main.Emulation;
 import messages.Message;
-import utilities.ByteArray;
 
 public class GameMapMovementRequestMessage extends Message {
-    public Vector<Integer> keyMovements;
-    public int mapId = 0;
-    
-	public GameMapMovementRequestMessage() {
-		super();
-	}
-	
-	public void serialize(Vector<Integer> keyMovements, int mapId, int instanceId) {
-		this.keyMovements = keyMovements;
-		this.mapId = mapId;
-		
-		ByteArray buffer = new ByteArray();
-		buffer.writeShort(this.keyMovements.size());
+	public Vector<Integer> keyMovements;
+	public int mapId = 0;
+
+	@Override
+	public void serialize() {
+		this.content.writeShort(this.keyMovements.size());
 		for(int i : this.keyMovements)
-			buffer.writeShort(i);
-		buffer.writeInt(mapId);
-		
-		completeInfos(Emulation.hashMessage(buffer, instanceId));
+			this.content.writeShort(i);
+		this.content.writeInt(mapId);
+	}
+
+	@Override
+	public void deserialize() {
+		// not implemented yet
 	}
 }

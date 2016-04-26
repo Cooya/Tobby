@@ -1,6 +1,5 @@
 package messages.fights;
 
-import utilities.ByteArray;
 import messages.Message;
 
 public class GameFightOptionStateUpdateMessage extends Message {
@@ -9,16 +8,16 @@ public class GameFightOptionStateUpdateMessage extends Message {
     public int option = 3;
     public boolean state = false;
 	
-	public GameFightOptionStateUpdateMessage(Message msg) {
-		super(msg);
-		deserialize();
+    @Override
+	public void serialize() {
+		// not implemented yet
 	}
-
-	private void deserialize() {
-		ByteArray buffer = new ByteArray(this.content);
-		this.fightId = buffer.readShort();
-		this.teamId = buffer.readByte();
-		this.option = buffer.readByte();
-		this.state = buffer.readBoolean();
+    
+    @Override
+	public void deserialize() {
+		this.fightId = this.content.readShort();
+		this.teamId = this.content.readByte();
+		this.option = this.content.readByte();
+		this.state = this.content.readBoolean();
 	}
 }

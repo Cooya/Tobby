@@ -1,6 +1,5 @@
 package messages.security;
 
-import utilities.ByteArray;
 import messages.Message;
 
 public class CheckFileMessage extends Message {
@@ -8,14 +7,15 @@ public class CheckFileMessage extends Message {
 	public int type = 0;
 	public String value = "";
 	
-	public CheckFileMessage() {
-		super();
+	@Override
+	public void serialize() {
+		this.content.writeUTF(this.filenameHash);
+		this.content.writeByte(this.type);
+		this.content.writeUTF(this.value);
 	}
 	
-	public void serialize() {
-		ByteArray buffer = new ByteArray();
-		buffer.writeUTF(this.filenameHash);
-		buffer.writeByte(this.type);
-		buffer.writeUTF(this.value);
+	@Override
+	public void deserialize() {
+		// not implemented yet
 	}
 }

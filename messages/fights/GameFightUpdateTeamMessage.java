@@ -1,21 +1,20 @@
 package messages.fights;
 
 import gamedata.context.FightTeamInformations;
-import utilities.ByteArray;
 import messages.Message;
 
 public class GameFightUpdateTeamMessage extends Message {
 	public int fightId = 0;
 	public FightTeamInformations team;
 	
-	public GameFightUpdateTeamMessage(Message msg) {
-		super(msg);
-		deserialize();
+	@Override
+	public void serialize() {
+		// not implemented yet
 	}
 	
-	private void deserialize() {
-		ByteArray buffer = new ByteArray(this.content);
-		this.fightId = buffer.readShort();
-		this.team = new FightTeamInformations(buffer);
+	@Override
+	public void deserialize() {
+		this.fightId = this.content.readShort();
+		this.team = new FightTeamInformations(this.content);
 	}
 }

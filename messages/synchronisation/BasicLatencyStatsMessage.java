@@ -1,28 +1,21 @@
 package messages.synchronisation;
 
-import utilities.ByteArray;
-import main.Emulation;
 import messages.Message;
 
 public class BasicLatencyStatsMessage extends Message {
     public int latency = 0;
     public int sampleCount = 0;
     public int max = 0;
-
-    public BasicLatencyStatsMessage() {
-    	super();
+    
+    @Override
+    public void serialize() {
+    	this.content.writeShort(this.latency);
+    	this.content.writeVarShort(this.sampleCount);
+    	this.content.writeVarShort(this.max);
     }
     
-    public void serialize(int latency, int sampleCount, int max, int instanceId) {
-    	this.latency = latency;
-    	this.sampleCount = sampleCount;
-    	this.max = max;
-    	
-    	ByteArray buffer = new ByteArray();
-    	buffer.writeShort(this.latency);
-    	buffer.writeVarShort(this.sampleCount);
-    	buffer.writeVarShort(this.max);
-    	
-    	completeInfos(Emulation.hashMessage(buffer, instanceId));
-    }
+    @Override
+	public void deserialize() {
+		// not implemented yet
+	}
 }

@@ -2,7 +2,6 @@ package messages.context;
 
 import java.util.Vector;
 
-import utilities.ByteArray;
 import messages.Message;
 
 public class SystemMessageDisplayMessage extends Message {
@@ -10,18 +9,18 @@ public class SystemMessageDisplayMessage extends Message {
     public int msgId = 0;
     public Vector<String> parameters;
     
-    public SystemMessageDisplayMessage(Message msg) {
-    	super(msg);
-    	this.parameters = new Vector<String>();
-    	deserialize();
-    }
+    @Override
+	public void serialize() {
+		// not implemented yet
+	}
     
-    private void deserialize() {
-    	ByteArray buffer = new ByteArray(this.content);
-    	this.hangUp = buffer.readBoolean();
-        this.msgId = buffer.readVarShort();
-        int nb = buffer.readShort();
+    @Override
+    public void deserialize() {
+    	this.parameters = new Vector<String>();
+    	this.hangUp = this.content.readBoolean();
+        this.msgId = this.content.readVarShort();
+        int nb = this.content.readShort();
         for(int i = 0; i < nb; ++i)
-        	this.parameters.add(buffer.readUTF());
+        	this.parameters.add(this.content.readUTF());
     }
 }

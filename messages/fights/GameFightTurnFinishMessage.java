@@ -1,19 +1,16 @@
 package messages.fights;
 
 import messages.Message;
-import utilities.ByteArray;
 
-public class GameFightTurnFinishMessage extends Message{
-	
-	public  GameFightTurnFinishMessage(){
-		super();
+public class GameFightTurnFinishMessage extends Message {
+
+	@Override
+	public void serialize() {
+		// not implemented yet
 	}
-	
-	public void serialize()
-    {
-		ByteArray buffer=new ByteArray();
-		completeInfos(buffer);
-    }
-	
-	
+
+	@Override
+	public void deserialize() {
+		// not implemented yet
+	}
 }

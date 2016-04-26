@@ -1,20 +1,19 @@
 package messages.fights;
 
 import messages.Message;
-import utilities.ByteArray;
 
 public class GameFightJoinRequestMessage extends Message {
 	public double fighterId = 0;
 	public int fightId = 0;
 	
-	public GameFightJoinRequestMessage() {
-		super();
+	@Override
+	public void serialize() {
+		this.content.writeDouble(this.fighterId);
+		this.content.writeInt(this.fightId);
 	}
 	
-	public void serialize() {
-		ByteArray buffer = new ByteArray();
-		buffer.writeDouble(this.fighterId);
-		buffer.writeInt(this.fightId);
-		super.completeInfos(buffer);
+	@Override
+	public void deserialize() {
+		// not implemented yet
 	}
 }

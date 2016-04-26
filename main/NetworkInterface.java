@@ -56,9 +56,9 @@ public class NetworkInterface extends Thread {
 			} catch(SocketTimeoutException e) {
 				this.instance.log.p("DEBUG : SocketTimeoutException");
 				if(canPing) {
-					BasicPingMessage ping = new BasicPingMessage();
-					ping.serialize(true);
-					instance.outPush(ping);
+					BasicPingMessage BPM = new BasicPingMessage();
+					BPM.quiet = true;
+					instance.outPush(BPM);
 					this.instance.log.p("Sending a ping request to server.");
 					canPing = false;
 				}

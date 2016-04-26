@@ -1,8 +1,5 @@
 package messages.exchanges;
 
-import messages.Message;
-import utilities.ByteArray;
-
 public class ExchangeStartedWithPodsMessage extends ExchangeStartedMessage {
 	public double firstCharacterId = 0;
     public int firstCharacterCurrentWeight = 0;
@@ -11,19 +8,19 @@ public class ExchangeStartedWithPodsMessage extends ExchangeStartedMessage {
     public int secondCharacterCurrentWeight = 0;
     public int secondCharacterMaxWeight = 0;
     
-    public ExchangeStartedWithPodsMessage(Message msg) {
-		super(msg);
-		deserialize();
+    @Override
+	public void serialize() {
+		// not implemented yet
 	}
     
-	private void deserialize() {
-		ByteArray buffer = new ByteArray(this.content);
-		super.deserialize(buffer);
-		this.firstCharacterId = buffer.readDouble();
-		this.firstCharacterCurrentWeight = buffer.readVarInt();
-		this.firstCharacterMaxWeight = buffer.readVarInt();
-		this.secondCharacterId = buffer.readDouble();
-		this.secondCharacterCurrentWeight = buffer.readVarInt();
-		this.secondCharacterMaxWeight = buffer.readVarInt();
+    @Override
+	public void deserialize() {
+		super.deserialize();
+		this.firstCharacterId = this.content.readDouble();
+		this.firstCharacterCurrentWeight = this.content.readVarInt();
+		this.firstCharacterMaxWeight = this.content.readVarInt();
+		this.secondCharacterId = this.content.readDouble();
+		this.secondCharacterCurrentWeight = this.content.readVarInt();
+		this.secondCharacterMaxWeight = this.content.readVarInt();
 	}
 }

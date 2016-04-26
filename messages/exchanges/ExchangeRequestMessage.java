@@ -1,17 +1,17 @@
 package messages.exchanges;
 
-import utilities.ByteArray;
 import messages.Message;
 
 public class ExchangeRequestMessage extends Message {
 	public int exchangeType = 0;
 	
-	public ExchangeRequestMessage() {
-		super();
+	@Override
+	public void serialize() {
+		this.content.writeByte(this.exchangeType);
 	}
 	
-	protected void serialize(ByteArray buffer, int exchangeType) {
-		this.exchangeType = exchangeType;
-		buffer.writeByte(this.exchangeType);
+	@Override
+	public void deserialize() {
+		// not implemented yet
 	}
 }

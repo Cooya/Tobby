@@ -1,21 +1,17 @@
 package messages.fights;
 
 import messages.Message;
-import utilities.ByteArray;
 
-public class GameFightReadyMessage extends Message{
-
-	public GameFightReadyMessage()
-	{
-		super();
+public class GameFightReadyMessage extends Message {
+	public boolean isReady = false;
+	
+	@Override
+	public void serialize() {
+		this.content.writeBoolean(this.isReady);
 	}
-
-	public void serialize()
-	{
-		ByteArray buffer=new ByteArray();
-		buffer.writeBoolean(true);
-		completeInfos(buffer);
+	
+	@Override
+	public void deserialize() {
+		// not implemented yet
 	}
-
-
 }

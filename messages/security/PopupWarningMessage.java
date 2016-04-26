@@ -1,22 +1,21 @@
 package messages.security;
 
-import utilities.ByteArray;
 import messages.Message;
 
 public class PopupWarningMessage extends Message {
 	public int lockDuration = 0;
 	public String author = "";
-	public String content = "";
+	public String content2 = ""; // nom de variable déjà utilisé
 	
-	public PopupWarningMessage(Message msg) {
-		super(msg);
-		deserialize();
+	@Override
+	public void serialize() {
+		// not implemented yet
 	}
 	
-	private void deserialize() {
-		ByteArray buffer = new ByteArray(super.content);
-        this.lockDuration = buffer.readByte();
-        this.author = buffer.readUTF();
-        this.content = buffer.readUTF();
+	@Override
+	public void deserialize() {
+        this.lockDuration = this.content.readByte();
+        this.author = this.content.readUTF();
+        this.content2 = this.content.readUTF();
     }
 }

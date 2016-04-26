@@ -4,7 +4,13 @@ import messages.Message;
 
 public class NpcDialogCreationMessage extends Message {
 	
-	public NpcDialogCreationMessage(Message msg) {
+	@Override
+	public void serialize() {
+		// not implemented yet
+	}
+	
+	@Override
+	public void deserialize() {
 		// not implemented yet
 	}
 }

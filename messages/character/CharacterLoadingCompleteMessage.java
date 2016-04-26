@@ -3,8 +3,14 @@ package messages.character;
 import messages.Message;
 
 public class CharacterLoadingCompleteMessage extends Message {
-
-	public CharacterLoadingCompleteMessage(Message msg) {
+	
+	@Override
+	public void serialize() {
+		// not implemented yet
+	}
+	
+	@Override
+	public void deserialize() {
 		// not implemented yet
 	}
 }

@@ -1,22 +1,19 @@
 package messages.fights;
 
 import messages.Message;
-import utilities.ByteArray;
 
 public class GameActionAcknowledgementMessage extends Message {
 	public boolean valid = false;
 	public int actionId = 0;
 
-	public GameActionAcknowledgementMessage() {
-		super();
+	@Override
+	public void serialize() {
+		this.content.writeBoolean(this.valid);
+		this.content.writeByte(this.actionId);
 	}
-
-	public void serialize(boolean valid, int actionId) {
-		this.valid = valid;
-		this.actionId = actionId;
-		ByteArray buffer = new ByteArray();
-		buffer.writeBoolean(this.valid);
-		buffer.writeByte(this.actionId);
-		super.completeInfos(buffer);
+	
+	@Override
+	public void deserialize() {
+		// not implemented yet
 	}
 }

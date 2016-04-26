@@ -5,8 +5,13 @@ import messages.Message;
 public class IdentificationFailedMessage extends Message {
 	public int reason = 99;
 	
-	public IdentificationFailedMessage(Message msg) {
-		super(msg);
-		this.reason = this.content[0];
+	@Override
+	public void serialize() {
+		// not implemented yet
+	}
+	
+	@Override
+	public void deserialize() {
+		this.reason = this.content.readByte();
 	}
 }

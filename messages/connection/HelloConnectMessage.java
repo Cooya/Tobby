@@ -1,42 +1,26 @@
 package messages.connection;
 
 import messages.Message;
-import utilities.ByteArray;
 
 public class HelloConnectMessage extends Message {
-	private String salt;
-	private int[] key;
+	public String salt;
+	public int[] key; // normalement c'est un vecteur
 	
-	public HelloConnectMessage(Message msg) {
-		super(msg);
-		deserialize();
+	@Override
+	public void serialize() {
+		this.content.writeUTF(this.salt);
+		int len = this.key.length;
+		this.content.writeVarInt(len);
+		for(int i = 0; i < len; ++i)
+			this.content.writeByte(this.key[i]);
 	}
 	
-	private void deserialize() {
-		ByteArray buffer = new ByteArray(this.content);
-		this.salt = buffer.readUTF();
-		int keySize = buffer.readVarInt();
+	@Override
+	public void deserialize() {
+		this.salt = this.content.readUTF();
+		int keySize = this.content.readVarInt();
 		this.key = new int[keySize];
 		for(int i = 0; i < keySize; ++i)
-			this.key[i] = buffer.readByte();
-	}
-	
-	public void serialize() {
-		ByteArray buffer = new ByteArray();
-		buffer.writeUTF(this.salt);
-		int len = this.key.length;
-		buffer.writeVarInt(len);
-		for(int i = 0; i < len; ++i)
-			buffer.writeByte(this.key[i]);
-		
-		completeInfos(buffer);
-	}
-	
-	public String getSalt() {
-		return this.salt;
-	}
-	
-	public int[] getKey() {
-		return this.key;
+			this.key[i] = this.content.readByte();
 	}
 }

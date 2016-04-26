@@ -4,23 +4,22 @@ import java.util.Vector;
 
 import gamedata.inventory.SpellItem;
 import messages.Message;
-import utilities.ByteArray;
 
 public class SpellListMessage extends Message {
 	public boolean spellPrevisualization = false;
 	public Vector<SpellItem> spells;
 	
-	public SpellListMessage(Message msg) {
-		super(msg);
-		spells = new Vector<SpellItem>();
-		deserialize();
+	@Override
+	public void serialize() {
+		// not implemented yet
 	}
 
-	private void deserialize() {
-		ByteArray buffer = new ByteArray(content);
-		this.spellPrevisualization = buffer.readBoolean();
-		int nb = buffer.readShort();
+	@Override
+	public void deserialize() {
+		this.spells = new Vector<SpellItem>();
+		this.spellPrevisualization = this.content.readBoolean();
+		int nb = this.content.readShort();
 		for(int i = 0; i < nb; ++i)
-			this.spells.add(new SpellItem(buffer));
+			this.spells.add(new SpellItem(this.content));
 	}
 }

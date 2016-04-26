@@ -1,8 +1,5 @@
 package messages.parties;
 
-import utilities.ByteArray;
-import messages.Message;
-
 public class PartyInvitationMessage extends AbstractPartyMessage {
     public int partyType = 0;
     public String partyName = "";
@@ -10,20 +7,20 @@ public class PartyInvitationMessage extends AbstractPartyMessage {
     public double fromId = 0;
     public String fromName = "";
     public double toId = 0;
-	
-    public PartyInvitationMessage(Message msg) {
-    	super(msg);
-    	deserialize();
-    }
     
-    private void deserialize() {
-    	ByteArray buffer = new ByteArray(this.content);
-    	super.deserialize(buffer);
-    	this.partyType = buffer.readByte();
-    	this.partyName = buffer.readUTF();
-    	this.maxParticipants = buffer.readByte();
-    	this.fromId = buffer.readVarLong();
-    	this.fromName = buffer.readUTF();
-    	this.toId = buffer.readVarLong();
+    @Override
+	public void serialize() {
+		// not implemented yet
+	}
+    
+    @Override
+    public void deserialize() {
+    	super.deserialize();
+    	this.partyType = this.content.readByte();
+    	this.partyName = this.content.readUTF();
+    	this.maxParticipants = this.content.readByte();
+    	this.fromId = this.content.readVarLong();
+    	this.fromName = this.content.readUTF();
+    	this.toId = this.content.readVarLong();
     }
 }

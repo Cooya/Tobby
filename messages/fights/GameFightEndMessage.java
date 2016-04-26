@@ -6,7 +6,6 @@ import gamedata.fight.NamedPartyTeamWithOutcome;
 
 import java.util.Vector;
 
-import utilities.ByteArray;
 import messages.Message;
 
 public class GameFightEndMessage extends Message{
@@ -16,23 +15,23 @@ public class GameFightEndMessage extends Message{
 	public Vector<FightResultListEntry> results;
 	public Vector<NamedPartyTeamWithOutcome> namedPartyTeamsOutcomes;
 
-	public GameFightEndMessage(Message msg) {
-		super(msg);
-		this.results = new Vector<FightResultListEntry>();
-		this.namedPartyTeamsOutcomes = new Vector<NamedPartyTeamWithOutcome>();
-		deserialize();
+	@Override
+	public void serialize() {
+		// not implemented yet
 	}
 
-	private void deserialize() {
-		ByteArray buffer = new ByteArray(this.content);
-		this.duration = buffer.readInt();
-		this.ageBonus = buffer.readShort();
-		this.lootShareLimitMalus = buffer.readShort();
-		int nb = buffer.readShort();
+	@Override
+	public void deserialize() {
+		this.results = new Vector<FightResultListEntry>();
+		this.namedPartyTeamsOutcomes = new Vector<NamedPartyTeamWithOutcome>();
+		this.duration = this.content.readInt();
+		this.ageBonus = this.content.readShort();
+		this.lootShareLimitMalus = this.content.readShort();
+		int nb = this.content.readShort();
 		for(int i = 0; i < nb; ++i)
-			this.results.add((FightResultListEntry) ProtocolTypeManager.getInstance(buffer.readShort(), buffer));
-		nb = buffer.readShort();
+			this.results.add((FightResultListEntry) ProtocolTypeManager.getInstance(this.content.readShort(), this.content));
+		nb = this.content.readShort();
 		for(int i = 0; i < nb; ++i)
-			this.namedPartyTeamsOutcomes.add(new NamedPartyTeamWithOutcome(buffer));
+			this.namedPartyTeamsOutcomes.add(new NamedPartyTeamWithOutcome(this.content));
 	}
 }

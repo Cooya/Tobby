@@ -1,40 +1,28 @@
 package messages.connection;
 
-import gamedata.context.GameServerInformations;
+import gamedata.connection.GameServerInformations;
 
 import java.util.Vector;
 
-import main.FatalError;
 import messages.Message;
-import utilities.ByteArray;
 
 public class ServersListMessage extends Message {
     public Vector<GameServerInformations> servers;
     public int alreadyConnectedToServerId = 0;
     public boolean canCreateNewCharacter = false;
-
-	public ServersListMessage(Message msg) {
-		super(msg);
+	
+	@Override
+	public void serialize() {
+		// not implemented yet
+	}
+	
+	@Override
+	public void deserialize() {
 		this.servers = new Vector<GameServerInformations>();
-		deserialize();
-	}
-	
-	private void deserialize() {
-		ByteArray buffer = new ByteArray(this.content);
-		int nb = buffer.readShort();
+		int nb = this.content.readShort();
 		for(int i = 0; i < nb; ++i)
-			this.servers.add(new GameServerInformations(buffer));
-		this.alreadyConnectedToServerId = buffer.readVarShort();
-		this.canCreateNewCharacter = buffer.readBoolean();
-	}
-	
-	public boolean isSelectable(int serverId) {
-		for(GameServerInformations server : servers)
-			if(server.id == serverId)
-				if(!server.isSelectable)
-					return false;
-				else
-					return true;
-		throw new FatalError("Invalid server id.");
+			this.servers.add(new GameServerInformations(this.content));
+		this.alreadyConnectedToServerId = this.content.readVarShort();
+		this.canCreateNewCharacter = this.content.readBoolean();
 	}
 }

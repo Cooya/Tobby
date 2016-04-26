@@ -1,11 +1,12 @@
 package controller.api;
 
+import gamedata.character.PlayerStatus;
 import controller.CharacterState;
 import controller.characters.Character;
 import controller.characters.Fighter;
 import controller.characters.Mule;
 import main.FatalError;
-import messages.EmptyMessage;
+import messages.UnhandledMessage;
 import messages.character.PlayerStatusUpdateRequestMessage;
 import messages.exchanges.ExchangeObjectMoveKamaMessage;
 import messages.exchanges.ExchangePlayerRequestMessage;
@@ -21,7 +22,7 @@ public class SocialAPI {
 	// change le statut du personnage
 	public void changePlayerStatus(int status) {
 		PlayerStatusUpdateRequestMessage PSURM = new PlayerStatusUpdateRequestMessage();
-		PSURM.serialize(status);
+		PSURM.status = new PlayerStatus(status);
 		this.character.instance.outPush(PSURM);
 		this.character.instance.log.p("Passing in away mode.");
 	}
@@ -54,12 +55,11 @@ public class SocialAPI {
 		
 		// transfert de tous les objets de l'inventaire
 		this.character.instance.log.p("Transfering all objects from inventory.");
-		EmptyMessage EM = new EmptyMessage("ExchangeObjectTransfertAllFromInvMessage");
-		this.character.instance.outPush(EM);
+		this.character.instance.outPush(new UnhandledMessage("ExchangeObjectTransfertAllFromInvMessage"));
 		
 		// les kamas aussi
 		ExchangeObjectMoveKamaMessage EOMKM = new ExchangeObjectMoveKamaMessage();
-		EOMKM.serialize(this.character.infos.stats.kamas);
+		EOMKM.quantity = this.character.infos.stats.kamas;
 		this.character.instance.outPush(EOMKM);
 		
 		// on attend de pouvoir valider l'échange (bouton bloqué pendant 3 secondes après chaque action)
@@ -72,7 +72,8 @@ public class SocialAPI {
 		
 		// validation de l'échange côté combattant
 		ExchangeReadyMessage ERM = new ExchangeReadyMessage();
-		ERM.serialize(true, 2); // car il y a eu 2 actions lors de l'échange
+		ERM.ready = true;
+		ERM.step = 2; // car il y a eu 2 actions lors de l'échange
 		this.character.instance.outPush(ERM);
 		this.character.instance.log.p("Exchange validated on my side.");
 		
@@ -99,8 +100,7 @@ public class SocialAPI {
 				return false;
 			}
 			this.character.instance.log.p("Refusing exchange request received from an unknown.");
-			EmptyMessage EM = new EmptyMessage("LeaveDialogRequestMessage");
-			this.character.instance.outPush(EM);
+			this.character.instance.outPush(new UnhandledMessage("LeaveDialogRequestMessage"));
 			return false;
 		}
 		
@@ -109,15 +109,13 @@ public class SocialAPI {
 		if((this.character instanceof Mule && !this.character.inState(CharacterState.MULE_AVAILABLE)) ||
 				this.character.inState(CharacterState.NEED_TO_EMPTY_INVENTORY)) {
 			this.character.instance.log.p("Refusing exchange request because I am busy.");
-			EmptyMessage EM = new EmptyMessage("LeaveDialogRequestMessage");
-			this.character.instance.outPush(EM);
+			this.character.instance.outPush(new UnhandledMessage("LeaveDialogRequestMessage"));
 			return false;
 		}
 			
 		// sinon on accepte l'échange
 		this.character.instance.log.p("Accepting exchange request received from a customer.");
-		EmptyMessage EM = new EmptyMessage("ExchangeAcceptMessage"); // accepter l'échange
-		this.character.instance.outPush(EM);
+		this.character.instance.outPush(new UnhandledMessage("ExchangeAcceptMessage"));
 		this.character.waitState(CharacterState.IN_EXCHANGE); // important
 		return true;
 	}
@@ -128,7 +126,8 @@ public class SocialAPI {
 		
 		// envoi de la demande d'échange
 		ExchangePlayerRequestMessage EPRM = new ExchangePlayerRequestMessage();
-		EPRM.serialize(characterId, 1, this.character.instance.id);
+		EPRM.target = characterId;
+		EPRM.exchangeType = 1;
 		this.character.instance.outPush(EPRM);
 		this.character.instance.log.p("Sending exchange demand.");
 		

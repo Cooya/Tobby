@@ -10,7 +10,6 @@ import gamedata.context.StatedElement;
 
 import java.util.Vector;
 
-import utilities.ByteArray;
 import messages.Message;
 
 public class MapComplementaryInformationsDataMessage extends Message {
@@ -22,40 +21,39 @@ public class MapComplementaryInformationsDataMessage extends Message {
     public Vector<StatedElement> statedElements;
     public Vector<MapObstacle> obstacles;
     public Vector<FightCommonInformations> fights;
-
-	public MapComplementaryInformationsDataMessage(Message msg) {
-		super(msg);
-		houses = new Vector<HouseInformations>();
-		actors = new Vector<GameRolePlayActorInformations>();
-		interactiveElements = new Vector<InteractiveElement>();
-		statedElements = new Vector<StatedElement>();
-		obstacles = new Vector<MapObstacle>();
-		fights = new Vector<FightCommonInformations>();
-		deserialize();
+    
+    @Override
+	public void serialize() {
+		// not implemented yet
 	}
 
-	private void deserialize() {
-		ByteArray buffer = new ByteArray(this.content);
-		this.subAreaId = buffer.readVarShort();
-		this.mapId = buffer.readInt();
-		
-		int nb = buffer.readShort();
+    @Override
+	public void deserialize() {
+		this.houses = new Vector<HouseInformations>();
+		this.actors = new Vector<GameRolePlayActorInformations>();
+		this.interactiveElements = new Vector<InteractiveElement>();
+		this.statedElements = new Vector<StatedElement>();
+		this.obstacles = new Vector<MapObstacle>();
+		this.fights = new Vector<FightCommonInformations>();
+		this.subAreaId = this.content.readVarShort();
+		this.mapId = this.content.readInt();
+		int nb = this.content.readShort();
 		for(int i = 0; i < nb; ++i)
-			houses.add((HouseInformations) ProtocolTypeManager.getInstance(buffer.readShort(), buffer));
-		nb = buffer.readShort();
+			houses.add((HouseInformations) ProtocolTypeManager.getInstance(this.content.readShort(), this.content));
+		nb = this.content.readShort();
 		for(int i = 0; i < nb; ++i)
-			actors.add((GameRolePlayActorInformations) ProtocolTypeManager.getInstance(buffer.readShort(), buffer));
-		nb = buffer.readShort();
+			actors.add((GameRolePlayActorInformations) ProtocolTypeManager.getInstance(this.content.readShort(), this.content));
+		nb = this.content.readShort();
 		for(int i = 0; i < nb; ++i)
-			interactiveElements.add((InteractiveElement) ProtocolTypeManager.getInstance(buffer.readShort(), buffer));
-		nb = buffer.readShort();
+			interactiveElements.add((InteractiveElement) ProtocolTypeManager.getInstance(this.content.readShort(), this.content));
+		nb = this.content.readShort();
 		for(int i = 0; i < nb; ++i)
-			statedElements.add(new StatedElement(buffer));
-		nb = buffer.readShort();
+			statedElements.add(new StatedElement(this.content));
+		nb = this.content.readShort();
 		for(int i = 0; i < nb; ++i)
-			obstacles.add(new MapObstacle(buffer));
-		nb = buffer.readShort();
+			obstacles.add(new MapObstacle(this.content));
+		nb = this.content.readShort();
 		for(int i = 0; i < nb; ++i)
-			fights.add(new FightCommonInformations(buffer));
+			fights.add(new FightCommonInformations(this.content));
 	}
 }

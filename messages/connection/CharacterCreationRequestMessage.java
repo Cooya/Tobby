@@ -2,7 +2,6 @@ package messages.connection;
 
 import java.util.Vector;
 
-import utilities.ByteArray;
 import messages.Message;
 
 public class CharacterCreationRequestMessage extends Message {
@@ -12,18 +11,18 @@ public class CharacterCreationRequestMessage extends Message {
 	public Vector<Integer> colors;
 	public int cosmeticId = 0;
 	
-	public CharacterCreationRequestMessage() {
-		super();
+	@Override
+	public void serialize() {
+		this.content.writeUTF(this.name);
+		this.content.writeByte(this.breed);
+		this.content.writeBoolean(this.sex);
+		for(int i : this.colors)
+			this.content.writeInt(i);
+		this.content.writeVarShort(this.cosmeticId);
 	}
 	
-	public void serialize() {
-		ByteArray buffer = new ByteArray();
-		buffer.writeUTF(this.name);
-		buffer.writeByte(this.breed);
-		buffer.writeBoolean(this.sex);
-		for(int i : this.colors)
-			buffer.writeInt(i);
-		buffer.writeVarShort(this.cosmeticId);
-		super.completeInfos(buffer);
+	@Override
+	public void deserialize() {
+		// not implemented yet
 	}
 }

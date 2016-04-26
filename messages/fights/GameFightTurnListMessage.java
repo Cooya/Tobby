@@ -3,26 +3,25 @@ package messages.fights;
 import java.util.Vector;
 
 import messages.Message;
-import utilities.ByteArray;
 
 public class GameFightTurnListMessage extends Message {
 	public Vector<Double> ids;
 	public Vector<Double> deadsIds;
 
-	public GameFightTurnListMessage(Message msg) {
-		super(msg);
-		this.ids = new Vector<Double>();
-		this.deadsIds = new Vector<Double>();
-		deserialize();
+	@Override
+	public void serialize() {
+		// not implemented yet
 	}
 
-	private void deserialize() {
-		ByteArray buffer = new ByteArray(this.content);
-		int nb = buffer.readShort();
+	@Override
+	public void deserialize() {
+		this.ids = new Vector<Double>();
+		this.deadsIds = new Vector<Double>();
+		int nb = this.content.readShort();
 		for(int i = 0; i < nb; ++i)
-			this.ids.add(buffer.readDouble());
-		nb = buffer.readShort();
+			this.ids.add(this.content.readDouble());
+		nb = this.content.readShort();
 		for(int i = 0; i < nb; ++i)
-			this.deadsIds.add(buffer.readDouble());
+			this.deadsIds.add(this.content.readDouble());
 	}
 }

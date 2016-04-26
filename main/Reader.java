@@ -66,6 +66,6 @@ public class Reader {
 		int counter = 0;
 		for(int i = 2 + lenofsize; i < bytesAvailable + 2 + lenofsize; ++i, ++counter)
 			content[counter] = buffer[i];
-	    return new Message(id, lenofsize, size, content, counter);		
+	    return Message.create(id, lenofsize, size, content, counter);		
 	}
 }

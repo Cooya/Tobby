@@ -1,18 +1,17 @@
 package messages.character;
 
-import utilities.ByteArray;
 import messages.Message;
 
 public class LifePointsRegenBeginMessage extends Message {
 	public int regenRate = 0;
-
-	public LifePointsRegenBeginMessage(Message msg) {
-		super(msg);
-		deserialize();
+	
+	@Override
+	public void serialize() {
+		// not implemented yet
 	}
 	
-	private void deserialize() {
-		ByteArray buffer = new ByteArray(this.content);
-		this.regenRate = buffer.readByte();
+	@Override
+	public void deserialize() {
+		this.regenRate = this.content.readByte();
 	}
 }

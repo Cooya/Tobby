@@ -8,7 +8,7 @@ import controller.pathfinding.Pathfinding;
 import controller.pathfinding.Pathfinding.Direction;
 import gamedata.d2p.MapsCache;
 import gamedata.d2p.ankama.Map;
-import messages.EmptyMessage;
+import messages.UnhandledMessage;
 import messages.context.ChangeMapMessage;
 import messages.context.GameMapMovementRequestMessage;
 import messages.interactions.NpcDialogReplyMessage;
@@ -50,7 +50,8 @@ public class MovementAPI {
 		
 		this.character.instance.log.p("Sending movement request.");
 		GameMapMovementRequestMessage GMMRM = new GameMapMovementRequestMessage();
-		GMMRM.serialize(path, this.character.infos.currentMap.id, this.character.instance.id);
+		GMMRM.keyMovements = path;
+		GMMRM.mapId = this.character.infos.currentMap.id;
 		this.character.instance.outPush(GMMRM);
 		this.character.waitState(CharacterState.CAN_MOVE); // on attend le GameMapMovementMessage
 		
@@ -65,8 +66,7 @@ public class MovementAPI {
 		}
 		
 		this.character.instance.log.p("Target cell reached.");
-		EmptyMessage EM = new EmptyMessage("GameMapMovementConfirmMessage");
-		this.character.instance.outPush(EM);
+		this.character.instance.outPush(new UnhandledMessage("GameMapMovementConfirmMessage"));
 		this.character.updateState(CharacterState.CAN_MOVE, false);
 		return true;
 	}
@@ -159,7 +159,7 @@ public class MovementAPI {
 		int nextMapId = this.character.infos.currentMap.getNeighbourMapFromDirection(direction.direction);
 		this.character.instance.log.p("Sending map changement request. Next map id : " + nextMapId + ".");
 		ChangeMapMessage CMM = new ChangeMapMessage();
-		CMM.serialize(nextMapId);
+		CMM.mapId = nextMapId;
 		this.character.instance.outPush(CMM);
 		this.character.infos.mapsTravelled++;
 		this.character.instance.log.graphicalFrame.setMapsTravelledCounter(this.character.infos.mapsTravelled);
@@ -178,8 +178,11 @@ public class MovementAPI {
 		
 		this.character.waitState(CharacterState.IS_LOADED); // important
 		
+		// on parle au pnj
 		NpcGenericActionRequestMessage NGARM = new NpcGenericActionRequestMessage();
-		NGARM.serialize(-10000, 3, this.character.infos.currentMap.id, this.character.instance.id); // on parle au pnj
+		NGARM.npcId = -10000;
+		NGARM.npcActionId = 3;
+		NGARM.npcMapId = this.character.infos.currentMap.id;
 		this.character.instance.outPush(NGARM);
 		
 		try {
@@ -190,7 +193,7 @@ public class MovementAPI {
 		}
 		
 		NpcDialogReplyMessage NDRM = new NpcDialogReplyMessage();
-		NDRM.serialize(25209); // on sélectionne la première réponse
+		NDRM.replyId = 25209; // on sélectionne la première réponse
 		this.character.instance.outPush(NDRM);
 		
 		try {
@@ -201,7 +204,7 @@ public class MovementAPI {
 		}
 		
 		NDRM = new NpcDialogReplyMessage();
-		NDRM.serialize(25207); // on sélectionne la seconde réponse
+		NDRM.replyId = 25207; // on sélectionne la seconde réponse
 		this.character.instance.outPush(NDRM);
 		
 		this.character.updateState(CharacterState.IS_LOADED, false); // chargement de map

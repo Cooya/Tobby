@@ -36,8 +36,8 @@ public class FightContextFrame extends Frame {
 	}
 	
 	protected void process(GameFightTurnReadyRequestMessage GFTRRM) {
-		GameFightTurnReadyMessage GFTRM = new GameFightTurnReadyMessage(true);
-		GFTRM.serialize();
+		GameFightTurnReadyMessage GFTRM = new GameFightTurnReadyMessage();
+		GFTRM.isReady = true;
 		instance.outPush(GFTRM);
 		this.instance.log.p("Next turn.");
 	}
@@ -72,7 +72,8 @@ public class FightContextFrame extends Frame {
 	protected void process(SequenceEndMessage SEM) {
 		if(SEM.authorId == this.character.infos.characterId) {
 			GameActionAcknowledgementMessage GAAM = new GameActionAcknowledgementMessage();
-			GAAM.serialize(true, SEM.actionId);
+			GAAM.valid = true;
+			GAAM.actionId = SEM.actionId;
 			instance.outPush(GAAM);
 		}
 	}

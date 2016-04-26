@@ -1,17 +1,14 @@
 package messages.parties;
 
-import utilities.ByteArray;
-import messages.Message;
-
 public class PartyDeletedMessage extends AbstractPartyMessage {
-
-	public PartyDeletedMessage(Message msg) {
-		super(msg);
-		deserialize();
+	
+	@Override
+	public void serialize() {
+		// not implemented yet
 	}
 	
-	private void deserialize() {
-		ByteArray buffer = new ByteArray(this.content);
-		super.deserialize(buffer);
+	@Override
+	public void deserialize() {
+		super.deserialize();
 	}
 }

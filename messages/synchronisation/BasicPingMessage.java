@@ -1,19 +1,17 @@
 package messages.synchronisation;
 
-import utilities.ByteArray;
 import messages.Message;
 
 public class BasicPingMessage extends Message {
 	public boolean quiet = false;
-
-	public BasicPingMessage() {
-		super();
+	
+	@Override
+	public void serialize() {
+		this.content.writeBoolean(this.quiet);
 	}
 	
-	public void serialize(boolean quiet) {
-		this.quiet = quiet;
-		ByteArray buffer = new ByteArray();
-		buffer.writeBoolean(this.quiet);
-		completeInfos(buffer);
+	@Override
+	public void deserialize() {
+		// not implemented yet
 	}
 }

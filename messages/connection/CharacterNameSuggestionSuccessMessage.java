@@ -1,18 +1,17 @@
 package messages.connection;
 
-import utilities.ByteArray;
 import messages.Message;
 
 public class CharacterNameSuggestionSuccessMessage extends Message {
 	public String suggestion = "";
-
-	public CharacterNameSuggestionSuccessMessage(Message msg) {
-		super(msg);
-		deserialize();
+	
+	@Override
+	public void serialize() {
+		// not implemented yet
 	}
 
-	private void deserialize() {
-		ByteArray buffer = new ByteArray(this.content);
-		this.suggestion = buffer.readUTF();
+	@Override
+	public void deserialize() {
+		this.suggestion = this.content.readUTF();
 	}
 }

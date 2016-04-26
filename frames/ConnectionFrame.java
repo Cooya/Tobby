@@ -1,18 +1,23 @@
 package frames;
 
 import gamedata.character.CharacterBaseInformations;
+import gamedata.connection.GameServerInformations;
+import gamedata.connection.VersionExtended;
 import gamedata.enums.BreedEnum;
 import gui.Controller;
 
 import java.util.Random;
 import java.util.Vector;
 
+import utilities.ByteArray;
+import utilities.Encryption;
 import controller.characters.Character;
 import main.Emulation;
 import main.FatalError;
 import main.Instance;
-import messages.EmptyMessage;
+import main.Main;
 import messages.Message;
+import messages.UnhandledMessage;
 import messages.connection.AuthenticationTicketMessage;
 import messages.connection.BasicCharactersListMessage;
 import messages.connection.CharacterCreationRequestMessage;
@@ -59,7 +64,10 @@ public class ConnectionFrame extends Frame {
 	protected void process(HelloConnectMessage HCM) {
 		this.HCM = HCM;
 		IdentificationMessage IM = new IdentificationMessage();
-		IM.serialize(HCM, this.character.infos.login, this.character.infos.password);
+		IM.version = new VersionExtended(Main.GAME_VERSION[0], Main.GAME_VERSION[1], Main.GAME_VERSION[2], Main.GAME_VERSION[3], Main.GAME_VERSION[4], 0, 1, 1);
+		IM.lang = "fr";
+		IM.credentials = Encryption.encryptCredentials(Encryption.decryptReceivedKey(ByteArray.toBytes(HCM.key)), this.character.infos.login, this.character.infos.password, HCM.salt);
+		IM.serverId = 0; // sélection du serveur automatique
 		this.instance.outPush(IM);
 	}
 	
@@ -92,10 +100,9 @@ public class ConnectionFrame extends Frame {
 	}
 	
 	protected void process(ServersListMessage SLM) {
-		int serverId = this.character.infos.serverId;
-		if(SLM.isSelectable(serverId)) {
+		if(serverIsSelectable(SLM.servers, this.character.infos.serverId)) {
 			ServerSelectionMessage SSM = new ServerSelectionMessage();
-			SSM.serialize(serverId);
+			SSM.serverId = this.character.infos.serverId;
 			instance.outPush(SSM);
 		}
 		else
@@ -103,10 +110,9 @@ public class ConnectionFrame extends Frame {
 	}
 	
 	protected void process(ServerStatusUpdateMessage SSUM) {
-		int serverId = this.character.infos.serverId;
-		if(SSUM.server.id == serverId && SSUM.server.isSelectable) {	
+		if(SSUM.server.id == this.character.infos.serverId && SSUM.server.isSelectable) {	
 			ServerSelectionMessage SSM = new ServerSelectionMessage();
-			SSM.serialize(serverId);
+			SSM.serverId = this.character.infos.serverId;
 			instance.outPush(SSM);
 		}
 	}
@@ -118,7 +124,8 @@ public class ConnectionFrame extends Frame {
 	
 	protected void process(HelloGameMessage HCM) {
 		AuthenticationTicketMessage ATM = new AuthenticationTicketMessage();
-		ATM.serialize("fr", this.ticket);
+		ATM.lang = "fr";
+		ATM.ticket = new String(Encryption.decodeWithAES(ByteArray.toBytes(this.ticket)));
 		instance.outPush(ATM);
 	}
 	
@@ -133,20 +140,16 @@ public class ConnectionFrame extends Frame {
 	}
 	
 	protected void process(CharactersListMessage CLM) {
-		if(CLM.characters.size() == 0) {
-			EmptyMessage EM = new EmptyMessage("CharacterNameSuggestionRequestMessage");
-			this.instance.outPush(EM);
-		}
+		if(CLM.characters.size() == 0)
+			this.instance.outPush(new UnhandledMessage("CharacterNameSuggestionRequestMessage"));
 		else
 			selectCharacter(CLM.characters);
 	}
 	
 	protected void process(BasicCharactersListMessage BCLM) {
 		BCLM.deserialize();
-		if(BCLM.characters.size() == 0) {
-			EmptyMessage EM = new EmptyMessage("CharacterNameSuggestionRequestMessage");
-			this.instance.outPush(EM);
-		}
+		if(BCLM.characters.size() == 0)
+			this.instance.outPush(new UnhandledMessage("CharacterNameSuggestionRequestMessage"));
 		else
 			selectCharacter(BCLM.characters);
 	}
@@ -176,8 +179,7 @@ public class ConnectionFrame extends Frame {
 				Thread.currentThread().interrupt();
 				return;
 			}
-			EmptyMessage EM = new EmptyMessage("CharacterNameSuggestionRequestMessage");
-			this.instance.outPush(EM);
+			this.instance.outPush(new UnhandledMessage("CharacterNameSuggestionRequestMessage"));
 			this.instance.log.p("Asking character name suggestion.");
 		}
 	}
@@ -206,6 +208,16 @@ public class ConnectionFrame extends Frame {
 	
 	protected void process(CharacterSelectedErrorMessage CSEM) {
 		throw new FatalError("Error at the character selection.");
+	}
+	
+	private static boolean serverIsSelectable(Vector<GameServerInformations> servers, int serverId) {
+		for(GameServerInformations server : servers)
+			if(server.id == serverId)
+				if(!server.isSelectable)
+					return false;
+				else
+					return true;
+		throw new FatalError("Invalid server id.");
 	}
 	
 	private void selectCharacter(Vector<CharacterBaseInformations> characters) {

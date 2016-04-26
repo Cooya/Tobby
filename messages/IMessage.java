@@ -2,6 +2,6 @@ package messages;
 
 import utilities.ByteArray;
 
-public interface IMessage {
+public interface IMessage { // TODO
 	public void deserialize(ByteArray buffer);
 }

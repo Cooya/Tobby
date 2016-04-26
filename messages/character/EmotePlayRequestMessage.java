@@ -1,18 +1,17 @@
 package messages.character;
 
 import messages.Message;
-import utilities.ByteArray;
 
 public class EmotePlayRequestMessage extends Message {
 	public int emoteId = 0;
 
-	public EmotePlayRequestMessage() {
-		super();
+	@Override
+	public void serialize() {
+		this.content.writeByte(this.emoteId);
 	}
-
-	public void serialize(byte emoteId) {
-		ByteArray buffer = new ByteArray();
-		buffer.writeByte(emoteId);
-		completeInfos(buffer);
+	
+	@Override
+	public void deserialize() {
+		// not implemented yet
 	}
 }

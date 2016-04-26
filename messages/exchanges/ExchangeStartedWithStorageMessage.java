@@ -1,19 +1,16 @@
 package messages.exchanges;
 
-import utilities.ByteArray;
-import messages.Message;
-
 public class ExchangeStartedWithStorageMessage extends ExchangeStartedMessage {
 	public int storageMaxSlot = 0;
 	
-	public ExchangeStartedWithStorageMessage(Message msg) {
-		super(msg);
-		deserialize();
+	@Override
+	public void serialize() {
+		// not implemented yet
 	}
 	
-	private void deserialize() {
-		ByteArray buffer = new ByteArray(this.content);
-		super.deserialize(buffer);
-		//this.storageMaxSlot = buffer.readVarInt(); // ne peut pas être lu car c'est un négatif
+	@Override
+	public void deserialize() {
+		super.deserialize();
+		//this.storageMaxSlot = this.content.readVarInt(); // ne peut pas être lu car c'est un négatif
 	}
 }

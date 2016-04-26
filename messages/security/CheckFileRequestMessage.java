@@ -1,20 +1,19 @@
 package messages.security;
 
-import utilities.ByteArray;
 import messages.Message;
 
 public class CheckFileRequestMessage extends Message {
 	public String filename = "";
 	public int type = 0;
 	
-	public CheckFileRequestMessage(Message msg) {
-		super(msg);
-		deserialize();
+	@Override
+	public void serialize() {
+		// not implemented yet
 	}
 	
-	private void deserialize() {
-		ByteArray buffer = new ByteArray(this.content);
-		this.filename = buffer.readUTF();
-		this.type = buffer.readByte();
+	@Override
+	public void deserialize() {
+		this.filename = this.content.readUTF();
+		this.type = this.content.readByte();
 	}
 }

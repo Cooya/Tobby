@@ -134,7 +134,7 @@ public class Captain extends Fighter {
 
 		if(inState(CharacterState.IN_FIGHT)) { // reprise de combat
 			GameContextReadyMessage GCRM = new GameContextReadyMessage(); // je ne sais pas à quoi sert ce message
-			GCRM.serialize(this.infos.currentMap.id);
+			GCRM.mapId = this.infos.currentMap.id;
 			this.instance.outPush(GCRM);
 			this.fight.fightManager(true);
 		}

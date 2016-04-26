@@ -55,7 +55,7 @@ public abstract class Character extends Thread {
 
 	protected void sendPingRequest() {
 		BasicPingMessage BPM = new BasicPingMessage();
-		BPM.serialize(false);
+		BPM.quiet = false;
 		this.instance.outPush(BPM);
 		this.instance.log.p("Sending a ping request to server for stay connected.");
 	}

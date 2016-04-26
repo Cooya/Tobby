@@ -1,20 +1,19 @@
 package messages.context;
 
 import messages.Message;
-import utilities.ByteArray;
 
 public class CurrentMapMessage extends Message {
     public int mapId;
 	public String mapKey;
 
-	public CurrentMapMessage(Message msg) {
-		super(msg);
-		deserialize();
+	@Override
+	public void serialize() {
+		// not implemented yet
 	}
 	
-	private void deserialize() {
-		ByteArray buffer = new ByteArray(this.content);
-		this.mapId = buffer.readInt();
-		this.mapKey = buffer.readUTF();
+	@Override
+	public void deserialize() {
+		this.mapId = this.content.readInt();
+		this.mapKey = this.content.readUTF();
 	}
 }

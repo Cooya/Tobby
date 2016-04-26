@@ -1,19 +1,18 @@
 package messages.connection;
 
-import gamedata.context.GameServerInformations;
-import utilities.ByteArray;
+import gamedata.connection.GameServerInformations;
 import messages.Message;
 
 public class ServerStatusUpdateMessage extends Message {
 	public GameServerInformations server;
-
-	public ServerStatusUpdateMessage(Message msg) {
-		super(msg);
-		deserialize();
+	
+	@Override
+	public void serialize() {
+		// not implemented yet
 	}
 	
-	private void deserialize() {
-		ByteArray buffer = new ByteArray(this.content);
-		this.server = new GameServerInformations(buffer);
+	@Override
+	public void deserialize() {
+		this.server = new GameServerInformations(this.content);
 	}
 }

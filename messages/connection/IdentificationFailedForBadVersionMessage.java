@@ -4,7 +4,13 @@ import messages.Message;
 
 public class IdentificationFailedForBadVersionMessage extends Message {
 
-	public IdentificationFailedForBadVersionMessage(Message msg) {
+	@Override
+	public void serialize() {
+		// not implemented yet
+	}
+	
+	@Override
+	public void deserialize() {
 		// not implemented yet
 	}
 }

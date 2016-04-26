@@ -1,18 +1,17 @@
 package messages.connection;
 
 import messages.Message;
-import utilities.ByteArray;
 
 public class CharacterCreationResultMessage extends Message {
 	public int result = 1;
 	
-	public CharacterCreationResultMessage(Message msg) {
-		super(msg);
-		deserialize();
+	@Override
+	public void serialize() {
+		// not implemented yet
 	}
 	
-	private void deserialize() {
-		ByteArray buffer = new ByteArray(this.content);
-		this.result = buffer.readByte();
+	@Override
+	public void deserialize() {
+		this.result = this.content.readByte();
 	}
 }

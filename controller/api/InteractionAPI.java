@@ -2,7 +2,7 @@ package controller.api;
 
 import controller.CharacterState;
 import controller.characters.Character;
-import messages.EmptyMessage;
+import messages.UnhandledMessage;
 import messages.interactions.InteractiveUseRequestMessage;
 import messages.interactions.NpcDialogReplyMessage;
 import messages.interactions.NpcGenericActionRequestMessage;
@@ -21,7 +21,8 @@ public class InteractionAPI {
 		this.character.waitState(CharacterState.IS_FREE);
 
 		InteractiveUseRequestMessage IURM = new InteractiveUseRequestMessage();
-		IURM.serialize(elemId, skillInstanceUid, this.character.instance.id);
+		IURM.elemId = elemId;
+		IURM.skillInstanceUid = skillInstanceUid;
 		this.character.instance.outPush(IURM);
 		this.character.instance.log.p("Interactive used.");
 		if(withMapChangement)
@@ -33,7 +34,9 @@ public class InteractionAPI {
 
 		// on parle au banquier
 		NpcGenericActionRequestMessage NGARM = new NpcGenericActionRequestMessage();
-		NGARM.serialize(-10001, 3, this.character.infos.currentMap.id, this.character.instance.id);
+		NGARM.npcId = -10001;
+		NGARM.npcActionId = 3;
+		NGARM.npcMapId = this.character.infos.currentMap.id;
 		this.character.instance.outPush(NGARM);
 
 		// on attend la question
@@ -41,21 +44,19 @@ public class InteractionAPI {
 
 		// on sélectionne la réponse
 		NpcDialogReplyMessage NDRM = new NpcDialogReplyMessage();
-		NDRM.serialize(259);
+		NDRM.replyId = 259;
 		this.character.instance.outPush(NDRM);
 
 		// on attend l'affichage de l'inventaire
 		this.character.waitState(CharacterState.IN_EXCHANGE);
 
 		// on transfère tous les objets de l'inventaire
-		EmptyMessage EM = new EmptyMessage("ExchangeObjectTransfertAllFromInvMessage");
-		this.character.instance.outPush(EM);
+		this.character.instance.outPush(new UnhandledMessage("ExchangeObjectTransfertAllFromInvMessage"));
 
 		// on attend la confirmation du transfert
 		this.character.waitState(CharacterState.BANK_TRANSFER);
 
 		// on ferme l'inventaire
-		EM = new EmptyMessage("LeaveDialogRequestMessage");
-		this.character.instance.outPush(EM);
+		this.character.instance.outPush(new UnhandledMessage("LeaveDialogRequestMessage"));
 	}
 }

@@ -1,20 +1,19 @@
 package messages.character;
 
-import utilities.ByteArray;
 import messages.Message;
 
 public class GameRolePlayPlayerLifeStatusMessage extends Message {
 	public int state = 0;
 	public int phenixMapId = 0;
 	
-	public GameRolePlayPlayerLifeStatusMessage(Message msg) {
-		super(msg);
-		deserialize();
+	@Override
+	public void serialize() {
+		// not implemented yet
 	}
 	
-	private void deserialize() {
-		ByteArray buffer = new ByteArray(this.content);
-		this.state = buffer.readByte();
-		this.phenixMapId = buffer.readInt();
+	@Override
+	public void deserialize() {
+		this.state = this.content.readByte();
+		this.phenixMapId = this.content.readInt();
 	}
 }

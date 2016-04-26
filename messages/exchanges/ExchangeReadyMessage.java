@@ -1,18 +1,19 @@
 package messages.exchanges;
 
 import messages.Message;
-import utilities.ByteArray;
 
 public class ExchangeReadyMessage extends Message {
+	public boolean ready = false;
+	public int step = 0;
     
-    public ExchangeReadyMessage() {
-       super();
+	@Override
+    public void serialize() {
+       this.content.writeBoolean(this.ready);
+       this.content.writeVarShort(this.step);
     }
     
-    public void serialize(boolean ready, int step) {
-	   ByteArray buffer = new ByteArray();
-       buffer.writeBoolean(ready);
-       buffer.writeVarShort(step);
-       completeInfos(buffer);
-    }
+    @Override
+	public void deserialize() {
+		// not implemented yet
+	}
 }

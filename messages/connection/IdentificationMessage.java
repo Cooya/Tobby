@@ -1,44 +1,47 @@
 package messages.connection;
 
-import main.Main;
+import gamedata.connection.VersionExtended;
+
+import java.util.Vector;
+
 import messages.Message;
-import utilities.ByteArray;
-import utilities.Encryption;
+import utilities.BooleanByteWrapper;
 
 public class IdentificationMessage extends Message {
+	public VersionExtended version;
+	public String lang = "";
+	public byte[] credentials; // normalement c'est un vecteur d'int
+	public int serverId = 0;
+	public boolean autoconnect = false;
+	public boolean useCertificate = false;
+	public boolean useLoginToken = false;
+	public double sessionOptionalSalt = 0;
+	public Vector<Integer> failedAttempts;
 	
-	public IdentificationMessage() {
-		super();
+	@Override
+	public void serialize() {
+		int b = 0;
+		b = BooleanByteWrapper.setFlag(b, 0, this.autoconnect);
+		b = BooleanByteWrapper.setFlag(b, 1, this.useCertificate);
+		b = BooleanByteWrapper.setFlag(b, 2, this.useLoginToken);
+		this.content.writeByte(b);
+		this.version.serialize(this.content);
+		this.content.writeUTF(this.lang);
+		this.content.writeVarInt(this.credentials.length);
+		this.content.writeBytes(this.credentials);
+		this.content.writeShort(this.serverId);
+		this.content.writeVarLong(this.sessionOptionalSalt);
+		if(this.failedAttempts == null)
+			this.content.writeShort(0);
+		else {
+			this.content.writeShort(this.failedAttempts.size());
+			for(int i : this.failedAttempts)
+				this.content.writeVarShort(i);
+		}
 	}
 	
-	public void serialize(HelloConnectMessage HCM, String login, String password) {
-		byte[] decryptedPublicKey = Encryption.decryptReceivedKey(ByteArray.toBytes(HCM.getKey()));
-		byte[] credentials = Encryption.encryptCredentials(decryptedPublicKey, login, password, HCM.getSalt());
-		ByteArray buffer = new ByteArray();
-		buffer.writeByte(0);
-		writeVersion(buffer, Main.GAME_VERSION[0], Main.GAME_VERSION[1], Main.GAME_VERSION[2], Main.GAME_VERSION[3], Main.GAME_VERSION[4], 0, 1, 1);
-		buffer.writeUTF("fr");
-		buffer.writeVarInt(credentials.length);
-		
-		buffer.writeBytes(credentials);
-		buffer.writeShort(0); // sélection du serveur automatique
-		buffer.writeByte(0);
-		buffer.writeByte(0);
-		buffer.writeByte(0);
-		buffer.writeByte(0);
-		buffer.writeByte(0);
-		
-		completeInfos(buffer);
-	}
-		
-	static void writeVersion(ByteArray array, int major, int minor, int release, int revision, int patch, int buildType, int install, int technology) {
-		array.writeByte(major);
-		array.writeByte(minor);
-		array.writeByte(release);
-		array.writeInt(revision);
-		array.writeByte(patch);
-		array.writeByte(buildType);
-		array.writeByte(install);
-		array.writeByte(technology);
+	@Override
+	public void deserialize() {
+		// not implemented yet
 	}
 }

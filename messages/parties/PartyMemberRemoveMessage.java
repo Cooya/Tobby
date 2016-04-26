@@ -1,19 +1,16 @@
 package messages.parties;
 
-import utilities.ByteArray;
-import messages.Message;
-
 public class PartyMemberRemoveMessage extends AbstractPartyEventMessage {
 	public double leavingPlayerId = 0;
-
-	public PartyMemberRemoveMessage(Message msg) {
-		super(msg);
-		deserialize();
+	
+	@Override
+	public void serialize() {
+		// not implemented yet
 	}
 	
-	private void deserialize() {
-		ByteArray buffer = new ByteArray(this.content);
-		super.deserialize(buffer);
-        this.leavingPlayerId = buffer.readVarLong();
+	@Override
+	public void deserialize() {
+		super.deserialize();
+        this.leavingPlayerId = this.content.readVarLong();
 	}
 }

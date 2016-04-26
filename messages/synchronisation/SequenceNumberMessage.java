@@ -1,18 +1,17 @@
 package messages.synchronisation;
 
-import utilities.ByteArray;
 import messages.Message;
 
 public class SequenceNumberMessage extends Message {
+	public int number = 0;
 	
-	public SequenceNumberMessage() {
-		super();
+	@Override
+	public void serialize() {
+		this.content.writeShort(this.number);
 	}
 	
-	public void serialize(int sequenceNumber) {
-		ByteArray buffer = new ByteArray();
-		buffer.writeShort(sequenceNumber);
-		
-		super.completeInfos(buffer);
+	@Override
+	public void deserialize() {
+		// not implemented yet
 	}
 }

@@ -50,7 +50,8 @@ public class DialogFrame extends Frame {
 		if(EIRM.id != this.character.infos.characterId) {
 			this.instance.log.p("Exchange validated by peer.");
 			ExchangeReadyMessage ERM = new ExchangeReadyMessage();
-			ERM.serialize(true, 2); // car il y a eu 2 actions lors de l'échange
+			ERM.ready = true;
+			ERM.step = 2; // car il y a eu 2 actions lors de l'échange
 			this.character.instance.outPush(ERM); // on valide de notre côté
 			this.character.instance.log.p("Exchange validated from my side.");
 		}

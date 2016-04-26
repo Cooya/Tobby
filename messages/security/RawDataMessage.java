@@ -1,27 +1,18 @@
 package messages.security;
 
-import java.io.FileOutputStream;
-
-import main.Instance;
 import messages.Message;
-import utilities.ByteArray;
 
 public class RawDataMessage extends Message {
+	public byte[] content2;
 	
-	public RawDataMessage(Message msg) {
-		super(msg);
+	@Override
+	public void serialize() {
+		this.content.writeVarInt(this.content2.length);
+		this.content.writeBytes(this.content2);
 	}
 	
-	@SuppressWarnings("unused")
-	private void createSWF() {
-		ByteArray buffer = new ByteArray(this.content);
-		try {
-			FileOutputStream fs = new FileOutputStream("./RDM.swf");
-			fs.write(buffer.readBytes(buffer.readVarInt()));
-			fs.close();
-			Instance.log("SWF file created.");
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+	@Override
+	public void deserialize() {
+		this.content2 = this.content.readBytes(this.content.readVarInt());
 	}
 }

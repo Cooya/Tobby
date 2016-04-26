@@ -1,20 +1,17 @@
 package messages.security;
 
-import utilities.ByteArray;
-import main.Emulation;
 import messages.Message;
 
 public class ClientKeyMessage extends Message {
 	private static final String flashKey = "lfbtPgniZWNU4QZXE6#01";
 	
-	public ClientKeyMessage() {
-		super();
+	@Override
+	public void serialize() {
+		this.content.writeUTF(flashKey);
 	}
 	
-	public void serialize(int instanceId) {
-		ByteArray buffer = new ByteArray();
-		buffer.writeUTF(flashKey);
-		
-		completeInfos(Emulation.hashMessage(buffer, instanceId));
+	@Override
+	public void deserialize() {
+		// not implemented yet
 	}
 }

@@ -16,33 +16,21 @@ import messages.Message;
 @SuppressWarnings("unchecked")
 public class Processor {
 	private static Vector<Class<? extends Frame>> processFrames = new Vector<Class<? extends Frame>>();
-	private static Map<String, Class<Message>> deserializationClasses = new Hashtable<String, Class<Message>>();
+	
 	private Map<String, Process> processTable;
 	
 	public static Vector<Long> perfTest = new Vector<Long>(); // TODO
 
 	static {
-		Class<?>[] classesArray;
-		
 		// récupération des différentes frames de traitement dans le package "frames"
 		try {
-			classesArray = Reflection.getClasses("frames");
+			Class<?>[] classesArray = Reflection.getClasses("frames");
 			for(Class<?> cl : classesArray)
 				if(cl.getSuperclass() == Frame.class)
 					processFrames.add((Class<? extends Frame>) cl);
 		} catch(Exception e) {
 			e.printStackTrace();
 			Controller.getInstance().exit("Impossible to load frame classes.");
-		}
-		
-		// récupération de toutes les classes de sérialisation/désérialisation des messages dans le package "messages"
-		try {
-			classesArray = Reflection.getClasses("messages");
-			for(Class<?> cl : classesArray)
-				deserializationClasses.put(cl.getSimpleName(), (Class<Message>) cl);
-		} catch(Exception e) {
-			e.printStackTrace();
-			Controller.getInstance().exit("Impossible to load deserialization classes.");
 		}
 		
 		/*
@@ -70,7 +58,7 @@ public class Processor {
 			for(Method method : methods)
 				if(method.getName().equals("process")) {
 					msgName = method.getParameterTypes()[0].getSimpleName();
-					this.processTable.put(msgName, new Process(deserializationClasses.get(msgName), frame));
+					this.processTable.put(msgName, new Process(Message.getClassByName(msgName), frame));
 				}
 		}
 	}

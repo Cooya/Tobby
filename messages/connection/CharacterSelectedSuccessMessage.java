@@ -2,20 +2,19 @@ package messages.connection;
 
 import gamedata.character.CharacterBaseInformations;
 import messages.Message;
-import utilities.ByteArray;
 
 public class CharacterSelectedSuccessMessage extends Message {
     public CharacterBaseInformations infos;
     public boolean isCollectingStats = false;
-   
-    public CharacterSelectedSuccessMessage(Message msg) {
-    	super(msg);
-    	deserialize();
-    }
     
-    private void deserialize() {
-    	ByteArray buffer = new ByteArray(this.content);
-    	this.infos = new CharacterBaseInformations(buffer);
-    	this.isCollectingStats = buffer.readBoolean();
+    @Override
+	public void serialize() {
+		// not implemented yet
+	}
+    
+    @Override
+    public void deserialize() {
+    	this.infos = new CharacterBaseInformations(this.content);
+    	this.isCollectingStats = this.content.readBoolean();
     }
 }
