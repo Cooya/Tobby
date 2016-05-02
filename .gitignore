@@ -1,4 +1,10 @@
 bin/
+Ressources/Bypass/content/
+Ressources/Bypass/data/
+Ressources/Bypass/ui/
+Ressources/Bypass/config.xml
+Ressources/Bypass/DofusInvoker.swf
+Ressources/Bypass/SharedDefinitions.swf
 Ressources/Bypass/log4as.xml
 Ressources/Logs/
 Others/

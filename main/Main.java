@@ -29,7 +29,7 @@ public class Main {
 			BYPASS_EXE = "Bypass.exe";
 		}
 		else {
-			LIB_PATH = "";
+			LIB_PATH = "Ressources/Injector/No.Ankama.so";
 			INJECTOR_PATH = "";
 			BYPASS_PATH = "";
 			BYPASS_EXE = "";
