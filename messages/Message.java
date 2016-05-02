@@ -11,13 +11,13 @@ import java.util.Map;
 import main.Emulation;
 import main.FatalError;
 import main.Log;
+import main.Main;
 import utilities.BiMap;
 import utilities.ByteArray;
 import utilities.Reflection;
 
 @SuppressWarnings("unchecked")
 public abstract class Message {
-	private static final String MESSAGES_FILEPATH = "Ressources/messages.txt";
 	private static final BiMap<Integer, String> messages = new BiMap<Integer, String>(Integer.class, String.class);
 	private static final Map<Integer, Object> acknowledgementExceptions = new HashMap<Integer, Object>();
 	private static final Map<String, Class<Message>> msgClasses = new HashMap<String, Class<Message>>();
@@ -30,7 +30,7 @@ public abstract class Message {
 		
 		// récupération de la liste des messages (id + nom) depuis le fichier "messages.txt"
 		try {
-			buffer = new BufferedReader(new FileReader(MESSAGES_FILEPATH));
+			buffer = new BufferedReader(new FileReader(Main.MESSAGES_FILEPATH));
 			line = buffer.readLine();
 			while(line != null) {
 				splitLine = line.split(" ");

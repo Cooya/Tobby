@@ -10,7 +10,6 @@ import messages.Message;
 
 public class Log {
 	private static final int WRITE_INTERVAL = 10;
-	private static final String LOG_PATH = System.getProperty("user.dir") + "/Ressources/Logs/";
 	private static final String EOL = System.getProperty("line.separator");
 	private PrintWriter writer;
 	private StringBuilder logFrameString;
@@ -22,7 +21,7 @@ public class Log {
 	
 	public Log(String characterName, CharacterFrame graphicalFrame) {
 		try {
-			this.writer = new PrintWriter(LOG_PATH + characterName + ".txt", "UTF-8");
+			this.writer = new PrintWriter(Main.LOG_PATH + characterName + ".txt", "UTF-8");
 		} catch(Exception e) {
 			e.printStackTrace();
 		}

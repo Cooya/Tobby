@@ -10,10 +10,9 @@ import java.util.Collections;
 import java.util.Vector;
 
 import main.Log;
+import main.Main;
 
 public class FilesManager {
-	private static final String ACCOUNTS_FILEPATH = "Ressources/accounts.txt";
-	private static final String SQUADS_FILEPATH = "Ressources/squads.txt";
 	private static final String EOL = System.getProperty("line.separator");
 
 	private View view;
@@ -30,7 +29,7 @@ public class FilesManager {
 	// chargement de la liste des comptes dans le fichier texte "accounts.txt"
 	private void loadAccountsFile() {
 		try {
-			BufferedReader buffer = new BufferedReader(new FileReader(ACCOUNTS_FILEPATH));
+			BufferedReader buffer = new BufferedReader(new FileReader(Main.ACCOUNTS_FILEPATH));
 			String line;
 			Account account;
 			while((line = buffer.readLine()) != null) {
@@ -47,7 +46,7 @@ public class FilesManager {
 	
 	private void loadSquadsFile() {
 		try {
-			BufferedReader buffer = new BufferedReader(new FileReader(SQUADS_FILEPATH));
+			BufferedReader buffer = new BufferedReader(new FileReader(Main.SQUADS_FILEPATH));
 			String line;
 			Account account;
 			String squadName = null;
@@ -106,7 +105,7 @@ public class FilesManager {
 			str += account.behaviour + " " + account.login + " " + account.password + " " + account.serverId + EOL;
 		FileWriter fileWriter;
 		try {
-			fileWriter = new FileWriter(ACCOUNTS_FILEPATH, false);
+			fileWriter = new FileWriter(Main.ACCOUNTS_FILEPATH, false);
 			fileWriter.write(str);
 			fileWriter.close();
 		} catch(IOException e) {

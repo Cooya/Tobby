@@ -11,9 +11,14 @@ public class Main {
 	public static final String INJECTOR_PATH;
 	public static final String BYPASS_PATH;
 	public static final String BYPASS_EXE;
-	public static final String D2P_PATH = "Ressources/Bypass/content/maps/maps0.d2p";
-	public static final String D2O_PATH = "Ressources/Bypass/data/common/";
-	public static final String D2I_PATH = "Ressources/Bypass/data/i18n/i18n_fr.d2i";
+	public static final String D2P_PATH = "Resources/Client/content/maps/maps0.d2p";
+	public static final String D2O_PATH = "Resources/Client/data/common/";
+	public static final String D2I_PATH = "Resources/Client/data/i18n/i18n_fr.d2i";
+	public static final String LOG_PATH = "Resources/Logs/";
+	public static final String MESSAGES_FILEPATH = "Resources/messages.txt";
+	public static final String ACCOUNTS_FILEPATH = "Resources/accounts.txt";
+	public static final String SQUADS_FILEPATH = "Resources/squads.txt";
+	public static final String PATHS_FILEPATH = "Resources/paths.txt";
 	public static final String AUTH_SERVER_IP = "213.248.126.39";
 	public static final String LOCALHOST = "127.0.0.1";
 	public static final int SERVER_PORT = 5555;
@@ -23,16 +28,16 @@ public class Main {
 	
 	static {
 		if(IS_WINDOWS) {
-			LIB_PATH = "Ressources/Injector/No.Ankama.dll";
-			INJECTOR_PATH = "Ressources/Injector/Injector.exe";
-			BYPASS_PATH = "Ressources/Bypass/Bypass.exe";
+			LIB_PATH = "Resources/Injector/No.Ankama.dll";
+			INJECTOR_PATH = "Resources/Injector/Injector.exe";
+			BYPASS_PATH = "C:/Program Files (x86)/Bypass/Bypass.exe";
 			BYPASS_EXE = "Bypass.exe";
 		}
 		else {
-			LIB_PATH = "Ressources/Injector/No.Ankama.so";
-			INJECTOR_PATH = "";
+			LIB_PATH = "Resources/Injector/No.Ankama.so";
+			INJECTOR_PATH = "Resources/Injector/Injector.exe";
 			BYPASS_PATH = "";
-			BYPASS_EXE = "";
+			BYPASS_EXE = "Bypass";
 		}
 	}
 

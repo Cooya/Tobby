@@ -8,19 +8,19 @@ import java.util.Hashtable;
 
 import controller.characters.Character;
 import main.FatalError;
+import main.Main;
 
 // classe inutilisée
 
 @SuppressWarnings("resource")
 class PathsManager {
-	private static final String pathsFilePath = "Ressources/paths.txt";
 	private static Hashtable<String, Path> paths = new Hashtable<String, Path>(); 
 	
 	static {
 		BufferedReader buffer = null;
 		try {
 			Character.log("Loading paths from paths file...");
-			buffer = new BufferedReader(new FileReader(pathsFilePath));
+			buffer = new BufferedReader(new FileReader(Main.PATHS_FILEPATH));
 			Path path;
 			boolean isLoop;
 			int direction;

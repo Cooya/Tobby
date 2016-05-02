@@ -25,16 +25,16 @@ public class Emulation {
 		if(!Processes.inProcess(Main.BYPASS_EXE))
 			try {
 				if(!Processes.fileExists(Main.BYPASS_PATH))
-					throw new FatalError("Bypass launcher not found.");
+					throw new FatalError("Emulation launcher not found.");
 				else {
-					Log.info("Running bypass launcher.");
+					Log.info("Running emulation launcher.");
 					launcherProcess = Runtime.getRuntime().exec(Main.BYPASS_PATH);
 				}
 			} catch(Exception e) {
 				throw new FatalError(e);
 			}
 		else
-			Log.info("Bypass launcher already in process.");
+			Log.info("Emulation launcher already in process.");
 		
 		clientDofusCo = new Connection.Server(Main.SERVER_PORT);
 		
@@ -68,7 +68,7 @@ public class Emulation {
 		if(launcherCo != null) {
 			launcherCo.close();
 			launcherCo = null;
-			Log.info("Connection to bypass launcher closed.");
+			Log.info("Connection to emulation launcher closed.");
 		}
 		
 		// et on tue le processus via l'objet Process ou via une commande Windows
@@ -77,7 +77,7 @@ public class Emulation {
 		else if(Processes.inProcess(Main.BYPASS_EXE))
 			Processes.killProcess(Main.BYPASS_EXE);
 		else { // processus inexistant
-			Log.info("Bypass launcher process does not exist");
+			Log.info("Emulation launcher process does not exist");
 			return;
 		}
 		
@@ -89,7 +89,7 @@ public class Emulation {
 				e.printStackTrace();
 				return;
 			}
-		Log.info("Bypass launcher process killed.");
+		Log.info("Emulation launcher process killed.");
 	}
 	
 	public static Message emulateServer(String login, String password, HelloConnectMessage HCM, IdentificationSuccessMessage ISM, RawDataMessage RDM, int characterId) {
@@ -104,7 +104,7 @@ public class Emulation {
 		array.writeByte(1);
 		array.writeUTF(login);
 		array.writeUTF(password);
-		Character.log("Sending credentials to bypass launcher.");
+		Character.log("Sending credentials to emulation launcher.");
 		launcherCo.send(array.bytes());
 		
 		// simulation du serveur officiel
@@ -140,7 +140,7 @@ public class Emulation {
 			array.setArray(buffer, bytesReceived);
 			Message CIM = processMsgStack(reader.processBuffer(array));
 			
-			Character.log("Asking hash function to bypass launcher.");
+			Character.log("Asking hash function to emulation launcher.");
 			byte[] bytes = {0, 0, 0, 2, 2, (byte) characterId}; // taille (int) + id + characterId
 			launcherCo.send(bytes);
 			
@@ -172,7 +172,7 @@ public class Emulation {
 				size = launcherCo.receive(buffer, 10000); // timeout de 10 secondes
 				if(size <= 0) {
 					lock.unlock();
-					throw new FatalError("Connection lost with the bypass launcher.");
+					throw new FatalError("Connection lost with the emulation launcher.");
 				}
 				array.setArray(buffer, size);
 				if(size - 2 != array.readShort()) {
@@ -202,7 +202,7 @@ public class Emulation {
 	}
 	
 	private static void connectToLauncher() {
-		Character.log("Connection to bypass launcher.");
+		Character.log("Connection to emulation launcher.");
 		launcherCo = new Connection.Client(Main.LOCALHOST, Main.LAUNCHER_PORT);
 		byte[] buffer = new byte[1]; // booléen d'injection
 		launcherCo.receive(buffer);
