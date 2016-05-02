@@ -3,10 +3,6 @@ package messages;
 import main.Log;
 
 public class UnhandledMessage extends Message {
-	
-	public UnhandledMessage() {
-		
-	}
 
 	public UnhandledMessage(String msgName) {
 		super(msgName);
@@ -14,11 +10,11 @@ public class UnhandledMessage extends Message {
 	
 	@Override
 	public void serialize() {
-		Log.err("Forbidden serialize method called.");
+		// message vide, rien à sérialiser
 	}
 
 	@Override
 	public void deserialize() {
-		Log.err("Forbidden deserialize method called.");
+		Log.err("Forbidden deserialize method called (" + getName() + ").");
 	}
 }

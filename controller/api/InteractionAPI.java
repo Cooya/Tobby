@@ -23,8 +23,8 @@ public class InteractionAPI {
 		InteractiveUseRequestMessage IURM = new InteractiveUseRequestMessage();
 		IURM.elemId = elemId;
 		IURM.skillInstanceUid = skillInstanceUid;
-		this.character.instance.outPush(IURM);
-		this.character.instance.log.p("Interactive used.");
+		this.character.net.send(IURM);
+		this.character.log.p("Interactive used.");
 		if(withMapChangement)
 			this.character.updateState(CharacterState.IS_LOADED, false);
 	}
@@ -37,7 +37,7 @@ public class InteractionAPI {
 		NGARM.npcId = -10001;
 		NGARM.npcActionId = 3;
 		NGARM.npcMapId = this.character.infos.currentMap.id;
-		this.character.instance.outPush(NGARM);
+		this.character.net.send(NGARM);
 
 		// on attend la question
 		this.character.waitState(CharacterState.DIALOG_DISPLAYED);
@@ -45,18 +45,18 @@ public class InteractionAPI {
 		// on sélectionne la réponse
 		NpcDialogReplyMessage NDRM = new NpcDialogReplyMessage();
 		NDRM.replyId = 259;
-		this.character.instance.outPush(NDRM);
+		this.character.net.send(NDRM);
 
 		// on attend l'affichage de l'inventaire
 		this.character.waitState(CharacterState.IN_EXCHANGE);
 
 		// on transfère tous les objets de l'inventaire
-		this.character.instance.outPush(new UnhandledMessage("ExchangeObjectTransfertAllFromInvMessage"));
+		this.character.net.send(new UnhandledMessage("ExchangeObjectTransfertAllFromInvMessage"));
 
 		// on attend la confirmation du transfert
 		this.character.waitState(CharacterState.BANK_TRANSFER);
 
 		// on ferme l'inventaire
-		this.character.instance.outPush(new UnhandledMessage("LeaveDialogRequestMessage"));
+		this.character.net.send(new UnhandledMessage("LeaveDialogRequestMessage"));
 	}
 }

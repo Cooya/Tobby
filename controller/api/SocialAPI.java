@@ -23,8 +23,8 @@ public class SocialAPI {
 	public void changePlayerStatus(int status) {
 		PlayerStatusUpdateRequestMessage PSURM = new PlayerStatusUpdateRequestMessage();
 		PSURM.status = new PlayerStatus(status);
-		this.character.instance.outPush(PSURM);
-		this.character.instance.log.p("Passing in away mode.");
+		this.character.net.send(PSURM);
+		this.character.log.p("Passing in away mode.");
 	}
 	
 	// se rend à la map d'attente de la mule et lui transmet tous les objets de l'inventaire et les kamas
@@ -54,13 +54,13 @@ public class SocialAPI {
 		}
 		
 		// transfert de tous les objets de l'inventaire
-		this.character.instance.log.p("Transfering all objects from inventory.");
-		this.character.instance.outPush(new UnhandledMessage("ExchangeObjectTransfertAllFromInvMessage"));
+		this.character.log.p("Transfering all objects from inventory.");
+		this.character.net.send(new UnhandledMessage("ExchangeObjectTransfertAllFromInvMessage"));
 		
 		// les kamas aussi
 		ExchangeObjectMoveKamaMessage EOMKM = new ExchangeObjectMoveKamaMessage();
 		EOMKM.quantity = this.character.infos.stats.kamas;
-		this.character.instance.outPush(EOMKM);
+		this.character.net.send(EOMKM);
 		
 		// on attend de pouvoir valider l'échange (bouton bloqué pendant 3 secondes après chaque action)
 		try {
@@ -74,8 +74,8 @@ public class SocialAPI {
 		ExchangeReadyMessage ERM = new ExchangeReadyMessage();
 		ERM.ready = true;
 		ERM.step = 2; // car il y a eu 2 actions lors de l'échange
-		this.character.instance.outPush(ERM);
-		this.character.instance.log.p("Exchange validated on my side.");
+		this.character.net.send(ERM);
+		this.character.log.p("Exchange validated on my side.");
 		
 		// attente du résulat de l'échange
 		this.character.waitState(CharacterState.IS_FREE);
@@ -83,7 +83,7 @@ public class SocialAPI {
 		// et agissement en conséquence
 		if(this.character.roleplayContext.lastExchangeOutcome) {
 			this.character.updateState(CharacterState.NEED_TO_EMPTY_INVENTORY, false);
-			this.character.instance.log.p("Exchange with mule terminated successfully.");
+			this.character.log.p("Exchange with mule terminated successfully.");
 		}
 		else
 			throw new FatalError("Exchange with mule has failed.");	
@@ -99,8 +99,8 @@ public class SocialAPI {
 				Thread.currentThread().interrupt();
 				return false;
 			}
-			this.character.instance.log.p("Refusing exchange request received from an unknown.");
-			this.character.instance.outPush(new UnhandledMessage("LeaveDialogRequestMessage"));
+			this.character.log.p("Refusing exchange request received from an unknown.");
+			this.character.net.send(new UnhandledMessage("LeaveDialogRequestMessage"));
 			return false;
 		}
 		
@@ -108,14 +108,14 @@ public class SocialAPI {
 		// ou si le caractère (peu importe le type) a besoin de vider son inventaire, on refuse aussi
 		if((this.character instanceof Mule && !this.character.inState(CharacterState.MULE_AVAILABLE)) ||
 				this.character.inState(CharacterState.NEED_TO_EMPTY_INVENTORY)) {
-			this.character.instance.log.p("Refusing exchange request because I am busy.");
-			this.character.instance.outPush(new UnhandledMessage("LeaveDialogRequestMessage"));
+			this.character.log.p("Refusing exchange request because I am busy.");
+			this.character.net.send(new UnhandledMessage("LeaveDialogRequestMessage"));
 			return false;
 		}
 			
 		// sinon on accepte l'échange
-		this.character.instance.log.p("Accepting exchange request received from a customer.");
-		this.character.instance.outPush(new UnhandledMessage("ExchangeAcceptMessage"));
+		this.character.log.p("Accepting exchange request received from a customer.");
+		this.character.net.send(new UnhandledMessage("ExchangeAcceptMessage"));
 		this.character.waitState(CharacterState.IN_EXCHANGE); // important
 		return true;
 	}
@@ -128,8 +128,8 @@ public class SocialAPI {
 		ExchangePlayerRequestMessage EPRM = new ExchangePlayerRequestMessage();
 		EPRM.target = characterId;
 		EPRM.exchangeType = 1;
-		this.character.instance.outPush(EPRM);
-		this.character.instance.log.p("Sending exchange demand.");
+		this.character.net.send(EPRM);
+		this.character.log.p("Sending exchange demand.");
 		
 		// attente du résultat de la requête
 		if(!this.character.waitState(CharacterState.EXCHANGE_DEMAND_OUTCOME))

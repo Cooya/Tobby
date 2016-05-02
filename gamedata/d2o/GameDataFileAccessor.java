@@ -3,13 +3,13 @@ package gamedata.d2o;
 import java.util.Hashtable;
 
 import main.FatalError;
+import main.Main;
 import utilities.ByteArray;
 
 // les flux sont remplacés par des tableaux d'octets
 // les URI sont remplacées par des strings
 public class GameDataFileAccessor {
 	private static final String ANKAMA_SIGNED_FILE_HEADER = "AKSF";
-	private static final String d2oPath = "Ressources/Antibot/data/common/";
 	private static GameDataFileAccessor _self;
 	
     private Hashtable<String, ByteArray> _streams;
@@ -37,7 +37,7 @@ public class GameDataFileAccessor {
             this._streamStartIndex = new Hashtable<String, Integer>();
     	ByteArray buffer;
     	if(!this._streams.containsKey(d2oModule)) {
-    		buffer = ByteArray.fileToByteArray(d2oPath + d2oModule + ".d2o");
+    		buffer = ByteArray.fileToByteArray(Main.D2O_PATH + d2oModule + ".d2o");
     		this._streams.put(d2oModule, buffer);
     		this._streamStartIndex.put(d2oModule, 7);
     	}

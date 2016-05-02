@@ -1,19 +1,43 @@
 package main;
 
+import gui.Controller;
+
 import java.text.SimpleDateFormat;
 
 public class Main {
-	public static final int[] GAME_VERSION = {2, 34, 2, 103887, 2};
-	public static final String DLL_LOCATION = "Ressources/DLLInjector/No.Ankama.dll";
-	public static final int BUFFER_DEFAULT_SIZE = 8192;
+	public static final boolean IS_WINDOWS = System.getProperty("os.name").toLowerCase().indexOf("win") >= 0;
+	public static final int[] GAME_VERSION = {2, 34, 4, 104034, 1};
+	public static final String LIB_PATH;
+	public static final String INJECTOR_PATH;
+	public static final String BYPASS_PATH;
+	public static final String BYPASS_EXE;
+	public static final String D2P_PATH = "Ressources/Bypass/content/maps/maps0.d2p";
+	public static final String D2O_PATH = "Ressources/Bypass/data/common/";
+	public static final String D2I_PATH = "Ressources/Bypass/data/i18n/i18n_fr.d2i";
 	public static final String AUTH_SERVER_IP = "213.248.126.39";
+	public static final String LOCALHOST = "127.0.0.1";
 	public static final int SERVER_PORT = 5555;
+	public static final int LAUNCHER_PORT = 5554;
 	public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("HH:mm:ss:SSS");
 	public static final String MODERATOR_NAME = "[Alkalino]";
 	
+	static {
+		if(IS_WINDOWS) {
+			LIB_PATH = "Ressources/Injector/No.Ankama.dll";
+			INJECTOR_PATH = "Ressources/Injector/Injector.exe";
+			BYPASS_PATH = "Ressources/Bypass/Bypass.exe";
+			BYPASS_EXE = "Bypass.exe";
+		}
+		else {
+			LIB_PATH = "";
+			INJECTOR_PATH = "";
+			BYPASS_PATH = "";
+			BYPASS_EXE = "";
+		}
+	}
 
-	public static void main(String[] args) {	
-		//Controller.getInstance();
+	public static void main(String[] args) {
+		Controller.getInstance();
 		//new Sniffer();
 		
 		/*

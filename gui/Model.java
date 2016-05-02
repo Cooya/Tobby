@@ -6,138 +6,138 @@ import java.util.Vector;
 import utilities.BiStruct;
 import utilities.BiVector;
 import controller.CharacterBehaviour;
+import controller.characters.Character;
 import controller.characters.Fighter;
 import controller.characters.Mule;
-import main.Instance;
 import main.Log;
 
 class Model {
-	private BiStruct<Account, Instance> instances;
+	private BiStruct<Account, Character> characters;
 	protected SquadsManager squads;
-	private Instance mule;
+	private Character mule;
 
 	protected Model() {
-		this.instances = new BiVector<Account, Instance>(Account.class, Instance.class);
+		this.characters = new BiVector<Account, Character>(Account.class, Character.class);
 		this.squads = new SquadsManager(this);
 		this.mule = null;
 	}
 
-	// crée, stocke et lance les instances
-	protected void createInstance(Account account, int areaId, CharacterFrame frame, Account captain) {
+	// crée, stocke et lance les personnages
+	protected void createCharacter(Account account, int areaId, CharacterFrame frame, Account captain) {
 		if(isConnected(account)) {
-			Log.info("Instance already connected.");
+			Log.info("Character already connected.");
 			return;
 		}
 		
 		account.lastAreaId = areaId; // pour la reconnexion automatique
-		Instance newInstance;
+		Character newCharacter;
 		if(account.behaviour == CharacterBehaviour.WAITING_MULE) {
-			newInstance = new Instance(account.id, account.behaviour, account.login, account.password, account.serverId, areaId, frame);
-			for(Instance instance : this.instances.values())
-				if(instance != null)
-					((Mule) newInstance.getCharacter()).newCustomer((Fighter) instance.getCharacter()); // un nouveau client est ajouté dans la liste des clients de la mule
-			this.mule = newInstance;
+			newCharacter = Character.create(account.id, account.behaviour, account.login, account.password, account.serverId, areaId, new Log(account.login, frame));
+			for(Character character : this.characters.values())
+				if(character != null)
+					((Mule) newCharacter).newCustomer((Fighter) character); // un nouveau client est ajouté dans la liste des clients de la mule
+			this.mule = newCharacter;
 		}
 		else if(account.behaviour == CharacterBehaviour.TRAINING_MULE || account.behaviour == CharacterBehaviour.LONE_WOLF) {
-			newInstance = new Instance(account.id, account.behaviour, account.login, account.password, account.serverId, areaId, frame);
+			newCharacter = Character.create(account.id, account.behaviour, account.login, account.password, account.serverId, areaId, new Log(account.login, frame));
 			if(this.mule != null) // si la mule est connectée
-				((Mule) this.mule.getCharacter()).newCustomer((Fighter) newInstance.getCharacter()); // un nouveau client est ajouté dans la liste des clients de la mule
+				((Mule) this.mule).newCustomer((Fighter) newCharacter); // un nouveau client est ajouté dans la liste des clients de la mule
 		}
 		else if(account.behaviour == CharacterBehaviour.SELLER)
-			newInstance = null; // à implémenter
+			newCharacter = null; // à implémenter
 		else { // combattants en groupe (capitaines ou soldats)
-			newInstance = this.squads.newSquadFighter(account, areaId, frame, captain);
+			newCharacter = this.squads.newSquadFighter(account, areaId, frame, captain);
 			if(this.mule != null) // si la mule est connectée
-				((Mule) this.mule.getCharacter()).newCustomer((Fighter) newInstance.getCharacter()); // un nouveau client est ajouté dans la liste des clients de la mule
+				((Mule) this.mule).newCustomer((Fighter) newCharacter); // un nouveau client est ajouté dans la liste des clients de la mule
 		}
-		this.instances.put(account, newInstance); // ajout dans la table des instances
+		this.characters.put(account, newCharacter); // ajout dans la table des personnages
 	}
 
-	private void restartInstance(Instance instance) {
-		instance.log.p("Restarting instance.");
+	protected void reconnectCharacter(Character character) {
+		character.log.p("Reconnecting character.");
 		Account account = null;
-		for(Account acc : this.instances.keys())
-			if(acc.id == instance.id)
+		for(Account acc : this.characters.keys())
+			if(acc.id == character.id)
 				account = acc;
 		if(account == null)
 			return;
-		instance = new Instance(account.id, account.behaviour, account.login, account.password, account.serverId, account.lastAreaId, instance.log);
+		character = Character.create(account.id, account.behaviour, account.login, account.password, account.serverId, account.lastAreaId, character.log);
 		if(account.behaviour != CharacterBehaviour.WAITING_MULE && this.mule != null)
-			((Mule) this.mule.getCharacter()).newCustomer((Fighter) instance.getCharacter()); // un nouveau client est ajouté dans la liste des clients de la mule
-		this.instances.put(account, instance); // remplacement dans la table des instances
+			((Mule) this.mule).newCustomer((Fighter) character); // un nouveau client est ajouté dans la liste des clients de la mule
+		this.characters.put(account, character); // remplacement dans la table des personnages
 	}
 
-	protected void restartAllInstances() {
-		for(Instance instance : this.instances.values())
-			if(instance != null)
-				restartInstance(instance);
+	protected void reconnectAllCharacters() {
+		for(Character character : this.characters.values())
+			if(character != null)
+				reconnectCharacter(character);
 	}
 
-	protected Vector<Instance> getConnectedInstances() {
-		Vector<Instance> instances = new Vector<Instance>();
-		for(Instance instance : this.instances.values())
-			if(instance != null)
-				instances.add(instance);
-		return instances;
+	protected Vector<Character> getConnectedCharacters() {
+		Vector<Character> characters = new Vector<Character>();
+		for(Character character : this.characters.values())
+			if(character != null)
+				characters.add(character);
+		return characters;
 	}
 	
 	protected boolean isConnected(Account account) {
-		return instances.get(account) != null;
+		return characters.get(account) != null;
 	}
 	
 	protected boolean muleIsConnected() {
 		return this.mule != null;
 	}
 	
-	protected Instance getInstance(Account account) {
-		return (Instance) this.instances.get(account);
+	protected Character getCharacter(Account account) {
+		return (Character) this.characters.get(account);
 	}
 
-	protected Instance getCurrentInstance() {
+	protected Character getCurrentCharacter() {
 		Thread currentThread = Thread.currentThread();
-		for(Instance instance : this.instances.values())
-			if(instance != null)
-				for(Thread thread : instance.threads)
+		for(Character character : this.characters.values())
+			if(character != null)
+				for(Thread thread : character.threads)
 					if(thread == currentThread)
-						return instance;
+						return character;
 		return null;
 	}
 
-	protected Instance removeInstance(int instanceId) {
+	protected Character removeCharacter(int characterId) {
 		boolean isMule = false;
-		Instance instance = null;
-		for(Account account : this.instances.keys())
-			if(account.id == instanceId) {
-				instance = (Instance) this.instances.get(account);
-				this.instances.put(account, null);
+		Character character = null;
+		for(Account account : this.characters.keys())
+			if(account.id == characterId) {
+				character = (Character) this.characters.get(account);
+				this.characters.put(account, null);
 				isMule = account.behaviour == CharacterBehaviour.WAITING_MULE;
 				break;
 			}
 		if(isMule)
 			this.mule = null;
 		else {
-			if(this.mule != null) // si la mule est connectée, on supprime l'instance de la liste de ses clients
-				((Mule) this.mule.getCharacter()).removeCustomer(instance.getCharacter());
-			this.squads.removeSquadFighter(instance);
+			if(this.mule != null) // si la mule est connectée, on supprime le personnage de la liste de ses clients
+				((Mule) this.mule).removeCustomer(character);
+			this.squads.removeSquadFighter(character);
 		}
-		return instance;
+		return character;
 	}
 
 	protected Account createAccount(String accountLine) {
 		String[] splitLine = accountLine.split(" ");
-		Account account = new Account(this.instances.size(), Integer.valueOf(splitLine[0]), splitLine[1], splitLine[2], Integer.valueOf(splitLine[3]));
-		this.instances.put(account, null);
+		Account account = new Account(this.characters.size(), Integer.valueOf(splitLine[0]), splitLine[1], splitLine[2], Integer.valueOf(splitLine[3]));
+		this.characters.put(account, null);
 		return account;
 	}
 
 	protected Account createAccount(int behaviour, String login, String password, int serverId) {
-		Account account = new Account(this.instances.size(), behaviour, login, password, serverId);
-		this.instances.put(account, null);
+		Account account = new Account(this.characters.size(), behaviour, login, password, serverId);
+		this.characters.put(account, null);
 		return account;
 	}
 	
 	protected Account getAccount(String login) {
-		Collection<Account> accounts = this.instances.keys();
+		Collection<Account> accounts = this.characters.keys();
 		for(Account account : accounts)
 			if(account.login.equals(login))
 				return account;
@@ -145,7 +145,7 @@ class Model {
 	}
 	
 	protected Account getMuleFromAccountsList() {
-		Collection<Account> accounts = this.instances.keys();
+		Collection<Account> accounts = this.characters.keys();
 		for(Account account : accounts)
 			if(account.behaviour == CharacterBehaviour.WAITING_MULE)
 				return account;
@@ -154,7 +154,7 @@ class Model {
 
 	protected Vector<Account> getAllAccounts() {
 		Vector<Account> accounts = new Vector<Account>();
-		Collection<Account> accountsSet = this.instances.keys();
+		Collection<Account> accountsSet = this.characters.keys();
 		for(Account account : accountsSet)
 			accounts.add(account);
 		return accounts;

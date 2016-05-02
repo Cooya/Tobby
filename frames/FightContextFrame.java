@@ -5,7 +5,6 @@ import gamedata.fight.FightResultPlayerListEntry;
 import controller.CharacterState;
 import controller.characters.Character;
 import controller.characters.Fighter;
-import main.Instance;
 import messages.fights.GameActionAcknowledgementMessage;
 import messages.fights.GameActionFightNoSpellCastMessage;
 import messages.fights.GameActionFightPointsVariationMessage;
@@ -22,12 +21,12 @@ import messages.fights.SequenceEndMessage;
 
 public class FightContextFrame extends Frame {
 
-	public FightContextFrame(Instance instance, Character character) {
-		super(instance, character);
+	public FightContextFrame(Character character) {
+		super(character);
 	}
 	
 	protected void process(GameFightStartingMessage GFSM) {
-		this.instance.log.p("Starting fight.");
+		this.character.log.p("Starting fight.");
 	}
 	
 	protected void process(GameFightShowFighterMessage GFSFM) {
@@ -38,21 +37,20 @@ public class FightContextFrame extends Frame {
 	protected void process(GameFightTurnReadyRequestMessage GFTRRM) {
 		GameFightTurnReadyMessage GFTRM = new GameFightTurnReadyMessage();
 		GFTRM.isReady = true;
-		instance.outPush(GFTRM);
-		this.instance.log.p("Next turn.");
+		this.character.net.send(GFTRM);
+		this.character.log.p("Next turn.");
 	}
 	
 	protected void process(GameFightTurnStartPlayingMessage GFTSPM) {
-		this.instance.log.p("Begin of my game turn.");
+		this.character.log.p("Begin of my game turn.");
 		this.character.updateState(CharacterState.IN_GAME_TURN, true);
 	}
 	
 	protected void process(GameFightSynchronizeMessage GFSM) {
 		Fighter fighter = (Fighter) this.character;
 		fighter.fightContext.setFightContext(GFSM.fighters);
-		this.instance.log.p("Fight context set.");
-		//this.instance.log.p("Life points : " + this.fighter.fightContext.self.stats.lifePoints + "/" + this.fighter.fightContext.self.stats.maxLifePoints + ".");
-		this.instance.log.graphicalFrame.setLifeLabel(fighter.fightContext.self.stats.lifePoints, fighter.fightContext.self.stats.maxLifePoints);
+		this.character.log.p("Fight context set.");
+		this.character.log.graphicalFrame.setLifeLabel(fighter.fightContext.self.stats.lifePoints, fighter.fightContext.self.stats.maxLifePoints);
 	}
 	
 	protected void process(GameActionFightSpellCastMessage GAFSCM) {
@@ -74,14 +72,14 @@ public class FightContextFrame extends Frame {
 			GameActionAcknowledgementMessage GAAM = new GameActionAcknowledgementMessage();
 			GAAM.valid = true;
 			GAAM.actionId = SEM.actionId;
-			instance.outPush(GAAM);
+			this.character.net.send(GAAM);
 		}
 	}
 	
 	protected void process(GameFightTurnEndMessage GFTEM) {
 		if(GFTEM.fighterId == this.character.infos.characterId) {
 			this.character.updateState(CharacterState.IN_GAME_TURN, false);
-			this.instance.log.p("End of my game turn.");
+			this.character.log.p("End of my game turn.");
 		}
 	}
 	
@@ -91,6 +89,6 @@ public class FightContextFrame extends Frame {
 				this.character.roleplayContext.lastFightOutcome = result.outcome == 2; // 2 = gagné, 0 = perdu
 				break;
 			}	
-		this.instance.log.p("End of fight.");
+		this.character.log.p("End of fight.");
 	}
 }

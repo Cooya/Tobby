@@ -86,16 +86,16 @@ public class View {
 		new Controller.SquadItemListener(item);
 	}
 	
-	protected CharacterFrame getInstance(JInternalFrame graphicalFrame) {
+	protected CharacterFrame getCharacter(JInternalFrame graphicalFrame) {
 		for(CharacterFrame frame : this.charactersFrame)
 			if(frame == graphicalFrame)
 				return frame;
 		return null;
 	}
 	
-	protected CharacterFrame getCharacterFrame(int instanceId) {
+	protected CharacterFrame getCharacterFrame(int characterId) {
 		for(CharacterFrame frame : this.charactersFrame)
-			if(frame.id == instanceId)
+			if(frame.id == characterId)
 				return frame;
 		return null;
 	}

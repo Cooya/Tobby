@@ -3,27 +3,26 @@ package gamedata.d2p;
 import java.util.Hashtable;
 import java.util.zip.Inflater;
 
+import controller.characters.Character;
 import main.FatalError;
-import main.Instance;
 import main.Main;
 import utilities.ByteArray;
 
 public class D2pReader {
 	private static final boolean DEBUG = false;
-	private static final String d2pPath = "Ressources/Antibot/content/maps/maps0.d2p";
     private static Hashtable<String, Hashtable<String, Object[]>> indexes = new Hashtable<String, Hashtable<String, Object[]>>();
     private static Hashtable<String, Hashtable<String, String>> properties = new Hashtable<String, Hashtable<String, String>>();
 
     static {
-    	readD2pFiles(d2pPath);
+    	readD2pFiles(Main.D2P_PATH);
     }
     
 	public synchronized static ByteArray getBinaryMap(int mapId) {
 		if(DEBUG)
-			Instance.log("Retrieving binary data of map id " + mapId + "...");
-		Object[] index = indexes.get(d2pPath).get(getMapUriFromId(mapId));
+			Character.log("Retrieving binary data of map id " + mapId + "...");
+		Object[] index = indexes.get(Main.D2P_PATH).get(getMapUriFromId(mapId));
 		if(index == null) {
-			Instance.log("Unknown map id : " + mapId + ".");
+			Character.log("Unknown map id : " + mapId + ".");
 			return null;
 		}
 		ByteArray binaryMap = ((ByteArray) index[2]).clonePart((int) index[0], (int) index[1]);
@@ -33,7 +32,7 @@ public class D2pReader {
 	
 	private static void readD2pFiles(String filepath) {
 		if(DEBUG)
-			Instance.log("Reading d2p files...");
+			Character.log("Reading d2p files...");
 		ByteArray buffer;
 		int propertiesPos;
 		int propertiesSize;
@@ -106,10 +105,10 @@ public class D2pReader {
 			return;
 		}
 		if(DEBUG)
-			Instance.log("Decompressing binary data...");
+			Character.log("Decompressing binary data...");
 		Inflater inflater = new Inflater();
 		inflater.setInput(binaryMap.bytes());
-		byte[] buffer = new byte[Main.BUFFER_DEFAULT_SIZE];
+		byte[] buffer = new byte[ByteArray.BUFFER_DEFAULT_SIZE];
 		binaryMap.flushArray();
 		@SuppressWarnings("unused")
 		int bytesCounter = 0;
@@ -124,7 +123,7 @@ public class D2pReader {
 			binaryMap.writeBytes(buffer, bufferSize);
 		}
 		if(DEBUG)
-			Instance.log(bytesCounter + " bytes resulting of decompression.");
+			Character.log(bytesCounter + " bytes resulting of decompression.");
 		binaryMap.setPos(0);
 		if(binaryMap.readByte() != 77)
 			throw new FatalError("Invalid binary map header.");

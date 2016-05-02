@@ -14,7 +14,6 @@ import utilities.Encryption;
 import controller.characters.Character;
 import main.Emulation;
 import main.FatalError;
-import main.Instance;
 import main.Main;
 import messages.Message;
 import messages.UnhandledMessage;
@@ -57,8 +56,8 @@ public class ConnectionFrame extends Frame {
 	private IdentificationSuccessMessage ISM;
 	private int[] ticket;
 	
-	public ConnectionFrame(Instance instance, Character character) {
-		super(instance, character);
+	public ConnectionFrame(Character character) {
+		super(character);
 	}
 	
 	protected void process(HelloConnectMessage HCM) {
@@ -68,7 +67,7 @@ public class ConnectionFrame extends Frame {
 		IM.lang = "fr";
 		IM.credentials = Encryption.encryptCredentials(Encryption.decryptReceivedKey(ByteArray.toBytes(HCM.key)), this.character.infos.login, this.character.infos.password, HCM.salt);
 		IM.serverId = 0; // sélection du serveur automatique
-		this.instance.outPush(IM);
+		this.character.net.send(IM);
 	}
 	
 	protected void process(IdentificationSuccessMessage ISM) {
@@ -76,7 +75,7 @@ public class ConnectionFrame extends Frame {
 	}
 	
 	protected void process(IdentificationFailedMessage IFM) { 
-		this.instance.log.p("Authentification failed for reason " + IFM.reason);
+		this.character.log.p("Authentification failed for reason " + IFM.reason);
 	}
 	
 	protected void process(IdentificationFailedForBadVersionMessage IFFBVM) {
@@ -86,70 +85,68 @@ public class ConnectionFrame extends Frame {
 	protected void process(NicknameRegistrationMessage NRM) {
 		NicknameChoiceRequestMessage NCRM = new NicknameChoiceRequestMessage();
 		NCRM.nickname = getRandomNickname(20);
-		NCRM.serialize();
-		this.instance.outPush(NCRM);
-		this.instance.log.p("Nickname asked, sending a generated nickname.");
+		this.character.net.send(NCRM);
+		this.character.log.p("Nickname asked, sending a generated nickname.");
 	}
 	
 	protected void process(NicknameRefusedMessage NRM) {
 		NicknameChoiceRequestMessage NCRM = new NicknameChoiceRequestMessage();
 		NCRM.nickname = getRandomNickname(20);
-		NCRM.serialize();
-		this.instance.outPush(NCRM);
-		this.instance.log.p("Nickname refused, sending a new generated nickname.");
+		this.character.net.send(NCRM);
+		this.character.log.p("Nickname refused, sending a new generated nickname.");
 	}
 	
 	protected void process(ServersListMessage SLM) {
 		if(serverIsSelectable(SLM.servers, this.character.infos.serverId)) {
 			ServerSelectionMessage SSM = new ServerSelectionMessage();
 			SSM.serverId = this.character.infos.serverId;
-			instance.outPush(SSM);
+			this.character.net.send(SSM);
 		}
 		else
-			this.instance.log.p("Backup in progress on the requested server.");
+			this.character.log.p("Backup in progress on the requested server.");
 	}
 	
 	protected void process(ServerStatusUpdateMessage SSUM) {
 		if(SSUM.server.id == this.character.infos.serverId && SSUM.server.isSelectable) {	
 			ServerSelectionMessage SSM = new ServerSelectionMessage();
 			SSM.serverId = this.character.infos.serverId;
-			instance.outPush(SSM);
+			this.character.net.send(SSM);
 		}
 	}
 	
 	protected void process(SelectedServerDataMessage SSDM) {
 		this.ticket = SSDM.ticket;
-		instance.setGameServerIP(SSDM.address);
+		this.character.net.setGameServerIP(SSDM.address);
 	}
 	
 	protected void process(HelloGameMessage HCM) {
 		AuthenticationTicketMessage ATM = new AuthenticationTicketMessage();
 		ATM.lang = "fr";
 		ATM.ticket = new String(Encryption.decodeWithAES(ByteArray.toBytes(this.ticket)));
-		instance.outPush(ATM);
+		this.character.net.send(ATM);
 	}
 	
 	protected void process(RawDataMessage RDM) {
-		Message CIM = Emulation.emulateServer(this.character.infos.login, this.character.infos.password, this.HCM, this.ISM, RDM, instance.id);
-		instance.outPush(CIM);
+		Message CIM = Emulation.emulateServer(this.character.infos.login, this.character.infos.password, this.HCM, this.ISM, RDM, character.id);
+		CIM.deserialize(); // exception
+		this.character.net.send(CIM);
 	}
 	
 	protected void process(TrustStatusMessage TSM) {
 		CharactersListRequestMessage CLRM = new CharactersListRequestMessage();
-		instance.outPush(CLRM);
+		this.character.net.send(CLRM);
 	}
 	
 	protected void process(CharactersListMessage CLM) {
 		if(CLM.characters.size() == 0)
-			this.instance.outPush(new UnhandledMessage("CharacterNameSuggestionRequestMessage"));
+			this.character.net.send(new UnhandledMessage("CharacterNameSuggestionRequestMessage"));
 		else
 			selectCharacter(CLM.characters);
 	}
 	
 	protected void process(BasicCharactersListMessage BCLM) {
-		BCLM.deserialize();
 		if(BCLM.characters.size() == 0)
-			this.instance.outPush(new UnhandledMessage("CharacterNameSuggestionRequestMessage"));
+			this.character.net.send(new UnhandledMessage("CharacterNameSuggestionRequestMessage"));
 		else
 			selectCharacter(BCLM.characters);
 	}
@@ -168,9 +165,8 @@ public class ConnectionFrame extends Frame {
 				CCRM.cosmeticId = femaleSadidaMinCosmeticId + random.nextInt(7);
 			else
 				throw new FatalError("Unhandled breed character.");
-			CCRM.serialize();
-			this.instance.outPush(CCRM);
-			this.instance.log.p("Creation of the character.");
+			this.character.net.send(CCRM);
+			this.character.log.p("Creation of the character.");
 		}
 		else {
 			try {
@@ -179,8 +175,8 @@ public class ConnectionFrame extends Frame {
 				Thread.currentThread().interrupt();
 				return;
 			}
-			this.instance.outPush(new UnhandledMessage("CharacterNameSuggestionRequestMessage"));
-			this.instance.log.p("Asking character name suggestion.");
+			this.character.net.send(new UnhandledMessage("CharacterNameSuggestionRequestMessage"));
+			this.character.log.p("Asking character name suggestion.");
 		}
 	}
 	
@@ -200,10 +196,10 @@ public class ConnectionFrame extends Frame {
 		this.character.infos.level = CSSM.infos.level;
 		if(this.character.infos.getBreed() != CSSM.infos.breed)
 			throw new FatalError("Incoherent character breed.");
-		this.instance.log.graphicalFrame.setNameLabel(this.character.infos.characterName, this.character.infos.level);
-		this.instance.endOfConnection();
+		this.character.log.graphicalFrame.setNameLabel(this.character.infos.characterName, this.character.infos.level);
+		this.character.processor.endOfConnection();
 		this.character.infos.isConnected = true;
-		this.instance.startCharacterController();
+		this.character.start(); // démarrage du thread contrôleur
 	}
 	
 	protected void process(CharacterSelectedErrorMessage CSEM) {
@@ -227,17 +223,15 @@ public class ConnectionFrame extends Frame {
 			CharacterFirstSelectionMessage CFSM = new CharacterFirstSelectionMessage();
 			CFSM.doTutorial = false;
 			CFSM.id = this.character.infos.characterId;
-			CFSM.serialize();
-			this.instance.outPush(CFSM);
+			this.character.net.send(CFSM);
 			this.character.infos.firstSelection = false;
 		}
 		else {
 			CharacterSelectionMessage CSM = new CharacterSelectionMessage();
 			CSM.id = this.character.infos.characterId;
-			CSM.serialize();
-			this.instance.outPush(CSM);
+			this.character.net.send(CSM);
 		}
-		this.instance.log.p("Selection of the character.");
+		this.character.log.p("Selection of the character.");
 	}
 	
 	private String getRandomNickname(int size) {

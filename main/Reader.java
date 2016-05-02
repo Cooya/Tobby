@@ -11,13 +11,12 @@ public class Reader {
 	
 	public LinkedList<Message> processBuffer(ByteArray buffer) {
 		LinkedList<Message> msgStack = new LinkedList<Message>();
-		
 		if(this.incompleteHeader != null) {
 			buffer.appendBefore(this.incompleteHeader);
 			this.incompleteHeader = null;
 		}
-		else if(this.incompleteMsg != null) {
-			buffer.readBytes(this.incompleteMsg.appendContent(buffer.bytes()));
+		else if(this.incompleteMsg != null) {	
+			buffer.setPos(this.incompleteMsg.appendContent(buffer.bytes()));
 			if(this.incompleteMsg.isComplete()) {
 				msgStack.add(this.incompleteMsg);
 				this.incompleteMsg = null;
@@ -33,8 +32,10 @@ public class Reader {
 			}
 			else if(msg.isComplete()) // message complet
 				msgStack.add(msg);
-			else // message incomplet
+			else { // message incomplet
 				this.incompleteMsg = msg;
+				this.incompleteMsg.setPosToMax();
+			}
 			buffer.readBytes(msg.getTotalSize());
 		}
 		return msgStack;

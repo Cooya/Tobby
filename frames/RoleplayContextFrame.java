@@ -14,7 +14,7 @@ import gamedata.d2p.MapsCache;
 import gamedata.enums.TextInformationTypeEnum;
 import gui.Controller;
 import main.FatalError;
-import main.Instance;
+import main.GlobalError;
 import main.Main;
 import messages.UnhandledMessage;
 import messages.character.BasicWhoIsMessage;
@@ -47,23 +47,23 @@ import messages.security.PopupWarningMessage;
 
 public class RoleplayContextFrame extends Frame {
 
-	public RoleplayContextFrame(Instance instance, Character character) {
-		super(instance, character);
+	public RoleplayContextFrame(Character character) {
+		super(character);
 	}
 	
 	protected void process(BasicWhoIsMessage BWIM) {
-		this.instance.log.p("Whois response received.");
+		this.character.log.p("Whois response received.");
 		if(BWIM.playerName == Main.MODERATOR_NAME && BWIM.playerState != 0)
-			Controller.getInstance().deconnectAllInstances("The moderator is online.", false, false);
+			throw new GlobalError("The moderator is online.", false);
 		else
 			this.character.updateState(CharacterState.WHOIS_RESPONSE, true);
 	}
 	
 	protected void process(TextInformationMessage TIM) {
 		if(TIM.msgType == 1 && TIM.msgId == 245) // limite de 200 combats par jour atteinte
-			Controller.getInstance().deconnectCurrentInstance("Limit of 200 fights per day reached.", false, false);
+			Controller.getInstance().deconnectCurrentCharacter("Limit of 200 fights per day reached.", false, false);
 		else {
-			this.instance.log.p("Text information received, reading...");
+			this.character.log.p("Text information received, reading...");
 			InfoMessage infoMessage = InfoMessage.getInfoMessageById((TIM.msgType * 10000) + TIM.msgId);
 			int textId;
 			Object[] parameters;
@@ -78,7 +78,7 @@ public class RoleplayContextFrame extends Frame {
 				}
 			}
 			else {
-				this.instance.log.p("Information message " + (TIM.msgType * 10000 + TIM.msgId) + " cannot be found.");
+				this.character.log.p("Information message " + (TIM.msgType * 10000 + TIM.msgId) + " cannot be found.");
 				if(TIM.msgType == TextInformationTypeEnum.TEXT_INFORMATION_ERROR)
 					textId = InfoMessage.getInfoMessageById(10231).textId;
 				else
@@ -88,10 +88,10 @@ public class RoleplayContextFrame extends Frame {
 			}
 			String messageContent = I18n.getText(textId);
 			if(messageContent != null)
-				//this.instance.log.p(ParamsDecoder.applyParams(msgContent, parameters));
-				this.instance.log.p(messageContent);
+				//this.character.log.p(ParamsDecoder.applyParams(msgContent, parameters));
+				this.character.log.p(messageContent);
 			else
-				this.instance.log.p("There is no message for id " + (TIM.msgType * 10000 + TIM.msgId) + ".");
+				this.character.log.p("There is no message for id " + (TIM.msgType * 10000 + TIM.msgId) + ".");
 		}
 	}
 	
@@ -105,21 +105,21 @@ public class RoleplayContextFrame extends Frame {
 		}
 		else
 			str = "Information message " + (40000 + SMDM.msgId) + " cannot be found.";
-		this.instance.log.p(str);
+		this.character.log.p(str);
 	}
 	
 	protected void process(CharacterLoadingCompleteMessage CLCM) {
-		this.instance.log.graphicalFrame.setFightsWonLabel(0);
-		this.instance.log.graphicalFrame.setFightsLostLabel(0);
-		instance.outPush(new UnhandledMessage("FriendsGetListMessage"));
-		instance.outPush(new UnhandledMessage("IgnoredGetListMessage"));
-		instance.outPush(new UnhandledMessage("SpouseGetInformationsMessage"));
-		instance.outPush(new ClientKeyMessage());
-		instance.outPush(new UnhandledMessage("GameContextCreateRequestMessage"));
-		//instance.outPush(new UnhandledMessage("ObjectAveragePricesGetMessage"));
-		instance.outPush(new UnhandledMessage("QuestListRequestMessage"));
-		instance.outPush(new PrismsListRegisterMessage());
-		instance.outPush(new ChannelEnablingMessage());
+		this.character.log.graphicalFrame.setFightsWonLabel(0);
+		this.character.log.graphicalFrame.setFightsLostLabel(0);
+		this.character.net.send(new UnhandledMessage("FriendsGetListMessage"));
+		this.character.net.send(new UnhandledMessage("IgnoredGetListMessage"));
+		this.character.net.send(new UnhandledMessage("SpouseGetInformationsMessage"));
+		this.character.net.send(new ClientKeyMessage());
+		this.character.net.send(new UnhandledMessage("GameContextCreateRequestMessage"));
+		//this.character.net.send(new UnhandledMessage("ObjectAveragePricesGetMessage"));
+		this.character.net.send(new UnhandledMessage("QuestListRequestMessage"));
+		this.character.net.send(new PrismsListRegisterMessage());
+		this.character.net.send(new ChannelEnablingMessage());
 	}
 	
 	protected void process(GameContextCreateMessage GCCM) {
@@ -143,27 +143,27 @@ public class RoleplayContextFrame extends Frame {
 		this.character.infos.currentMap = MapsCache.loadMap(CMM.mapId);
 		MapInformationsRequestMessage MIRM = new MapInformationsRequestMessage();
 		MIRM.mapId = this.character.infos.currentMap.id;
-		instance.outPush(MIRM);
+		this.character.net.send(MIRM);
 	}
 	
 	protected void process(CharacterStatsListMessage CSLM) {
 		this.character.infos.stats = CSLM.stats;
-		this.instance.log.graphicalFrame.setEnergyLabel(this.character.infos.stats.energyPoints, this.character.infos.stats.maxEnergyPoints);
-		this.instance.log.graphicalFrame.setKamasLabel(this.character.infos.stats.kamas);
-		this.instance.log.graphicalFrame.setExperienceLabel((int) this.character.infos.stats.experience, (int) this.character.infos.stats.experienceNextLevelFloor);
+		this.character.log.graphicalFrame.setEnergyLabel(this.character.infos.stats.energyPoints, this.character.infos.stats.maxEnergyPoints);
+		this.character.log.graphicalFrame.setKamasLabel(this.character.infos.stats.kamas);
+		this.character.log.graphicalFrame.setExperienceLabel((int) this.character.infos.stats.experience, (int) this.character.infos.stats.experienceNextLevelFloor);
 	}
 	
 	protected void process(CharacterLevelUpMessage CLUM) {
 		this.character.infos.level = CLUM.newLevel;
-		this.instance.log.graphicalFrame.setNameLabel(this.character.infos.characterName, this.character.infos.level);
+		this.character.log.graphicalFrame.setNameLabel(this.character.infos.characterName, this.character.infos.level);
 		this.character.updateState(CharacterState.LEVEL_UP, true);
 	}
 	
 	protected void process(MapComplementaryInformationsDataMessage MCIDM) {
 		this.character.roleplayContext.newContextActors(MCIDM.actors);
-		this.instance.log.p("Current map : " + MapPosition.getMapPositionById(this.character.infos.currentMap.id) + ".\nCurrent cell id : " + this.character.infos.currentCellId + ".\nCurrent area id : " + this.character.infos.currentMap.subareaId + ".");
-		this.instance.log.graphicalFrame.setMapLabel(String.valueOf(MapPosition.getMapPositionById(this.character.infos.currentMap.id)));
-		this.instance.log.graphicalFrame.setCellLabel(String.valueOf(this.character.infos.currentCellId));
+		this.character.log.p("Current map : " + MapPosition.getMapPositionById(this.character.infos.currentMap.id) + ".\nCurrent cell id : " + this.character.infos.currentCellId + ".\nCurrent area id : " + this.character.infos.currentMap.subareaId + ".");
+		this.character.log.graphicalFrame.setMapLabel(String.valueOf(MapPosition.getMapPositionById(this.character.infos.currentMap.id)));
+		this.character.log.graphicalFrame.setCellLabel(String.valueOf(this.character.infos.currentCellId));
 		this.character.updatePosition(this.character.infos.currentMap, this.character.infos.currentCellId);
 		this.character.updateState(CharacterState.IS_LOADED, true);
 	}
@@ -182,8 +182,8 @@ public class RoleplayContextFrame extends Frame {
 		this.character.roleplayContext.updateContextActorPosition(GMMM.actorId, position);
 		if(GMMM.actorId == this.character.infos.characterId) {
 			this.character.infos.currentCellId = position;
-			this.instance.log.p("Next cell id after movement : " + position + ".");
-			this.instance.log.graphicalFrame.setCellLabel(String.valueOf(this.character.infos.currentCellId));
+			this.character.log.p("Next cell id after movement : " + position + ".");
+			this.character.log.graphicalFrame.setCellLabel(String.valueOf(this.character.infos.currentCellId));
 			this.character.mvt.updatePosition(this.character.infos.currentCellId);
 			this.character.updateState(CharacterState.CAN_MOVE, true);
 		}
@@ -196,17 +196,17 @@ public class RoleplayContextFrame extends Frame {
 	protected void process(InventoryWeightMessage IWM) {
 		this.character.infos.weight = IWM.weight;
 		this.character.infos.weightMax = IWM.weightMax;
-		this.instance.log.graphicalFrame.setWeightLabel(this.character.infos.weight, this.character.infos.weightMax);
+		this.character.log.graphicalFrame.setWeightLabel(this.character.infos.weight, this.character.infos.weightMax);
 		if(this.character.infos.weightMaxAlmostReached()) {
 			this.character.updateState(CharacterState.NEED_TO_EMPTY_INVENTORY, true);
-			this.instance.log.p("Inventory weight maximum almost reached, need to empty.");
+			this.character.log.p("Inventory weight maximum almost reached, need to empty.");
 		}
 	}
 	
 	protected void process(PlayerStatusUpdateMessage PSUM) {
 		if(PSUM.playerId == this.character.infos.characterId) {
 			this.character.infos.status = PSUM.status.statusId;
-			this.instance.log.p("New status : " + this.character.infos.status + ".");
+			this.character.log.p("New status : " + this.character.infos.status + ".");
 		}
 	}
 	
@@ -215,7 +215,7 @@ public class RoleplayContextFrame extends Frame {
 	}
 	
 	protected void process(PopupWarningMessage PWM) {
-		this.instance.log.p("Popup received by " + PWM.author + " that contains : \"" + PWM.content2 + "\".");
+		this.character.log.p("Popup received by " + PWM.author + " that contains : \"" + PWM.content2 + "\".");
 		try {
 			Thread.sleep(PWM.lockDuration * 1000); // attendre le nombre de secondes indiqué
 		} catch (InterruptedException e) {
@@ -224,7 +224,7 @@ public class RoleplayContextFrame extends Frame {
 	}
 	
 	protected void process(CheckFileRequestMessage CFRM) {
-		this.instance.log.p("Request for check file \"" + CFRM.filename + "\" received.");
+		this.character.log.p("Request for check file \"" + CFRM.filename + "\" received.");
 		CheckFileMessage CFM = new CheckFileMessage();
 		MessageDigest md;
 		try {
@@ -253,10 +253,10 @@ public class RoleplayContextFrame extends Frame {
 			}
 		}
 		CFM.type = CFRM.type;
-		this.instance.outPush(CFM);
-		this.instance.log.p(CFM.filenameHash);
-		this.instance.log.p(String.valueOf(CFM.type));
-		this.instance.log.p(CFM.value);
+		this.character.net.send(CFM);
+		this.character.log.p(CFM.filenameHash);
+		this.character.log.p(String.valueOf(CFM.type));
+		this.character.log.p(CFM.value);
 	}
 	
 	protected void process(GameMapNoMovementMessage GMNMM) {

@@ -76,7 +76,6 @@ import gamedata.maps.MapCoordinates;
 import gamedata.maps.MapCoordinatesExtended;
 import gamedata.parties.PartyMemberInformations;
 
-import java.lang.reflect.Constructor;
 import java.util.Hashtable;
 
 import main.FatalError;
@@ -265,15 +264,12 @@ public class ProtocolTypeManager {
 		Class<?> c = types.get(protocolId);
 		if(c == null)
 			throw new FatalError("Invalid or unhandled protocol id : " + protocolId + ".");
-		else {
-			Object o = null;
-			Constructor<?> cons = c.getConstructors()[0];
+		else
 			try {
-				o = cons.newInstance(buffer);
+				return c.getConstructor(ByteArray.class).newInstance(buffer);
 			} catch(Exception e) {
 				e.printStackTrace();
+				return null;
 			}
-			return o;
-		}
 	}
 }

@@ -1,7 +1,6 @@
 package frames;
 
 import gui.Controller;
-import main.Instance;
 import messages.parties.PartyAcceptInvitationMessage;
 import messages.parties.PartyDeletedMessage;
 import messages.parties.PartyInvitationMessage;
@@ -16,18 +15,17 @@ import controller.characters.Character;
 
 public class PartyFrame extends Frame {
 	
-	public PartyFrame(Instance instance, Character character) {
-		super(instance, character);
+	public PartyFrame(Character character) {
+		super(character);
 	}
 	
 	protected void process(PartyInvitationMessage PIM) {
-		this.instance.log.p("Party invitation received.");
+		this.character.log.p("Party invitation received.");
 		if(Controller.getInstance().isWorkmate(PIM.fromId)) {
 			PartyAcceptInvitationMessage PAIM = new PartyAcceptInvitationMessage();
 			PAIM.partyId = PIM.partyId;
-			PAIM.serialize();
-			this.instance.outPush(PAIM);
-			this.instance.log.p("Party invitation acceptation sent.");
+			this.character.net.send(PAIM);
+			this.character.log.p("Party invitation acceptation sent.");
 		}
 	}
 	

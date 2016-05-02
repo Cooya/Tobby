@@ -1,11 +1,13 @@
 package main;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 
 public interface Connection {
 	void send(byte[] bytes);
@@ -25,7 +27,7 @@ public interface Connection {
 					this.outputStream = this.client.getOutputStream();
 					break;
 				} catch(Exception e) {
-					e.printStackTrace();
+					Log.err(e.getClass().getSimpleName() + " : " + e.getMessage());
 				}
 		}
 		
@@ -60,11 +62,16 @@ public interface Connection {
 			}
 		}
 		
-		public int receive(byte[] buffer) throws Exception {
-			return this.inputStream.read(buffer);
+		public int receive(byte[] buffer) {
+			try {
+				return this.inputStream.read(buffer);
+			} catch(IOException e) {
+				Log.err(e.getClass().getSimpleName() + " : " + e.getMessage());
+				return -1;
+			}
 		}
 		
-		public int receive(byte[] buffer, int timeout) throws Exception {
+		public int receive(byte[] buffer, int timeout) throws SocketException {
 			this.client.setSoTimeout(timeout);
 			int bytes = receive(buffer);
 			this.client.setSoTimeout(0);
@@ -102,7 +109,7 @@ public interface Connection {
 			this.client.send(bytes);
 		}
 
-		public int receive(byte[] bytes) throws Exception {
+		public int receive(byte[] bytes) {
 			if(this.client.isClosed())
 				throw new FatalError("Connection closed.");
 			return this.client.receive(bytes);

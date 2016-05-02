@@ -4,15 +4,14 @@ import gamedata.enums.PlayerStatusEnum;
 import gui.Controller;
 import controller.CharacterState;
 import controller.api.FightAPI;
-import main.Instance;
 import main.Log;
 import messages.context.GameContextReadyMessage;
 
 public class LoneFighter extends Fighter {
 	private FightAPI fight;
 
-	public LoneFighter(Instance instance, String login, String password, int serverId, int breed, int areaId) {
-		super(instance, login, password, serverId, breed);
+	public LoneFighter(int id, String login, String password, int serverId, int breed, int areaId, Log log) {
+		super(id, login, password, serverId, breed, log);
 		this.fight = new FightAPI(this, areaId);
 	}
 	
@@ -25,7 +24,7 @@ public class LoneFighter extends Fighter {
 		if(inState(CharacterState.IN_FIGHT)) { // reprise de combat
 			GameContextReadyMessage GCRM = new GameContextReadyMessage(); // je ne sais pas à quoi sert ce message
 			GCRM.mapId = this.infos.currentMap.id;
-			this.instance.outPush(GCRM);
+			this.net.send(GCRM);
 			this.fight.fightManager(true);
 		}
 		
@@ -59,11 +58,11 @@ public class LoneFighter extends Fighter {
 			}
 			
 			if(inState(CharacterState.SHOULD_DECONNECT)) {
-				this.instance.deconnectionOrder(true);
+				deconnectionOrder(true);
 				break;
 			}
 		}
-		Log.info("Thread controller of instance with id = " + this.instance.id + " terminated.");
+		Log.info("Thread controller of character with id = " + this.id + " terminated.");
 		Controller.getInstance().threadTerminated();
 	}
 }

@@ -4,8 +4,11 @@ import gui.Model.Account;
 
 import java.util.Vector;
 
+import main.Log;
 import controller.CharacterBehaviour;
-import main.Instance;
+import controller.characters.Captain;
+import controller.characters.Character;
+import controller.characters.Soldier;
 
 // gère les escouades (fixes ou non) via un vecteur d'escouades
 public class SquadsManager {
@@ -45,15 +48,15 @@ public class SquadsManager {
 	}
 
 	// crée un nouveau combattant et l'affecte à une escouade s'il n'en a pas
-	protected Instance newSquadFighter(Account account, int areaId, CharacterFrame frame, Account captain) {
-		Instance newFighter;
+	protected Character newSquadFighter(Account account, int areaId, CharacterFrame frame, Account captain) {
+		Character newFighter;
 		if(captain == null) { // combattant n'ayant pas d'escouade fixée
 			Squad incompleteSquad = this.squads.get(this.incompleteSquadIndex);
 			if(incompleteSquad.members.size() == 0) // capitaine
-				newFighter = new Instance(account.id, account.behaviour, account.login, account.password, account.serverId, areaId, frame);
+				newFighter = Character.create(account.id, account.behaviour, account.login, account.password, account.serverId, areaId, new Log(account.login, frame));
 			else { // soldat
-				newFighter = new Instance(account.id, account.behaviour, account.login, account.password, account.serverId, 0, frame);
-				this.model.getInstance(incompleteSquad.members.firstElement()).newRecruit(newFighter); // on ajoute ce nouveau soldat aux recrues du capitaine
+				newFighter = Character.create(account.id, account.behaviour, account.login, account.password, account.serverId, 0, new Log(account.login, frame));
+				((Captain) this.model.getCharacter(incompleteSquad.members.firstElement())).newRecruit((Soldier) newFighter); // on ajoute ce nouveau soldat aux recrues du capitaine
 			}
 			incompleteSquad.members.add(account);
 			if(incompleteSquad.members.size() == MAX_GROUP_SIZE) { // si l'escouade est complète
@@ -68,15 +71,15 @@ public class SquadsManager {
 			}
 		}
 		else { // combattant ayant une escouade fixée
-			newFighter = new Instance(account.id, account.behaviour, account.login, account.password, account.serverId, areaId, frame);
+			newFighter = Character.create(account.id, account.behaviour, account.login, account.password, account.serverId, areaId, new Log(account.login, frame));
 			if(account.behaviour == CharacterBehaviour.SOLDIER)
-				this.model.getInstance(captain).newRecruit(newFighter);
+				((Captain) this.model.getCharacter(captain)).newRecruit((Soldier) newFighter);
 		}
 		return newFighter;
 	}
 
 	// supprime un combattant du vecteur d'escouades et libère ainsi sa place dans l'escouade
-	protected void removeSquadFighter(Instance fighter) {
+	protected void removeSquadFighter(Character fighter) {
 		int squadsNumber = this.squads.size();
 		int currentSquadSize;
 		Squad currentSquad;
@@ -86,7 +89,7 @@ public class SquadsManager {
 				continue; // on ne touche pas aux escouades enregistrées
 			currentSquadSize = currentSquad.members.size();
 			for(int j = 0; j < currentSquadSize; ++j)
-				if(this.model.getInstance(currentSquad.members.get(j)) == fighter) {
+				if(this.model.getCharacter(currentSquad.members.get(j)) == fighter) {
 					currentSquad.members.remove(j); // TODO -> problème si c'est le capitaine
 					if(i < this.incompleteSquadIndex)
 						this.incompleteSquadIndex = i; // changement du groupe de combat à compléter

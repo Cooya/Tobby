@@ -38,25 +38,25 @@ public class MovementAPI {
 		this.character.waitState(CharacterState.IS_FREE);
 
 		if(this.character.infos.currentCellId == targetId) { // déjà sur la cellule cible
-			this.character.instance.log.p("Already on the target cell id.");
+			this.character.log.p("Already on the target cell id.");
 			return true;
 		}
 		
-		this.character.instance.log.p("Moving from cell " + this.character.infos.currentCellId + " to " + targetId + ".");
+		this.character.log.p("Moving from cell " + this.character.infos.currentCellId + " to " + targetId + ".");
 		
 		Vector<Integer> path = pathfinding.getCellsPathTo(targetId);
 		if(path == null)
 			return false;
 		
-		this.character.instance.log.p("Sending movement request.");
+		this.character.log.p("Sending movement request.");
 		GameMapMovementRequestMessage GMMRM = new GameMapMovementRequestMessage();
 		GMMRM.keyMovements = path;
 		GMMRM.mapId = this.character.infos.currentMap.id;
-		this.character.instance.outPush(GMMRM);
+		this.character.net.send(GMMRM);
 		this.character.waitState(CharacterState.CAN_MOVE); // on attend le GameMapMovementMessage
 		
 		int duration = this.pathfinding.getCellsPathDuration();
-		this.character.instance.log.p("Movement duration : " + duration + " ms.");
+		this.character.log.p("Movement duration : " + duration + " ms.");
 
 		try {
 			Thread.sleep(duration); // on attend d'arriver à destination
@@ -65,8 +65,8 @@ public class MovementAPI {
 			return false;
 		}
 		
-		this.character.instance.log.p("Target cell reached.");
-		this.character.instance.outPush(new UnhandledMessage("GameMapMovementConfirmMessage"));
+		this.character.log.p("Target cell reached.");
+		this.character.net.send(new UnhandledMessage("GameMapMovementConfirmMessage"));
 		this.character.updateState(CharacterState.CAN_MOVE, false);
 		return true;
 	}
@@ -75,12 +75,12 @@ public class MovementAPI {
 	public void defineTargetMap(int mapId) {
 		this.character.waitState(CharacterState.IS_LOADED); // attendre le refresh des infos
 		if(this.character.infos.currentMap.id == mapId) { // déjà sur la map cible
-			this.character.instance.log.p("Already on the target map.");
+			this.character.log.p("Already on the target map.");
 			return;
 		}
 		if(mapIsInCelestialTemple(this.character.infos.currentMap))
 			goOutFromCelestialTemple();
-		this.character.instance.log.p("Going from map " + this.character.infos.currentMap.id + " to map " + mapId + ".");
+		this.character.log.p("Going from map " + this.character.infos.currentMap.id + " to map " + mapId + ".");
 		boolean isInIncarnam = mapIsInIncarnam(this.character.infos.currentMap);
 		if(mapIsInIncarnam(MapsCache.loadMap(mapId))) {
 			if(!isInIncarnam)
@@ -100,7 +100,7 @@ public class MovementAPI {
 		if(mapIsInCelestialTemple(this.character.infos.currentMap))
 			goOutFromCelestialTemple();
 		this.character.waitState(CharacterState.IS_LOADED); // attendre le refresh des infos
-		this.character.instance.log.p("Going from map " + this.character.infos.currentMap.id + " to area " + areaId + ".");
+		this.character.log.p("Going from map " + this.character.infos.currentMap.id + " to area " + areaId + ".");
 		boolean isInIncarnam = mapIsInIncarnam(this.character.infos.currentMap);
 		if(areaIsInIncarnam(areaId)) {
 			if(!isInIncarnam)
@@ -135,7 +135,7 @@ public class MovementAPI {
 			return; // en cas d'interruption (c'est déjà arrivé plusieurs fois)
 		if(this.character.infos.currentMap.subareaId == areaId) { // déjà sur l'aire
 			this.pathfinding.setArea(areaId); // pas besoin du calcul du chemin
-			this.character.instance.log.p("Already on the target area.");
+			this.character.log.p("Already on the target area.");
 			return;
 		}
 		defineArea(areaId);
@@ -154,15 +154,15 @@ public class MovementAPI {
 		if(direction == null || !moveTo(direction.outgoingCellId))
 			return false;
 		
-		this.character.instance.log.p("Moving to " + Map.directionToString(direction.direction) + " map.");
+		this.character.log.p("Moving to " + Map.directionToString(direction.direction) + " map.");
 		
 		int nextMapId = this.character.infos.currentMap.getNeighbourMapFromDirection(direction.direction);
-		this.character.instance.log.p("Sending map changement request. Next map id : " + nextMapId + ".");
+		this.character.log.p("Sending map changement request. Next map id : " + nextMapId + ".");
 		ChangeMapMessage CMM = new ChangeMapMessage();
 		CMM.mapId = nextMapId;
-		this.character.instance.outPush(CMM);
+		this.character.net.send(CMM);
 		this.character.infos.mapsTravelled++;
-		this.character.instance.log.graphicalFrame.setMapsTravelledCounter(this.character.infos.mapsTravelled);
+		this.character.log.graphicalFrame.setMapsTravelledCounter(this.character.infos.mapsTravelled);
 			
 		this.character.updateState(CharacterState.IS_LOADED, false); // chargement de map
 		return true;
@@ -170,7 +170,7 @@ public class MovementAPI {
 	
 	// fait descendre le personnage à Astrub depuis Incarnam
 	private void goDownToAstrub() {
-		this.character.instance.log.p("Going down to Astrub.");
+		this.character.log.p("Going down to Astrub.");
 		defineTargetMap(153880835); // map où se situe le pnj
 		Direction direction;
 		while(!Thread.currentThread().isInterrupted() && (direction = this.pathfinding.nextDirectionForReachTarget()) != null)
@@ -183,7 +183,7 @@ public class MovementAPI {
 		NGARM.npcId = -10000;
 		NGARM.npcActionId = 3;
 		NGARM.npcMapId = this.character.infos.currentMap.id;
-		this.character.instance.outPush(NGARM);
+		this.character.net.send(NGARM);
 		
 		try {
 			Thread.sleep(1000); // on attend la première question
@@ -194,7 +194,7 @@ public class MovementAPI {
 		
 		NpcDialogReplyMessage NDRM = new NpcDialogReplyMessage();
 		NDRM.replyId = 25209; // on sélectionne la première réponse
-		this.character.instance.outPush(NDRM);
+		this.character.net.send(NDRM);
 		
 		try {
 			Thread.sleep(1000); // on attend la seconde question
@@ -205,14 +205,14 @@ public class MovementAPI {
 		
 		NDRM = new NpcDialogReplyMessage();
 		NDRM.replyId = 25207; // on sélectionne la seconde réponse
-		this.character.instance.outPush(NDRM);
+		this.character.net.send(NDRM);
 		
 		this.character.updateState(CharacterState.IS_LOADED, false); // chargement de map
 	}
 	
 	// fait monter le personnage à Incarnam depuis Astrub
 	private void goUpToIncarnam() {
-		this.character.instance.log.p("Going up to Incarnam.");
+		this.character.log.p("Going up to Incarnam.");
 		defineTargetMap(84674054); // map où se situe la statue Féca
 		Direction direction;
 		while(!Thread.currentThread().isInterrupted() && (direction = this.pathfinding.nextDirectionForReachTarget()) != null)
@@ -222,7 +222,7 @@ public class MovementAPI {
 	
 	// fait sortir le personnage du temple céleste d'Incarnam
 	private void goOutFromCelestialTemple() {
-		this.character.instance.log.p("Going out from celestial temple of Incarnam.");
+		this.character.log.p("Going out from celestial temple of Incarnam.");
 		if(this.character.infos.currentMap.id == 153092354) // première salle
 			this.character.interaction.useInteractive(396, 489318, 235719, true); // escalier
 		changeMap(new Direction(Map.RIGHT, 531)); // on sort du temple

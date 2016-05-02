@@ -8,7 +8,6 @@ import java.util.Vector;
 
 import controller.CharacterState;
 import controller.api.FightAPI;
-import main.Instance;
 import main.Log;
 import messages.context.GameContextReadyMessage;
 import messages.parties.PartyInvitationRequestMessage;
@@ -18,8 +17,8 @@ public class Captain extends Fighter {
 	private FightAPI fight;
 	private Vector<Soldier> squad;
 
-	public Captain(Instance instance, String login, String password, int serverId, int breed, int areaId) {
-		super(instance, login, password, serverId, breed);
+	public Captain(int id, String login, String password, int serverId, int breed, int areaId, Log log) {
+		super(id, login, password, serverId, breed, log);
 		this.recruits = new Vector<Soldier>();
 		this.fight = new FightAPI(this, areaId);
 	}
@@ -43,13 +42,13 @@ public class Captain extends Fighter {
 				maxMissingLife = currentMissingLife;
 		}
 		if(maxMissingLife > 0) {
-			this.instance.log.p("Break for life regeneration, " + maxMissingLife + " life points missing.");
+			this.log.p("Break for life regeneration, " + maxMissingLife + " life points missing.");
 			waitState(CharacterState.IN_REGENERATION, this.infos.regenRate * 100 * maxMissingLife); // à peu près
 			this.infos.stats.lifePoints = this.infos.stats.maxLifePoints;
-			this.instance.log.graphicalFrame.setLifeLabel(this.infos.stats.lifePoints, this.infos.stats.maxLifePoints);
+			this.log.graphicalFrame.setLifeLabel(this.infos.stats.lifePoints, this.infos.stats.maxLifePoints);
 			for(Character teamMate : this.squad) { // update de la vie pour toute l'escouade
 				teamMate.infos.stats.lifePoints = teamMate.infos.stats.maxLifePoints;
-				teamMate.instance.log.graphicalFrame.setLifeLabel(teamMate.infos.stats.lifePoints, teamMate.infos.stats.maxLifePoints);
+				teamMate.log.graphicalFrame.setLifeLabel(teamMate.infos.stats.lifePoints, teamMate.infos.stats.maxLifePoints);
 			}
 		}
 	}
@@ -64,7 +63,7 @@ public class Captain extends Fighter {
 					need = true;
 		}
 		if(need) {
-			this.instance.log.p("Need to empty inventory.");
+			this.log.p("Need to empty inventory.");
 			broadcastStateUpdate();
 			
 			// vérification du poids de l'inventaire
@@ -79,7 +78,7 @@ public class Captain extends Fighter {
 	public void newRecruit(Soldier recruit) {
 		this.recruits.add(recruit);
 		recruit.setCaptain(this);
-		this.instance.log.p("Recruit " + recruit.infos.login + " added to the recruits list.");
+		this.log.p("Recruit " + recruit.infos.login + " added to the recruits list.");
 	}
 
 	// parcourt la liste des recrues et les invite à rejoindre l'escouade (avec attente d'acceptation de l'invitation)
@@ -93,8 +92,7 @@ public class Captain extends Fighter {
 			// envoi d'une invitation à rejoindre le groupe
 			PartyInvitationRequestMessage PIRM = new PartyInvitationRequestMessage();
 			PIRM.name = recruit.infos.characterName;
-			PIRM.serialize();
-			this.instance.outPush(PIRM);
+			this.net.send(PIRM);
 			
 			// attente de l'acceptation de l'invitation
 			waitState(CharacterState.NEW_PARTY_MEMBER);
@@ -110,7 +108,7 @@ public class Captain extends Fighter {
 	}
 
 	private void waitSoldiersOnMap() {
-		this.instance.log.p("Waiting for complete team be on the map.");
+		this.log.p("Waiting for complete team be on the map.");
 		for(Soldier soldier : this.squad) {
 			while(!this.roleplayContext.actorIsOnMap(soldier.infos.characterId))
 				waitState(CharacterState.NEW_ACTOR_ON_MAP);
@@ -120,7 +118,7 @@ public class Captain extends Fighter {
 	}
 
 	private void waitSoldiersInFight() {
-		this.instance.log.p("Waiting for complete team be in the fight.");
+		this.log.p("Waiting for complete team be in the fight.");
 		for(Character soldier : this.squad)
 			while(!this.fightContext.inFight(soldier.infos.characterId))
 				if(!waitState(CharacterState.NEW_ACTOR_IN_FIGHT)) // fin de la phase de préparation ou interruption
@@ -135,7 +133,7 @@ public class Captain extends Fighter {
 		if(inState(CharacterState.IN_FIGHT)) { // reprise de combat
 			GameContextReadyMessage GCRM = new GameContextReadyMessage(); // je ne sais pas à quoi sert ce message
 			GCRM.mapId = this.infos.currentMap.id;
-			this.instance.outPush(GCRM);
+			this.net.send(GCRM);
 			this.fight.fightManager(true);
 		}
 
@@ -181,11 +179,11 @@ public class Captain extends Fighter {
 			}
 			
 			if(inState(CharacterState.SHOULD_DECONNECT)) {
-				this.instance.deconnectionOrder(true);
+				deconnectionOrder(true);
 				break;
 			}
 		}
-		Log.info("Thread controller of instance with id = " + this.instance.id + " terminated.");
+		Log.info("Thread controller of character with id = " + this.id + " terminated.");
 		Controller.getInstance().threadTerminated();
 	}
 }

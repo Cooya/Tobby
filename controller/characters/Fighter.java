@@ -1,15 +1,15 @@
 package controller.characters;
 
+import main.Log;
 import controller.CharacterState;
 import controller.informations.FightContext;
-import main.Instance;
 
 public abstract class Fighter extends Character {
 	public FightContext fightContext;
 	private Mule mule;
 	
-	public Fighter(Instance instance, String login, String password, int serverId, int breed) {
-		super(instance, login, password, serverId, breed);
+	public Fighter(int id, String login, String password, int serverId, int breed, Log log) {
+		super(id, login, password, serverId, breed, log);
 		this.fightContext = new FightContext(this);
 	}
 	

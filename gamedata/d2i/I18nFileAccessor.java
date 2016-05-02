@@ -6,11 +6,11 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 
 import main.FatalError;
+import main.Main;
 import utilities.ByteArray;
 
 public class I18nFileAccessor {
 	private static I18nFileAccessor _self;
-	private static final String d2iPath = "Ressources/Antibot/data/i18n/i18n_fr.d2i";
 	private ByteArray _stream; // pas vraiment un stream mais beaucoup plus pratique
 	private Dictionary<Integer, Integer> _indexes;
 	private Dictionary<Integer, Integer> _unDiacriticalIndex;
@@ -24,7 +24,7 @@ public class I18nFileAccessor {
 	public I18nFileAccessor() {
 		if(_self != null)
 			throw new FatalError("Instance already instanciated.");
-		init(d2iPath);
+		init(Main.D2I_PATH);
 	}
 
 	public static I18nFileAccessor getInstance() {

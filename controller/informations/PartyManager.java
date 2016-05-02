@@ -41,7 +41,7 @@ public class PartyManager {
 		this.partyMembers = members;
 		for(PartyMemberInformations partyMember : this.partyMembers)
 			this.partyLevel += partyMember.level;
-		this.character.instance.log.p("Party joined.");
+		this.character.log.p("Party joined.");
 		
 		if(this.character instanceof Captain)
 			((Captain) this.character).updateFightArea(this.partyLevel);
@@ -51,7 +51,7 @@ public class PartyManager {
 		this.partyId = 0;
 		this.partyMembers = null;
 		this.partyLevel = 0;
-		this.character.instance.log.p("Party left.");
+		this.character.log.p("Party left.");
 		
 		if(this.character instanceof Captain)
 			((Captain) this.character).updateFightArea(this.character.infos.level);
@@ -60,7 +60,7 @@ public class PartyManager {
 	public void addPartyMember(PartyMemberInformations newMember) {
 		this.partyMembers.add(newMember);
 		this.partyLevel += newMember.level;
-		this.character.instance.log.p("Member " + newMember.name + " joined the party.");
+		this.character.log.p("Member " + newMember.name + " joined the party.");
 		
 		if(this.character instanceof Captain)
 			((Captain) this.character).updateFightArea(this.partyLevel);
@@ -70,7 +70,7 @@ public class PartyManager {
 		for(PartyMemberInformations partyMember : this.partyMembers)
 			if(partyMember.id == leavingMemberId) {
 				this.partyLevel -= partyMember.level;
-				this.character.instance.log.p("Member " + partyMember.name + " left the party.");
+				this.character.log.p("Member " + partyMember.name + " left the party.");
 				this.partyMembers.remove(partyMember);
 				if(this.character instanceof Captain)
 					((Captain) this.character).updateFightArea(this.partyLevel);
@@ -96,9 +96,8 @@ public class PartyManager {
 	public void leaveParty() {
 		PartyLeaveRequestMessage PLRM = new PartyLeaveRequestMessage();
 		PLRM.partyId = this.partyId;
-		PLRM.serialize();
-		this.character.instance.outPush(PLRM);
-		this.character.instance.log.p("Leaving party request sent.");
+		this.character.net.send(PLRM);
+		this.character.log.p("Leaving party request sent.");
 		this.character.waitState(CharacterState.NOT_IN_PARTY);
 	}
 }

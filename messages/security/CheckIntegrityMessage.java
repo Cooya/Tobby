@@ -1,16 +1,24 @@
 package messages.security;
 
+import java.util.Vector;
+
 import messages.Message;
 
 public class CheckIntegrityMessage extends Message {
+	public Vector<Integer> data;
 
 	@Override
 	public void serialize() {
-		// not implemented yet
+		this.content.writeVarInt(this.data.size());
+		for(int i : this.data)
+			this.content.writeByte(i);
 	}
 	
 	@Override
 	public void deserialize() {
-		// not implemented yet
+		int nb = this.content.readVarInt();
+		this.data = new Vector<Integer>(nb);
+		for(int i = 0; i < nb; ++i)
+			this.data.add(this.content.readByte());
 	}
 }

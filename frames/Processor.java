@@ -3,24 +3,26 @@ package frames;
 import gui.Controller;
 
 import java.lang.reflect.Method;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import utilities.Reflection;
 import controller.characters.Character;
-import main.Instance;
 import main.Log;
+import main.Main;
 import messages.Message;
 
 @SuppressWarnings("unchecked")
-public class Processor {
+public class Processor extends Thread {
+	private static Character characterInConnection; // personnage en cours de connexion
 	private static Vector<Class<? extends Frame>> processFrames = new Vector<Class<? extends Frame>>();
 	
+	private Character character;
 	private Map<String, Process> processTable;
+	private ConcurrentLinkedQueue<Message> input; // file des messages reçus qui doivent être traité
 	
-	public static Vector<Long> perfTest = new Vector<Long>(); // TODO
-
 	static {
 		// récupération des différentes frames de traitement dans le package "frames"
 		try {
@@ -42,14 +44,17 @@ public class Processor {
 		*/
 	}
 
-	public Processor(Instance instance, Character character) {
-		this.processTable = new Hashtable<String, Process>();
+	public Processor(Character character, String login) {
+		super(login + "/processor");
+		this.character = character;
+		this.processTable = new HashMap<String, Process>();
+		this.input = new ConcurrentLinkedQueue<Message>();
 		Frame frame;
 		Method[] methods;
 		String msgName;
 		for(Class<? extends Frame> processFrame : processFrames) {
 			try {
-				frame = processFrame.getConstructor(Instance.class, Character.class).newInstance(instance, character);
+				frame = processFrame.getConstructor(Character.class).newInstance(character);
 			} catch(Exception e) {
 				e.printStackTrace();
 				return;
@@ -58,39 +63,91 @@ public class Processor {
 			for(Method method : methods)
 				if(method.getName().equals("process")) {
 					msgName = method.getParameterTypes()[0].getSimpleName();
-					this.processTable.put(msgName, new Process(Message.getClassByName(msgName), frame));
+					this.processTable.put(msgName, new Process(frame, method));
 				}
 		}
 	}
-
-	public void processMessage(Message msg) {
-		String name = msg.getName();
-		if(name == null) { // message inconnu
-			Log.warn("Unknown message with id = " + msg.getId() + ".");
-			return;
+	
+	// attente si une connexion d'un autre personnage est déjà en cours
+	public void waitForConnection() {
+		synchronized(Main.class) {
+			while(!isInterrupted() && characterInConnection != null) {
+				this.character.log.p("Waiting for connection.");
+				try {
+					Main.class.wait();
+				} catch (Exception e) {
+					Thread.currentThread().interrupt();
+				}
+			}
+			characterInConnection = this.character;
 		}
+	}
+	
+	// signale à un autre personnage en attente de connexion qu'il peut se connecter
+	// appelée lors de la réception du CharacterSelectedSuccessMessage
+	public void endOfConnection() {
+		synchronized(Main.class) {
+			characterInConnection = null;
+			Main.class.notify();
+		}
+	}
+	
+	// appelée depuis le "receiver" uniquement
+	public synchronized void incomingMessage(Message msg) {
+		this.input.add(msg);
+		notify();
+	}
+	
+	@Override
+	public synchronized void run() {
+		waitForConnection(); // attente de fin de connexion du personage précédent
+		
+		// lancement des threads de l'interface réseau
+		this.character.net.start();
+		this.character.net.sender.start();
+		
+		Message msg;
+		while(!isInterrupted()) {
+			if((msg = this.input.poll()) != null)
+				processMessage(msg);
+			else
+				try {
+					wait();
+				} catch(Exception e) {
+					Thread.currentThread().interrupt();
+				}
+		}
+		if(characterInConnection == this.character) { // on libère le launcher
+			synchronized(Main.class) {
+				characterInConnection = null;
+				Main.class.notify();
+			}
+		}
+		Log.info("Thread process of character with id = " + this.character.id + " terminated.");
+		Controller.getInstance().threadTerminated();
+	}
+	
+	// ne reçoit pas de message inconnu
+	public void processMessage(Message msg) {
 		Process process = this.processTable.get(msg.getName());
-		if(process == null) // message n'ayant pas de traitement associé
+		if(process == null) // message inconnu ou n'ayant pas de traitement associé
 			return;
 		process.process(msg);
 	}
 
 	private class Process {
-		private Class<Message> deserializationClass; // classe de désérialisation/sérialisation du message
 		private Frame processFrame; // frame où se situe la méthode "process()"
+		private Method processMethod; // méthode "process()"
 
-		private Process(Class<Message> deserializationClass, Frame processFrame) {
-			this.deserializationClass = deserializationClass;
+		private Process(Frame processFrame, Method processMethod) {
 			this.processFrame = processFrame;
+			this.processMethod = processMethod;
 		}
 
 		private void process(Message msg) {
+			msg.deserialize(); // unique appel de la fonction "deserialize()"
 			try {
-				msg = this.deserializationClass.cast(msg);
-				msg = this.deserializationClass.getConstructor(Message.class).newInstance(msg);
-				long startTime = System.nanoTime(); 
-				this.processFrame.getClass().getDeclaredMethod("process", this.deserializationClass).invoke(processFrame, this.deserializationClass.cast(msg));
-				perfTest.add(System.nanoTime() - startTime);
+				this.processMethod.invoke(processFrame, msg);
 			}
 			catch(Exception e) {
 				e.printStackTrace();

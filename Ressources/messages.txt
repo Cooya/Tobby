@@ -15,6 +15,7 @@
 109 AlreadyConnectedMessage
 110 AuthenticationTicketMessage
 111 AuthentificationTicketAcceptedMessage
+112 AuthenticationTicketRefusedMessage
 150 CharactersListRequestMessage
 151 CharactersListMessage
 152 CharacterSelectionMessage

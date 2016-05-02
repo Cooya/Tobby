@@ -13,10 +13,11 @@ public class Log {
 	private static final String LOG_PATH = System.getProperty("user.dir") + "/Ressources/Logs/";
 	private static final String EOL = System.getProperty("line.separator");
 	private PrintWriter writer;
-	private StringBuilder logString;
-	private StringBuilder writeBuffer;
+	private StringBuilder logFrameString;
+	private StringBuilder logFileBuffer;
 	private int writeCounter;
-	private ReentrantLock lock;
+	private ReentrantLock stringLock;
+	private ReentrantLock bufferLock;
 	public CharacterFrame graphicalFrame;
 	
 	public Log(String characterName, CharacterFrame graphicalFrame) {
@@ -25,50 +26,39 @@ public class Log {
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
-		this.logString = new StringBuilder();
-		this.writeBuffer = new StringBuilder();
+		this.logFrameString = new StringBuilder();
+		this.logFileBuffer = new StringBuilder();
 		this.writeCounter = 0;
-		this.lock = new ReentrantLock();
+		this.stringLock = new ReentrantLock();
+		this.bufferLock = new ReentrantLock();
 		this.graphicalFrame = graphicalFrame;
 	}
 	
 	public void p(String msgDirection, Message msg) { // pour la réception et l'envoi de messages
 		if(Thread.currentThread().isInterrupted())
 			return;
-		
-		// ajout de la date et de l'heure
-		this.logString.append("[").append(Main.DATE_FORMAT.format(new Date())).append("] ");
-		
-		//int lenofsize = msg.getLenOfSize();
-		//int size = msg.getSize();
+		this.stringLock.lock();
+		this.logFrameString.append("[").append(Main.DATE_FORMAT.format(new Date())).append("] ");
 		if(msgDirection == "r" || msgDirection == "reception")
-			this.logString.append("Receiving message ").append(msg.getId()).append(" (").append(msg.getName()).append(")");
+			this.logFrameString.append("Receiving message ").append(msg.getId()).append(" (").append(msg.getName()).append(")");
 		else if(msgDirection == "s" || msgDirection == "sending")
-			this.logString.append("Sending message " + msg.getId() + " (" + msg.getName() + ")");
-		/*
-		if(lenofsize > 1)
-			str += "Length of size : " + lenofsize + " bytes" + EOL;
-		else
-			str += "Length of size : " + lenofsize + " byte" + EOL;
-		if(size > 1)
-			str += "Size : " + size + " bytes" + EOL;
-		else
-			str += "Size : " + size + " byte" + EOL;
-		*/
-		this.logString.append(EOL);
-		writeIntoLogFile(this.logString);
-		this.logString.setLength(0);
+			this.logFrameString.append("Sending message " + msg.getId() + " (" + msg.getName() + ")");
+		this.logFrameString.append(EOL);
+		writeIntoLogFile(this.logFrameString);
+		this.logFrameString.setLength(0);
+		this.stringLock.unlock();
 	}
 	
 	public void p(String str) {
 		if(Thread.currentThread().isInterrupted())
 			return;
-		
-		this.logString.append("[").append(Main.DATE_FORMAT.format(new Date())).append("] ").append(str).append(EOL);
+		this.stringLock.lock();
+		this.logFrameString.append("[").append(Main.DATE_FORMAT.format(new Date())).append("] ").append(str).append(EOL);
 		if(this.graphicalFrame != null)
-			graphicalFrame.appendText(this.logString);
-		writeIntoLogFile(this.logString);
-		this.logString.setLength(0);
+			this.graphicalFrame.appendText(this.logFrameString);
+		writeIntoLogFile(this.logFrameString);
+		this.logFrameString.setLength(0);
+		this.stringLock.unlock();
 	}
 	
 	public static void info(String msg) {
@@ -84,17 +74,19 @@ public class Log {
 	}
 	
 	public void flushBuffer() {
-		this.writer.print(this.writeBuffer);
+		this.bufferLock.lock();
+		this.writer.print(this.logFileBuffer);
 		this.writer.flush();
-		this.writeBuffer.setLength(0);
+		this.logFileBuffer.setLength(0);
+		this.bufferLock.unlock();
 		this.writeCounter = 0;
 	}
 	
 	private void writeIntoLogFile(StringBuilder msg) {
-		this.lock.lock();
-		this.writeBuffer.append(msg);
+		this.bufferLock.lock();
+		this.logFileBuffer.append(msg);
+		this.bufferLock.unlock();
 		if(++this.writeCounter == WRITE_INTERVAL)
 			flushBuffer();
-		this.lock.unlock();
 	}
 }

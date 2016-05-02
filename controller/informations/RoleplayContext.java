@@ -34,7 +34,7 @@ public class RoleplayContext {
 		for(GameRolePlayActorInformations actor : actors)
 			if(actor.contextualId == actorId) {
 				//if(actor instanceof GameRolePlayGroupMonsterInformations)
-					//Instance.log("Monster group is moving from cell id " + actor.disposition.cellId + " to " + position + ".");
+					//Character.log("Monster group is moving from cell id " + actor.disposition.cellId + " to " + position + ".");
 				actor.disposition.cellId = position;
 			}
 	} 

@@ -4,7 +4,6 @@ import controller.CharacterState;
 import controller.api.FightAPI;
 import gamedata.enums.PlayerStatusEnum;
 import gui.Controller;
-import main.Instance;
 import main.Log;
 import messages.context.GameContextReadyMessage;
 import messages.fights.GameFightJoinRequestMessage;
@@ -17,8 +16,8 @@ public class Soldier extends Fighter {
 	protected boolean waitingPartyInvitation;
 	protected boolean readyForFight;
 
-	public Soldier(Instance instance, String login, String password, int serverId, int breed) {
-		super(instance, login, password, serverId, breed);
+	public Soldier(int id, String login, String password, int serverId, int breed, Log log) {
+		super(id, login, password, serverId, breed, log);
 		this.fight = new FightAPI(this);
 	}
 	
@@ -50,9 +49,8 @@ public class Soldier extends Fighter {
 		GameFightJoinRequestMessage GFJRM = new GameFightJoinRequestMessage();
 		GFJRM.fighterId = this.captain.infos.characterId;
 		GFJRM.fightId = this.partyManager.getFightId();
-		GFJRM.serialize();
-		this.instance.outPush(GFJRM);
-		this.instance.log.p("Request for join fight sent.");
+		this.net.send(GFJRM);
+		this.log.p("Request for join fight sent.");
 	}
 	
 	public void run() {
@@ -62,7 +60,7 @@ public class Soldier extends Fighter {
 		if(inState(CharacterState.IN_FIGHT)) {
 			GameContextReadyMessage GCRM = new GameContextReadyMessage();
 			GCRM.mapId = this.infos.currentMap.id;
-			this.instance.outPush(GCRM);
+			this.net.send(GCRM);
 			this.fight.fightManager(true);
 		}
 		
@@ -104,8 +102,8 @@ public class Soldier extends Fighter {
 			}
 		}
 		if(inState(CharacterState.SHOULD_DECONNECT))
-			this.instance.deconnectionOrder(true);
-		Log.info("Thread controller of instance with id = " + this.instance.id + " terminated.");
+			deconnectionOrder(true);
+		Log.info("Thread controller of character with id = " + this.id + " terminated.");
 		Controller.getInstance().threadTerminated();
 	}
 }

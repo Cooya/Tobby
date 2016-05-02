@@ -7,7 +7,6 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import controller.CharacterState;
-import main.Instance;
 import main.Log;
 import main.Main;
 
@@ -19,8 +18,8 @@ public class Mule extends Character {
 	private Vector<Character> customers;
 	private Lock lock;
 
-	public Mule(Instance instance, String login, String password, int serverId, int breed) {
-		super(instance, login, password, serverId, breed);
+	public Mule(int id, String login, String password, int serverId, int breed, Log log) {
+		super(id, login, password, serverId, breed, log);
 		this.waitingMapId = BANK_OUTSIDE_MAP_ID; // banque d'Astrub
 		this.customers = new Vector<Character>();
 		this.lock = new ReentrantLock();
@@ -36,13 +35,13 @@ public class Mule extends Character {
 		this.lock.unlock();
 		((Fighter) customer).setMule(this);
 		customer.updateState(CharacterState.MULE_AVAILABLE, inState(CharacterState.MULE_AVAILABLE));
-		this.instance.log.p("Customer " + customer.infos.login + " added to the customers list.");
+		this.log.p("Customer " + customer.infos.login + " added to the customers list.");
 	}
 	
 	public void removeCustomer(Character customer) {
 		this.lock.lock();
 		if(this.customers.remove(customer))
-			this.instance.log.p("Customer " + customer.infos.login + " removed from the customers list.");
+			this.log.p("Customer " + customer.infos.login + " removed from the customers list.");
 		this.lock.unlock();
 	}
 	
@@ -79,12 +78,12 @@ public class Mule extends Character {
 	public void run() {
 		while(!isInterrupted() && waitState(CharacterState.IS_FREE) && !inState(CharacterState.SHOULD_DECONNECT)) { // attente d'état importante afin de laisser le temps aux pods de se mettre à jour après un échange
 			checkIfModeratorIsOnline(Main.MODERATOR_NAME);
-			if(this.infos.currentMap.id == BANK_INSIDE_MAP_ID) // si le perso est dans la banque (lancement de l'instance)
+			if(this.infos.currentMap.id == BANK_INSIDE_MAP_ID) // si le perso est dans la banque
 				goOutAstrubBank();
 			if(inventoryIsSoHeavy(0.1f)) { // + de 10% de l'inventaire occupé
 				updateState(CharacterState.NEED_TO_EMPTY_INVENTORY, true);
 				broadcastAvailability(false);		
-				this.instance.log.p("Need to go to empty inventory at Astrub bank.");
+				this.log.p("Need to go to empty inventory at Astrub bank.");
 				this.mvt.goTo(BANK_OUTSIDE_MAP_ID); // map où se situe la banque
 				this.interaction.useInteractive(317, 465440, 140242, true); // porte de la banque
 				this.interaction.emptyInventoryInBank();
@@ -94,16 +93,16 @@ public class Mule extends Character {
 			this.mvt.goTo(this.waitingMapId);
 			broadcastAvailability(true);
 			if(waitState(CharacterState.PENDING_DEMAND)) { // on attend qu'un combattant lance un échange
-				this.instance.log.p("Exchange demand received.");
+				this.log.p("Exchange demand received.");
 				if(this.social.processExchangeDemand(this.roleplayContext.actorDemandingExchange))
 					broadcastAvailability(false);
 			}
 		}
 		
 		if(inState(CharacterState.SHOULD_DECONNECT))
-			this.instance.deconnectionOrder(true);
+			deconnectionOrder(true);
 		broadcastDeconnection();
-		Log.info("Thread controller of instance with id = " + this.instance.id + " terminated.");
+		Log.info("Thread controller of character with id = " + this.id + " terminated.");
 		Controller.getInstance().threadTerminated();
 	}
 }

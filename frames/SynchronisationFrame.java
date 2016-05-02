@@ -1,8 +1,8 @@
 package frames;
 
 import controller.characters.Character;
-import main.Instance;
 import main.Latency;
+import messages.synchronisation.BasicAckMessage;
 import messages.synchronisation.BasicLatencyStatsMessage;
 import messages.synchronisation.BasicLatencyStatsRequestMessage;
 import messages.synchronisation.SequenceNumberMessage;
@@ -12,33 +12,35 @@ public class SynchronisationFrame extends Frame {
 	private int sequenceNumber;
 	//private int basicNoOperationMsgCounter;
 	
-	public SynchronisationFrame(Instance instance, Character character) {
-		super(instance, character);
-		this.instance = instance;
+	public SynchronisationFrame(Character character) {
+		super(character);
 		this.sequenceNumber = 1;
+	}
+	
+	protected void process(BasicAckMessage BAM) {
+		this.character.net.acknowledgeMessage(BAM.lastPacketId);
 	}
 	
 	protected void process(SequenceNumberRequestMessage SNRM) {
 		SequenceNumberMessage SNM = new SequenceNumberMessage();
 		SNM.number = this.sequenceNumber++;
-		instance.outPush(SNM);
+		this.character.net.send(SNM);
 	}
 	
 	protected void process(BasicLatencyStatsRequestMessage BLSRM) {
 		BasicLatencyStatsMessage BLSM = new BasicLatencyStatsMessage();
-		Latency latency = instance.getLatency();
+		Latency latency = character.net.latency;
 		BLSM.latency = latency.latencyAvg();
 		BLSM.sampleCount = latency.latencySamplesCount();
 		BLSM.max = latency.latencySamplesMax();
-		instance.outPush(BLSM);
+		this.character.net.send(BLSM);
 	}
 	
 	/*
 	protected void process(BasicNoOperationMessage BNOM) {
 		if(this.basicNoOperationMsgCounter++ % 10 == 0) {
 			BasicStatMessage BSM = new BasicStatMessage();
-			BSM.serialize();
-			instance.outPush(BSM);
+			this.character.net.send(BSM);
 		}
 	}
 	*/

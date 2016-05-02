@@ -6,8 +6,8 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.util.Hashtable;
 
+import controller.characters.Character;
 import main.FatalError;
-import main.Instance;
 
 // classe inutilisée
 
@@ -19,7 +19,7 @@ class PathsManager {
 	static {
 		BufferedReader buffer = null;
 		try {
-			Instance.log("Loading paths from paths file...");
+			Character.log("Loading paths from paths file...");
 			buffer = new BufferedReader(new FileReader(pathsFilePath));
 			Path path;
 			boolean isLoop;
@@ -68,7 +68,7 @@ class PathsManager {
 	}
 	
 	protected synchronized static Path createPath(String name, boolean isLoop) {
-		Instance.log("Creation of a path named \"" + name + "\".");
+		Character.log("Creation of a path named \"" + name + "\".");
 		Path path = new Path(name, isLoop);
 		paths.put(name, path);
 		return path;

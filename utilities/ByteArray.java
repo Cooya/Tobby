@@ -7,6 +7,7 @@ import java.nio.ByteBuffer;
 import main.FatalError;
 
 public class ByteArray {	
+	public static final int BUFFER_DEFAULT_SIZE = 8192;
     private static final int INT_SIZE = 32;  
     private static final int SHORT_SIZE = 16;
     //private static final int SHORT_MIN_VALUE = -32768;
@@ -18,35 +19,40 @@ public class ByteArray {
     private static final int MASK_01111111 = 127;
 	private static final char[] hexArray = "0123456789ABCDEF".toCharArray();
 
-	private static final int defaultSize = 8192;
 	private byte[] array;
 	private int pos;
 	private int size;
 
+	// construit un tableau vide de taille par défaut
 	public ByteArray() {
-		this(defaultSize);
+		this(BUFFER_DEFAULT_SIZE);
 	}
 
+	// construit un tableau vide de taille "size"
 	public ByteArray(int size) {
 		this.array = new byte[size];
 		this.pos = 0;
 		this.size = 0;
 	}
 
-	public ByteArray(byte[] array) { // tableau complet
+	// constructeur destiné à construire un tableau complet
+	public ByteArray(byte[] array) {
 		this.array = array;
 		this.pos = 0;
 		this.size = array.length;
 	}
 	
-	public ByteArray(byte[] array, int size) { // à utiliser lorsque le tableau passé est incomplet
+	// constructeur destiné à construire un tableau incomplet,
+	// "array" a donc une taille "size" et sera complété plus tard
+	public ByteArray(byte[] array, int size) {
 		this.array = new byte[size];
-		for(int i = 0; i < size; ++i)
+		for(int i = 0; i < array.length; ++i)
 			this.array[i] = array[i];
 		this.pos = 0;
-		this.size = size;
+		this.size = array.length;
 	}
 	
+	// agrandit le tableau courant en multipliant sa taille par 2
 	private void extendArray() {
 		byte[] newArray = new byte[this.array.length * 2];
 		for(int i = 0; i < this.array.length; ++i)
@@ -54,9 +60,18 @@ public class ByteArray {
 		this.array = newArray;
 	}
 	
+	// remplace le tableau courant par un nouveau tableau complet
 	public void setArray(byte[] array) {
 		this.array = array;
 		this.size = array.length;
+		this.pos = 0;
+	}
+	
+	// remplace le tableau courant par un nouveau tableau complet
+	// mais qui est limité à "size", c'est une sorte de découpage
+	public void setArray(byte[] array, int size) {
+		this.array = array;
+		this.size = size;
 		this.pos = 0;
 	}
 	
@@ -195,6 +210,10 @@ public class ByteArray {
 	
 	public static void printBytes(byte[] bytes) {
 		printBytes(bytes, "hex", bytes.length);
+	}
+	
+	public void printArray(String format, int size) {
+		printBytes(bytes(), format, size);
 	}
 
 	public void printArray(String format) {

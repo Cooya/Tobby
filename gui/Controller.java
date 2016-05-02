@@ -1,26 +1,23 @@
 package gui;
 
-import frames.Processor;
 import gui.Model.Account;
 import gui.View.FighterOptionsPanel;
 import gui.View.LoginPanel;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Vector;
 
 import javax.swing.AbstractButton;
 import javax.swing.JInternalFrame;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
-import javax.swing.SwingUtilities;
 import javax.swing.event.InternalFrameEvent;
 import javax.swing.event.InternalFrameListener;
 
 import controller.CharacterBehaviour;
+import controller.characters.Character;
 import main.Emulation;
-import main.Instance;
 import main.Log;
 
 public class Controller {
@@ -29,6 +26,7 @@ public class Controller {
 	private View view;
 	private Model model;
 	private FilesManager filesManager;
+	private boolean globalDeconnectionInProgress;
 
 	private Controller() {
 		this.view = new View(); // lance tous les listeners
@@ -47,13 +45,13 @@ public class Controller {
 	}
 	
 	public synchronized void threadTerminated() {
-		notify(); // notifie l'UI thread
+		notifyAll(); // si un ou plusieurs threads sont en attente d'évènement, alors ils sont réveillés
 	}
 
-	// détermine si l'identifiant du personnage passé en paramètre est un id d'instance de l'application
+	// détermine si l'identifiant du personnage passé en paramètre est un id de personnage de l'application
 	public boolean isWorkmate(double characterId) {
-		for(Instance instance : this.model.getConnectedInstances())
-			if(instance.getCharacter().infos.characterId == characterId)
+		for(Character character : this.model.getConnectedCharacters())
+			if(character.infos.characterId == characterId)
 				return true;
 		return false;
 	}
@@ -61,54 +59,59 @@ public class Controller {
 	// retourne l'objet Log correspondant au thread courant (utile pour les méthodes statiques)
 	public Log getLog() {
 		Thread currentThread = Thread.currentThread();
-		for(Instance instance : this.model.getConnectedInstances())
-			for(Thread thread : instance.threads)
+		for(Character character : this.model.getConnectedCharacters())
+			for(Thread thread : character.threads)
 				if(thread == currentThread)
-					return instance.log;
+					return character.log;
 		return null;
 	}
 	
-	// déconnexion de l'instance du thread courant
-	public void deconnectCurrentInstance(String reason, boolean forced, boolean reconnection) {
-		Instance instance = this.model.getCurrentInstance();
-		if(instance != null)
-			deconnectInstance(instance, reason, forced, reconnection);
+	// déconnexion du personnage correspondant au thread courant
+	public void deconnectCurrentCharacter(String reason, boolean forced, boolean reconnection) {
+		Character character = this.model.getCurrentCharacter();
+		if(character != null)
+			deconnectCharacter(character, reason, forced, reconnection);
 	}
 
-	// déconnexion de toutes les instances avec redémarrage ou non (les frames graphiques restent présentes)
-	// à ne pas appeler depuis le thread UI
-	public synchronized void deconnectAllInstances(String reason, boolean forced, boolean reconnection) {
-		try {
-			SwingUtilities.invokeAndWait(new Runnable() {
-				@Override
-				public void run() {
-					// déconnexion (voire suppression) de toutes les instances connectées
-					Log.info("Deconnecting all instances.");
-					Vector<Instance> instances = model.getConnectedInstances();
-					for(Instance instance : instances)
-						deconnectInstance(instance, reason, forced, reconnection);
-					
-					// attente de l'interruption de tous les threads de chaque instance
-					while(Thread.activeCount() > 1) // UI thread
-						try {
-							wait();
-						} catch(InterruptedException e) {
-							e.printStackTrace();
-							exit("Thread UI interrupted.");
-						}
-					
-					// réconnexion de toutes les instances si spécifié
-					if(reconnection) {
-						Emulation.killLauncher();
-						Emulation.runLauncher();
-						model.restartAllInstances(); // redémarrage de toutes les instances
-					}
-				}
-			});
-		} catch(InvocationTargetException | InterruptedException e) {
-			e.printStackTrace();
-			exit("Error during invocation of the deconnection task.");
+	// déconnexion de tous les personnages avec redémarrage ou non (les frames graphiques restent présentes)
+	public void deconnectAllCharacters(String reason, boolean forced, boolean reconnection) {
+		synchronized(this) {
+			if(this.globalDeconnectionInProgress)
+				return;
+			this.globalDeconnectionInProgress = true;
 		}
+		new Thread() {
+			@Override
+			public void run() {
+				// déconnexion (voire suppression) de tous les personnages connectés
+				Log.info("Deconnecting all characters.");
+				Vector<Character> characters = model.getConnectedCharacters();
+				for(Character character : characters) {
+					character.log.p(reason);
+					character.log.flushBuffer();
+					character.deconnectionOrder(forced);
+					if(!reconnection)
+						Controller.getInstance().model.removeCharacter(character.id);
+				}
+				
+				// attente de l'interruption des threads de chaque personnage
+				while(Thread.activeCount() > 3) // il ne reste normalement que l'UI thread, le thread d'émulation et le thread courant
+					try {
+						wait();
+					} catch(InterruptedException e) {
+						e.printStackTrace();
+						exit("Thread UI interrupted.");
+					}
+				
+				// réconnexion de tous les personnages si spécifié
+				if(reconnection) {
+					Emulation.killLauncher();
+					Emulation.runLauncher();
+					model.reconnectAllCharacters();
+				}
+				Controller.getInstance().globalDeconnectionInProgress = false;
+			}
+		}.start();
 	}
 
 	// fonction appelée lors d'une erreur critique
@@ -121,19 +124,14 @@ public class Controller {
 	
 	// fonction appelée à la fermeture de l'application
 	public void exit() {
-		long sum = 0;
-		for(long l : Processor.perfTest) // TODO
-			sum += l;
-		System.out.println("Average time : " + sum / Processor.perfTest.size());
-		
 		this.filesManager.saveAccountsInFile();
 		Emulation.killLauncher();
 		Log.info("Application closed by user.");
 		System.exit(0);
 	}
 	
-	// création d'une instance (passage au modèle)
-	private synchronized void createInstance(Account account, int areaId, Account captain) {
+	// création d'un personnage (passage au modèle)
+	private synchronized void createCharacter(Account account, int areaId, Account captain) {
 		// vérification de la disponibilité du compte (connecté ou non)
 		if(this.model.isConnected(account))
 			return;
@@ -142,26 +140,39 @@ public class Controller {
 		this.view.addCharacterFrame(frame);
 		frame.addInternalFrameListener(new CharacterFrameListener());
 		frame.setVisible(true);
-		this.model.createInstance(account, areaId, frame, captain);
+		this.model.createCharacter(account, areaId, frame, captain);
 	}
 	
-	// déconnexion d'une instance avec suppression de l'instance ou non (la frame graphique reste présente)
-	private synchronized void deconnectInstance(Instance instance, String reason, boolean forced, boolean reconnection) {
-		instance.log.p(reason);
-		instance.log.flushBuffer();
-		instance.deconnectionOrder(forced);
-		if(!reconnection)
-			this.model.removeInstance(instance.id);
-		// TODO -> reconnexion à implémenter
+	// déconnexion d'un personnage avec suppression ou non (la frame graphique reste présente)
+	private synchronized void deconnectCharacter(Character character, String reason, boolean forced, boolean reconnection) {
+		new Thread() {
+			@Override
+			public void run() {
+				character.log.p(reason);
+				character.log.flushBuffer();
+				character.deconnectionOrder(forced);
+				if(!reconnection)
+					Controller.getInstance().model.removeCharacter(character.id);
+				else {
+					while(character.isActive())
+						try {
+							wait();
+						} catch(InterruptedException e) {
+							e.printStackTrace();
+						}
+				}
+				//this.model.reconnectCharacter(character); // TODO
+			}
+		}.start();
 	}
 	
 	// méthode déclenchée par la fermeture d'une frame graphique
-	private synchronized void killInstance(JInternalFrame graphicalFrame) {
-		int instanceId = this.view.getInstance(graphicalFrame).id;
+	private synchronized void killCharacter(JInternalFrame graphicalFrame) {
+		int characterId = this.view.getCharacter(graphicalFrame).id;
 		this.view.removeCharacterFrame(graphicalFrame);
-		Instance instance = this.model.removeInstance(instanceId);
-		if(instance != null)
-			instance.deconnectionOrder(true);
+		Character character = this.model.removeCharacter(characterId);
+		if(character != null)
+			character.deconnectionOrder(true);
 	}
 
 	// écoute du clic sur le bouton "load account"
@@ -172,7 +183,7 @@ public class Controller {
 		}
 
 		public void actionPerformed(ActionEvent event) {
-			new ConnectionListener(Controller.getInstance().view.createLoginPanel());
+			new ConnectionListener(self.view.createLoginPanel());
 		}
 	}
 
@@ -187,8 +198,6 @@ public class Controller {
 		}
 
 		public void actionPerformed(ActionEvent event) {
-			Controller controller = Controller.getInstance();
-			
 			String login = this.loginPanel.loginField.getText();
 			String password = this.loginPanel.passwordField.getText();
 			int serverId = Integer.parseInt(this.loginPanel.serverField.getText());
@@ -197,12 +206,12 @@ public class Controller {
 				JOptionPane.showMessageDialog(null, "Missing informations.", "Erreur", JOptionPane.ERROR_MESSAGE);
 			else {
 				this.loginPanel.dispose();
-				Account account = controller.model.getAccount(login); // si le compte existe déjà
+				Account account = self.model.getAccount(login); // si le compte existe déjà
 				if(account == null) {
-					account = controller.model.createAccount(characterType, login, password, serverId);
-					controller.view.newAccountItem(login, characterType);
+					account = self.model.createAccount(characterType, login, password, serverId);
+					self.view.newAccountItem(login, characterType);
 				}
-				new FighterOptionsPanelListener(controller.view.createFighterOptionsPanel(account.behaviour, controller.model.squads.nextFighterWillBe()), account); // affichage des options de combat éventuelles
+				new FighterOptionsPanelListener(self.view.createFighterOptionsPanel(account.behaviour, self.model.squads.nextFighterWillBe()), account); // affichage des options de combat éventuelles
 			}
 		}
 	}
@@ -218,7 +227,7 @@ public class Controller {
 
 		@Override
 		public void internalFrameClosing(InternalFrameEvent event) {
-			Controller.getInstance().killInstance(event.getInternalFrame());
+			self.killCharacter(event.getInternalFrame());
 		}
 
 		@Override
@@ -245,11 +254,9 @@ public class Controller {
 		}
 
 		public void actionPerformed(ActionEvent e) {
-			Controller controller = Controller.getInstance();
-			
-			Account account = controller.model.getAccount(this.accountItem.getText().split(" ")[0]);
+			Account account = self.model.getAccount(this.accountItem.getText().split(" ")[0]);
 			if(account != null)
-				new FighterOptionsPanelListener(controller.view.createFighterOptionsPanel(account.behaviour, controller.model.squads.nextFighterWillBe()), account);
+				new FighterOptionsPanelListener(self.view.createFighterOptionsPanel(account.behaviour, self.model.squads.nextFighterWillBe()), account);
 			else
 				Log.err("Unknown account.");
 		}
@@ -266,24 +273,22 @@ public class Controller {
 		}
 
 		public void actionPerformed(ActionEvent e) {
-			Controller controller = Controller.getInstance();
-			
-			Vector<Account> squad = controller.model.squads.getSquad(this.squadItem.getText().split(" ")[0]);
+			Vector<Account> squad = self.model.squads.getSquad(this.squadItem.getText().split(" ")[0]);
 			if(squad != null)
-				new FighterOptionsPanelListener(controller.view.createFighterOptionsPanel(CharacterBehaviour.CAPTAIN, -1), squad);
+				new FighterOptionsPanelListener(self.view.createFighterOptionsPanel(CharacterBehaviour.CAPTAIN, -1), squad);
 			else
 				Log.err("Unknown squad.");
 		}
 	}
 
 	// écoute du bouton "Go" dans la boîte de dialogue des options de combat
-	// => lancement d'une instance
+	// => démarrage d'un personnage
 	private static class FighterOptionsPanelListener implements ActionListener {
 		private FighterOptionsPanel fighterOptionsPanel;
 		private Account account;
 		private Vector<Account> squad;
 
-		// instance seule
+		// loup solitaire
 		private FighterOptionsPanelListener(FighterOptionsPanel fighterOptionsPanel, Account account) {
 			this.fighterOptionsPanel = fighterOptionsPanel;
 			this.account = account;
@@ -298,15 +303,13 @@ public class Controller {
 		}
 
 		public void actionPerformed(ActionEvent event) {
-			Controller controller = Controller.getInstance();
-			
 			 // si une mule n'est pas connectée, on en connecte une
-			if((this.account == null  || this.account.behaviour != CharacterBehaviour.WAITING_MULE) && !controller.model.muleIsConnected())
-				controller.createInstance(controller.model.getMuleFromAccountsList(), 0, null);
+			if((this.account == null  || this.account.behaviour != CharacterBehaviour.WAITING_MULE) && !self.model.muleIsConnected())
+				self.createCharacter(self.model.getMuleFromAccountsList(), 0, null);
 			
-			if(squad == null) { // instance seule
+			if(squad == null) { // loup solitaire
 				this.account.behaviour = this.fighterOptionsPanel.getSelectedBehaviour();
-				controller.createInstance(this.account, this.fighterOptionsPanel.getSelectedAreaId(), null);
+				self.createCharacter(this.account, this.fighterOptionsPanel.getSelectedAreaId(), null);
 			}
 			else { // escouade
 				int squadSize = squad.size();
@@ -316,7 +319,7 @@ public class Controller {
 					for(int i = 0; i < squadSize; ++i) {
 						account = squad.get(i);
 						account.behaviour = CharacterBehaviour.LONE_WOLF;
-						controller.createInstance(account, selectedAreaId, account);
+						self.createCharacter(account, selectedAreaId, account);
 					}
 				}
 				else { // vaut -1 ici car comportement non défini
@@ -324,11 +327,11 @@ public class Controller {
 						account = squad.get(i);
 						if(i == 0) { // capitaine
 							account.behaviour = CharacterBehaviour.CAPTAIN;
-							controller.createInstance(account, selectedAreaId, account);
+							self.createCharacter(account, selectedAreaId, account);
 						}
 						else {
 							account.behaviour = CharacterBehaviour.SOLDIER;
-							controller.createInstance(account, 0, squad.firstElement());
+							self.createCharacter(account, 0, squad.firstElement());
 						}
 					}
 				}

@@ -8,8 +8,8 @@ import utilities.ByteArray;
 import utilities.Processes;
 
 public class Sniffer extends Thread {
+	private static final String DOFUS_EXE = "Dofus.exe";
 	private static Reader reader = new Reader();
-	private static final String dofusExe = "Dofus.exe";
 	private static String gameServerAddress;
 	private static Connection.Server clientCo;
 	private static Connection.Client serverCo;
@@ -23,14 +23,14 @@ public class Sniffer extends Thread {
 	}
 	
 	private void launch() {
-		log.p("Waiting for " + dofusExe +" process...");
-		while(!Processes.inProcess(dofusExe))
+		log.p("Waiting for " + DOFUS_EXE +" process...");
+		while(!Processes.inProcess(DOFUS_EXE))
 			try {
 				Thread.sleep(1000);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-		Processes.injectDLL(Main.DLL_LOCATION, dofusExe);
+		Processes.injectDLL(Main.LIB_PATH, "Dofus.exe");
 		
 		clientCo = new Connection.Server(Main.SERVER_PORT);
 		log.p("Running sniffer server. Waiting Dofus client connection...");
@@ -41,11 +41,13 @@ public class Sniffer extends Thread {
 		
 		start();
 		
-		byte[] buffer = new byte[Main.BUFFER_DEFAULT_SIZE];
+		byte[] buffer = new byte[ByteArray.BUFFER_DEFAULT_SIZE];
+		ByteArray array = new ByteArray();
 		int bytesReceived = 0;
 		try {
 			while((bytesReceived = clientCo.receive(buffer)) != -1) {
-				processMsgStack(reader.processBuffer(new ByteArray(buffer, bytesReceived)), "s");
+				array.setArray(buffer, bytesReceived);
+				processMsgStack(reader.processBuffer(array), "s");
 				serverCo.send(ByteArray.trimBuffer(buffer, bytesReceived));
 			}
 		} catch(Exception e) {
@@ -61,7 +63,8 @@ public class Sniffer extends Thread {
 		
 		try {
 			while((bytesReceived = clientCo.receive(buffer)) != -1) {
-				processMsgStack(reader.processBuffer(new ByteArray(buffer, bytesReceived)), "s");
+				array.setArray(buffer, bytesReceived);
+				processMsgStack(reader.processBuffer(array), "s");
 				serverCo.send(ByteArray.trimBuffer(buffer, bytesReceived));
 			}
 		} catch(Exception e) {
@@ -73,18 +76,16 @@ public class Sniffer extends Thread {
 	
 	public void run() { // connexion au serveur officiel
 		serverCoThread = this;
-		byte[] buffer = new byte[Main.BUFFER_DEFAULT_SIZE];
+		byte[] buffer = new byte[ByteArray.BUFFER_DEFAULT_SIZE];
+		ByteArray array = new ByteArray();
 		int bytesReceived = 0;
 		
-		try {
-			while((bytesReceived = serverCo.receive(buffer)) != -1) {
-				if(processMsgStack(reader.processBuffer(new ByteArray(buffer, bytesReceived)), "r"))
-					clientCo.send(ByteArray.trimBuffer(buffer, bytesReceived));
-				if(mustDeconnectClient)
-					break;
-			}
-		} catch(Exception e) {
-			throw new FatalError(e);
+		while((bytesReceived = serverCo.receive(buffer)) != -1) {
+			array.setArray(buffer, bytesReceived);
+			if(processMsgStack(reader.processBuffer(array), "r"))
+				clientCo.send(ByteArray.trimBuffer(buffer, bytesReceived));
+			if(mustDeconnectClient)
+				break;
 		}
 		clientCo.closeClient();
 		log.p("Deconnection from Dofus client.");
@@ -101,13 +102,10 @@ public class Sniffer extends Thread {
 		if(gameServerAddress != null) {
 			log.p("Connecting to game server, waiting response...");
 			serverCo = new Connection.Client(gameServerAddress, Main.SERVER_PORT);
-			try {
-				while((bytesReceived = serverCo.receive(buffer)) != -1) {
-					processMsgStack(reader.processBuffer(new ByteArray(buffer, bytesReceived)), "r");
-					clientCo.send(ByteArray.trimBuffer(buffer, bytesReceived));
-				}
-			} catch(Exception e) {
-				throw new FatalError(e);
+			while((bytesReceived = serverCo.receive(buffer)) != -1) {
+				array.setArray(buffer, bytesReceived);
+				processMsgStack(reader.processBuffer(array), "r");
+				clientCo.send(ByteArray.trimBuffer(buffer, bytesReceived));
 			}
 			serverCo.close();
 			log.p("Deconnected from game server.");
@@ -126,8 +124,8 @@ public class Sniffer extends Thread {
 				mustDeconnectClient = true;
 				if(msgStack.size() > 1)
 					throw new FatalError("Little problem !");
-				SSDM.address = "127.0.0.1";
-				clientCo.send(SSDM.pack());
+				SSDM.address = Main.LOCALHOST;
+				clientCo.send(SSDM.pack(0));
 				return false;
 			}
 		}
