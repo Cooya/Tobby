@@ -32,10 +32,6 @@ public class Controller {
 		this.view = new View(); // lance tous les listeners
 		this.model = new Model();
 		this.filesManager = new FilesManager(view, model);
-		
-		Emulation.runLauncher();
-		
-		// le thread principal se termine ici
 	}
 	
 	public static Controller getInstance() {

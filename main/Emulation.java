@@ -1,5 +1,6 @@
 package main;
 
+import java.io.File;
 import java.net.SocketException;
 import java.util.LinkedList;
 import java.util.concurrent.locks.Lock;
@@ -28,7 +29,7 @@ public class Emulation {
 					throw new FatalError("Emulation launcher not found.");
 				else {
 					Log.info("Running emulation launcher.");
-					launcherProcess = Runtime.getRuntime().exec(Main.BYPASS_PATH);
+					launcherProcess = Runtime.getRuntime().exec(Main.BYPASS_PATH, null, new File(Main.CLIENT_PATH));
 				}
 			} catch(Exception e) {
 				throw new FatalError(e);

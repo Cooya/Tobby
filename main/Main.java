@@ -11,6 +11,7 @@ public class Main {
 	public static final String INJECTOR_PATH;
 	public static final String BYPASS_PATH;
 	public static final String BYPASS_EXE;
+	public static final String CLIENT_PATH = "Resources/Client/";
 	public static final String D2P_PATH = "Resources/Client/content/maps/maps0.d2p";
 	public static final String D2O_PATH = "Resources/Client/data/common/";
 	public static final String D2I_PATH = "Resources/Client/data/i18n/i18n_fr.d2i";
@@ -36,13 +37,14 @@ public class Main {
 		else {
 			LIB_PATH = "Resources/Injector/No.Ankama.so";
 			INJECTOR_PATH = "Resources/Injector/Injector.exe";
-			BYPASS_PATH = "";
+			BYPASS_PATH = "/opt/Bypass/bin/Bypass";
 			BYPASS_EXE = "Bypass";
 		}
 	}
 
 	public static void main(String[] args) {
 		Controller.getInstance();
+		Emulation.runLauncher();
 		//new Sniffer();
 		
 		/*
