@@ -4,45 +4,55 @@ import gui.Controller;
 
 import java.text.SimpleDateFormat;
 
+import utilities.Processes;
+
 public class Main {
 	public static final boolean IS_WINDOWS = System.getProperty("os.name").toLowerCase().indexOf("win") >= 0;
-	public static final int[] GAME_VERSION = {2, 34, 4, 104034, 1};
 	public static final String LIB_PATH;
 	public static final String INJECTOR_PATH;
 	public static final String BYPASS_PATH;
-	public static final String BYPASS_EXE;
-	public static final String CLIENT_PATH = "Resources/Client/";
-	public static final String D2P_PATH = "Resources/Client/content/maps/maps0.d2p";
-	public static final String D2O_PATH = "Resources/Client/data/common/";
-	public static final String D2I_PATH = "Resources/Client/data/i18n/i18n_fr.d2i";
-	public static final String LOG_PATH = "Resources/Logs/";
-	public static final String MESSAGES_FILEPATH = "Resources/messages.txt";
-	public static final String ACCOUNTS_FILEPATH = "Resources/accounts.txt";
-	public static final String SQUADS_FILEPATH = "Resources/squads.txt";
-	public static final String PATHS_FILEPATH = "Resources/paths.txt";
-	public static final String AUTH_SERVER_IP = "213.248.126.39";
-	public static final String LOCALHOST = "127.0.0.1";
-	public static final int SERVER_PORT = 5555;
-	public static final int LAUNCHER_PORT = 5554;
-	public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("HH:mm:ss:SSS");
-	public static final String MODERATOR_NAME = "[Alkalino]";
+	public static final String BYPASS_PROCESS_NAME;
+	public static final String CLIENT_PATH;
 	
 	static {
 		if(IS_WINDOWS) {
 			LIB_PATH = "Resources/Injector/No.Ankama.dll";
 			INJECTOR_PATH = "Resources/Injector/Injector.exe";
 			BYPASS_PATH = "C:/Program Files (x86)/Bypass/Bypass.exe";
-			BYPASS_EXE = "Bypass.exe";
+			BYPASS_PROCESS_NAME = "Bypass.exe";
+			CLIENT_PATH = "C:/Program Files (x86)/Bypass/";
 		}
 		else {
 			LIB_PATH = "Resources/Injector/No.Ankama.so";
 			INJECTOR_PATH = "Resources/Injector/Injector.exe";
 			BYPASS_PATH = "/opt/Bypass/bin/Bypass";
-			BYPASS_EXE = "Bypass";
+			BYPASS_PROCESS_NAME = "Bypass";
+			CLIENT_PATH = "/opt/Bypass/share/";
 		}
 	}
+	
+	public static final String D2P_PATH = CLIENT_PATH + "content/maps/maps0.d2p";
+	public static final String D2O_PATH = CLIENT_PATH + "data/common/";
+	public static final String D2I_PATH = CLIENT_PATH + "data/i18n/i18n_fr.d2i";
+	public static final String LOG_PATH = "Resources/Logs/";
+	public static final String MESSAGES_FILEPATH = "Resources/messages.txt";
+	public static final String ACCOUNTS_FILEPATH = "Resources/accounts.txt";
+	public static final String SQUADS_FILEPATH = "Resources/squads.txt";
+	public static final String PATHS_FILEPATH = "Resources/paths.txt";
+	public static final int[] GAME_VERSION = {2, 34, 4, 104034, 1};
+	public static final String AUTH_SERVER_IP = "213.248.126.39";
+	public static final String LOCALHOST = "127.0.0.1";
+	public static final int SERVER_PORT = 5555;
+	public static final int LAUNCHER_PORT = 5554;
+	public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("HH:mm:ss:SSS");
+	public static final String MODERATOR_NAME = "[Alkalino]";
 
 	public static void main(String[] args) {
+		if(!Processes.fileExists(BYPASS_PATH)) {
+			Log.err("Bypass application not installed on the computer.");
+			return;
+		}
+		
 		Controller.getInstance();
 		Emulation.runLauncher();
 		//new Sniffer();

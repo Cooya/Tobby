@@ -140,10 +140,10 @@ public class Controller {
 	}
 	
 	// déconnexion d'un personnage avec suppression ou non (la frame graphique reste présente)
-	private synchronized void deconnectCharacter(Character character, String reason, boolean forced, boolean reconnection) {
+	private void deconnectCharacter(Character character, String reason, boolean forced, boolean reconnection) {
 		new Thread() {
 			@Override
-			public void run() {
+			public synchronized void run() {
 				character.log.p(reason);
 				character.log.flushBuffer();
 				character.deconnectionOrder(forced);

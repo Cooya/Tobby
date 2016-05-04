@@ -23,7 +23,7 @@ public class Emulation {
 	private static Thread securityThread;
 
 	public static void runLauncher() {
-		if(!Processes.inProcess(Main.BYPASS_EXE))
+		if(!Processes.inProcess(Main.BYPASS_PROCESS_NAME))
 			try {
 				if(!Processes.fileExists(Main.BYPASS_PATH))
 					throw new FatalError("Emulation launcher not found.");
@@ -38,6 +38,7 @@ public class Emulation {
 			Log.info("Emulation launcher already in process.");
 		
 		clientDofusCo = new Connection.Server(Main.SERVER_PORT);
+		Log.info("Emulation server started."); 
 		
 		// thread qui "secoue" le client toutes les 10 minutes
 		securityThread = new Thread() {
@@ -75,15 +76,15 @@ public class Emulation {
 		// et on tue le processus via l'objet Process ou via une commande Windows
 		if(launcherProcess != null)
 			launcherProcess.destroy();
-		else if(Processes.inProcess(Main.BYPASS_EXE))
-			Processes.killProcess(Main.BYPASS_EXE);
+		else if(Processes.inProcess(Main.BYPASS_PROCESS_NAME))
+			Processes.killProcess(Main.BYPASS_PROCESS_NAME);
 		else { // processus inexistant
 			Log.info("Emulation launcher process does not exist");
 			return;
 		}
 		
 		// on attend que le processus se termine
-		while(Processes.inProcess(Main.BYPASS_EXE))
+		while(Processes.inProcess(Main.BYPASS_PROCESS_NAME))
 			try {
 				Thread.sleep(500);
 			} catch(InterruptedException e) {
@@ -110,16 +111,12 @@ public class Emulation {
 		
 		// simulation du serveur officiel
 		try {
-			/*
-			clientDofusCo = new Connection.Server(serverPort);
-			Character.log("Running emulation server. Waiting Dofus client connection...");
-			*/
-			
+			Character.log("Waiting official client connection...");
 			clientDofusCo.waitClient();
-			Character.log("Dofus client connected.");
+			Character.log("Official client connected.");
 			
 			clientDofusCo.send(HCM.pack(characterId));
-			Character.log("HCM sent to Dofus client");
+			Character.log("HCM sent to official client");
 			
 			byte[] buffer = new byte[ByteArray.BUFFER_DEFAULT_SIZE];
 			int bytesReceived = clientDofusCo.receive(buffer);
@@ -130,14 +127,14 @@ public class Emulation {
 			processMsgStack(reader.processBuffer(array));
 			
 			clientDofusCo.send(ISM.pack(characterId));
-			Character.log("ISM sent to Dofus client");
+			Character.log("ISM sent to official client");
 			clientDofusCo.send(RDM.pack(characterId));
-			Character.log("RDM sent to Dofus client");
+			Character.log("RDM sent to official client");
 			
 			bytesReceived = clientDofusCo.receive(buffer);
 			if(bytesReceived == -1)
 				throw new Exception();
-			Character.log(bytesReceived + " bytes received from Dofus client.");
+			Character.log(bytesReceived + " bytes received from official client.");
 			array.setArray(buffer, bytesReceived);
 			Message CIM = processMsgStack(reader.processBuffer(array));
 			
@@ -145,13 +142,13 @@ public class Emulation {
 			byte[] bytes = {0, 0, 0, 2, 2, (byte) characterId}; // taille (int) + id + characterId
 			launcherCo.send(bytes);
 			
-			Character.log("Deconnection from Dofus client.");
+			Character.log("Deconnection from official client.");
 			clientDofusCo.closeClient();
 			Thread.sleep(2000);
 			lock.unlock();
 			return CIM;
 		} catch(Exception e) {
-			Character.log("Interaction with Dofus client has failed, deconnection.");
+			Character.log("Interaction with official client has failed, deconnection.");
 			clientDofusCo.closeClient();
 			lock.unlock();
 			throw new FatalError(e);
@@ -205,10 +202,12 @@ public class Emulation {
 	private static void connectToLauncher() {
 		Character.log("Connection to emulation launcher.");
 		launcherCo = new Connection.Client(Main.LOCALHOST, Main.LAUNCHER_PORT);
+		/*
 		byte[] buffer = new byte[1]; // booléen d'injection
 		launcherCo.receive(buffer);
 		if(buffer[0] == 0)
 			Processes.injectDLL(Main.LIB_PATH, Main.BYPASS_EXE);
+		*/
 	}
 	
 	private static Message processMsgStack(LinkedList<Message> msgStack) {
