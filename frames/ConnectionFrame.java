@@ -4,7 +4,6 @@ import gamedata.character.CharacterBaseInformations;
 import gamedata.connection.GameServerInformations;
 import gamedata.connection.VersionExtended;
 import gamedata.enums.BreedEnum;
-import gui.Controller;
 
 import java.util.Random;
 import java.util.Vector;
@@ -12,6 +11,7 @@ import java.util.Vector;
 import utilities.ByteArray;
 import utilities.Encryption;
 import controller.characters.Character;
+import main.Controller;
 import main.Emulation;
 import main.FatalError;
 import main.Main;
@@ -65,7 +65,7 @@ public class ConnectionFrame extends Frame {
 		IdentificationMessage IM = new IdentificationMessage();
 		IM.version = new VersionExtended(Main.GAME_VERSION[0], Main.GAME_VERSION[1], Main.GAME_VERSION[2], Main.GAME_VERSION[3], Main.GAME_VERSION[4], 0, 1, 1);
 		IM.lang = "fr";
-		IM.credentials = Encryption.encryptCredentials(Encryption.decryptReceivedKey(ByteArray.toBytes(HCM.key)), this.character.infos.login, this.character.infos.password, HCM.salt);
+		IM.credentials = Encryption.encryptCredentials(Encryption.decryptReceivedKey(ByteArray.toBytes(HCM.key)), this.character.infos.getLogin(), this.character.infos.getPassword(), HCM.salt);
 		IM.serverId = 0; // sélection du serveur automatique
 		this.character.net.send(IM);
 	}
@@ -97,9 +97,10 @@ public class ConnectionFrame extends Frame {
 	}
 	
 	protected void process(ServersListMessage SLM) {
-		if(serverIsSelectable(SLM.servers, this.character.infos.serverId)) {
+		int serverId = this.character.infos.getServerId();
+		if(serverIsSelectable(SLM.servers, serverId)) {
 			ServerSelectionMessage SSM = new ServerSelectionMessage();
-			SSM.serverId = this.character.infos.serverId;
+			SSM.serverId = serverId;
 			this.character.net.send(SSM);
 		}
 		else
@@ -107,9 +108,10 @@ public class ConnectionFrame extends Frame {
 	}
 	
 	protected void process(ServerStatusUpdateMessage SSUM) {
-		if(SSUM.server.id == this.character.infos.serverId && SSUM.server.isSelectable) {	
+		int serverId = this.character.infos.getServerId();
+		if(SSUM.server.id == serverId && SSUM.server.isSelectable) {	
 			ServerSelectionMessage SSM = new ServerSelectionMessage();
-			SSM.serverId = this.character.infos.serverId;
+			SSM.serverId = serverId;
 			this.character.net.send(SSM);
 		}
 	}
@@ -127,7 +129,7 @@ public class ConnectionFrame extends Frame {
 	}
 	
 	protected void process(RawDataMessage RDM) {
-		Message CIM = Emulation.emulateServer(this.character.infos.login, this.character.infos.password, this.HCM, this.ISM, RDM, character.id);
+		Message CIM = Emulation.emulateServer(this.character.infos.getLogin(), this.character.infos.getPassword(), this.HCM, this.ISM, RDM, character.id);
 		CIM.deserialize(); // exception
 		this.character.net.send(CIM);
 	}
@@ -184,7 +186,7 @@ public class ConnectionFrame extends Frame {
 		if(CCRM.result != 0)
 			throw new FatalError("Character creation has failed, error id : " + CCRM.result + ".");
 		else
-			this.character.infos.firstSelection = true;
+			this.character.infos.setFirstSelection(true);
 	}
 	
 	protected void process(CharacterNameSuggestionFailureMessage CNSFM) {
@@ -192,13 +194,12 @@ public class ConnectionFrame extends Frame {
 	}
 	
 	protected void process(CharacterSelectedSuccessMessage CSSM) {
-		this.character.infos.characterName = CSSM.infos.name;
-		this.character.infos.level = CSSM.infos.level;
+		this.character.infos.setCharacterName(CSSM.infos.name);
+		this.character.infos.setLevel(CSSM.infos.level);
 		if(this.character.infos.getBreed() != CSSM.infos.breed)
 			throw new FatalError("Incoherent character breed.");
-		this.character.log.graphicalFrame.setNameLabel(this.character.infos.characterName, this.character.infos.level);
 		this.character.processor.endOfConnection();
-		this.character.infos.isConnected = true;
+		this.character.infos.inGame(true);
 		this.character.start(); // démarrage du thread contrôleur
 	}
 	
@@ -218,17 +219,17 @@ public class ConnectionFrame extends Frame {
 	
 	private void selectCharacter(Vector<CharacterBaseInformations> characters) {
 		for(CharacterBaseInformations character : characters)
-			this.character.infos.characterId = character.id; // on suppose qu'il n'y a qu'un seul perso sur le compte
-		if(this.character.infos.firstSelection) {
+			this.character.infos.setCharacterId(character.id); // on suppose qu'il n'y a qu'un seul perso sur le compte
+		if(this.character.infos.firstSelection()) {
 			CharacterFirstSelectionMessage CFSM = new CharacterFirstSelectionMessage();
 			CFSM.doTutorial = false;
-			CFSM.id = this.character.infos.characterId;
+			CFSM.id = this.character.infos.getCharacterId();
 			this.character.net.send(CFSM);
-			this.character.infos.firstSelection = false;
+			this.character.infos.setFirstSelection(false);
 		}
 		else {
 			CharacterSelectionMessage CSM = new CharacterSelectionMessage();
-			CSM.id = this.character.infos.characterId;
+			CSM.id = this.character.infos.getCharacterId();
 			this.character.net.send(CSM);
 		}
 		this.character.log.p("Selection of the character.");

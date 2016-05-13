@@ -10,8 +10,6 @@ import controller.characters.Character;
 import main.FatalError;
 import main.Main;
 
-// classe inutilisée
-
 @SuppressWarnings("resource")
 class PathsManager {
 	private static Hashtable<String, Path> paths = new Hashtable<String, Path>(); 

@@ -1,5 +1,6 @@
 package gamedata.d2p.ankama;
 
+import gamedata.d2o.modules.MapPosition;
 import gamedata.d2p.Cell;
 
 import java.util.Vector;
@@ -192,20 +193,9 @@ public class Map {
 		}
 	}
     
-    /*
-    public static int getMapIdFromCoords(int worldId, int x, int y) {
-    	int var1 = 2 << 12;
-    	int var2 = 2 << 8;
-    	if(worldId > var1 || x > var2 || y > var2)
-    		return -1;
-    	int var3 = worldId & 4095;
-    	int var4 = Math.abs(x) & 0xFF;
-    	if(x < 0)
-    		var4 = var4 | 0x0100;
-    	int var5 = Math.abs(y) & 0xFF;
-    	if(y < 0)
-    		var5 = var5 | 0x0100;
-    	return (var3 << 18) | (var4 << 9) | var5;
+	@Override
+    public String toString() {
+		MapPosition mp = MapPosition.getMapPositionById(this.id);
+    	return this.id + " [" + mp.posX + ", " + mp.posY + "]";
     }
-    */
 }

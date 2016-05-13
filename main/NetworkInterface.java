@@ -1,7 +1,6 @@
 package main;
 
-import gui.Controller;
-
+import java.io.IOException;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -49,7 +48,12 @@ public class NetworkInterface extends Thread {
 	
 	private void connectionToServer(String IP, int port) {
 		// connexion au serveur et envoi d'un ping
-		this.serverCo = new Connection.Client(IP, port);
+		try {
+			this.serverCo = new Connection.Client(IP, port);
+		} catch(IOException e) {
+			throw new FatalError(e);
+		}
+		this.character.log.p("Connected to server. Sending ping message...");
 		BasicPingMessage BPM = new BasicPingMessage();
 		BPM.quiet = true;
 		send(BPM);
@@ -97,15 +101,14 @@ public class NetworkInterface extends Thread {
 	// appelée lors de la réception d'un BasicAckMessage
 	public void acknowledgeMessage(int msgId) {
 		this.sender.listLock.lock();
-		if(this.sender.acknowledgementList.isEmpty())
-			throw new FatalError("Received a acknowledgement but acknowledgement queue is empty.");
 		for(Message msg : this.sender.acknowledgementList)
 			if(msg.getId() == msgId) {
 				this.sender.acknowledgementList.remove(msg);
 				this.sender.listLock.unlock();
 				return;
 			}
-		throw new FatalError("Receive a acknowledgement but not found into the acknowledgement list.");
+		this.sender.listLock.unlock();
+		//throw new FatalError("Receive a acknowledgement for message with id = " + msgId + " but not found into the acknowledgement list.");
 	}
 	
 	public class Sender extends Thread {

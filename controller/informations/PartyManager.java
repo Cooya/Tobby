@@ -54,7 +54,7 @@ public class PartyManager {
 		this.character.log.p("Party left.");
 		
 		if(this.character instanceof Captain)
-			((Captain) this.character).updateFightArea(this.character.infos.level);
+			((Captain) this.character).updateFightArea(this.character.infos.getLevel());
 	}
 	
 	public void addPartyMember(PartyMemberInformations newMember) {

@@ -11,10 +11,11 @@ import gamedata.d2i.I18n;
 import gamedata.d2o.modules.InfoMessage;
 import gamedata.d2o.modules.MapPosition;
 import gamedata.d2p.MapsCache;
+import gamedata.d2p.ankama.Map;
 import gamedata.enums.TextInformationTypeEnum;
-import gui.Controller;
+import main.Controller;
 import main.FatalError;
-import main.GlobalError;
+import main.Log;
 import main.Main;
 import messages.UnhandledMessage;
 import messages.character.BasicWhoIsMessage;
@@ -39,6 +40,7 @@ import messages.context.MapInformationsRequestMessage;
 import messages.context.SystemMessageDisplayMessage;
 import messages.context.TextInformationMessage;
 import messages.interactions.InteractiveUseErrorMessage;
+import messages.interactions.NpcGenericActionFailureMessage;
 import messages.security.AccountLoggingKickedMessage;
 import messages.security.CheckFileMessage;
 import messages.security.CheckFileRequestMessage;
@@ -54,7 +56,7 @@ public class RoleplayContextFrame extends Frame {
 	protected void process(BasicWhoIsMessage BWIM) {
 		this.character.log.p("Whois response received.");
 		if(BWIM.playerName == Main.MODERATOR_NAME && BWIM.playerState != 0)
-			throw new GlobalError("The moderator is online.", false);
+			Controller.getInstance().globalDeconnection("The moderator is online.", true, false);
 		else
 			this.character.updateState(CharacterState.WHOIS_RESPONSE, true);
 	}
@@ -109,8 +111,8 @@ public class RoleplayContextFrame extends Frame {
 	}
 	
 	protected void process(CharacterLoadingCompleteMessage CLCM) {
-		this.character.log.graphicalFrame.setFightsWonLabel(0);
-		this.character.log.graphicalFrame.setFightsLostLabel(0);
+		Log.info("Character with id = " + this.character.id + " connected in game.");
+		
 		this.character.net.send(new UnhandledMessage("FriendsGetListMessage"));
 		this.character.net.send(new UnhandledMessage("IgnoredGetListMessage"));
 		this.character.net.send(new UnhandledMessage("SpouseGetInformationsMessage"));
@@ -136,35 +138,32 @@ public class RoleplayContextFrame extends Frame {
 	}
 	
 	protected void process(SpellListMessage SLM) {
-		this.character.infos.loadSpellList(SLM.spells);
+		this.character.infos.setSpellList(SLM.spells);
 	}
 	
 	protected void process(CurrentMapMessage CMM) {
-		this.character.infos.currentMap = MapsCache.loadMap(CMM.mapId);
+		this.character.infos.setCurrentMap(MapsCache.loadMap(CMM.mapId));
 		MapInformationsRequestMessage MIRM = new MapInformationsRequestMessage();
-		MIRM.mapId = this.character.infos.currentMap.id;
+		MIRM.mapId = this.character.infos.getCurrentMap().id;
 		this.character.net.send(MIRM);
 	}
 	
 	protected void process(CharacterStatsListMessage CSLM) {
-		this.character.infos.stats = CSLM.stats;
-		this.character.log.graphicalFrame.setEnergyLabel(this.character.infos.stats.energyPoints, this.character.infos.stats.maxEnergyPoints);
-		this.character.log.graphicalFrame.setKamasLabel(this.character.infos.stats.kamas);
-		this.character.log.graphicalFrame.setExperienceLabel((int) this.character.infos.stats.experience, (int) this.character.infos.stats.experienceNextLevelFloor);
+		this.character.infos.setStats(CSLM.stats);
 	}
 	
 	protected void process(CharacterLevelUpMessage CLUM) {
-		this.character.infos.level = CLUM.newLevel;
-		this.character.log.graphicalFrame.setNameLabel(this.character.infos.characterName, this.character.infos.level);
+		this.character.infos.setLevel(CLUM.newLevel);
 		this.character.updateState(CharacterState.LEVEL_UP, true);
 	}
 	
 	protected void process(MapComplementaryInformationsDataMessage MCIDM) {
 		this.character.roleplayContext.newContextActors(MCIDM.actors);
-		this.character.log.p("Current map : " + MapPosition.getMapPositionById(this.character.infos.currentMap.id) + ".\nCurrent cell id : " + this.character.infos.currentCellId + ".\nCurrent area id : " + this.character.infos.currentMap.subareaId + ".");
-		this.character.log.graphicalFrame.setMapLabel(String.valueOf(MapPosition.getMapPositionById(this.character.infos.currentMap.id)));
-		this.character.log.graphicalFrame.setCellLabel(String.valueOf(this.character.infos.currentCellId));
-		this.character.updatePosition(this.character.infos.currentMap, this.character.infos.currentCellId);
+		this.character.roleplayContext.newContextInteractives(MCIDM.interactiveElements);
+		int currentCellId = this.character.infos.getCurrentCellId();
+		Map currentMap = this.character.infos.getCurrentMap();
+		this.character.log.p("Current map : " + MapPosition.getMapPositionById(currentMap.id) + ".\nCurrent cell id : " + currentCellId + ".\nCurrent area id : " + currentMap.subareaId + ".");
+		this.character.updatePosition(currentMap, currentCellId);
 		this.character.updateState(CharacterState.IS_LOADED, true);
 	}
 	
@@ -180,23 +179,21 @@ public class RoleplayContextFrame extends Frame {
 	protected void process(GameMapMovementMessage GMMM) {
 		int position = GMMM.keyMovements.lastElement();
 		this.character.roleplayContext.updateContextActorPosition(GMMM.actorId, position);
-		if(GMMM.actorId == this.character.infos.characterId) {
-			this.character.infos.currentCellId = position;
+		if(GMMM.actorId == this.character.infos.getCharacterId()) {
+			this.character.infos.setCurrentCellId(position);
 			this.character.log.p("Next cell id after movement : " + position + ".");
-			this.character.log.graphicalFrame.setCellLabel(String.valueOf(this.character.infos.currentCellId));
-			this.character.mvt.updatePosition(this.character.infos.currentCellId);
+			this.character.mvt.updatePosition(position);
 			this.character.updateState(CharacterState.CAN_MOVE, true);
 		}
 	}
 	
 	protected void process(LifePointsRegenBeginMessage LPRBM) {
-		this.character.infos.regenRate = LPRBM.regenRate;
+		this.character.infos.setRegenRate(LPRBM.regenRate);
 	}
 	
 	protected void process(InventoryWeightMessage IWM) {
-		this.character.infos.weight = IWM.weight;
-		this.character.infos.weightMax = IWM.weightMax;
-		this.character.log.graphicalFrame.setWeightLabel(this.character.infos.weight, this.character.infos.weightMax);
+		this.character.infos.setWeight(IWM.weight);
+		this.character.infos.setWeightMax(IWM.weightMax);
 		if(this.character.infos.weightMaxAlmostReached()) {
 			this.character.updateState(CharacterState.NEED_TO_EMPTY_INVENTORY, true);
 			this.character.log.p("Inventory weight maximum almost reached, need to empty.");
@@ -204,14 +201,12 @@ public class RoleplayContextFrame extends Frame {
 	}
 	
 	protected void process(PlayerStatusUpdateMessage PSUM) {
-		if(PSUM.playerId == this.character.infos.characterId) {
-			this.character.infos.status = PSUM.status.statusId;
-			this.character.log.p("New status : " + this.character.infos.status + ".");
-		}
+		if(PSUM.playerId == this.character.infos.getCharacterId())
+			this.character.log.p("New status : " + PSUM.status.statusId + ".");
 	}
 	
 	protected void process(GameRolePlayPlayerLifeStatusMessage GRPPLSM) {
-		this.character.infos.healthState = GRPPLSM.state;
+		this.character.infos.setHealthState(GRPPLSM.state);
 	}
 	
 	protected void process(PopupWarningMessage PWM) {
@@ -269,5 +264,9 @@ public class RoleplayContextFrame extends Frame {
 	
 	protected void process(AccountLoggingKickedMessage ALKM) {
 		throw new FatalError("Kicked from the game server.");
+	}
+	
+	protected void process(NpcGenericActionFailureMessage NGAFM) {
+		throw new FatalError("Error during dialog with a NPC.");
 	}
 }

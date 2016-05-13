@@ -1,27 +1,35 @@
 package main;
 
-import gui.CharacterFrame;
-
+import java.io.File;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Date;
 import java.util.concurrent.locks.ReentrantLock;
 
+import utilities.Processes;
 import messages.Message;
+
+// TODO -> flusher le buffer toutes les 10 secondes ?
 
 public class Log {
 	private static final int WRITE_INTERVAL = 10;
 	private static final String EOL = System.getProperty("line.separator");
+	private static final StringBuilder globalLog = new StringBuilder();
+	private String logFilepath;
 	private PrintWriter writer;
 	private StringBuilder logFrameString;
 	private StringBuilder logFileBuffer;
 	private int writeCounter;
 	private ReentrantLock stringLock;
 	private ReentrantLock bufferLock;
-	public CharacterFrame graphicalFrame;
+	private CharacterFrame graphicalFrame;
 	
-	public Log(String characterName, CharacterFrame graphicalFrame) {
+	public Log(String login, CharacterFrame graphicalFrame) {
+		if(!Processes.dirExists(Main.LOG_PATH))
+			new File(Main.LOG_PATH).mkdir();
+		this.logFilepath = Main.LOG_PATH + login + ".txt";
 		try {
-			this.writer = new PrintWriter(Main.LOG_PATH + characterName + ".txt", "UTF-8");
+			this.writer = new PrintWriter(this.logFilepath, "UTF-8");
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
@@ -51,6 +59,7 @@ public class Log {
 	public void p(String str) {
 		if(Thread.currentThread().isInterrupted())
 			return;
+		
 		this.stringLock.lock();
 		this.logFrameString.append("[").append(Main.DATE_FORMAT.format(new Date())).append("] ").append(str).append(EOL);
 		if(this.graphicalFrame != null)
@@ -61,15 +70,32 @@ public class Log {
 	}
 	
 	public static void info(String msg) {
-		System.out.println("[" + Main.DATE_FORMAT.format(new Date()) + "] INFO : " + msg);
+		msg = "[" + Main.DATE_FORMAT.format(new Date()) + "] INFO : " + msg;
+		globalLog.append(msg);
+		globalLog.append(EOL);
+		System.out.println(msg);
 	}
 	
 	public static void warn(String msg) {
-		System.out.println("[" + Main.DATE_FORMAT.format(new Date()) + "] WARNING : " + msg);
+		msg = "[" + Main.DATE_FORMAT.format(new Date()) + "] WARNING : " + msg;
+		globalLog.append(msg);
+		globalLog.append(EOL);
+		System.out.println(msg);
 	}
 	
 	public static void err(String msg) {
-		System.out.println("[" + Main.DATE_FORMAT.format(new Date()) + "] ERROR : " + msg);
+		msg = "[" + Main.DATE_FORMAT.format(new Date()) + "] ERROR : " + msg;
+		globalLog.append(msg);
+		globalLog.append(EOL);
+		System.out.println(msg);
+	}
+	
+	public static void displayGlobalLog() {
+		System.out.println(globalLog);
+	}
+	
+	public void displayLog(int linesNumber) {
+		System.out.println(tail(new File(this.logFilepath), linesNumber));
 	}
 	
 	public void flushBuffer() {
@@ -87,5 +113,52 @@ public class Log {
 		this.bufferLock.unlock();
 		if(++this.writeCounter == WRITE_INTERVAL)
 			flushBuffer();
+	}
+	
+	// fonction récupérée sur le net
+	private String tail(File file, int lines) {
+	    java.io.RandomAccessFile fileHandler = null;
+	    try {
+	        fileHandler = 
+	            new java.io.RandomAccessFile( file, "r" );
+	        long fileLength = fileHandler.length() - 1;
+	        StringBuilder sb = new StringBuilder();
+	        int line = 0;
+
+	        for(long filePointer = fileLength; filePointer != -1; filePointer--){
+	            fileHandler.seek( filePointer );
+	            int readByte = fileHandler.readByte();
+
+	             if( readByte == 0xA ) {
+	                if (filePointer < fileLength) {
+	                    line = line + 1;
+	                }
+	            } else if( readByte == 0xD ) {
+	                if (filePointer < fileLength-1) {
+	                    line = line + 1;
+	                }
+	            }
+	            if (line >= lines) {
+	                break;
+	            }
+	            sb.append( ( char ) readByte );
+	        }
+
+	        String lastLine = sb.reverse().toString();
+	        return lastLine;
+	    } catch( java.io.FileNotFoundException e ) {
+	        e.printStackTrace();
+	        return null;
+	    } catch( java.io.IOException e ) {
+	        e.printStackTrace();
+	        return null;
+	    }
+	    finally {
+	        if (fileHandler != null )
+	            try {
+	                fileHandler.close();
+	            } catch (IOException e) {
+	            }
+	    }
 	}
 }

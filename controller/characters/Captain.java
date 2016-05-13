@@ -2,12 +2,12 @@ package controller.characters;
 
 import gamedata.d2p.ankama.Map;
 import gamedata.enums.PlayerStatusEnum;
-import gui.Controller;
 
 import java.util.Vector;
 
 import controller.CharacterState;
 import controller.api.FightAPI;
+import main.Controller;
 import main.Log;
 import messages.context.GameContextReadyMessage;
 import messages.parties.PartyInvitationRequestMessage;
@@ -43,13 +43,10 @@ public class Captain extends Fighter {
 		}
 		if(maxMissingLife > 0) {
 			this.log.p("Break for life regeneration, " + maxMissingLife + " life points missing.");
-			waitState(CharacterState.IN_REGENERATION, this.infos.regenRate * 100 * maxMissingLife); // à peu près
-			this.infos.stats.lifePoints = this.infos.stats.maxLifePoints;
-			this.log.graphicalFrame.setLifeLabel(this.infos.stats.lifePoints, this.infos.stats.maxLifePoints);
-			for(Character teamMate : this.squad) { // update de la vie pour toute l'escouade
-				teamMate.infos.stats.lifePoints = teamMate.infos.stats.maxLifePoints;
-				teamMate.log.graphicalFrame.setLifeLabel(teamMate.infos.stats.lifePoints, teamMate.infos.stats.maxLifePoints);
-			}
+			waitState(CharacterState.IN_REGENERATION, this.infos.getRegenRate() * 100 * maxMissingLife); // à peu près
+			this.infos.setLifePoints(this.infos.getMaxLifePoints());
+			for(Character teamMate : this.squad) // update de la vie pour toute l'escouade
+				teamMate.infos.setLifePoints(teamMate.infos.getMaxLifePoints());
 		}
 	}
 	
@@ -67,7 +64,7 @@ public class Captain extends Fighter {
 			broadcastStateUpdate();
 			
 			// vérification du poids de l'inventaire
-			if(inventoryIsSoHeavy(0.1f)) {
+			if(this.infos.inventoryIsFull(0.1f)) {
 				this.updateState(CharacterState.NEED_TO_EMPTY_INVENTORY, true);
 				this.social.goToExchangeWithMule();
 			}
@@ -78,7 +75,7 @@ public class Captain extends Fighter {
 	public void newRecruit(Soldier recruit) {
 		this.recruits.add(recruit);
 		recruit.setCaptain(this);
-		this.log.p("Recruit " + recruit.infos.login + " added to the recruits list.");
+		this.log.p("Recruit " + recruit.infos.getLogin() + " added to the recruits list.");
 	}
 
 	// parcourt la liste des recrues et les invite à rejoindre l'escouade (avec attente d'acceptation de l'invitation)
@@ -91,7 +88,7 @@ public class Captain extends Fighter {
 			
 			// envoi d'une invitation à rejoindre le groupe
 			PartyInvitationRequestMessage PIRM = new PartyInvitationRequestMessage();
-			PIRM.name = recruit.infos.characterName;
+			PIRM.name = recruit.infos.getCharacterName();
 			this.net.send(PIRM);
 			
 			// attente de l'acceptation de l'invitation
@@ -109,8 +106,10 @@ public class Captain extends Fighter {
 
 	private void waitSoldiersOnMap() {
 		this.log.p("Waiting for complete team be on the map.");
+		double characterId;
 		for(Soldier soldier : this.squad) {
-			while(!this.roleplayContext.actorIsOnMap(soldier.infos.characterId))
+			characterId = soldier.infos.getCharacterId();
+			while(!this.roleplayContext.actorIsOnMap(characterId))
 				waitState(CharacterState.NEW_ACTOR_ON_MAP);
 			while(!soldier.readyForFight)
 				waitState(CharacterState.SOLDIER_ACT);
@@ -119,20 +118,23 @@ public class Captain extends Fighter {
 
 	private void waitSoldiersInFight() {
 		this.log.p("Waiting for complete team be in the fight.");
-		for(Character soldier : this.squad)
-			while(!this.fightContext.inFight(soldier.infos.characterId))
+		double characterId;
+		for(Character soldier : this.squad) {
+			characterId = soldier.infos.getCharacterId();
+			while(!this.fightContext.inFight(characterId))
 				if(!waitState(CharacterState.NEW_ACTOR_IN_FIGHT)) // fin de la phase de préparation ou interruption
 					return;
+		}
 	}
 
 	@Override
 	public void run() {
 		waitState(CharacterState.IS_LOADED); // attendre l'entrée en jeu
-		this.fight.updateFightArea(this.infos.level);
+		this.fight.updateFightArea(this.infos.getLevel());
 
 		if(inState(CharacterState.IN_FIGHT)) { // reprise de combat
 			GameContextReadyMessage GCRM = new GameContextReadyMessage(); // je ne sais pas à quoi sert ce message
-			GCRM.mapId = this.infos.currentMap.id;
+			GCRM.mapId = this.infos.getCurrentMap().id;
 			this.net.send(GCRM);
 			this.fight.fightManager(true);
 		}

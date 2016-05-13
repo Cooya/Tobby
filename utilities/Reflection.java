@@ -8,60 +8,25 @@ import java.security.ProtectionDomain;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Vector;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 import main.Main;
 import messages.Message;
 
 public class Reflection {
 	private static final ProtectionDomain currentDomain = Main.class.getProtectionDomain();
-	/*
-	private static Class<?>[] messageClasses;
-	
-	static {
-		try {
-			messageClasses = getClasses("messages");
-		} catch(ClassNotFoundException | IOException e) {
-			e.printStackTrace();
-		}
+	private static final String CONTAINER = Reflection.class.getProtectionDomain().getCodeSource().getLocation().getFile();
+
+	public static Class<?>[] getClassesInPackage(String packageName) throws ClassNotFoundException, IOException {
+		if(CONTAINER.endsWith(".jar"))
+			return getClassesInPackageInJar(packageName);
+		else
+			return getClassesInPackageInDir(packageName);
 	}
 	
-	public static void displayMessageFields(Message msg) {
-		String msgName = msg.getName();
-		for(Class<?> cl : messageClasses)
-			if(cl.getSimpleName().equals(msgName))
-				try {
-					explore(cl.getConstructor(Message.class).newInstance(msg));
-				} catch(Exception e) {
-					e.printStackTrace();
-				}
-	}
-	*/
-	
-	public static void explore(Object object) {
-		displayAllFields(object, "");
-	}
-	
-	private static void displayAllFields(Object o, String gap) {
-		Class<?> current = o.getClass();
-		while(current.getSuperclass() != null) {
-			Field[] fields = current.getDeclaredFields();
-			for(Field field : fields) {
-				try {
-					field.setAccessible(true);
-					if(field.getDeclaringClass() == Message.class) // les attributs de la classe Message ne nous intéressent pas
-						continue;
-					System.out.println(gap + field.getName() + " = " + field.get(o));
-					if(field.get(o).getClass().getProtectionDomain() == currentDomain) // si c'est un objet dont la classe est une classe du projet courant
-						displayAllFields(field.get(o), gap + "   ");
-				} catch(Exception e) {
-					e.printStackTrace();
-				}
-			}
-		    current = current.getSuperclass();
-		}
-	}
-	
-	public static Class<?>[] getClasses(String packageName) throws ClassNotFoundException, IOException {
+	private static Class<?>[] getClassesInPackageInDir(String packageName) throws ClassNotFoundException, IOException {
 		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 		String path = packageName.replace('.', '/');
 		Enumeration<URL> resources = classLoader.getResources(path);
@@ -72,21 +37,61 @@ public class Reflection {
 		}
 		ArrayList<Class<?>> classes = new ArrayList<Class<?>>();
 		for(File directory : dirs)
-			classes.addAll(findClasses(directory, packageName));
+			classes.addAll(findClassesInDir(directory, packageName));
 		return classes.toArray(new Class[classes.size()]);
 	}
 
-	private static List<Class<?>> findClasses(File directory, String packageName) throws ClassNotFoundException {
+	private static List<Class<?>> findClassesInDir(File directory, String packageName) throws ClassNotFoundException {
 		List<Class<?>> classes = new ArrayList<Class<?>>();
 		if(!directory.exists())
 			return classes;
 		File[] files = directory.listFiles();
 		for(File file : files) {
 			if(file.isDirectory())
-				classes.addAll(findClasses(file, packageName + "." + file.getName()));
+				classes.addAll(findClassesInDir(file, packageName + "." + file.getName()));
 			else if(file.getName().endsWith(".class"))
 				classes.add(Class.forName(packageName + '.' + file.getName().substring(0, file.getName().length() - 6)));
 		}
 		return classes;
+	}
+
+	private static Class<?>[] getClassesInPackageInJar(String packageName) throws IOException, ClassNotFoundException {
+		List<Class<?>> classes = new Vector<Class<?>>();
+		JarFile jarFile = new JarFile(CONTAINER);
+		Enumeration<JarEntry> jarEntries = jarFile.entries();
+		JarEntry entry;
+		String entryName;
+		while(jarEntries.hasMoreElements()) {
+			entry = jarEntries.nextElement();
+			entryName = entry.getName();
+			if(entryName.endsWith(".class") && entryName.startsWith(packageName))
+				classes.add(Class.forName(entryName.substring(0 ,entryName.length() - 6).replace('/', '.')));
+		}
+		jarFile.close();
+		return classes.toArray(new Class[classes.size()]);
+	}
+
+	public static void explore(Object object, int depth) {
+		displayFields(object, depth - 1, "");
+	}
+
+	private static void displayFields(Object o, int depth, String gap) {
+		Class<?> current = o.getClass();
+		while(current.getSuperclass() != null) {
+			Field[] fields = current.getDeclaredFields();
+			for(Field field : fields) {
+				try {
+					field.setAccessible(true);
+					if(field.getDeclaringClass() == Message.class) // les attributs de la classe Message ne nous intéressent pas
+						continue;
+					System.out.println(gap + field.getName() + " = " + field.get(o));
+					if(depth > 0 && field.get(o).getClass().getProtectionDomain() == currentDomain) // si c'est un objet dont la classe est une classe du projet courant
+						displayFields(field.get(o), depth - 1, gap + "   ");
+				} catch(Exception e) {
+					e.printStackTrace();
+				}
+			}
+			current = current.getSuperclass();
+		}
 	}
 }

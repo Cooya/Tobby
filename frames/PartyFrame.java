@@ -1,6 +1,6 @@
 package frames;
 
-import gui.Controller;
+import main.Controller;
 import messages.parties.PartyAcceptInvitationMessage;
 import messages.parties.PartyDeletedMessage;
 import messages.parties.PartyInvitationMessage;

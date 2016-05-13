@@ -36,7 +36,7 @@ public class FightContext {
 	public synchronized void setFightContext(Vector<GameFightFighterInformations> fighters) {
 		this.fighters = fighters;
 		for(GameFightFighterInformations fighter : this.fighters)
-			if(fighter.contextualId == this.character.infos.characterId)
+			if(fighter.contextualId == this.character.infos.getCharacterId())
 				this.self = fighter;
 	}
 

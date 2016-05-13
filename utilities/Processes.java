@@ -70,4 +70,11 @@ public class Processes {
 		    return true;
 		return false;
 	}
+	
+	public static boolean dirExists(String dirPath) {
+		File f = new File(dirPath);
+		if(f.exists() && f.isDirectory())
+			return true;
+		return false;
+	}
 }

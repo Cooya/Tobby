@@ -3,7 +3,6 @@ package controller.characters;
 import frames.Processor;
 import gamedata.d2p.ankama.Map;
 import gamedata.enums.BreedEnum;
-import gui.Controller;
 
 import java.util.Hashtable;
 
@@ -15,6 +14,7 @@ import controller.api.SocialAPI;
 import controller.informations.CharacterInformations;
 import controller.informations.PartyManager;
 import controller.informations.RoleplayContext;
+import main.Controller;
 import main.FatalError;
 import main.Log;
 import main.Main;
@@ -123,13 +123,6 @@ public abstract class Character extends Thread {
 
 	public void updatePosition(Map map, int cellId) {
 		this.mvt.updatePosition(map, cellId);
-	}
-
-	// determine si l'inventaire est plein ou pas selon le pourcentage donné
-	protected boolean inventoryIsSoHeavy(float percentage) { // percentage < 1
-		if(this.infos.weight > this.infos.weightMax * percentage)
-			return true;
-		return false;
 	}
 
 	// envoie une requête WHOIS pour savoir si le modérateur du serveur est en ligne
@@ -337,7 +330,7 @@ public abstract class Character extends Thread {
 			}
 			if(infiniteWaiting) {
 				//sendPingRequest();
-				if(this.infos.isConnected)
+				if(this.infos.isInGame())
 					checkIfModeratorIsOnline(Main.MODERATOR_NAME); // requête effectuée toutes les 2 minutes
 				startTime = System.currentTimeMillis();
 			}

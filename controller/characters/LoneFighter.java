@@ -1,9 +1,9 @@
 package controller.characters;
 
 import gamedata.enums.PlayerStatusEnum;
-import gui.Controller;
 import controller.CharacterState;
 import controller.api.FightAPI;
+import main.Controller;
 import main.Log;
 import messages.context.GameContextReadyMessage;
 
@@ -19,11 +19,11 @@ public class LoneFighter extends Fighter {
 	public void run() {
 		waitState(CharacterState.IS_LOADED); // attendre l'entrée en jeu
 		this.social.changePlayerStatus(PlayerStatusEnum.PLAYER_STATUS_AFK);
-		this.fight.updateFightArea(this.infos.level);
+		this.fight.updateFightArea(this.infos.getLevel());
 		
 		if(inState(CharacterState.IN_FIGHT)) { // reprise de combat
 			GameContextReadyMessage GCRM = new GameContextReadyMessage(); // je ne sais pas à quoi sert ce message
-			GCRM.mapId = this.infos.currentMap.id;
+			GCRM.mapId = this.infos.getCurrentMap().id;
 			this.net.send(GCRM);
 			this.fight.fightManager(true);
 		}

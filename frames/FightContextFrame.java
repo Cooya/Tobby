@@ -26,7 +26,7 @@ public class FightContextFrame extends Frame {
 	}
 	
 	protected void process(GameFightStartingMessage GFSM) {
-		this.character.log.p("Starting fight.");
+		this.character.log.p("Starting a fight.");
 	}
 	
 	protected void process(GameFightShowFighterMessage GFSFM) {
@@ -50,11 +50,10 @@ public class FightContextFrame extends Frame {
 		Fighter fighter = (Fighter) this.character;
 		fighter.fightContext.setFightContext(GFSM.fighters);
 		this.character.log.p("Fight context set.");
-		this.character.log.graphicalFrame.setLifeLabel(fighter.fightContext.self.stats.lifePoints, fighter.fightContext.self.stats.maxLifePoints);
 	}
 	
 	protected void process(GameActionFightSpellCastMessage GAFSCM) {
-		if(GAFSCM.sourceId == this.character.infos.characterId)
+		if(GAFSCM.sourceId == this.character.infos.getCharacterId())
 			this.character.updateState(CharacterState.SPELL_CASTED, true);
 	}
 	
@@ -68,7 +67,7 @@ public class FightContextFrame extends Frame {
 	}
 	
 	protected void process(SequenceEndMessage SEM) {
-		if(SEM.authorId == this.character.infos.characterId) {
+		if(SEM.authorId == this.character.infos.getCharacterId()) {
 			GameActionAcknowledgementMessage GAAM = new GameActionAcknowledgementMessage();
 			GAAM.valid = true;
 			GAAM.actionId = SEM.actionId;
@@ -77,7 +76,7 @@ public class FightContextFrame extends Frame {
 	}
 	
 	protected void process(GameFightTurnEndMessage GFTEM) {
-		if(GFTEM.fighterId == this.character.infos.characterId) {
+		if(GFTEM.fighterId == this.character.infos.getCharacterId()) {
 			this.character.updateState(CharacterState.IN_GAME_TURN, false);
 			this.character.log.p("End of my game turn.");
 		}
@@ -85,10 +84,10 @@ public class FightContextFrame extends Frame {
 	
 	protected void process(GameFightEndMessage GFEM) {
 		for(FightResultListEntry result : GFEM.results)
-			if(result instanceof FightResultPlayerListEntry && ((FightResultPlayerListEntry) result).id == this.character.infos.characterId) {
+			if(result instanceof FightResultPlayerListEntry && ((FightResultPlayerListEntry) result).id == this.character.infos.getCharacterId()) {
 				this.character.roleplayContext.lastFightOutcome = result.outcome == 2; // 2 = gagné, 0 = perdu
 				break;
 			}	
-		this.character.log.p("End of fight.");
+		this.character.log.p("Fight done.");
 	}
 }

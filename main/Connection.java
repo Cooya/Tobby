@@ -19,16 +19,10 @@ public interface Connection {
 		private InputStream inputStream;
 		private OutputStream outputStream;
 		
-		public Client(String serverIP, int port) {
-			while(true)
-				try {
-					this.client = new Socket(serverIP, port);
-					this.inputStream = this.client.getInputStream();
-					this.outputStream = this.client.getOutputStream();
-					break;
-				} catch(Exception e) {
-					Log.err(e.getClass().getSimpleName() + " : " + e.getMessage());
-				}
+		public Client(String serverIP, int port) throws IOException {
+			this.client = new Socket(serverIP, port);
+			this.inputStream = this.client.getInputStream();
+			this.outputStream = this.client.getOutputStream();
 		}
 		
 		public Client(Socket client) {

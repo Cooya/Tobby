@@ -1,5 +1,5 @@
 bin/
-Resources/Logs/
-Others/
+Logs/
+Workshop/
 .classpath
 .project

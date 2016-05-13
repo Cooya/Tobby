@@ -1,5 +1,6 @@
 package main;
 
+import java.io.IOException;
 import java.util.LinkedList;
 
 import messages.Message;
@@ -36,7 +37,12 @@ public class Sniffer extends Thread {
 		log.p("Running sniffer server. Waiting Dofus client connection...");
 		clientCo.waitClient();
 		log.p("Dofus client connected.");
-		serverCo = new Connection.Client(Main.AUTH_SERVER_IP, Main.SERVER_PORT);
+		try {
+			serverCo = new Connection.Client(Main.AUTH_SERVER_IP, Main.SERVER_PORT);
+		} catch(IOException e) {
+			e.printStackTrace();
+			return;
+		}
 		log.p("Running sniffer client. Connection to Dofus server.");
 		
 		start();
@@ -101,7 +107,12 @@ public class Sniffer extends Thread {
 		}
 		if(gameServerAddress != null) {
 			log.p("Connecting to game server, waiting response...");
-			serverCo = new Connection.Client(gameServerAddress, Main.SERVER_PORT);
+			try {
+				serverCo = new Connection.Client(gameServerAddress, Main.SERVER_PORT);
+			} catch(IOException e) {
+				e.printStackTrace();
+				return;
+			}
 			while((bytesReceived = serverCo.receive(buffer)) != -1) {
 				array.setArray(buffer, bytesReceived);
 				processMsgStack(reader.processBuffer(array), "r");

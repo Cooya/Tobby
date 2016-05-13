@@ -1,7 +1,5 @@
 package frames;
 
-import gui.Controller;
-
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
@@ -10,6 +8,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import utilities.Reflection;
 import controller.characters.Character;
+import main.Controller;
 import main.Log;
 import main.Main;
 import messages.Message;
@@ -26,7 +25,7 @@ public class Processor extends Thread {
 	static {
 		// récupération des différentes frames de traitement dans le package "frames"
 		try {
-			Class<?>[] classesArray = Reflection.getClasses("frames");
+			Class<?>[] classesArray = Reflection.getClassesInPackage("frames");
 			for(Class<?> cl : classesArray)
 				if(cl.getSuperclass() == Frame.class)
 					processFrames.add((Class<? extends Frame>) cl);

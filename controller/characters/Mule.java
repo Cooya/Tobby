@@ -1,12 +1,11 @@
 package controller.characters;
 
-import gui.Controller;
-
 import java.util.Vector;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import controller.CharacterState;
+import main.Controller;
 import main.Log;
 import main.Main;
 
@@ -35,19 +34,19 @@ public class Mule extends Character {
 		this.lock.unlock();
 		((Fighter) customer).setMule(this);
 		customer.updateState(CharacterState.MULE_AVAILABLE, inState(CharacterState.MULE_AVAILABLE));
-		this.log.p("Customer " + customer.infos.login + " added to the customers list.");
+		this.log.p("Customer " + customer.infos.getLogin() + " added to the customers list.");
 	}
 	
 	public void removeCustomer(Character customer) {
 		this.lock.lock();
 		if(this.customers.remove(customer))
-			this.log.p("Customer " + customer.infos.login + " removed from the customers list.");
+			this.log.p("Customer " + customer.infos.getLogin() + " removed from the customers list.");
 		this.lock.unlock();
 	}
 	
 	public boolean isCustomer(double characterId) {
 		for(Character customer : this.customers)
-			if(customer.infos.characterId == characterId)
+			if(customer.infos.getCharacterId() == characterId)
 				return true;
 		return false;
 	}
@@ -78,14 +77,14 @@ public class Mule extends Character {
 	public void run() {
 		while(!isInterrupted() && waitState(CharacterState.IS_FREE) && !inState(CharacterState.SHOULD_DECONNECT)) { // attente d'état importante afin de laisser le temps aux pods de se mettre à jour après un échange
 			checkIfModeratorIsOnline(Main.MODERATOR_NAME);
-			if(this.infos.currentMap.id == BANK_INSIDE_MAP_ID) // si le perso est dans la banque
+			if(this.infos.getCurrentMap().id == BANK_INSIDE_MAP_ID) // si le perso est dans la banque
 				goOutAstrubBank();
-			if(inventoryIsSoHeavy(0.1f)) { // + de 10% de l'inventaire occupé
+			if(this.infos.inventoryIsFull(0.1f)) { // + de 10% de l'inventaire occupé
 				updateState(CharacterState.NEED_TO_EMPTY_INVENTORY, true);
 				broadcastAvailability(false);		
 				this.log.p("Need to go to empty inventory at Astrub bank.");
 				this.mvt.goTo(BANK_OUTSIDE_MAP_ID); // map où se situe la banque
-				this.interaction.useInteractive(317, 465440, 140242, true); // porte de la banque
+				this.interaction.useInteractive(317, 465440, true); // porte de la banque
 				this.interaction.emptyInventoryInBank();
 				updateState(CharacterState.NEED_TO_EMPTY_INVENTORY, false);
 				goOutAstrubBank(); // on sort de la banque

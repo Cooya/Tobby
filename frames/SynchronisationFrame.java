@@ -19,6 +19,7 @@ public class SynchronisationFrame extends Frame {
 	
 	protected void process(BasicAckMessage BAM) {
 		this.character.net.acknowledgeMessage(BAM.lastPacketId);
+		this.character.log.p("Acknowledgement received for message with id = " + BAM.lastPacketId + ".");
 	}
 	
 	protected void process(SequenceNumberRequestMessage SNRM) {

@@ -1,6 +1,5 @@
 package main;
 
-import gui.Controller;
 
 public class FatalError extends Error {
 	private static final long serialVersionUID = -293840118247954992L;

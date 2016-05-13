@@ -14,7 +14,7 @@ public class InteractionAPI {
 		this.character = character;
 	}
 
-	public void useInteractive(int besideCellId, int elemId, int skillInstanceUid, boolean withMapChangement) {
+	public void useInteractive(int besideCellId, int elemId, boolean withMapChangement) {
 		if(!this.character.mvt.moveTo(besideCellId))
 			return;
 
@@ -22,7 +22,7 @@ public class InteractionAPI {
 
 		InteractiveUseRequestMessage IURM = new InteractiveUseRequestMessage();
 		IURM.elemId = elemId;
-		IURM.skillInstanceUid = skillInstanceUid;
+		IURM.skillInstanceUid = this.character.roleplayContext.getInteractiveSkillInstanceUid(elemId);
 		this.character.net.send(IURM);
 		this.character.log.p("Interactive used.");
 		if(withMapChangement)
@@ -34,9 +34,9 @@ public class InteractionAPI {
 
 		// on parle au banquier
 		NpcGenericActionRequestMessage NGARM = new NpcGenericActionRequestMessage();
-		NGARM.npcId = -10001;
+		NGARM.npcId = (int) this.character.roleplayContext.getNpcContextualId(522);
 		NGARM.npcActionId = 3;
-		NGARM.npcMapId = this.character.infos.currentMap.id;
+		NGARM.npcMapId = this.character.infos.getCurrentMap().id;
 		this.character.net.send(NGARM);
 
 		// on attend la question

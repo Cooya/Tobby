@@ -1,4 +1,4 @@
-package gui;
+package main;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -64,15 +64,15 @@ public class View {
 			@Override
 			public void windowClosing(WindowEvent event) {
 				frame.dispose();
-				Controller.getInstance().exit();
+				Controller.getInstance().exit(null);
 			}
 		});
 		frame.setVisible(true);
 	}
 	
-	protected void newAccountItem(String login, int behaviour) {
+	protected void newAccountItem(String login, int serverId) {
 		JMenuItem item;
-		if(behaviour < 10)
+		if(serverId != 0)
 			item = new JMenuItem(login + " (salesman)");
 		else
 			item = new JMenuItem(login + " (fighter)");

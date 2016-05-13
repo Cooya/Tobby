@@ -38,11 +38,11 @@ public class SocialAPI {
 		
 		// tentative d'échange avec elle
 		while(!Thread.currentThread().isInterrupted()) {
-			if(!this.character.roleplayContext.actorIsOnMap(mule.infos.characterId)) // si la mule n'est pas sur la map
+			if(!this.character.roleplayContext.actorIsOnMap(mule.infos.getCharacterId())) // si la mule n'est pas sur la map
 				this.character.waitState(CharacterState.NEW_ACTOR_ON_MAP); // on attend qu'elle arrive
 			else {
 				this.character.waitState(CharacterState.MULE_AVAILABLE);
-				if(exchangeDemand(mule.infos.characterId)) // si l'échange a été accepté
+				if(exchangeDemand(mule.infos.getCharacterId())) // si l'échange a été accepté
 					break;
 				try {
 					Thread.sleep(5000); // pour pas flooder de demandes d'échange
@@ -59,7 +59,7 @@ public class SocialAPI {
 		
 		// les kamas aussi
 		ExchangeObjectMoveKamaMessage EOMKM = new ExchangeObjectMoveKamaMessage();
-		EOMKM.quantity = this.character.infos.stats.kamas;
+		EOMKM.quantity = this.character.infos.getKamas();
 		this.character.net.send(EOMKM);
 		
 		// on attend de pouvoir valider l'échange (bouton bloqué pendant 3 secondes après chaque action)

@@ -22,8 +22,8 @@ import main.FatalError;
 // 450 -> route des âmes d'Incarnam
 
 public class FightOptions {
+	public static final int[] fightAreasId = {92, 95, 97, 98, 101, 173, 442, 443, 444, 445, 450};
 	private static BiMap<Integer, String> areaTable = new BiMap<Integer, String>(Integer.class, String.class);
-	private static final int[] fightAreasId = {92, 95, 97, 98, 101, 173, 442, 443, 444, 445, 450};
 	private static final int[][] fightAreasRawParameters = {
 		{40, 80, 120, 160, 200, 250, 300},
 		{40, 80, 120, 160, 200, 250, 300},
@@ -74,6 +74,13 @@ public class FightOptions {
 			subArea = SubArea.getSubAreaById(subAreaId);
 			areaTable.put(subArea.id, new String(((subArea.getName() + " (" + subArea.getArea().getName() + ")").getBytes()), StandardCharsets.UTF_8));
 		}
+	}
+	
+	public static boolean isHandledFightArea(int id) {
+		for(int fightAreaId : fightAreasId)
+			if(fightAreaId == id)
+				return true;
+		return false;
 	}
 
 	private boolean areaIsFixed;

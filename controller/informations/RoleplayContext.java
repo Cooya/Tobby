@@ -3,6 +3,8 @@ package controller.informations;
 import gamedata.context.GameRolePlayActorInformations;
 import gamedata.context.GameRolePlayGroupMonsterInformations;
 import gamedata.context.GameRolePlayNamedActorInformations;
+import gamedata.context.GameRolePlayNpcInformations;
+import gamedata.context.InteractiveElement;
 
 import java.util.Iterator;
 import java.util.Vector;
@@ -12,6 +14,7 @@ import controller.characters.Character;
 public class RoleplayContext {
 	private Character character;
 	private Vector<GameRolePlayActorInformations> actors;
+	private Vector<InteractiveElement> interactives;
 	public double actorDemandingExchange;
 	public boolean lastFightOutcome;
 	public boolean lastExchangeDemandOutcome;
@@ -24,23 +27,22 @@ public class RoleplayContext {
 	public synchronized void newContextActors(Vector<GameRolePlayActorInformations> actors) {
 		this.actors = actors;
 		for(GameRolePlayActorInformations actor : actors)
-			if(actor.contextualId == this.character.infos.characterId) {
-				this.character.infos.currentCellId = actor.disposition.cellId;
-				this.character.infos.currentDirection = actor.disposition.direction;
-			}
+			if(actor.contextualId == this.character.infos.getCharacterId())
+				this.character.infos.setCurrentCellId(actor.disposition.cellId);
 	}
 	
+	public void newContextInteractives(Vector<InteractiveElement> interactives) {
+		this.interactives = interactives;
+	}
+
 	public synchronized void updateContextActorPosition(double actorId, int position) {
-		for(GameRolePlayActorInformations actor : actors)
-			if(actor.contextualId == actorId) {
-				//if(actor instanceof GameRolePlayGroupMonsterInformations)
-					//Character.log("Monster group is moving from cell id " + actor.disposition.cellId + " to " + position + ".");
+		for(GameRolePlayActorInformations actor : this.actors)
+			if(actor.contextualId == actorId)
 				actor.disposition.cellId = position;
-			}
 	} 
 	
 	public synchronized void addContextActor(GameRolePlayActorInformations actor) {
-		actors.add(actor);
+		this.actors.add(actor);
 	}
 	
 	public synchronized void removeContextActor(double actorId) {
@@ -63,6 +65,24 @@ public class RoleplayContext {
 			if(actor instanceof GameRolePlayNamedActorInformations && ((GameRolePlayNamedActorInformations) actor).name == name)
 				return actor.contextualId;
 		return -1;
+	}
+	
+	public synchronized double getNpcContextualId(int npcId) {
+		GameRolePlayNpcInformations npc;
+		for(GameRolePlayActorInformations actor : this.actors)
+			if(actor instanceof GameRolePlayNpcInformations) {
+				npc = (GameRolePlayNpcInformations) actor;
+				if(npc.npcId == npcId)
+					return npc.contextualId;
+			}
+		return 0;
+	}
+	
+	public int getInteractiveSkillInstanceUid(int elementId) {
+		for(InteractiveElement interactive : this.interactives)
+			if(interactive.elementId == elementId)
+				return interactive.enabledSkills.firstElement().skillInstanceUid;
+		return 0;
 	}
 	
 	public synchronized GameRolePlayActorInformations getActorById(double id) {

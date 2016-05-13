@@ -3,7 +3,9 @@ package controller.api;
 import gamedata.context.GameRolePlayGroupMonsterInformations;
 import gamedata.enums.PlayerLifeStatusEnum;
 import gamedata.fight.GameFightMonsterInformations;
+import gamedata.inventory.SpellItem;
 
+import java.util.HashMap;
 import java.util.Vector;
 
 import controller.CharacterState;
@@ -36,7 +38,6 @@ public class FightAPI {
 
 	public void updateFightArea(int level) {
 		this.fightOptions.updateFightArea(level);
-		this.fighter.log.graphicalFrame.setAreaLabel(this.fightOptions.getFightAreaId());
 	}
 
 	public void levelUpManager() {
@@ -54,17 +55,16 @@ public class FightAPI {
 		int missingLife = this.fighter.infos.missingLife();
 		if(missingLife > 0) {
 			this.fighter.log.p("Break for life regeneration, " + missingLife + " life points missing.");
-			this.fighter.waitState(CharacterState.IN_REGENERATION, this.fighter.infos.regenRate * 100 * missingLife);
-			this.fighter.infos.stats.lifePoints = this.fighter.infos.stats.maxLifePoints;
-			this.fighter.log.graphicalFrame.setLifeLabel(this.fighter.infos.stats.lifePoints, this.fighter.infos.stats.maxLifePoints);
+			this.fighter.waitState(CharacterState.IN_REGENERATION, this.fighter.infos.getRegenRate() * 100 * missingLife);
+			this.fighter.infos.setLifePoints(this.fighter.infos.getMaxLifePoints());
 		}
 	}
 	
 	public void rebirthManager() {
-		if(this.fighter.infos.healthState == PlayerLifeStatusEnum.STATUS_TOMBSTONE) {
+		if(this.fighter.infos.getHealthState() == PlayerLifeStatusEnum.STATUS_TOMBSTONE) {
 			this.fighter.net.send(new UnhandledMessage("GameRolePlayFreeSoulRequestMessage"));
 			this.fighter.updateState(CharacterState.IS_LOADED, false);
-			this.fighter.interaction.useInteractive(287, 479466, 152192, false);
+			this.fighter.interaction.useInteractive(287, 479466, false); // status phénix
 			try {
 				Thread.sleep(2000); // temporaire
 			} catch(Exception e) {
@@ -116,7 +116,7 @@ public class FightAPI {
 			Vector<GameFightMonsterInformations> aliveMonsters = this.fighter.fightContext.getAliveMonsters();
 			this.fighter.log.p(aliveMonsters.size() + " alive monster(s) remaining.");
 			for(GameFightMonsterInformations aliveMonster : aliveMonsters) {
-				if(this.fighter.inState(CharacterState.IN_GAME_TURN) && this.fighter.fightContext.self.stats.actionPoints >= this.fighter.infos.attackSpellActionPoints)
+				if(this.fighter.inState(CharacterState.IN_GAME_TURN) && this.fighter.fightContext.self.stats.actionPoints >= this.fighter.infos.getAttackSpellActionPoints())
 					castSpellOverMonster(aliveMonster);
 				else
 					break;
@@ -127,63 +127,46 @@ public class FightAPI {
 				this.fighter.updateState(CharacterState.IN_GAME_TURN, false);
 			}
 		}
-		if(this.fighter.roleplayContext.lastFightOutcome) { // si on a gagné le combat
-			this.fighter.infos.fightsWonCounter++;
-			this.fighter.log.graphicalFrame.setFightsWonLabel(this.fighter.infos.fightsWonCounter);
-		}
+		if(this.fighter.roleplayContext.lastFightOutcome) // si on a gagné le combat
+			this.fighter.infos.incFightsWonCounter();
 		else {
-			this.fighter.infos.fightsLostCounter++;
-			this.fighter.log.graphicalFrame.setFightsLostLabel(this.fighter.infos.fightsLostCounter);
+			this.fighter.infos.incFightsLostCounter();
 			this.fighter.log.p("Fight lost.");
 		}
 	}
 
 	private void upgradeSpell() {
-		int spellId = this.fighter.infos.attackSpell;
-		if(this.fighter.infos.spellList.get(spellId) != null && canUpgradeSpell(spellId)) {
-			this.fighter.infos.spellList.get(spellId).spellLevel++;
+		int spellId = this.fighter.infos.getAttackSpell();
+		HashMap<Integer, SpellItem> spellList = this.fighter.infos.getSpellList();
+		if(spellList.get(spellId) != null && canUpgradeSpell(spellId)) {
+			spellList.get(spellId).spellLevel++;
 			SpellModifyRequestMessage SMRM = new SpellModifyRequestMessage();
 			SMRM.spellId = spellId;
-			SMRM.spellLevel = this.fighter.infos.spellList.get(spellId).spellLevel;
+			SMRM.spellLevel = spellList.get(spellId).spellLevel;
 			this.fighter.net.send(SMRM);
-			this.fighter.log.p("Increasing attack spell to level " + this.fighter.infos.spellList.get(spellId).spellLevel + ".");
+			this.fighter.log.p("Increasing attack spell to level " + spellList.get(spellId).spellLevel + ".");
 		}
 	}
 
 	private boolean canUpgradeSpell(int spellId) {
-		int level = this.fighter.infos.spellList.get(spellId).spellLevel;
+		int level = this.fighter.infos.getSpellList().get(spellId).spellLevel;
 		if(level < 5)
-			return this.fighter.infos.stats.spellsPoints >= level;
-			return false;
+			return this.fighter.infos.getSpellsPoints() >= level;
+		return false;
 	}
 
 	private void increaseStats() {
 		StatsUpgradeRequestMessage SURM = new StatsUpgradeRequestMessage();
-		SURM.statId = this.fighter.infos.element;
-		SURM.boostPoint = calculateMaxStatsPoints();
+		SURM.statId = this.fighter.infos.getElement();
+		SURM.boostPoint = this.fighter.infos.calculateMaxStatsPoints();
 		this.fighter.net.send(SURM);
-		this.fighter.log.p("Increase stat : " + this.fighter.infos.element + ".");
-	}
-
-	private int calculateMaxStatsPoints() {
-		int stage = (getElementInfoById() / 100) + 1;
-		return this.fighter.infos.stats.statsPoints - (this.fighter.infos.stats.statsPoints % stage);
-	}
-
-	private int getElementInfoById() {
-		switch(this.fighter.infos.element) {
-			case 10 : return this.fighter.infos.stats.strength.base;
-			case 13 : return this.fighter.infos.stats.chance.base;
-			case 14 : return this.fighter.infos.stats.agility.base;
-			case 15 : return this.fighter.infos.stats.intelligence.base;
-		}
-		return 0;
+		this.fighter.log.p("Increase stat : " + SURM.statId + ".");
 	}
 
 	private void castSpellOverMonster(GameFightMonsterInformations monster) {
 		this.fighter.log.p("Trying to cast a spell over a monster.");
 		GameActionFightCastOnTargetRequestMessage GAFCOTRM = new GameActionFightCastOnTargetRequestMessage();
-		GAFCOTRM.spellId = this.fighter.infos.attackSpell;
+		GAFCOTRM.spellId = this.fighter.infos.getAttackSpell();
 		GAFCOTRM.targetId = monster.contextualId;
 		this.fighter.net.send(GAFCOTRM);
 		/*

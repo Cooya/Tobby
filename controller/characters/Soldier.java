@@ -3,7 +3,7 @@ package controller.characters;
 import controller.CharacterState;
 import controller.api.FightAPI;
 import gamedata.enums.PlayerStatusEnum;
-import gui.Controller;
+import main.Controller;
 import main.Log;
 import messages.context.GameContextReadyMessage;
 import messages.fights.GameFightJoinRequestMessage;
@@ -37,8 +37,8 @@ public class Soldier extends Fighter {
 	private void followCaptain() {
 		waitState(CharacterState.IS_LOADED); // attendre le refresh des infos
 		
-		while(this.infos.currentMap.id != this.captain.infos.currentMap.id) {
-			this.mvt.dynamicGoTo(this.captain.infos.currentMap.id);
+		while(this.infos.getCurrentMap().id != this.captain.infos.getCurrentMap().id) {
+			this.mvt.dynamicGoTo(this.captain.infos.getCurrentMap().id);
 			waitState(CharacterState.IS_LOADED); // attendre le refresh des infos
 		}
 	}
@@ -47,7 +47,7 @@ public class Soldier extends Fighter {
 		waitState(CharacterState.IS_LOADED); // peut-être encore dans le précédent combat
 		
 		GameFightJoinRequestMessage GFJRM = new GameFightJoinRequestMessage();
-		GFJRM.fighterId = this.captain.infos.characterId;
+		GFJRM.fighterId = this.captain.infos.getCharacterId();
 		GFJRM.fightId = this.partyManager.getFightId();
 		this.net.send(GFJRM);
 		this.log.p("Request for join fight sent.");
@@ -59,7 +59,7 @@ public class Soldier extends Fighter {
 		// reprise de combat à la connexion
 		if(inState(CharacterState.IN_FIGHT)) {
 			GameContextReadyMessage GCRM = new GameContextReadyMessage();
-			GCRM.mapId = this.infos.currentMap.id;
+			GCRM.mapId = this.infos.getCurrentMap().id;
 			this.net.send(GCRM);
 			this.fight.fightManager(true);
 		}
@@ -95,7 +95,7 @@ public class Soldier extends Fighter {
 				}
 			}
 			else if(this.captain.inState(CharacterState.NEED_TO_EMPTY_INVENTORY)) {
-				if(inventoryIsSoHeavy(0.1f))
+				if(this.infos.inventoryIsFull(0.1f))
 					this.social.goToExchangeWithMule();
 				else // annule l'état broadcasté par le capitaine
 					updateState(CharacterState.NEED_TO_EMPTY_INVENTORY, false);

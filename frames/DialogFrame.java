@@ -46,7 +46,7 @@ public class DialogFrame extends Frame {
 	}
 	
 	protected void process(ExchangeIsReadyMessage EIRM) {
-		if(EIRM.id != this.character.infos.characterId) {
+		if(EIRM.id != this.character.infos.getCharacterId()) {
 			this.character.log.p("Exchange validated by peer.");
 			ExchangeReadyMessage ERM = new ExchangeReadyMessage();
 			ERM.ready = true;

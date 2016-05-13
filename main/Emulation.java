@@ -1,6 +1,7 @@
 package main;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.SocketException;
 import java.util.LinkedList;
 import java.util.concurrent.locks.Lock;
@@ -37,9 +38,26 @@ public class Emulation {
 		else
 			Log.info("Emulation launcher already in process.");
 		
+		// on attend un peu que le launcher se lance
+		try {
+			Thread.sleep(2000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		
+		// on se connecte au launcher de manière permanente
+		try {
+			launcherCo = new Connection.Client(Main.LOCALHOST, Main.LAUNCHER_PORT);
+		} catch(IOException e) {
+			Controller.getInstance().exit("Impossible to connect to the launcher.");
+		}
+		Character.log("Connected to emulation launcher.");
+		
+		// on lance le serveur d'émulation
 		clientDofusCo = new Connection.Server(Main.SERVER_PORT);
 		Log.info("Emulation server started."); 
 		
+		/*
 		// thread qui "secoue" le client toutes les 10 minutes
 		securityThread = new Thread() {
 			@Override
@@ -59,6 +77,7 @@ public class Emulation {
 			}
 		};
 		securityThread.start();
+		*/
 	}
 	
 	public static void killLauncher() {
@@ -95,10 +114,6 @@ public class Emulation {
 	}
 	
 	public static Message emulateServer(String login, String password, HelloConnectMessage HCM, IdentificationSuccessMessage ISM, RawDataMessage RDM, int characterId) {
-		lock.lock();
-		if(launcherCo == null)
-			connectToLauncher();
-		
 		// simulation de l'authentification
 		int requestSize = 1 + 2 + login.length() + 2 + password.length();
 		ByteArray array = new ByteArray(4 + requestSize);
@@ -107,41 +122,43 @@ public class Emulation {
 		array.writeUTF(login);
 		array.writeUTF(password);
 		Character.log("Sending credentials to emulation launcher.");
+		lock.lock();
 		launcherCo.send(array.bytes());
 		
 		// simulation du serveur officiel
 		try {
+			// attente de la connexion du client officiel
 			Character.log("Waiting official client connection...");
 			clientDofusCo.waitClient();
 			Character.log("Official client connected.");
 			
+			// envoi du HelloConnectMessage
 			clientDofusCo.send(HCM.pack(characterId));
 			Character.log("HCM sent to official client");
 			
-			byte[] buffer = new byte[ByteArray.BUFFER_DEFAULT_SIZE];
-			int bytesReceived = clientDofusCo.receive(buffer);
-			if(bytesReceived == -1)
-				throw new Exception();
-			Character.log(bytesReceived + " bytes received from Dofus client.");
-			array.setArray(buffer, bytesReceived);
-			processMsgStack(reader.processBuffer(array));
+			// réception de l'IdentificationMessage (aucune utilité)
+			receiveDataFromLauncher();
 			
+			// envoi de l'IdentificationSuccessMessage et du RawDataMessage
 			clientDofusCo.send(ISM.pack(characterId));
 			Character.log("ISM sent to official client");
 			clientDofusCo.send(RDM.pack(characterId));
 			Character.log("RDM sent to official client");
 			
-			bytesReceived = clientDofusCo.receive(buffer);
-			if(bytesReceived == -1)
-				throw new Exception();
-			Character.log(bytesReceived + " bytes received from official client.");
-			array.setArray(buffer, bytesReceived);
-			Message CIM = processMsgStack(reader.processBuffer(array));
+			// réception du CheckIntegrityMessage
+			Message CIM = receiveDataFromLauncher();
+			if(CIM == null) { // réception du BasicPingMessage
+				CIM = receiveDataFromLauncher();
+				if(CIM == null)
+					throw new Exception();
+			}
 			
+			// demande de récupération de la fonction de hachage dans le client officiel
 			Character.log("Asking hash function to emulation launcher.");
 			byte[] bytes = {0, 0, 0, 2, 2, (byte) characterId}; // taille (int) + id + characterId
 			launcherCo.send(bytes);
 			
+			// déconnexion du client officiel
 			Character.log("Deconnection from official client.");
 			clientDofusCo.closeClient();
 			Thread.sleep(2000);
@@ -187,6 +204,7 @@ public class Emulation {
 		msg.setArray(array.bytesFromPos());
 	}
 	
+	@SuppressWarnings("unused")
 	private static void shakeUpClient() {
 		if(launcherCo == null) {
 			Log.err("Impossible to shake up the launcher, connection lost or not initialized.");
@@ -199,22 +217,19 @@ public class Emulation {
 		lock.unlock();
 	}
 	
-	private static void connectToLauncher() {
-		Character.log("Connection to emulation launcher.");
-		launcherCo = new Connection.Client(Main.LOCALHOST, Main.LAUNCHER_PORT);
-		/*
-		byte[] buffer = new byte[1]; // booléen d'injection
-		launcherCo.receive(buffer);
-		if(buffer[0] == 0)
-			Processes.injectDLL(Main.LIB_PATH, Main.BYPASS_EXE);
-		*/
-	}
-	
-	private static Message processMsgStack(LinkedList<Message> msgStack) {
+	private static Message receiveDataFromLauncher() throws Exception {
+		ByteArray array = new ByteArray(0);
+		byte[] buffer = new byte[ByteArray.BUFFER_DEFAULT_SIZE];
+		int bytesReceived = clientDofusCo.receive(buffer);
+		if(bytesReceived == -1)
+			throw new Exception();
+		Character.log(bytesReceived + " bytes received from official client.");
+		array.setArray(buffer, bytesReceived);
+		LinkedList<Message> msgStack = reader.processBuffer(array);
 		Message msg;
 		while((msg = msgStack.poll()) != null) {
 			Character.log("r", msg);
-			if(msg.getId() == 6372)
+			if(msg.getId() == 6372) // CheckIntegrityMessage
 				return msg;
 		}
 		return null;
