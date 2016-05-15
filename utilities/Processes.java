@@ -34,7 +34,7 @@ public class Processes {
 			}
 		else
 			try {
-				Process pidof = Runtime.getRuntime().exec(LINUX_PIDOF);
+				Process pidof = Runtime.getRuntime().exec(LINUX_PIDOF + " " + processName);
 				BufferedReader input = new BufferedReader(new InputStreamReader(pidof.getInputStream()));
 				if(input.readLine() != null)
 					return true;

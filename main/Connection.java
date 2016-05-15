@@ -7,7 +7,6 @@ import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.SocketException;
 
 public interface Connection {
 	void send(byte[] bytes);
@@ -56,16 +55,11 @@ public interface Connection {
 			}
 		}
 		
-		public int receive(byte[] buffer) {
-			try {
-				return this.inputStream.read(buffer);
-			} catch(IOException e) {
-				Log.err(e.getClass().getSimpleName() + " : " + e.getMessage());
-				return -1;
-			}
+		public int receive(byte[] buffer) throws IOException {
+			return this.inputStream.read(buffer);
 		}
 		
-		public int receive(byte[] buffer, int timeout) throws SocketException {
+		public int receive(byte[] buffer, int timeout) throws IOException {
 			this.client.setSoTimeout(timeout);
 			int bytes = receive(buffer);
 			this.client.setSoTimeout(0);
@@ -103,7 +97,7 @@ public interface Connection {
 			this.client.send(bytes);
 		}
 
-		public int receive(byte[] bytes) {
+		public int receive(byte[] bytes) throws IOException {
 			if(this.client.isClosed())
 				throw new FatalError("Connection closed.");
 			return this.client.receive(bytes);

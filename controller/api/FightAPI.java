@@ -2,6 +2,7 @@ package controller.api;
 
 import gamedata.context.GameRolePlayGroupMonsterInformations;
 import gamedata.enums.PlayerLifeStatusEnum;
+import gamedata.enums.PlayerStatusEnum;
 import gamedata.fight.GameFightMonsterInformations;
 import gamedata.inventory.SpellItem;
 
@@ -11,6 +12,7 @@ import java.util.Vector;
 import controller.CharacterState;
 import controller.FightOptions;
 import controller.characters.Fighter;
+import controller.characters.LoneFighter;
 import messages.UnhandledMessage;
 import messages.character.SpellModifyRequestMessage;
 import messages.character.StatsUpgradeRequestMessage;
@@ -46,7 +48,11 @@ public class FightAPI {
 		this.fighter.waitState(CharacterState.IS_LOADED);
 		upgradeSpell();
 		increaseStats();
-		this.fighter.partyManager.incPartyLevel();
+		if(this.fighter instanceof LoneFighter)
+			this.fightOptions.updateFightArea(this.fighter.infos.getLevel());
+		else
+			this.fighter.partyManager.incPartyLevel();
+		this.fighter.updateState(CharacterState.LEVEL_UP, false);
 	}
 
 	public void lifeManager() {
@@ -77,6 +83,7 @@ public class FightAPI {
 		if(this.fighter.inState(CharacterState.NEED_TO_EMPTY_INVENTORY)) {
 			this.fighter.log.p("Need to empty inventory.");
 			this.fighter.social.goToExchangeWithMule();
+			this.fighter.social.changePlayerStatus(PlayerStatusEnum.PLAYER_STATUS_AFK);
 		}
 	}
 

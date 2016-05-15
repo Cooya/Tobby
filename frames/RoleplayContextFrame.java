@@ -34,6 +34,8 @@ import messages.context.GameContextCreateMessage;
 import messages.context.GameContextRemoveElementMessage;
 import messages.context.GameMapMovementMessage;
 import messages.context.GameMapNoMovementMessage;
+import messages.context.GameRolePlayPlayerFightFriendlyAnswerMessage;
+import messages.context.GameRolePlayPlayerFightFriendlyRequestedMessage;
 import messages.context.GameRolePlayShowActorMessage;
 import messages.context.MapComplementaryInformationsDataMessage;
 import messages.context.MapInformationsRequestMessage;
@@ -207,6 +209,21 @@ public class RoleplayContextFrame extends Frame {
 	
 	protected void process(GameRolePlayPlayerLifeStatusMessage GRPPLSM) {
 		this.character.infos.setHealthState(GRPPLSM.state);
+	}
+	
+	protected void process(GameRolePlayPlayerFightFriendlyRequestedMessage GRPPFFRM) {
+		this.character.log.p("Player fight request received.");
+		this.character.updateState(CharacterState.PENDING_DEMAND, true);
+		try {
+			Thread.sleep(2000); // pour faire un peu normal
+		} catch(InterruptedException e) {
+			Thread.currentThread().interrupt();
+		}
+		GameRolePlayPlayerFightFriendlyAnswerMessage GRPPFFAM = new GameRolePlayPlayerFightFriendlyAnswerMessage();
+		GRPPFFAM.fightId = GRPPFFRM.fightId;
+		GRPPFFAM.accept = false;
+		this.character.net.send(GRPPFFAM);
+		this.character.updateState(CharacterState.PENDING_DEMAND, false);
 	}
 	
 	protected void process(PopupWarningMessage PWM) {

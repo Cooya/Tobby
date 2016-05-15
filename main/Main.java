@@ -1,7 +1,6 @@
 package main;
 
 import java.text.SimpleDateFormat;
-
 import utilities.Processes;
 
 public class Main {

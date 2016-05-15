@@ -86,12 +86,17 @@ public class Sniffer extends Thread {
 		ByteArray array = new ByteArray();
 		int bytesReceived = 0;
 		
-		while((bytesReceived = serverCo.receive(buffer)) != -1) {
-			array.setArray(buffer, bytesReceived);
-			if(processMsgStack(reader.processBuffer(array), "r"))
-				clientCo.send(ByteArray.trimBuffer(buffer, bytesReceived));
-			if(mustDeconnectClient)
-				break;
+		try {
+			while((bytesReceived = serverCo.receive(buffer)) != -1) {
+				array.setArray(buffer, bytesReceived);
+				if(processMsgStack(reader.processBuffer(array), "r"))
+					clientCo.send(ByteArray.trimBuffer(buffer, bytesReceived));
+				if(mustDeconnectClient)
+					break;
+			}
+		} catch(IOException e) {
+			e.printStackTrace();
+			return;
 		}
 		clientCo.closeClient();
 		log.p("Deconnection from Dofus client.");
@@ -109,14 +114,14 @@ public class Sniffer extends Thread {
 			log.p("Connecting to game server, waiting response...");
 			try {
 				serverCo = new Connection.Client(gameServerAddress, Main.SERVER_PORT);
+				while((bytesReceived = serverCo.receive(buffer)) != -1) {
+					array.setArray(buffer, bytesReceived);
+					processMsgStack(reader.processBuffer(array), "r");
+					clientCo.send(ByteArray.trimBuffer(buffer, bytesReceived));
+				}
 			} catch(IOException e) {
 				e.printStackTrace();
 				return;
-			}
-			while((bytesReceived = serverCo.receive(buffer)) != -1) {
-				array.setArray(buffer, bytesReceived);
-				processMsgStack(reader.processBuffer(array), "r");
-				clientCo.send(ByteArray.trimBuffer(buffer, bytesReceived));
 			}
 			serverCo.close();
 			log.p("Deconnected from game server.");

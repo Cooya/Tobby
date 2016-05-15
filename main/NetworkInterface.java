@@ -62,13 +62,16 @@ public class NetworkInterface extends Thread {
 		byte[] buffer = new byte[ByteArray.BUFFER_DEFAULT_SIZE];
 		ByteArray array = new ByteArray();
 		int bytesReceived;
-		while(!isInterrupted()) {
-			if((bytesReceived = this.serverCo.receive(buffer)) == -1)
-				break;
-			array.setArray(buffer, bytesReceived); // le buffer n'est pas complet, donc on le coupe
-			processMsgStack(this.reader.processBuffer(array));
-		}
-		this.serverCo.close();
+		while(!isInterrupted())
+			try {
+				if((bytesReceived = this.serverCo.receive(buffer)) == -1)
+					break;
+				array.setArray(buffer, bytesReceived); // le buffer n'est pas complet, donc on le coupe
+				processMsgStack(this.reader.processBuffer(array));
+			} catch(IOException e) {
+				if(!isInterrupted())
+					throw new FatalError(e);
+			}
 	}
 	
 	private void processMsgStack(LinkedList<Message> msgStack) {
@@ -126,11 +129,19 @@ public class NetworkInterface extends Thread {
 		private void browseAcknowledgeList() {
 			Date now = new Date();
 			this.listLock.lock();
-			for(Message msg : this.acknowledgementList)
-				if(now.getTime() - msg.getSendingTime().getTime() > 10000) { // 10 secondes
+			for(Message msg : this.acknowledgementList) {
+				// TODO -> test en cours
+				if(msg.getId() == 950) {
+					if(now.getTime() - msg.getSendingTime().getTime() > 20000) {
+						send(msg);
+						Log.warn("Resending " + msg.getName() + ".");
+					}
+				}
+				else if(now.getTime() - msg.getSendingTime().getTime() > 10000) { // 10 secondes
 					send(msg);
 					Log.warn("Resending " + msg.getName() + ".");
 				}
+			}
 			this.listLock.unlock();
 		}
 		

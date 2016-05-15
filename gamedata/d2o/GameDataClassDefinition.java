@@ -39,8 +39,6 @@ public class GameDataClassDefinition {
 					//e.printStackTrace();
 				}
 			}
-			if(o instanceof IPostInit)
-				((IPostInit) o).postInit();
 		return o;
 	}
 	

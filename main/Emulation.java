@@ -2,7 +2,6 @@ package main;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.SocketException;
 import java.util.LinkedList;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -31,6 +30,8 @@ public class Emulation {
 				else {
 					Log.info("Running emulation launcher.");
 					launcherProcess = Runtime.getRuntime().exec(Main.BYPASS_PATH, null, new File(Main.CLIENT_PATH));
+					while(!Processes.inProcess(Main.BYPASS_PROCESS_NAME))
+						Thread.sleep(500);
 				}
 			} catch(Exception e) {
 				throw new FatalError(e);
@@ -38,19 +39,20 @@ public class Emulation {
 		else
 			Log.info("Emulation launcher already in process.");
 		
-		// on attend un peu que le launcher se lance
-		try {
-			Thread.sleep(2000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		
 		// on se connecte au launcher de manière permanente
-		try {
-			launcherCo = new Connection.Client(Main.LOCALHOST, Main.LAUNCHER_PORT);
-		} catch(IOException e) {
+		for(int i = 0; i < 10 ; ++i)
+			try {
+				launcherCo = new Connection.Client(Main.LOCALHOST, Main.LAUNCHER_PORT);
+				break;
+			} catch(IOException e) {
+				try {
+					Thread.sleep(1000);
+				} catch(InterruptedException e2) {
+					e2.printStackTrace();
+				}
+			}
+		if(launcherCo == null)
 			Controller.getInstance().exit("Impossible to connect to the launcher.");
-		}
 		Character.log("Connected to emulation launcher.");
 		
 		// on lance le serveur d'émulation
@@ -195,7 +197,7 @@ public class Emulation {
 					throw new FatalError("Missing bytes !"); // erreur qui n'est encore jamais arrivée
 				}
 				break;
-			} catch(SocketException e) {
+			} catch(IOException e) {
 				lock.unlock();
 				throw new FatalError(e);
 			}
