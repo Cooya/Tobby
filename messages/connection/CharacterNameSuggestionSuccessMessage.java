@@ -1,8 +1,8 @@
 package messages.connection;
 
-import messages.Message;
+import messages.NetworkMessage;
 
-public class CharacterNameSuggestionSuccessMessage extends Message {
+public class CharacterNameSuggestionSuccessMessage extends NetworkMessage {
 	public String suggestion = "";
 	
 	@Override

@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 import controller.CharacterBehaviour;
-import controller.FightOptions;
+import controller.informations.FightOptions;
 
 // TODO -> ajouter les aires de combat
 // TODO -> checker les serverId au niveau des escouades

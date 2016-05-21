@@ -1,8 +1,8 @@
 package messages.context;
 
-import messages.Message;
+import messages.NetworkMessage;
 
-public class ChangeMapMessage extends Message {
+public class ChangeMapMessage extends NetworkMessage {
 	public int mapId = 0;
 	
 	@Override

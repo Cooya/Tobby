@@ -1,8 +1,8 @@
 package messages.fights;
 
-import messages.Message;
+import messages.NetworkMessage;
 
-public class GameFightOptionStateUpdateMessage extends Message {
+public class GameFightOptionStateUpdateMessage extends NetworkMessage {
     public int fightId = 0;
     public int teamId = 2;
     public int option = 3;

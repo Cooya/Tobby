@@ -1,8 +1,8 @@
 package messages.connection;
 
-import messages.Message;
+import messages.NetworkMessage;
 
-public class CharactersListRequestMessage extends Message {
+public class CharactersListRequestMessage extends NetworkMessage {
 	
 	@Override
 	public void serialize() {

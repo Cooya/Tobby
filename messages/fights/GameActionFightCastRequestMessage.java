@@ -1,8 +1,8 @@
 package messages.fights;
 
-import messages.Message;
+import messages.NetworkMessage;
 
-public class GameActionFightCastRequestMessage extends Message {
+public class GameActionFightCastRequestMessage extends NetworkMessage {
 	public int spellId = 0;
 	public short cellId = 0;
 

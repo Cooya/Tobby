@@ -5,9 +5,9 @@ import gamedata.fight.GameFightFighterInformations;
 
 import java.util.Vector;
 
-import messages.Message;
+import messages.NetworkMessage;
 
-public class GameFightSynchronizeMessage extends Message {
+public class GameFightSynchronizeMessage extends NetworkMessage {
 	public Vector<GameFightFighterInformations> fighters;
 
 	@Override

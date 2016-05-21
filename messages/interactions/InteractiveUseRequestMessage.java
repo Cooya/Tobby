@@ -1,8 +1,8 @@
 package messages.interactions;
 
-import messages.Message;
+import messages.NetworkMessage;
 
-public class InteractiveUseRequestMessage extends Message {
+public class InteractiveUseRequestMessage extends NetworkMessage {
 	public int elemId = 0;
 	public int skillInstanceUid = 0;
 	

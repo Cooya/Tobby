@@ -2,9 +2,9 @@ package messages.context;
 
 import java.util.Vector;
 
-import messages.Message;
+import messages.NetworkMessage;
 
-public class SystemMessageDisplayMessage extends Message {
+public class SystemMessageDisplayMessage extends NetworkMessage {
     public boolean hangUp = false;
     public int msgId = 0;
     public Vector<String> parameters;

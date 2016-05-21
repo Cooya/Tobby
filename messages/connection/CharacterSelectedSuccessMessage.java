@@ -1,9 +1,9 @@
 package messages.connection;
 
 import gamedata.character.CharacterBaseInformations;
-import messages.Message;
+import messages.NetworkMessage;
 
-public class CharacterSelectedSuccessMessage extends Message {
+public class CharacterSelectedSuccessMessage extends NetworkMessage {
     public CharacterBaseInformations infos;
     public boolean isCollectingStats = false;
     

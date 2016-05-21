@@ -2,7 +2,7 @@ package messages;
 
 import main.Log;
 
-public class UnhandledMessage extends Message {
+public class UnhandledMessage extends NetworkMessage {
 
 	public UnhandledMessage(String msgName) {
 		super(msgName);

@@ -1,8 +1,8 @@
 package messages.context;
 
-import messages.Message;
+import messages.NetworkMessage;
 
-public class CurrentMapMessage extends Message {
+public class CurrentMapMessage extends NetworkMessage {
     public int mapId;
 	public String mapKey;
 

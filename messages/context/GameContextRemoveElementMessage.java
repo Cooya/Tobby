@@ -1,8 +1,8 @@
 package messages.context;
 
-import messages.Message;
+import messages.NetworkMessage;
 
-public class GameContextRemoveElementMessage extends Message {
+public class GameContextRemoveElementMessage extends NetworkMessage {
 	public double id = 0;
 	
 	@Override

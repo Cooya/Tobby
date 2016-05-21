@@ -3,9 +3,9 @@ package messages.character;
 import java.util.Vector;
 
 import gamedata.inventory.SpellItem;
-import messages.Message;
+import messages.NetworkMessage;
 
-public class SpellListMessage extends Message {
+public class SpellListMessage extends NetworkMessage {
 	public boolean spellPrevisualization = false;
 	public Vector<SpellItem> spells;
 	

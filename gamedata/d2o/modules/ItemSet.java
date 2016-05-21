@@ -17,7 +17,7 @@ public class ItemSet {
 	public int id;
 	public Vector<Integer> items;
 	public int nameId;
-	//public Vector<Vector<EffectInstance>> effects;
+	public Vector<Vector<EffectInstance>> effects;
 	public boolean bonusIsSecret;
 	private String _name;
 

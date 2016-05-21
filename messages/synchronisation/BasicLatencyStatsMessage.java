@@ -1,8 +1,8 @@
 package messages.synchronisation;
 
-import messages.Message;
+import messages.NetworkMessage;
 
-public class BasicLatencyStatsMessage extends Message {
+public class BasicLatencyStatsMessage extends NetworkMessage {
     public int latency = 0;
     public int sampleCount = 0;
     public int max = 0;

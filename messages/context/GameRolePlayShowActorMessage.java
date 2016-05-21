@@ -2,9 +2,9 @@ package messages.context;
 
 import gamedata.ProtocolTypeManager;
 import gamedata.context.GameRolePlayActorInformations;
-import messages.Message;
+import messages.NetworkMessage;
 
-public class GameRolePlayShowActorMessage extends Message {
+public class GameRolePlayShowActorMessage extends NetworkMessage {
 	public GameRolePlayActorInformations informations;
 	
 	@Override

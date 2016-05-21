@@ -1,8 +1,8 @@
 package messages.interactions;
 
-import messages.Message;
+import messages.NetworkMessage;
 
-public class NpcDialogReplyMessage extends Message {
+public class NpcDialogReplyMessage extends NetworkMessage {
 	public int replyId = 0;
 
 	@Override

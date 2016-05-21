@@ -1,8 +1,8 @@
 package messages.character;
 
-import messages.Message;
+import messages.NetworkMessage;
 
-public class LifePointsRegenBeginMessage extends Message {
+public class LifePointsRegenBeginMessage extends NetworkMessage {
 	public int regenRate = 0;
 	
 	@Override

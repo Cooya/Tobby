@@ -1,8 +1,8 @@
 package messages.fights;
 
-import messages.Message;
+import messages.NetworkMessage;
 
-public class GameFightTurnReadyMessage extends Message {
+public class GameFightTurnReadyMessage extends NetworkMessage {
 	public boolean isReady = false;
 
 	@Override

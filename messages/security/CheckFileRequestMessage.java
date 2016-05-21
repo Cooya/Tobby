@@ -1,8 +1,8 @@
 package messages.security;
 
-import messages.Message;
+import messages.NetworkMessage;
 
-public class CheckFileRequestMessage extends Message {
+public class CheckFileRequestMessage extends NetworkMessage {
 	public String filename = "";
 	public int type = 0;
 	

@@ -7,7 +7,7 @@ import java.util.Date;
 import java.util.concurrent.locks.ReentrantLock;
 
 import utilities.Processes;
-import messages.Message;
+import messages.NetworkMessage;
 
 // TODO -> flusher le buffer toutes les 10 secondes ?
 
@@ -41,7 +41,7 @@ public class Log {
 		this.graphicalFrame = graphicalFrame;
 	}
 	
-	public void p(String msgDirection, Message msg) { // pour la réception et l'envoi de messages
+	public void p(String msgDirection, NetworkMessage msg) { // pour la réception et l'envoi de messages
 		if(Thread.currentThread().isInterrupted())
 			return;
 		this.stringLock.lock();

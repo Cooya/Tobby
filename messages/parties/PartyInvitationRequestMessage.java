@@ -1,8 +1,8 @@
 package messages.parties;
 
-import messages.Message;
+import messages.NetworkMessage;
 
-public class PartyInvitationRequestMessage extends Message {
+public class PartyInvitationRequestMessage extends NetworkMessage {
 	public String name = "";
 	
 	@Override

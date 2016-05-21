@@ -6,11 +6,10 @@ import gamedata.enums.PlayerStatusEnum;
 import java.util.Vector;
 
 import controller.CharacterState;
-import controller.api.FightAPI;
+import controller.modules.FightAPI;
 import main.Controller;
 import main.Log;
 import messages.context.GameContextReadyMessage;
-import messages.parties.PartyInvitationRequestMessage;
 
 public class Captain extends Fighter {
 	private Vector<Soldier> recruits;
@@ -66,7 +65,7 @@ public class Captain extends Fighter {
 			// vérification du poids de l'inventaire
 			if(this.infos.inventoryIsFull(0.1f)) {
 				this.updateState(CharacterState.NEED_TO_EMPTY_INVENTORY, true);
-				this.social.goToExchangeWithMule();
+				this.exchangeManager.goToExchangeWithMule();
 			}
 		}
 	}
@@ -87,15 +86,10 @@ public class Captain extends Fighter {
 				waitState(CharacterState.SOLDIER_ACT);
 			
 			// envoi d'une invitation à rejoindre le groupe
-			PartyInvitationRequestMessage PIRM = new PartyInvitationRequestMessage();
-			PIRM.name = recruit.infos.getCharacterName();
-			this.net.send(PIRM);
-			
-			// attente de l'acceptation de l'invitation
-			waitState(CharacterState.NEW_PARTY_MEMBER);
+			this.partyManager.sendPartyInvitation(recruit.infos.getCharacterName());
 		}
 		this.recruits.clear();
-		this.social.changePlayerStatus(PlayerStatusEnum.PLAYER_STATUS_AFK); // pour repasser en mode absent
+		changePlayerStatus(PlayerStatusEnum.PLAYER_STATUS_AFK); // pour repasser en mode absent
 	}
 
 	// indique à tous les soldats de l'escouade que le capitaine a effectué une action
@@ -141,11 +135,9 @@ public class Captain extends Fighter {
 
 		if(inState(CharacterState.IN_PARTY))
 			this.partyManager.leaveParty();
-		this.social.changePlayerStatus(PlayerStatusEnum.PLAYER_STATUS_AFK);
+		changePlayerStatus(PlayerStatusEnum.PLAYER_STATUS_AFK);
 
 		while(!isInterrupted()) {
-			waitState(CharacterState.IS_LOADED); // important
-
 			// recrues en attente ?
 			integrateRecruits();
 

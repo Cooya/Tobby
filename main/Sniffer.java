@@ -3,7 +3,7 @@ package main;
 import java.io.IOException;
 import java.util.LinkedList;
 
-import messages.Message;
+import messages.NetworkMessage;
 import messages.connection.SelectedServerDataMessage;
 import utilities.ByteArray;
 import utilities.Processes;
@@ -128,8 +128,8 @@ public class Sniffer extends Thread {
 		}
 	}
 	
-	public static boolean processMsgStack(LinkedList<Message> msgStack, String direction) {
-		Message msg;
+	public static boolean processMsgStack(LinkedList<NetworkMessage> msgStack, String direction) {
+		NetworkMessage msg;
 		while((msg = msgStack.poll()) != null) {
 			log.p(direction, msg);
 			//if(direction.equals("r"))

@@ -1,8 +1,8 @@
 package messages.fights;
 
-import messages.Message;
+import messages.NetworkMessage;
 
-public class GameFightTurnStartPlayingMessage extends Message {
+public class GameFightTurnStartPlayingMessage extends NetworkMessage {
 
 	@Override
 	public void serialize() {

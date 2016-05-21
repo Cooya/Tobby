@@ -11,7 +11,7 @@ import controller.characters.Character;
 import main.Controller;
 import main.Log;
 import main.Main;
-import messages.Message;
+import messages.NetworkMessage;
 
 @SuppressWarnings("unchecked")
 public class Processor extends Thread {
@@ -20,7 +20,7 @@ public class Processor extends Thread {
 	
 	private Character character;
 	private Map<String, Process> processTable;
-	private ConcurrentLinkedQueue<Message> input; // file des messages reçus qui doivent être traité
+	private ConcurrentLinkedQueue<NetworkMessage> input; // file des messages reçus qui doivent être traité
 	
 	static {
 		// récupération des différentes frames de traitement dans le package "frames"
@@ -47,7 +47,7 @@ public class Processor extends Thread {
 		super(login + "/processor");
 		this.character = character;
 		this.processTable = new HashMap<String, Process>();
-		this.input = new ConcurrentLinkedQueue<Message>();
+		this.input = new ConcurrentLinkedQueue<NetworkMessage>();
 		Frame frame;
 		Method[] methods;
 		String msgName;
@@ -92,7 +92,7 @@ public class Processor extends Thread {
 	}
 	
 	// appelée depuis le "receiver" uniquement
-	public synchronized void incomingMessage(Message msg) {
+	public synchronized void incomingMessage(NetworkMessage msg) {
 		this.input.add(msg);
 		notify();
 	}
@@ -105,7 +105,7 @@ public class Processor extends Thread {
 		this.character.net.start();
 		this.character.net.sender.start();
 		
-		Message msg;
+		NetworkMessage msg;
 		while(!isInterrupted()) {
 			if((msg = this.input.poll()) != null)
 				processMessage(msg);
@@ -127,7 +127,7 @@ public class Processor extends Thread {
 	}
 	
 	// ne reçoit pas de message inconnu
-	public void processMessage(Message msg) {
+	public void processMessage(NetworkMessage msg) {
 		Process process = this.processTable.get(msg.getName());
 		if(process == null) // message inconnu ou n'ayant pas de traitement associé
 			return;
@@ -143,7 +143,7 @@ public class Processor extends Thread {
 			this.processMethod = processMethod;
 		}
 
-		private void process(Message msg) {
+		private void process(NetworkMessage msg) {
 			msg.deserialize(); // unique appel de la fonction "deserialize()"
 			try {
 				this.processMethod.invoke(processFrame, msg);

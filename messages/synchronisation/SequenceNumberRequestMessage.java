@@ -1,8 +1,8 @@
 package messages.synchronisation;
 
-import messages.Message;
+import messages.NetworkMessage;
 
-public class SequenceNumberRequestMessage extends Message {
+public class SequenceNumberRequestMessage extends NetworkMessage {
 
 	@Override
 	public void serialize() {

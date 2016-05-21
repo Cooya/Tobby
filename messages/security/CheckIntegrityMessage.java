@@ -2,9 +2,9 @@ package messages.security;
 
 import java.util.Vector;
 
-import messages.Message;
+import messages.NetworkMessage;
 
-public class CheckIntegrityMessage extends Message {
+public class CheckIntegrityMessage extends NetworkMessage {
 	public Vector<Integer> data;
 
 	@Override

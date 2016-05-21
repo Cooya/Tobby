@@ -1,8 +1,8 @@
 package messages.fights;
 
-import messages.Message;
+import messages.NetworkMessage;
 
-public class GameFightStartingMessage extends Message {
+public class GameFightStartingMessage extends NetworkMessage {
 	public int fightType = 0;
 	public double attackerId = 0;
 	public double defenderId = 0;

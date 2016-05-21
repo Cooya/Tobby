@@ -1,8 +1,8 @@
 package messages.exchanges;
 
-import messages.Message;
+import messages.NetworkMessage;
 
-public class ExchangeObjectMoveKamaMessage extends Message {
+public class ExchangeObjectMoveKamaMessage extends NetworkMessage {
 	public int quantity = 0;
 	
 	@Override

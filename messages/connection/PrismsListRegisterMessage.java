@@ -1,8 +1,8 @@
 package messages.connection;
 
-import messages.Message;
+import messages.NetworkMessage;
 
-public class PrismsListRegisterMessage extends Message {
+public class PrismsListRegisterMessage extends NetworkMessage {
 	public int listen;
 
 	@Override

@@ -1,8 +1,8 @@
 package messages.exchanges;
 
-import messages.Message;
+import messages.NetworkMessage;
 
-public class ExchangeRequestedMessage extends Message {
+public class ExchangeRequestedMessage extends NetworkMessage {
 	public int exchangeType = 0;
 	
 	@Override

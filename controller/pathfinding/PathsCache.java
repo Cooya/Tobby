@@ -30,6 +30,8 @@ class PathsCache {
 	protected static Path toMap(int targetMapId, int sourceMapId, int startCellId) {
 		Pathfinder pf = new MapsPathfinder(startCellId);
 		Path path = pf.compute(sourceMapId, targetMapId);
+		if(path == null)
+			throw new FatalError("Impossible to find a path between the map with id = " + sourceMapId + " and the map with id = " + targetMapId + ".");
 		path.startCellId = startCellId;
 		return path;
 	}

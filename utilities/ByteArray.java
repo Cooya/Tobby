@@ -251,6 +251,10 @@ public class ByteArray {
 		return readByte() * 16777216 + readByte() * 65536 + readByte() * 256 + readByte();
 	}
 	
+	public float readFloat() {
+		return ByteBuffer.wrap(readBytes(4)).getFloat();
+	}
+	
 	public double readDouble() {
 		return ByteBuffer.wrap(readBytes(8)).getDouble();
 	}

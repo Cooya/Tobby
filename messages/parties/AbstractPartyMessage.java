@@ -1,8 +1,8 @@
 package messages.parties;
 
-import messages.Message;
+import messages.NetworkMessage;
 
-public class AbstractPartyMessage extends Message {
+public class AbstractPartyMessage extends NetworkMessage {
 	public int partyId = 0;
 	
 	@Override

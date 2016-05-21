@@ -2,9 +2,9 @@ package messages.fights;
 
 import java.util.Vector;
 
-import messages.Message;
+import messages.NetworkMessage;
 
-public class GameFightTurnListMessage extends Message {
+public class GameFightTurnListMessage extends NetworkMessage {
 	public Vector<Double> ids;
 	public Vector<Double> deadsIds;
 

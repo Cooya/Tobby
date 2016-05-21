@@ -1,7 +1,7 @@
 package controller.characters;
 
 import controller.CharacterState;
-import controller.api.FightAPI;
+import controller.modules.FightAPI;
 import gamedata.enums.PlayerStatusEnum;
 import main.Controller;
 import main.Log;
@@ -35,17 +35,11 @@ public class Soldier extends Fighter {
 	}
 	
 	private void followCaptain() {
-		waitState(CharacterState.IS_LOADED); // attendre le refresh des infos
-		
-		while(this.infos.getCurrentMap().id != this.captain.infos.getCurrentMap().id) {
-			this.mvt.dynamicGoTo(this.captain.infos.getCurrentMap().id);
-			waitState(CharacterState.IS_LOADED); // attendre le refresh des infos
-		}
+		while(this.infos.getCurrentMap().id != this.captain.infos.getCurrentMap().id)
+			this.mvt.goTo(this.captain.infos.getCurrentMap().id, true);
 	}
 	
 	private void joinFight() {
-		waitState(CharacterState.IS_LOADED); // peut-être encore dans le précédent combat
-		
 		GameFightJoinRequestMessage GFJRM = new GameFightJoinRequestMessage();
 		GFJRM.fighterId = this.captain.infos.getCharacterId();
 		GFJRM.fightId = this.partyManager.getFightId();
@@ -54,7 +48,7 @@ public class Soldier extends Fighter {
 	}
 	
 	public void run() {
-		waitState(CharacterState.IS_LOADED);
+		waitState(CharacterState.IS_LOADED); // attendre l'entrée en jeu
 		
 		// reprise de combat à la connexion
 		if(inState(CharacterState.IN_FIGHT)) {
@@ -69,17 +63,17 @@ public class Soldier extends Fighter {
 			this.partyManager.leaveParty();
 		
 		// on passe en mode disponible pour pouvoir être invité dans un groupe
-		this.social.changePlayerStatus(PlayerStatusEnum.PLAYER_STATUS_AVAILABLE);
+		changePlayerStatus(PlayerStatusEnum.PLAYER_STATUS_AVAILABLE);
 		
 		// on informe le capitain qu'on est prêt et on attend la demande d'invitation de groupe puis on passe en mode absent
 		this.waitingPartyInvitation = true;
 		informCaptain();
 		waitState(CharacterState.IN_PARTY);
 		this.waitingPartyInvitation = false;
-		this.social.changePlayerStatus(PlayerStatusEnum.PLAYER_STATUS_AFK);
+		changePlayerStatus(PlayerStatusEnum.PLAYER_STATUS_AFK);
 		
 		// boucle déplacements + combats
-		while(!isInterrupted() && !inState(CharacterState.SHOULD_DECONNECT)) {
+		while(!isInterrupted()) {
 			this.fight.rebirthManager(); // besoin de renaître au phénix ?
 			followCaptain();
 			this.readyForFight = true;
@@ -96,13 +90,16 @@ public class Soldier extends Fighter {
 			}
 			else if(this.captain.inState(CharacterState.NEED_TO_EMPTY_INVENTORY)) {
 				if(this.infos.inventoryIsFull(0.1f))
-					this.social.goToExchangeWithMule();
+					this.exchangeManager.goToExchangeWithMule();
 				else // annule l'état broadcasté par le capitaine
 					updateState(CharacterState.NEED_TO_EMPTY_INVENTORY, false);
 			}
+			
+			if(inState(CharacterState.SHOULD_DECONNECT)) {
+				deconnectionOrder(true);
+				break;
+			}
 		}
-		if(inState(CharacterState.SHOULD_DECONNECT))
-			deconnectionOrder(true);
 		Log.info("Thread controller of character with id = " + this.id + " terminated.");
 		Controller.getInstance().threadTerminated();
 	}

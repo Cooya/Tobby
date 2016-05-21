@@ -1,8 +1,8 @@
 package messages.character;
 
-import messages.Message;
+import messages.NetworkMessage;
 
-public class GameRolePlayPlayerLifeStatusMessage extends Message {
+public class GameRolePlayPlayerLifeStatusMessage extends NetworkMessage {
 	public int state = 0;
 	public int phenixMapId = 0;
 	

@@ -2,9 +2,9 @@ package messages.fights;
 
 import java.util.Vector;
 
-import messages.Message;
+import messages.NetworkMessage;
 
-public class GameFightPlacementPossiblePositionsMessage extends Message {
+public class GameFightPlacementPossiblePositionsMessage extends NetworkMessage {
 	public Vector<Integer> positionsForChallengers;
 	public Vector<Integer> positionsForDefenders;
 	public int teamNumber = 2;

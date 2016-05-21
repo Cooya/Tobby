@@ -7,7 +7,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import controller.characters.Character;
-import messages.Message;
+import messages.NetworkMessage;
 import messages.connection.HelloConnectMessage;
 import messages.connection.IdentificationSuccessMessage;
 import messages.security.RawDataMessage;
@@ -115,7 +115,7 @@ public class Emulation {
 		Log.info("Emulation launcher process killed.");
 	}
 	
-	public static Message emulateServer(String login, String password, HelloConnectMessage HCM, IdentificationSuccessMessage ISM, RawDataMessage RDM, int characterId) {
+	public static NetworkMessage emulateServer(String login, String password, HelloConnectMessage HCM, IdentificationSuccessMessage ISM, RawDataMessage RDM, int characterId) {
 		// simulation de l'authentification
 		int requestSize = 1 + 2 + login.length() + 2 + password.length();
 		ByteArray array = new ByteArray(4 + requestSize);
@@ -148,7 +148,7 @@ public class Emulation {
 			Character.log("RDM sent to official client");
 			
 			// réception du CheckIntegrityMessage
-			Message CIM = receiveDataFromLauncher();
+			NetworkMessage CIM = receiveDataFromLauncher();
 			if(CIM == null) { // réception du BasicPingMessage
 				CIM = receiveDataFromLauncher();
 				if(CIM == null)
@@ -219,7 +219,7 @@ public class Emulation {
 		lock.unlock();
 	}
 	
-	private static Message receiveDataFromLauncher() throws Exception {
+	private static NetworkMessage receiveDataFromLauncher() throws Exception {
 		ByteArray array = new ByteArray(0);
 		byte[] buffer = new byte[ByteArray.BUFFER_DEFAULT_SIZE];
 		int bytesReceived = clientDofusCo.receive(buffer);
@@ -227,8 +227,8 @@ public class Emulation {
 			throw new Exception();
 		Character.log(bytesReceived + " bytes received from official client.");
 		array.setArray(buffer, bytesReceived);
-		LinkedList<Message> msgStack = reader.processBuffer(array);
-		Message msg;
+		LinkedList<NetworkMessage> msgStack = reader.processBuffer(array);
+		NetworkMessage msg;
 		while((msg = msgStack.poll()) != null) {
 			Character.log("r", msg);
 			if(msg.getId() == 6372) // CheckIntegrityMessage

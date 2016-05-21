@@ -10,9 +10,9 @@ import gamedata.context.StatedElement;
 
 import java.util.Vector;
 
-import messages.Message;
+import messages.NetworkMessage;
 
-public class MapComplementaryInformationsDataMessage extends Message {
+public class MapComplementaryInformationsDataMessage extends NetworkMessage {
     public int subAreaId = 0;
     public int mapId = 0;
     public Vector<HouseInformations> houses;

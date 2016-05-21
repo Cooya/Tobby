@@ -1,8 +1,8 @@
 package messages.connection;
 
-import messages.Message;
+import messages.NetworkMessage;
 
-public class IdentificationFailedMessage extends Message {
+public class IdentificationFailedMessage extends NetworkMessage {
 	public int reason = 99;
 	
 	@Override

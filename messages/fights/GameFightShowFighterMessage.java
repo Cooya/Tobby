@@ -2,9 +2,9 @@ package messages.fights;
 
 import gamedata.ProtocolTypeManager;
 import gamedata.fight.GameFightFighterInformations;
-import messages.Message;
+import messages.NetworkMessage;
 
-public class GameFightShowFighterMessage extends Message {
+public class GameFightShowFighterMessage extends NetworkMessage {
 	public GameFightFighterInformations informations;
 
 	@Override

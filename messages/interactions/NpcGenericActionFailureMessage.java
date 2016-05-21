@@ -1,8 +1,8 @@
 package messages.interactions;
 
-import messages.Message;
+import messages.NetworkMessage;
 
-public class NpcGenericActionFailureMessage extends Message {
+public class NpcGenericActionFailureMessage extends NetworkMessage {
 
 	@Override
 	public void serialize() {

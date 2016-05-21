@@ -1,8 +1,8 @@
 package messages.synchronisation;
 
-import messages.Message;
+import messages.NetworkMessage;
 
-public class BasicStatMessage extends Message {
+public class BasicStatMessage extends NetworkMessage {
 	public int statId = 81; // ou 151...
 
 	@Override

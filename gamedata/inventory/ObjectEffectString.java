@@ -2,38 +2,11 @@ package gamedata.inventory;
 
 import utilities.ByteArray;
 
-public class ObjectEffectString extends ObjectEffect
-{
-
+public class ObjectEffectString extends ObjectEffect {
 	public String value = "";
 
-	public ObjectEffectString()
-	{
-		super();
-	}
-
-	public int getTypeId()
-	{
-		return 74;
-	}
-
-	public ObjectEffectString initObjectEffectString(int param1,String param2)
-	{
-		super.initObjectEffect(param1);
-		this.value = param2;
-		return this;
-	}
-
-	public void reset()
-	{
-		super.reset();
-		this.value = "";
-	}
-
-	public void deserialize(ByteArray buffer)
-	{
-		super.deserialize(buffer);
+	public ObjectEffectString(ByteArray buffer) {
+		super(buffer);
 		this.value = buffer.readUTF();
 	}
 }
-

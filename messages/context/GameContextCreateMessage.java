@@ -1,8 +1,8 @@
 package messages.context;
 
-import messages.Message;
+import messages.NetworkMessage;
 
-public class GameContextCreateMessage extends Message {
+public class GameContextCreateMessage extends NetworkMessage {
 	public int context = 1;
 
 	@Override

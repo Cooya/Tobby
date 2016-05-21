@@ -113,11 +113,11 @@ public class D2pReader {
 		@SuppressWarnings("unused")
 		int bytesCounter = 0;
 		int bufferSize = 0;
-		while (!inflater.finished()) {
+		while(!inflater.finished()) {
 			try {
 				bufferSize = inflater.inflate(buffer);
 				bytesCounter += bufferSize;
-			} catch (Exception e) {
+			} catch(Exception e) {
 				e.printStackTrace();
 			}
 			binaryMap.writeBytes(buffer, bufferSize);

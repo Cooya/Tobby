@@ -1,8 +1,8 @@
 package messages.character;
 
-import messages.Message;
+import messages.NetworkMessage;
 
-public class SpellModifyRequestMessage extends Message {
+public class SpellModifyRequestMessage extends NetworkMessage {
 	public int spellId = 0;
 	public int spellLevel = 0;
 	

@@ -1,8 +1,8 @@
 package messages.security;
 
-import messages.Message;
+import messages.NetworkMessage;
 
-public class AccountLoggingKickedMessage extends Message {
+public class AccountLoggingKickedMessage extends NetworkMessage {
 
 	@Override
 	public void serialize() {

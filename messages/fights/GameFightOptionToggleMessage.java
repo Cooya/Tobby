@@ -1,8 +1,8 @@
 package messages.fights;
 
-import messages.Message;
+import messages.NetworkMessage;
 
-public class GameFightOptionToggleMessage extends Message {
+public class GameFightOptionToggleMessage extends NetworkMessage {
 	public int option = 3;
 
 	@Override

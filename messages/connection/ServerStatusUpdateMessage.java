@@ -1,9 +1,9 @@
 package messages.connection;
 
 import gamedata.connection.GameServerInformations;
-import messages.Message;
+import messages.NetworkMessage;
 
-public class ServerStatusUpdateMessage extends Message {
+public class ServerStatusUpdateMessage extends NetworkMessage {
 	public GameServerInformations server;
 	
 	@Override

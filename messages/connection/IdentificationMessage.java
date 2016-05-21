@@ -4,10 +4,10 @@ import gamedata.connection.VersionExtended;
 
 import java.util.Vector;
 
-import messages.Message;
+import messages.NetworkMessage;
 import utilities.BooleanByteWrapper;
 
-public class IdentificationMessage extends Message {
+public class IdentificationMessage extends NetworkMessage {
 	public VersionExtended version;
 	public String lang = "";
 	public byte[] credentials; // normalement c'est un vecteur d'int

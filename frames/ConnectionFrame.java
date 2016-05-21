@@ -11,11 +11,14 @@ import java.util.Vector;
 import utilities.ByteArray;
 import utilities.Encryption;
 import controller.characters.Character;
+import controller.modules.SalesManager;
 import main.Controller;
 import main.Emulation;
 import main.FatalError;
+import main.Log;
 import main.Main;
-import messages.Message;
+import messages.NetworkDataContainerMessage;
+import messages.NetworkMessage;
 import messages.UnhandledMessage;
 import messages.connection.AuthenticationTicketMessage;
 import messages.connection.BasicCharactersListMessage;
@@ -38,6 +41,7 @@ import messages.connection.IdentificationSuccessMessage;
 import messages.connection.NicknameChoiceRequestMessage;
 import messages.connection.NicknameRefusedMessage;
 import messages.connection.NicknameRegistrationMessage;
+import messages.connection.ObjectAveragePricesMessage;
 import messages.connection.SelectedServerDataMessage;
 import messages.connection.ServerSelectionMessage;
 import messages.connection.ServerStatusUpdateMessage;
@@ -60,104 +64,106 @@ public class ConnectionFrame extends Frame {
 		super(character);
 	}
 	
-	protected void process(HelloConnectMessage HCM) {
-		this.HCM = HCM;
+	protected void process(HelloConnectMessage msg) {
+		this.HCM = msg;
 		IdentificationMessage IM = new IdentificationMessage();
 		IM.version = new VersionExtended(Main.GAME_VERSION[0], Main.GAME_VERSION[1], Main.GAME_VERSION[2], Main.GAME_VERSION[3], Main.GAME_VERSION[4], 0, 1, 1);
 		IM.lang = "fr";
-		IM.credentials = Encryption.encryptCredentials(Encryption.decryptReceivedKey(ByteArray.toBytes(HCM.key)), this.character.infos.getLogin(), this.character.infos.getPassword(), HCM.salt);
+		IM.credentials = Encryption.encryptCredentials(Encryption.decryptReceivedKey(ByteArray.toBytes(msg.key)), this.character.infos.getLogin(), this.character.infos.getPassword(), msg.salt);
 		IM.serverId = 0; // sélection du serveur automatique
 		this.character.net.send(IM);
 	}
 	
-	protected void process(IdentificationSuccessMessage ISM) {
-		this.ISM = ISM;
+	protected void process(IdentificationSuccessMessage msg) {
+		this.ISM = msg;
 	}
 	
-	protected void process(IdentificationFailedMessage IFM) { 
-		this.character.log.p("Authentification failed for reason " + IFM.reason);
+	protected void process(IdentificationFailedMessage msg) { 
+		this.character.log.p("Authentification failed for reason " + msg.reason);
 	}
 	
-	protected void process(IdentificationFailedForBadVersionMessage IFFBVM) {
+	protected void process(IdentificationFailedForBadVersionMessage msg) {
 		Controller.getInstance().exit("Authentification failed for bad version, need to update.");
 	}
 	
-	protected void process(NicknameRegistrationMessage NRM) {
+	protected void process(NicknameRegistrationMessage msg) {
 		NicknameChoiceRequestMessage NCRM = new NicknameChoiceRequestMessage();
 		NCRM.nickname = getRandomNickname(20);
 		this.character.net.send(NCRM);
 		this.character.log.p("Nickname asked, sending a generated nickname.");
 	}
 	
-	protected void process(NicknameRefusedMessage NRM) {
+	protected void process(NicknameRefusedMessage msg) {
 		NicknameChoiceRequestMessage NCRM = new NicknameChoiceRequestMessage();
 		NCRM.nickname = getRandomNickname(20);
 		this.character.net.send(NCRM);
 		this.character.log.p("Nickname refused, sending a new generated nickname.");
 	}
 	
-	protected void process(ServersListMessage SLM) {
+	protected void process(ServersListMessage msg) {
 		int serverId = this.character.infos.getServerId();
-		if(serverIsSelectable(SLM.servers, serverId)) {
+		if(serverIsSelectable(msg.servers, serverId)) {
 			ServerSelectionMessage SSM = new ServerSelectionMessage();
 			SSM.serverId = serverId;
 			this.character.net.send(SSM);
 		}
-		else
+		else {
 			this.character.log.p("Backup in progress on the requested server.");
+			Log.info("Backup in progress on the requested server.");
+		}
 	}
 	
-	protected void process(ServerStatusUpdateMessage SSUM) {
+	protected void process(ServerStatusUpdateMessage msg) {
 		int serverId = this.character.infos.getServerId();
-		if(SSUM.server.id == serverId && SSUM.server.isSelectable) {	
+		if(msg.server.id == serverId && msg.server.isSelectable) {	
 			ServerSelectionMessage SSM = new ServerSelectionMessage();
 			SSM.serverId = serverId;
 			this.character.net.send(SSM);
 		}
 	}
 	
-	protected void process(SelectedServerDataMessage SSDM) {
-		this.ticket = SSDM.ticket;
-		this.character.net.setGameServerIP(SSDM.address);
+	protected void process(SelectedServerDataMessage msg) {
+		this.ticket = msg.ticket;
+		this.character.net.setGameServerIP(msg.address);
 	}
 	
-	protected void process(HelloGameMessage HCM) {
+	protected void process(HelloGameMessage msg) {
 		AuthenticationTicketMessage ATM = new AuthenticationTicketMessage();
 		ATM.lang = "fr";
 		ATM.ticket = new String(Encryption.decodeWithAES(ByteArray.toBytes(this.ticket)));
 		this.character.net.send(ATM);
 	}
 	
-	protected void process(RawDataMessage RDM) {
-		Message CIM = Emulation.emulateServer(this.character.infos.getLogin(), this.character.infos.getPassword(), this.HCM, this.ISM, RDM, character.id);
+	protected void process(RawDataMessage msg) {
+		NetworkMessage CIM = Emulation.emulateServer(this.character.infos.getLogin(), this.character.infos.getPassword(), this.HCM, this.ISM, msg, character.id);
 		CIM.deserialize(); // exception
 		this.character.net.send(CIM);
 	}
 	
-	protected void process(TrustStatusMessage TSM) {
+	protected void process(TrustStatusMessage msg) {
 		CharactersListRequestMessage CLRM = new CharactersListRequestMessage();
 		this.character.net.send(CLRM);
 	}
 	
-	protected void process(CharactersListMessage CLM) {
-		if(CLM.characters.size() == 0)
+	protected void process(CharactersListMessage msg) {
+		if(msg.characters.size() == 0)
 			this.character.net.send(new UnhandledMessage("CharacterNameSuggestionRequestMessage"));
 		else
-			selectCharacter(CLM.characters);
+			selectCharacter(msg.characters);
 	}
 	
-	protected void process(BasicCharactersListMessage BCLM) {
-		if(BCLM.characters.size() == 0)
+	protected void process(BasicCharactersListMessage msg) {
+		if(msg.characters.size() == 0)
 			this.character.net.send(new UnhandledMessage("CharacterNameSuggestionRequestMessage"));
 		else
-			selectCharacter(BCLM.characters);
+			selectCharacter(msg.characters);
 	}
 	
-	protected void process(CharacterNameSuggestionSuccessMessage CNSSM) {
+	protected void process(CharacterNameSuggestionSuccessMessage msg) {
 		Random random = new Random();
-		if(CNSSM.suggestion.indexOf("-") == -1) {
+		if(msg.suggestion.indexOf("-") == -1) {
 			CharacterCreationRequestMessage CCRM = new CharacterCreationRequestMessage();
-			CCRM.name = CNSSM.suggestion;
+			CCRM.name = msg.suggestion;
 			CCRM.breed = this.character.infos.getBreed();
 			CCRM.sex = true; // femelle
 			CCRM.colors = getRandomColorVector();
@@ -182,29 +188,37 @@ public class ConnectionFrame extends Frame {
 		}
 	}
 	
-	protected void process(CharacterCreationResultMessage CCRM) {
-		if(CCRM.result != 0)
-			throw new FatalError("Character creation has failed, error id : " + CCRM.result + ".");
+	protected void process(CharacterCreationResultMessage msg) {
+		if(msg.result != 0)
+			throw new FatalError("Character creation has failed, error id : " + msg.result + ".");
 		else
 			this.character.infos.setFirstSelection(true);
 	}
 	
-	protected void process(CharacterNameSuggestionFailureMessage CNSFM) {
+	protected void process(CharacterNameSuggestionFailureMessage msg) {
 		throw new FatalError("Generation of character name suggestion has failed.");
 	}
 	
-	protected void process(CharacterSelectedSuccessMessage CSSM) {
-		this.character.infos.setCharacterName(CSSM.infos.name);
-		this.character.infos.setLevel(CSSM.infos.level);
-		if(this.character.infos.getBreed() != CSSM.infos.breed)
+	protected void process(CharacterSelectedSuccessMessage msg) {
+		this.character.infos.setCharacterName(msg.infos.name);
+		this.character.infos.setLevel(msg.infos.level);
+		if(this.character.infos.getBreed() != msg.infos.breed)
 			throw new FatalError("Incoherent character breed.");
 		this.character.processor.endOfConnection();
 		this.character.infos.inGame(true);
 		this.character.start(); // démarrage du thread contrôleur
 	}
 	
-	protected void process(CharacterSelectedErrorMessage CSEM) {
+	protected void process(CharacterSelectedErrorMessage msg) {
 		throw new FatalError("Error at the character selection.");
+	}
+	
+	protected void process(NetworkDataContainerMessage msg) {
+		this.character.net.processNetworkDataContainerMessage(msg);
+	}
+	
+	protected void process(ObjectAveragePricesMessage msg) {
+		SalesManager.setAveragePrices(msg.ids, msg.avgPrices);
 	}
 	
 	private static boolean serverIsSelectable(Vector<GameServerInformations> servers, int serverId) {

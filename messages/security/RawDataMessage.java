@@ -1,8 +1,8 @@
 package messages.security;
 
-import messages.Message;
+import messages.NetworkMessage;
 
-public class RawDataMessage extends Message {
+public class RawDataMessage extends NetworkMessage {
 	public byte[] content2;
 	
 	@Override

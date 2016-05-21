@@ -1,8 +1,8 @@
 package messages.security;
 
-import messages.Message;
+import messages.NetworkMessage;
 
-public class ClientKeyMessage extends Message {
+public class ClientKeyMessage extends NetworkMessage {
 	private static final String flashKey = "lfbtPgniZWNU4QZXE6#01";
 	
 	@Override

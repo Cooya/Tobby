@@ -1,8 +1,8 @@
 package messages.security;
 
-import messages.Message;
+import messages.NetworkMessage;
 
-public class PopupWarningMessage extends Message {
+public class PopupWarningMessage extends NetworkMessage {
 	public int lockDuration = 0;
 	public String author = "";
 	public String content2 = ""; // nom de variable déjà utilisé

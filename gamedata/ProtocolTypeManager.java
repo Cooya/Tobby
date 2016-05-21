@@ -73,6 +73,7 @@ import gamedata.inventory.ObjectEffectMinMax;
 import gamedata.inventory.ObjectEffectMount;
 import gamedata.inventory.ObjectEffectString;
 import gamedata.maps.MapCoordinates;
+import gamedata.maps.MapCoordinatesAndId;
 import gamedata.maps.MapCoordinatesExtended;
 import gamedata.parties.PartyMemberInformations;
 
@@ -189,7 +190,7 @@ public class ProtocolTypeManager {
         //types[388] = ShortcutSmiley.class;
         //types[389] = ShortcutEmote.class;
         //types[391] = PartyMemberArenaInformations.class;
-        //types[392] = MapCoordinatesAndId.class;
+        types.put(392, MapCoordinatesAndId.class);
         //types[396] = GroupMonsterStaticInformationsWithAlternatives.class;
 		types.put(398, InteractiveElementWithAgeBonus.class);
 		types.put(406, HumanOption.class);

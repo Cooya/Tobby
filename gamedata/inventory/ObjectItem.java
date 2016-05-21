@@ -2,6 +2,7 @@ package gamedata.inventory;
 
 import gamedata.ProtocolTypeManager;
 
+import java.util.Comparator;
 import java.util.Vector;
 
 import utilities.ByteArray;
@@ -12,6 +13,8 @@ public class ObjectItem extends Item {
 	public Vector<ObjectEffect> effects;
 	public int objectUID = 0;
 	public int quantity = 0;
+	
+	public int averagePrice; // rajout
 
 	public ObjectItem(ByteArray buffer) {
 		super(buffer);
@@ -24,4 +27,6 @@ public class ObjectItem extends Item {
 		this.objectUID = buffer.readVarInt();
 		this.quantity = buffer.readVarInt();
 	}
+	
+	public static final Comparator<ObjectItem> AVG_PRICE_DESC = (ObjectItem o1, ObjectItem o2) -> - Integer.compare(o1.averagePrice, o2.averagePrice);
 }

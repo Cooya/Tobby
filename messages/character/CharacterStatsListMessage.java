@@ -1,9 +1,9 @@
 package messages.character;
 
 import gamedata.character.CharacterCharacteristicsInformations;
-import messages.Message;
+import messages.NetworkMessage;
 
-public class CharacterStatsListMessage extends Message {
+public class CharacterStatsListMessage extends NetworkMessage {
 	public CharacterCharacteristicsInformations stats;
 	
 	@Override

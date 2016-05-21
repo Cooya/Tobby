@@ -1,8 +1,8 @@
 package messages.fights;
 
-import messages.Message;
+import messages.NetworkMessage;
 
-public class GameFightJoinRequestMessage extends Message {
+public class GameFightJoinRequestMessage extends NetworkMessage {
 	public double fighterId = 0;
 	public int fightId = 0;
 	

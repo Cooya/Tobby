@@ -1,8 +1,8 @@
 package messages.connection;
 
-import messages.Message;
+import messages.NetworkMessage;
 
-public class CharacterSelectionMessage extends Message {
+public class CharacterSelectionMessage extends NetworkMessage {
 	public double id = 0;
 	
 	@Override

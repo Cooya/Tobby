@@ -9,7 +9,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.locks.ReentrantLock;
 
 import controller.characters.Character;
-import messages.Message;
+import messages.NetworkDataContainerMessage;
+import messages.NetworkMessage;
 import messages.synchronisation.BasicPingMessage;
 import utilities.ByteArray;
 
@@ -74,13 +75,17 @@ public class NetworkInterface extends Thread {
 			}
 	}
 	
-	private void processMsgStack(LinkedList<Message> msgStack) {
-		Message msg;
+	private void processMsgStack(LinkedList<NetworkMessage> msgStack) {
+		NetworkMessage msg;
 		while((msg = msgStack.poll()) != null) {
 			this.latency.updateLatency();
 			this.character.log.p("r", msg);
 			this.character.processor.incomingMessage(msg);
 		}
+	}
+	
+	public void processNetworkDataContainerMessage(NetworkDataContainerMessage msg) {
+		processMsgStack(this.reader.processBuffer(msg.getContent()));
 	}
 	
 	public void setGameServerIP(String gameServerIP) {
@@ -94,7 +99,7 @@ public class NetworkInterface extends Thread {
 			this.serverCo.close();
 	}
 	
-	public void send(Message msg) {
+	public void send(NetworkMessage msg) {
 		this.sender.output.add(msg);
 		synchronized(this.sender) {
 			this.sender.notify();
@@ -104,7 +109,7 @@ public class NetworkInterface extends Thread {
 	// appelée lors de la réception d'un BasicAckMessage
 	public void acknowledgeMessage(int msgId) {
 		this.sender.listLock.lock();
-		for(Message msg : this.sender.acknowledgementList)
+		for(NetworkMessage msg : this.sender.acknowledgementList)
 			if(msg.getId() == msgId) {
 				this.sender.acknowledgementList.remove(msg);
 				this.sender.listLock.unlock();
@@ -115,21 +120,21 @@ public class NetworkInterface extends Thread {
 	}
 	
 	public class Sender extends Thread {
-		private ConcurrentLinkedQueue<Message> output; // file des messages qui doivent être envoyé
-		private List<Message> acknowledgementList; // file des messages qui attendent d'être acquitté
+		private ConcurrentLinkedQueue<NetworkMessage> output; // file des messages qui doivent être envoyé
+		private List<NetworkMessage> acknowledgementList; // file des messages qui attendent d'être acquitté
 		private ReentrantLock listLock;
 		
 		private Sender(String login) {
 			super(login + "/sender");
-			this.output = new ConcurrentLinkedQueue<Message>();
-			this.acknowledgementList = new Vector<Message>();
+			this.output = new ConcurrentLinkedQueue<NetworkMessage>();
+			this.acknowledgementList = new Vector<NetworkMessage>();
 			this.listLock = new ReentrantLock();
 		}
 		
 		private void browseAcknowledgeList() {
 			Date now = new Date();
 			this.listLock.lock();
-			for(Message msg : this.acknowledgementList) {
+			for(NetworkMessage msg : this.acknowledgementList) {
 				// TODO -> test en cours
 				if(msg.getId() == 950) {
 					if(now.getTime() - msg.getSendingTime().getTime() > 20000) {
@@ -145,7 +150,7 @@ public class NetworkInterface extends Thread {
 			this.listLock.unlock();
 		}
 		
-		private void addMessageToAcknowledgeList(Message msg) {
+		private void addMessageToAcknowledgeList(NetworkMessage msg) {
 			msg.setSendingTime(new Date());
 			this.listLock.lock();
 			if(!this.acknowledgementList.contains(msg))
@@ -154,7 +159,7 @@ public class NetworkInterface extends Thread {
 		}
 	
 		public synchronized void run() {
-			Message msg;
+			NetworkMessage msg;
 			while (!isInterrupted()) {
 				if((msg = this.output.poll()) != null) {
 					latency.setLatestSent();

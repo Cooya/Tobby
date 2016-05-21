@@ -5,9 +5,9 @@ import gamedata.character.CharacterBaseInformations;
 
 import java.util.Vector;
 
-import messages.Message;
+import messages.NetworkMessage;
 
-public class BasicCharactersListMessage extends Message {
+public class BasicCharactersListMessage extends NetworkMessage {
 	public Vector<CharacterBaseInformations> characters;
 	
 	@Override

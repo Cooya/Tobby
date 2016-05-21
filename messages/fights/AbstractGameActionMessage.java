@@ -1,8 +1,8 @@
 package messages.fights;
 
-import messages.Message;
+import messages.NetworkMessage;
 
-public class AbstractGameActionMessage extends Message {
+public class AbstractGameActionMessage extends NetworkMessage {
 	public int actionId = 0;
 	public double sourceId = 0;
 	

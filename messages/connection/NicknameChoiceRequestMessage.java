@@ -1,8 +1,8 @@
 package messages.connection;
 
-import messages.Message;
+import messages.NetworkMessage;
 
-public class NicknameChoiceRequestMessage extends Message {
+public class NicknameChoiceRequestMessage extends NetworkMessage {
 	public String nickname = "";
 	
 	@Override

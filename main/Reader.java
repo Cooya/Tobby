@@ -2,15 +2,15 @@ package main;
 
 import java.util.LinkedList;
 
-import messages.Message;
+import messages.NetworkMessage;
 import utilities.ByteArray;
 
 public class Reader {
-	private Message incompleteMsg; // message incomplet qui attend d'être complété
+	private NetworkMessage incompleteMsg; // message incomplet qui attend d'être complété
 	private byte[] incompleteHeader; // header incomplet qui attend d'être complété
 	
-	public LinkedList<Message> processBuffer(ByteArray buffer) {
-		LinkedList<Message> msgStack = new LinkedList<Message>();
+	public LinkedList<NetworkMessage> processBuffer(ByteArray buffer) {
+		LinkedList<NetworkMessage> msgStack = new LinkedList<NetworkMessage>();
 		if(this.incompleteHeader != null) {
 			buffer.appendBefore(this.incompleteHeader);
 			this.incompleteHeader = null;
@@ -25,7 +25,7 @@ public class Reader {
 				return msgStack; // si le message est incomplet, cela signifie qu'il n'y a plus rien à lire dans le buffer
 		}
 		while(!buffer.endOfArray()) {
-			Message msg = extractMsgFromBuffer(buffer.bytesFromPos());
+			NetworkMessage msg = extractMsgFromBuffer(buffer.bytesFromPos());
 			if(msg == null) { // header incomplet
 				this.incompleteHeader = buffer.bytesFromPos();
 				break;
@@ -41,7 +41,7 @@ public class Reader {
 		return msgStack;
 	}
 	
-	private static Message extractMsgFromBuffer(byte[] buffer) {
+	private static NetworkMessage extractMsgFromBuffer(byte[] buffer) {
 		if(buffer.length < 2)
 			return null;
 		char[] cbuffer = new char[buffer.length]; // étant donné que ce sont des octets signés bruts
@@ -67,6 +67,6 @@ public class Reader {
 		int counter = 0;
 		for(int i = 2 + lenofsize; i < bytesAvailable + 2 + lenofsize; ++i, ++counter)
 			content[counter] = buffer[i];
-	    return Message.create(id, lenofsize, size, content, counter);		
+	    return NetworkMessage.create(id, lenofsize, size, content, counter);		
 	}
 }

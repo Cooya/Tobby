@@ -1,8 +1,8 @@
 package messages.connection;
 
-import messages.Message;
+import messages.NetworkMessage;
 
-public class ServerSelectionMessage extends Message {
+public class ServerSelectionMessage extends NetworkMessage {
 	public int serverId = 0;
 	
 	@Override

@@ -1,8 +1,8 @@
 package messages.connection;
 
-import messages.Message;
+import messages.NetworkMessage;
 
-public class TrustStatusMessage extends Message {
+public class TrustStatusMessage extends NetworkMessage {
 
 	@Override
 	public void serialize() {

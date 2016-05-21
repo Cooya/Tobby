@@ -1,8 +1,8 @@
 package messages.connection;
 
-import messages.Message;
+import messages.NetworkMessage;
 
-public class SelectedServerDataMessage extends Message {
+public class SelectedServerDataMessage extends NetworkMessage {
 	private int serverId = 0;
 	public String address = "";
 	public int port = 0;

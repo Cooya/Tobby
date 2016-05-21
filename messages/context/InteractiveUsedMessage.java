@@ -1,8 +1,8 @@
 package messages.context;
 
-import messages.Message;
+import messages.NetworkMessage;
 
-public class InteractiveUsedMessage extends Message {
+public class InteractiveUsedMessage extends NetworkMessage {
 	public double entityId = 0;
 	public int elemId = 0;
 	public int skillId = 0;

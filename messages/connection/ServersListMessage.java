@@ -4,9 +4,9 @@ import gamedata.connection.GameServerInformations;
 
 import java.util.Vector;
 
-import messages.Message;
+import messages.NetworkMessage;
 
-public class ServersListMessage extends Message {
+public class ServersListMessage extends NetworkMessage {
     public Vector<GameServerInformations> servers;
     public int alreadyConnectedToServerId = 0;
     public boolean canCreateNewCharacter = false;

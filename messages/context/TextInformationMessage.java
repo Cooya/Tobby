@@ -2,9 +2,9 @@ package messages.context;
 
 import java.util.Vector;
 
-import messages.Message;
+import messages.NetworkMessage;
 
-public class TextInformationMessage extends Message {
+public class TextInformationMessage extends NetworkMessage {
 	public int msgType = 0;
 	public int msgId = 0;
 	public Vector<String> parameters;

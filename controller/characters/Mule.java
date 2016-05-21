@@ -5,21 +5,19 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import controller.CharacterState;
+import controller.modules.MovementAPI;
 import main.Controller;
 import main.Log;
 import main.Main;
 
 public class Mule extends Character {
-	private static final int BANK_INSIDE_MAP_ID = 83887104;
-	private static final int BANK_OUTSIDE_MAP_ID = 84674566;
-	
 	private int waitingMapId;
 	private Vector<Character> customers;
 	private Lock lock;
 
 	public Mule(int id, String login, String password, int serverId, int breed, Log log) {
 		super(id, login, password, serverId, breed, log);
-		this.waitingMapId = BANK_OUTSIDE_MAP_ID; // banque d'Astrub
+		this.waitingMapId = MovementAPI.ASTRUB_BANK_OUTSIDE_MAP_ID;
 		this.customers = new Vector<Character>();
 		this.lock = new ReentrantLock();
 	}
@@ -68,38 +66,37 @@ public class Mule extends Character {
 		this.lock.unlock();
 	}
 
-	private void goOutAstrubBank() {
-		this.mvt.moveTo(396); // on sort de la banque
-		updateState(CharacterState.IS_LOADED, false); // important (porte de la banque)
-	}
-
 	@Override
 	public void run() {
-		while(!isInterrupted() && waitState(CharacterState.IS_FREE) && !inState(CharacterState.SHOULD_DECONNECT)) { // attente d'état importante afin de laisser le temps aux pods de se mettre à jour après un échange
+		waitState(CharacterState.IS_LOADED); // attendre l'entrée en jeu
+		while(!isInterrupted()) {
 			checkIfModeratorIsOnline(Main.MODERATOR_NAME);
-			if(this.infos.getCurrentMap().id == BANK_INSIDE_MAP_ID) // si le perso est dans la banque
-				goOutAstrubBank();
 			if(this.infos.inventoryIsFull(0.1f)) { // + de 10% de l'inventaire occupé
 				updateState(CharacterState.NEED_TO_EMPTY_INVENTORY, true);
 				broadcastAvailability(false);		
 				this.log.p("Need to go to empty inventory at Astrub bank.");
-				this.mvt.goTo(BANK_OUTSIDE_MAP_ID); // map où se situe la banque
-				this.interaction.useInteractive(317, 465440, true); // porte de la banque
-				this.interaction.emptyInventoryInBank();
+				this.mvt.goToInsideBank();
+				this.interaction.openBankStorage();	
+				this.exchangeManager.transfertAllObjectsFromInventory();
+				this.interaction.closeStorage();
 				updateState(CharacterState.NEED_TO_EMPTY_INVENTORY, false);
-				goOutAstrubBank(); // on sort de la banque
 			}
-			this.mvt.goTo(this.waitingMapId);
+			this.salesManager.bidHouseSellingRoutine();
+			this.mvt.goTo(this.waitingMapId, false); // sort automatiquement de la banque s'il y est
 			broadcastAvailability(true);
 			if(waitState(CharacterState.PENDING_DEMAND)) { // on attend qu'un combattant lance un échange
 				this.log.p("Exchange demand received.");
-				if(this.social.processExchangeDemand(this.roleplayContext.actorDemandingExchange))
+				if(this.exchangeManager.processExchangeDemand(this.roleplayContext.actorDemandingExchange)) {
 					broadcastAvailability(false);
+					this.exchangeManager.waitExchangeValidatedForValidExchange();
+				}
+			}
+			
+			if(inState(CharacterState.SHOULD_DECONNECT)) {
+				deconnectionOrder(true);
+				break;
 			}
 		}
-		
-		if(inState(CharacterState.SHOULD_DECONNECT))
-			deconnectionOrder(true);
 		broadcastDeconnection();
 		Log.info("Thread controller of character with id = " + this.id + " terminated.");
 		Controller.getInstance().threadTerminated();

@@ -1,8 +1,8 @@
 package messages.connection;
 
-import messages.Message;
+import messages.NetworkMessage;
 
-public class CharacterCreationResultMessage extends Message {
+public class CharacterCreationResultMessage extends NetworkMessage {
 	public int result = 1;
 	
 	@Override

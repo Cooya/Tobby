@@ -7,11 +7,13 @@ import utilities.ByteArray;
 import controller.CharacterState;
 import controller.characters.Character;
 import controller.characters.Fighter;
+import controller.modules.SalesManager;
 import gamedata.d2i.I18n;
 import gamedata.d2o.modules.InfoMessage;
 import gamedata.d2o.modules.MapPosition;
 import gamedata.d2p.MapsCache;
 import gamedata.d2p.ankama.Map;
+import gamedata.enums.DialogTypeEnum;
 import gamedata.enums.TextInformationTypeEnum;
 import main.Controller;
 import main.FatalError;
@@ -23,7 +25,6 @@ import messages.character.CharacterLevelUpMessage;
 import messages.character.CharacterLoadingCompleteMessage;
 import messages.character.CharacterStatsListMessage;
 import messages.character.GameRolePlayPlayerLifeStatusMessage;
-import messages.character.InventoryWeightMessage;
 import messages.character.LifePointsRegenBeginMessage;
 import messages.character.PlayerStatusUpdateMessage;
 import messages.character.SpellListMessage;
@@ -37,11 +38,13 @@ import messages.context.GameMapNoMovementMessage;
 import messages.context.GameRolePlayPlayerFightFriendlyAnswerMessage;
 import messages.context.GameRolePlayPlayerFightFriendlyRequestedMessage;
 import messages.context.GameRolePlayShowActorMessage;
+import messages.context.LeaveDialogMessage;
 import messages.context.MapComplementaryInformationsDataMessage;
 import messages.context.MapInformationsRequestMessage;
 import messages.context.SystemMessageDisplayMessage;
 import messages.context.TextInformationMessage;
 import messages.interactions.InteractiveUseErrorMessage;
+import messages.interactions.NpcDialogCreationMessage;
 import messages.interactions.NpcGenericActionFailureMessage;
 import messages.security.AccountLoggingKickedMessage;
 import messages.security.CheckFileMessage;
@@ -61,6 +64,11 @@ public class RoleplayContextFrame extends Frame {
 			Controller.getInstance().globalDeconnection("The moderator is online.", true, false);
 		else
 			this.character.updateState(CharacterState.WHOIS_RESPONSE, true);
+	}
+	
+	protected void process(NpcDialogCreationMessage NDCM) {
+		this.character.log.p("NPC dialog displayed.");
+		this.character.updateState(CharacterState.DIALOG_DISPLAYED, true);
 	}
 	
 	protected void process(TextInformationMessage TIM) {
@@ -112,6 +120,19 @@ public class RoleplayContextFrame extends Frame {
 		this.character.log.p(str);
 	}
 	
+	protected void process(LeaveDialogMessage LDM) {
+		if(LDM.dialogType == DialogTypeEnum.DIALOG_DIALOG) {
+			this.character.log.p("Dialog window closed.");
+			this.character.updateState(CharacterState.DIALOG_DISPLAYED, false);
+		}
+		else if(LDM.dialogType == DialogTypeEnum.DIALOG_EXCHANGE) {
+			this.character.log.p("Exchange closed.");
+			this.character.updateState(CharacterState.IN_EXCHANGE, false);
+		}
+		else
+			this.character.log.p("Unknown dialog window closed.");
+	}
+	
 	protected void process(CharacterLoadingCompleteMessage CLCM) {
 		Log.info("Character with id = " + this.character.id + " connected in game.");
 		
@@ -120,7 +141,8 @@ public class RoleplayContextFrame extends Frame {
 		this.character.net.send(new UnhandledMessage("SpouseGetInformationsMessage"));
 		this.character.net.send(new ClientKeyMessage());
 		this.character.net.send(new UnhandledMessage("GameContextCreateRequestMessage"));
-		//this.character.net.send(new UnhandledMessage("ObjectAveragePricesGetMessage"));
+		if(!SalesManager.averagePricesAreSet())
+			this.character.net.send(new UnhandledMessage("ObjectAveragePricesGetMessage"));
 		this.character.net.send(new UnhandledMessage("QuestListRequestMessage"));
 		this.character.net.send(new PrismsListRegisterMessage());
 		this.character.net.send(new ChannelEnablingMessage());
@@ -152,6 +174,7 @@ public class RoleplayContextFrame extends Frame {
 	
 	protected void process(CharacterStatsListMessage CSLM) {
 		this.character.infos.setStats(CSLM.stats);
+		this.character.inventory.setKamas(CSLM.stats.kamas);
 	}
 	
 	protected void process(CharacterLevelUpMessage CLUM) {
@@ -185,21 +208,11 @@ public class RoleplayContextFrame extends Frame {
 			this.character.infos.setCurrentCellId(position);
 			this.character.log.p("Next cell id after movement : " + position + ".");
 			this.character.mvt.updatePosition(position);
-			this.character.updateState(CharacterState.CAN_MOVE, true);
 		}
 	}
 	
 	protected void process(LifePointsRegenBeginMessage LPRBM) {
 		this.character.infos.setRegenRate(LPRBM.regenRate);
-	}
-	
-	protected void process(InventoryWeightMessage IWM) {
-		this.character.infos.setWeight(IWM.weight);
-		this.character.infos.setWeightMax(IWM.weightMax);
-		if(this.character.infos.weightMaxAlmostReached()) {
-			this.character.updateState(CharacterState.NEED_TO_EMPTY_INVENTORY, true);
-			this.character.log.p("Inventory weight maximum almost reached, need to empty.");
-		}
 	}
 	
 	protected void process(PlayerStatusUpdateMessage PSUM) {

@@ -1,5 +1,7 @@
 package messages.exchanges;
 
+import messages.context.LeaveDialogMessage;
+
 public class ExchangeLeaveMessage extends LeaveDialogMessage {
 	public boolean success = false;
 	

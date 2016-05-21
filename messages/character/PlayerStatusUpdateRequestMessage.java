@@ -1,9 +1,9 @@
 package messages.character;
 
 import gamedata.character.PlayerStatus;
-import messages.Message;
+import messages.NetworkMessage;
 
-public class PlayerStatusUpdateRequestMessage extends Message {
+public class PlayerStatusUpdateRequestMessage extends NetworkMessage {
 	public PlayerStatus status;
 	
 	@Override

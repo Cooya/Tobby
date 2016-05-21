@@ -1,8 +1,8 @@
 package messages.connection;
 
-import messages.Message;
+import messages.NetworkMessage;
 
-public class NicknameRefusedMessage extends Message {
+public class NicknameRefusedMessage extends NetworkMessage {
 
 	@Override
 	public void serialize() {

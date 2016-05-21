@@ -1,8 +1,8 @@
 package messages.context;
 
-import messages.Message;
+import messages.NetworkMessage;
 
-public class MapFightCountMessage extends Message {
+public class MapFightCountMessage extends NetworkMessage {
 	public int fightCount = 0;
 	
 	@Override

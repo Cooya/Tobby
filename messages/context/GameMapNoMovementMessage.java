@@ -1,8 +1,8 @@
 package messages.context;
 
-import messages.Message;
+import messages.NetworkMessage;
 
-public class GameMapNoMovementMessage extends Message {
+public class GameMapNoMovementMessage extends NetworkMessage {
 
 	@Override
 	public void serialize() {

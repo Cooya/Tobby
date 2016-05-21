@@ -1,8 +1,8 @@
 package messages.connection;
 
-import messages.Message;
+import messages.NetworkMessage;
 
-public class AuthenticationTicketMessage extends Message {
+public class AuthenticationTicketMessage extends NetworkMessage {
 	public String lang;
 	public String ticket;
 	

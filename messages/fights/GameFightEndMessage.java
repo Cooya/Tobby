@@ -6,9 +6,9 @@ import gamedata.fight.NamedPartyTeamWithOutcome;
 
 import java.util.Vector;
 
-import messages.Message;
+import messages.NetworkMessage;
 
-public class GameFightEndMessage extends Message{
+public class GameFightEndMessage extends NetworkMessage{
 	public int duration = 0;   
 	public int ageBonus = 0;
 	public int lootShareLimitMalus = 0;

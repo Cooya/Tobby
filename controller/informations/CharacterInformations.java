@@ -11,6 +11,7 @@ import gamedata.enums.ElementEnum;
 import gamedata.enums.PlayerLifeStatusEnum;
 import gamedata.inventory.SpellItem;
 
+@SuppressWarnings("unused")
 public class CharacterInformations {
 	private boolean isInGame;
 	private boolean firstSelection;
@@ -30,7 +31,6 @@ public class CharacterInformations {
 	private int lifePoints;
 	private int maxLifePoints;
 	private int energyPoints;
-	private int kamas;
 	private double experience;
 	private double experienceNextLevelFloor;
 	private int statsPoints;
@@ -60,12 +60,6 @@ public class CharacterInformations {
 	
 	public int missingLife() {
 		return this.maxLifePoints - this.lifePoints;
-	}
-
-	public boolean weightMaxAlmostReached() {
-		if(this.weightMax - this.weight < this.weight * 0.05) // moins de 5% restant
-			return true;
-		return false;
 	}
 	
 	// determine si l'inventaire est plein ou pas selon le pourcentage donné
@@ -124,16 +118,20 @@ public class CharacterInformations {
 		return this.regenRate;
 	}
 	
+	public int getWeight() {
+		return this.weight;
+	}
+	
+	public int getWeightMax() {
+		return this.weightMax;
+	}
+	
 	public int getLevel() {
 		return this.level;
 	}
 	
 	public int getMaxLifePoints() {
 		return this.maxLifePoints;
-	}
-	
-	public int getKamas() {
-		return this.kamas;
 	}
 	
 	public int getSpellsPoints() {
@@ -227,7 +225,6 @@ public class CharacterInformations {
 		this.lifePoints = stats.lifePoints;
 		this.maxLifePoints = stats.maxLifePoints;
 		this.energyPoints = stats.energyPoints;
-		this.kamas = stats.kamas;
 		this.experience = stats.experience;
 		this.experienceNextLevelFloor = stats.experienceNextLevelFloor;
 		this.statsPoints = stats.statsPoints;

@@ -1,8 +1,8 @@
 package messages.exchanges;
 
-import messages.Message;
+import messages.NetworkMessage;
 
-public class ExchangeIsReadyMessage extends Message {
+public class ExchangeIsReadyMessage extends NetworkMessage {
     public double id = 0;
     public boolean ready = false;
 	

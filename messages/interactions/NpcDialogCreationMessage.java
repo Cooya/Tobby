@@ -1,8 +1,8 @@
 package messages.interactions;
 
-import messages.Message;
+import messages.NetworkMessage;
 
-public class NpcDialogCreationMessage extends Message {
+public class NpcDialogCreationMessage extends NetworkMessage {
 	
 	@Override
 	public void serialize() {

@@ -1,8 +1,8 @@
 package messages.character;
 
-import messages.Message;
+import messages.NetworkMessage;
 
-public class BasicWhoIsRequestMessage extends Message {
+public class BasicWhoIsRequestMessage extends NetworkMessage {
 	public boolean verbose = false;
 	public String search = "";
 	

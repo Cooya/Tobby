@@ -1,8 +1,8 @@
 package messages.fights;
 
-import messages.Message;
+import messages.NetworkMessage;
 
-public class SequenceEndMessage extends Message {
+public class SequenceEndMessage extends NetworkMessage {
 	public int actionId = 0;
 	public double authorId = 0;
 	public int sequenceType = 0;

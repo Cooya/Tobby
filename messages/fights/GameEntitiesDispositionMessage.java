@@ -4,9 +4,9 @@ import gamedata.context.IdentifiedEntityDispositionInformations;
 
 import java.util.Vector;
 
-import messages.Message;
+import messages.NetworkMessage;
 
-public class GameEntitiesDispositionMessage extends Message {
+public class GameEntitiesDispositionMessage extends NetworkMessage {
 	public Vector<IdentifiedEntityDispositionInformations> dispositions;
 	
 	@Override

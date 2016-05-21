@@ -53,7 +53,7 @@ public class Item {
 	public int recipeSlots;
 	public Vector<Integer> recipeIds;
 	public boolean bonusIsSecret;
-	//public Vector<EffectInstance> possibleEffects;
+	public Vector<EffectInstance> possibleEffects;
 	public Vector<Integer> favoriteSubAreas;
 	public int favoriteSubAreasBonus;
 	public int craftXpRatio;

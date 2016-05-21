@@ -1,8 +1,8 @@
 package messages.context;
 
-import messages.Message;
+import messages.NetworkMessage;
 
-public class GameRolePlayPlayerFightFriendlyRequestedMessage extends Message {
+public class GameRolePlayPlayerFightFriendlyRequestedMessage extends NetworkMessage {
 	public int fightId = 0;
 	public double sourceId = 0;
 	public double targetId = 0;

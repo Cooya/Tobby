@@ -1,8 +1,8 @@
 package messages.connection;
 
-import messages.Message;
+import messages.NetworkMessage;
 
-public class ChannelEnablingMessage extends Message {
+public class ChannelEnablingMessage extends NetworkMessage {
     public int channel = 0;
     public boolean enable = false;
 

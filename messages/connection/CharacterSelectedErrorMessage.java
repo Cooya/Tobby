@@ -1,8 +1,8 @@
 package messages.connection;
 
-import messages.Message;
+import messages.NetworkMessage;
 
-public class CharacterSelectedErrorMessage extends Message {
+public class CharacterSelectedErrorMessage extends NetworkMessage {
 
 	@Override
 	public void serialize() {

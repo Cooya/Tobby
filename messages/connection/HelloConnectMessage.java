@@ -1,8 +1,8 @@
 package messages.connection;
 
-import messages.Message;
+import messages.NetworkMessage;
 
-public class HelloConnectMessage extends Message {
+public class HelloConnectMessage extends NetworkMessage {
 	public String salt;
 	public int[] key; // normalement c'est un vecteur
 	

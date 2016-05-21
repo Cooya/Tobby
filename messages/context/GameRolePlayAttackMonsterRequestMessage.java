@@ -1,8 +1,8 @@
 package messages.context;
 
-import messages.Message;
+import messages.NetworkMessage;
 
-public class GameRolePlayAttackMonsterRequestMessage extends Message {
+public class GameRolePlayAttackMonsterRequestMessage extends NetworkMessage {
 	public double monsterGroupId = 0;
 
 	@Override

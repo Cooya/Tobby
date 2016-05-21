@@ -2,9 +2,9 @@ package messages.context;
 
 import java.util.Vector;
 
-import messages.Message;
+import messages.NetworkMessage;
 
-public class GameMapMovementRequestMessage extends Message {
+public class GameMapMovementRequestMessage extends NetworkMessage {
 	public Vector<Integer> keyMovements;
 	public int mapId = 0;
 

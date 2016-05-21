@@ -1,8 +1,8 @@
 package messages.character;
 
-import messages.Message;
+import messages.NetworkMessage;
 
-public class CharacterLevelUpMessage extends Message {
+public class CharacterLevelUpMessage extends NetworkMessage {
 	public int newLevel = 0;
 	
 	@Override

@@ -11,7 +11,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.text.DefaultCaret;
 
-import controller.FightOptions;
+import controller.informations.FightOptions;
 
 public class CharacterFrame extends JInternalFrame {
 	protected static final int FRAME_SIZE = 400;

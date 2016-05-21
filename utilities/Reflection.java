@@ -13,7 +13,7 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 import main.Main;
-import messages.Message;
+import messages.NetworkMessage;
 
 public class Reflection {
 	private static final ProtectionDomain currentDomain = Main.class.getProtectionDomain();
@@ -82,7 +82,7 @@ public class Reflection {
 			for(Field field : fields) {
 				try {
 					field.setAccessible(true);
-					if(field.getDeclaringClass() == Message.class) // les attributs de la classe Message ne nous intéressent pas
+					if(field.getDeclaringClass() == NetworkMessage.class) // les attributs de la classe Message ne nous intéressent pas
 						continue;
 					System.out.println(gap + field.getName() + " = " + field.get(o));
 					if(depth > 0 && field.get(o).getClass().getProtectionDomain() == currentDomain) // si c'est un objet dont la classe est une classe du projet courant

@@ -35,12 +35,12 @@ public class PartyFrame extends Frame {
 	}
 	
 	protected void process(PartyNewMemberMessage PNMM) {
-		this.character.partyManager.addPartyMember(PNMM.memberInformations);
+		this.character.partyManager.partyMemberAdded(PNMM.memberInformations);
 		this.character.updateState(CharacterState.NEW_PARTY_MEMBER, true);
 	}
 	
 	protected void process(PartyMemberRemoveMessage PMRM) {
-		this.character.partyManager.removePartyMember(PMRM.leavingPlayerId);
+		this.character.partyManager.partyMemberRemoved(PMRM.leavingPlayerId);
 	}
 	
 	protected void process(PartyMemberInFightMessage PMIFM) {
@@ -49,7 +49,7 @@ public class PartyFrame extends Frame {
 	}
 	
 	protected void process(PartyUpdateMessage PUM) {
-		this.character.partyManager.updatePartyMember(PUM.memberInformations);
+		this.character.partyManager.partyMemberUpdated(PUM.memberInformations);
 	}
 	
 	protected void process(PartyLeaveMessage PLM) {

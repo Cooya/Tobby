@@ -1,9 +1,9 @@
 package messages.fights;
 
 import gamedata.context.FightTeamInformations;
-import messages.Message;
+import messages.NetworkMessage;
 
-public class GameFightUpdateTeamMessage extends Message {
+public class GameFightUpdateTeamMessage extends NetworkMessage {
 	public int fightId = 0;
 	public FightTeamInformations team;
 	

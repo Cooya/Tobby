@@ -2,9 +2,9 @@ package messages.character;
 
 import gamedata.ProtocolTypeManager;
 import gamedata.character.PlayerStatus;
-import messages.Message;
+import messages.NetworkMessage;
 
-public class PlayerStatusUpdateMessage extends Message {
+public class PlayerStatusUpdateMessage extends NetworkMessage {
     public int accountId = 0;
     public double playerId = 0;
     public PlayerStatus status;

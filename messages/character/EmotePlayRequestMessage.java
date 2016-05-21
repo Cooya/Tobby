@@ -1,8 +1,8 @@
 package messages.character;
 
-import messages.Message;
+import messages.NetworkMessage;
 
-public class EmotePlayRequestMessage extends Message {
+public class EmotePlayRequestMessage extends NetworkMessage {
 	public int emoteId = 0;
 
 	@Override

@@ -20,9 +20,12 @@ import messages.fights.GameFightTurnStartPlayingMessage;
 import messages.fights.SequenceEndMessage;
 
 public class FightContextFrame extends Frame {
+	private Fighter fighter;
 
 	public FightContextFrame(Character character) {
 		super(character);
+		if(character instanceof Fighter)
+			this.fighter = (Fighter) character; // petit raccourci
 	}
 	
 	protected void process(GameFightStartingMessage GFSM) {
@@ -30,7 +33,7 @@ public class FightContextFrame extends Frame {
 	}
 	
 	protected void process(GameFightShowFighterMessage GFSFM) {
-		((Fighter) this.character).fightContext.newFighter(GFSFM.informations);
+		this.fighter.fightContext.newFighter(GFSFM.informations);
 		this.character.updateState(CharacterState.NEW_ACTOR_IN_FIGHT, true);
 	}
 	
@@ -47,8 +50,7 @@ public class FightContextFrame extends Frame {
 	}
 	
 	protected void process(GameFightSynchronizeMessage GFSM) {
-		Fighter fighter = (Fighter) this.character;
-		fighter.fightContext.setFightContext(GFSM.fighters);
+		this.fighter.fightContext.setFightContext(GFSM.fighters);
 		this.character.log.p("Fight context set.");
 	}
 	
@@ -62,8 +64,8 @@ public class FightContextFrame extends Frame {
 	}
 	
 	protected void process(GameActionFightPointsVariationMessage GAFPVM) {
-		if(((Fighter) this.character).fightContext.self != null)
-			((Fighter) this.character).fightContext.self.stats.actionPoints -= GAFPVM.delta;
+		if(this.fighter.fightContext.self != null)
+			this.fighter.fightContext.self.stats.actionPoints -= GAFPVM.delta;
 	}
 	
 	protected void process(SequenceEndMessage SEM) {

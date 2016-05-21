@@ -1,8 +1,8 @@
 package messages.synchronisation;
 
-import messages.Message;
+import messages.NetworkMessage;
 
-public class BasicPingMessage extends Message {
+public class BasicPingMessage extends NetworkMessage {
 	public boolean quiet = false;
 	
 	@Override

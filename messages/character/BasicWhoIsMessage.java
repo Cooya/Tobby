@@ -6,9 +6,9 @@ import gamedata.context.AbstractSocialGroupInfos;
 import java.util.Vector;
 
 import utilities.BooleanByteWrapper;
-import messages.Message;
+import messages.NetworkMessage;
 
-public class BasicWhoIsMessage extends Message {
+public class BasicWhoIsMessage extends NetworkMessage {
 	public boolean self = false;
 	public int position = -1;
 	public String accountNickname = "";

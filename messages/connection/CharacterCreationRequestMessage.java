@@ -2,9 +2,9 @@ package messages.connection;
 
 import java.util.Vector;
 
-import messages.Message;
+import messages.NetworkMessage;
 
-public class CharacterCreationRequestMessage extends Message {
+public class CharacterCreationRequestMessage extends NetworkMessage {
 	public String name = "";
 	public int breed = 0;
 	public boolean sex = false;

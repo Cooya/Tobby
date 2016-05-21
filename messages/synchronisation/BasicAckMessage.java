@@ -1,8 +1,8 @@
 package messages.synchronisation;
 
-import messages.Message;
+import messages.NetworkMessage;
 
-public class BasicAckMessage extends Message {
+public class BasicAckMessage extends NetworkMessage {
 	public int seq = 0;
 	public int lastPacketId = 0;
 	

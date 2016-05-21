@@ -27,7 +27,7 @@ import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 
 import controller.CharacterBehaviour;
-import controller.FightOptions;
+import controller.informations.FightOptions;
 
 public class View {
 	private JFrame frame;

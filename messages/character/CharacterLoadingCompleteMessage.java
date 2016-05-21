@@ -1,8 +1,8 @@
 package messages.character;
 
-import messages.Message;
+import messages.NetworkMessage;
 
-public class CharacterLoadingCompleteMessage extends Message {
+public class CharacterLoadingCompleteMessage extends NetworkMessage {
 	
 	@Override
 	public void serialize() {

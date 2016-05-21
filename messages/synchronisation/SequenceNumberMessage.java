@@ -1,8 +1,8 @@
 package messages.synchronisation;
 
-import messages.Message;
+import messages.NetworkMessage;
 
-public class SequenceNumberMessage extends Message {
+public class SequenceNumberMessage extends NetworkMessage {
 	public int number = 0;
 	
 	@Override

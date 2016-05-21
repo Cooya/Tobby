@@ -1,8 +1,8 @@
 package messages.fights;
 
-import messages.Message;
+import messages.NetworkMessage;
 
-public class GameFightTurnEndMessage extends Message {
+public class GameFightTurnEndMessage extends NetworkMessage {
 	public double fighterId;
 
 	@Override

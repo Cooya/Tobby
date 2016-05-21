@@ -1,8 +1,8 @@
 package messages.character;
 
-import messages.Message;
+import messages.NetworkMessage;
 
-public class StatsUpgradeRequestMessage extends Message {
+public class StatsUpgradeRequestMessage extends NetworkMessage {
 	public boolean useAdditionnal = false;
 	public int statId = 11;
 	public int boostPoint = 0;

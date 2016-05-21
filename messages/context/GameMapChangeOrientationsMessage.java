@@ -4,9 +4,9 @@ import gamedata.context.ActorOrientation;
 
 import java.util.Vector;
 
-import messages.Message;
+import messages.NetworkMessage;
 
-public class GameMapChangeOrientationsMessage extends Message {
+public class GameMapChangeOrientationsMessage extends NetworkMessage {
 	public Vector<ActorOrientation> orientations;
 	
 	@Override

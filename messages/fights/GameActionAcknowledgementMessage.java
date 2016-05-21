@@ -1,8 +1,8 @@
 package messages.fights;
 
-import messages.Message;
+import messages.NetworkMessage;
 
-public class GameActionAcknowledgementMessage extends Message {
+public class GameActionAcknowledgementMessage extends NetworkMessage {
 	public boolean valid = false;
 	public int actionId = 0;
 

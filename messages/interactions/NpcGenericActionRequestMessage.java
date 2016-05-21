@@ -1,8 +1,8 @@
 package messages.interactions;
 
-import messages.Message;
+import messages.NetworkMessage;
 
-public class NpcGenericActionRequestMessage extends Message {
+public class NpcGenericActionRequestMessage extends NetworkMessage {
 	public int npcId = 0;
 	public int npcActionId = 0;
 	public int npcMapId = 0;

@@ -1,8 +1,8 @@
 package messages.connection;
 
-import messages.Message;
+import messages.NetworkMessage;
 
-public class IdentificationFailedForBadVersionMessage extends Message {
+public class IdentificationFailedForBadVersionMessage extends NetworkMessage {
 
 	@Override
 	public void serialize() {

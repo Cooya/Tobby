@@ -1,9 +1,9 @@
 package messages.connection;
 
 import utilities.BooleanByteWrapper;
-import messages.Message;
+import messages.NetworkMessage;
 
-public class IdentificationSuccessMessage extends Message {
+public class IdentificationSuccessMessage extends NetworkMessage {
 	public String login = "";
 	public String nickname = "";
 	public int accountId = 0;
