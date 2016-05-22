@@ -9,17 +9,14 @@ import java.util.concurrent.locks.ReentrantLock;
 import utilities.Processes;
 import messages.NetworkMessage;
 
-// TODO -> flusher le buffer toutes les 10 secondes ?
-
 public class Log {
-	private static final int WRITE_INTERVAL = 10;
 	private static final String EOL = System.getProperty("line.separator");
 	private static final StringBuilder globalLog = new StringBuilder();
 	private String logFilepath;
 	private PrintWriter writer;
 	private StringBuilder logFrameString;
 	private StringBuilder logFileBuffer;
-	private int writeCounter;
+	private long lastFlushDate;
 	private ReentrantLock stringLock;
 	private ReentrantLock bufferLock;
 	private CharacterFrame graphicalFrame;
@@ -35,7 +32,7 @@ public class Log {
 		}
 		this.logFrameString = new StringBuilder();
 		this.logFileBuffer = new StringBuilder();
-		this.writeCounter = 0;
+		this.lastFlushDate = new Date().getTime();
 		this.stringLock = new ReentrantLock();
 		this.bufferLock = new ReentrantLock();
 		this.graphicalFrame = graphicalFrame;
@@ -104,14 +101,14 @@ public class Log {
 		this.writer.flush();
 		this.logFileBuffer.setLength(0);
 		this.bufferLock.unlock();
-		this.writeCounter = 0;
+		this.lastFlushDate = new Date().getTime();
 	}
 	
 	private void writeIntoLogFile(StringBuilder msg) {
 		this.bufferLock.lock();
 		this.logFileBuffer.append(msg);
 		this.bufferLock.unlock();
-		if(++this.writeCounter == WRITE_INTERVAL)
+		if(new Date().getTime() - this.lastFlushDate > 10000) // 10 secondes
 			flushBuffer();
 	}
 	

@@ -49,7 +49,7 @@ public interface Connection {
 		public void send(byte[] bytes) {
 			try {
 				this.outputStream.write(bytes);
-				this.outputStream.flush();
+				//this.outputStream.flush();
 			} catch(Exception e) {
 				throw new FatalError(e);
 			}

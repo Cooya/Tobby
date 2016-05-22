@@ -10,7 +10,6 @@ import java.util.Collection;
 import java.util.Vector;
 
 import javax.swing.BoxLayout;
-import javax.swing.ButtonGroup;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -23,7 +22,6 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
-import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 
 import controller.CharacterBehaviour;
@@ -146,8 +144,6 @@ public class View {
 		public JTextField loginField;
 		public JTextField passwordField;
 		public JTextField serverField;
-		private JRadioButton isSalesman;
-		private JRadioButton isFighter;
 		public JButton connectButton;
 		private int selectedType;
 
@@ -173,20 +169,6 @@ public class View {
 			serverPanel.add(new JLabel("Server :"));
 			serverPanel.add(this.serverField);
 
-			// zone type de perso
-			this.isFighter = new JRadioButton("Fighter", true);
-			this.isFighter.setActionCommand(String.valueOf(CharacterBehaviour.LONE_WOLF));
-			this.isFighter.addActionListener(this);
-			this.isSalesman = new JRadioButton("Salesman");
-			this.isSalesman.setActionCommand(String.valueOf(CharacterBehaviour.WAITING_MULE));
-			this.isSalesman.addActionListener(this);
-			ButtonGroup typeButtonGroup = new ButtonGroup();
-			typeButtonGroup.add(this.isFighter);
-			typeButtonGroup.add(this.isSalesman);
-			JPanel typePanel = new JPanel();
-			typePanel.add(this.isFighter);
-			typePanel.add(this.isSalesman);
-
 			this.connectButton = new JButton("Run");
 
 			setSize(300, 300);
@@ -195,7 +177,6 @@ public class View {
 			add(loginPanel);
 			add(passwordPanel);
 			add(serverPanel);
-			add(typePanel);
 			add(this.connectButton);
 			setVisible(true);
 		}
@@ -214,14 +195,8 @@ public class View {
 	// elle affiche les dernières options sélectionnées pour le personnage
 	protected class FighterOptionsPanel extends JFrame implements ActionListener, ItemListener {
 		private static final long serialVersionUID = 3793718835483044716L;
-
-		// pour les salesmen
-		private JRadioButton isWaitingMule;
-		private JRadioButton isTrainingMule;
-		private JRadioButton isSeller;
+		
 		private int selectedBehaviour;
-
-		// pour les combattants
 		private JCheckBox isLoneWolf;
 
 		// éléments en communs
@@ -239,43 +214,17 @@ public class View {
 				behaviour = this.nextFighterBehaviour;
 			this.selectedBehaviour = behaviour;
 			
-			if(behaviour < 10 && nextFighterBehaviour != -1) { // zone des salesmen
-				this.isWaitingMule = new JRadioButton("Waiting mule", behaviour == CharacterBehaviour.WAITING_MULE);
-				this.isWaitingMule.setActionCommand(String.valueOf(CharacterBehaviour.WAITING_MULE));
-				this.isWaitingMule.addActionListener(this);
-				this.isTrainingMule = new JRadioButton("Training mule", behaviour == CharacterBehaviour.TRAINING_MULE);
-				this.isTrainingMule.setActionCommand(String.valueOf(CharacterBehaviour.TRAINING_MULE));
-				this.isTrainingMule.addActionListener(this);
-				this.isSeller = new JRadioButton("Seller", behaviour == CharacterBehaviour.SELLER);
-				this.isSeller.setActionCommand(String.valueOf(CharacterBehaviour.SELLER));
-				this.isSeller.addActionListener(this);
+			JPanel loneWolfPanel = new JPanel();
+			if(nextFighterBehaviour != -1) // lancement d'un seul combattant à la fois
+				loneWolfPanel.add(new JLabel("Lone wolf"));
+			else // lancement d'une escouade
+				loneWolfPanel.add(new JLabel("Lone wolves"));
+			this.isLoneWolf = new JCheckBox();
+			this.isLoneWolf.setSelected(this.selectedBehaviour == CharacterBehaviour.LONE_WOLF);
+			this.isLoneWolf.addItemListener(this);
+			loneWolfPanel.add(this.isLoneWolf);
 
-				// création d'un groupe de boutons pour unir les boutons radio
-				ButtonGroup salesmanButtonGroup = new ButtonGroup();
-				salesmanButtonGroup.add(this.isWaitingMule);
-				salesmanButtonGroup.add(this.isTrainingMule);
-				salesmanButtonGroup.add(this.isSeller);
-
-				JPanel salesmanPanel = new JPanel();
-				salesmanPanel.add(this.isWaitingMule);
-				salesmanPanel.add(this.isTrainingMule);
-				salesmanPanel.add(this.isSeller);
-
-				add(salesmanPanel);
-			}
-			else { // zone des combattants
-				JPanel loneWolfPanel = new JPanel();
-				if(nextFighterBehaviour != -1) // lancement d'un seul combattant à la fois
-					loneWolfPanel.add(new JLabel("Lone wolf"));
-				else // lancement d'une escouade
-					loneWolfPanel.add(new JLabel("Lone wolves"));
-				this.isLoneWolf = new JCheckBox();
-				this.isLoneWolf.setSelected(this.selectedBehaviour == CharacterBehaviour.LONE_WOLF);
-				this.isLoneWolf.addItemListener(this);
-				loneWolfPanel.add(this.isLoneWolf);
-
-				add(loneWolfPanel);
-			}
+			add(loneWolfPanel);
 
 			// création de la liste des aires
 			Collection<String> areaNames = FightOptions.getAreaNames();
@@ -316,8 +265,7 @@ public class View {
 		}
 
 		private void displayAreasPanel() {
-			if(this.selectedBehaviour == CharacterBehaviour.TRAINING_MULE ||
-					this.selectedBehaviour == CharacterBehaviour.LONE_WOLF ||
+			if(this.selectedBehaviour == CharacterBehaviour.LONE_WOLF ||
 					this.selectedBehaviour == CharacterBehaviour.CAPTAIN ||
 					this.selectedBehaviour == -1) {
 				if(this.areasPanel.isValid()) // déjà affiché

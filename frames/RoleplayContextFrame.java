@@ -6,7 +6,6 @@ import java.security.MessageDigest;
 import utilities.ByteArray;
 import controller.CharacterState;
 import controller.characters.Character;
-import controller.characters.Fighter;
 import controller.modules.SalesManager;
 import gamedata.d2i.I18n;
 import gamedata.d2o.modules.InfoMessage;
@@ -152,8 +151,7 @@ public class RoleplayContextFrame extends Frame {
 		if(GCCM.context == 1 && this.character.inState(CharacterState.IN_FIGHT)) {
 			this.character.updateState(CharacterState.IN_FIGHT, false);
 			this.character.updateState(CharacterState.IN_GAME_TURN, false);
-			if(this.character instanceof Fighter)
-				((Fighter) this.character).fightContext.clearFightContext();
+			this.character.fightContext.clearFightContext();
 		}
 		else if(GCCM.context == 2) {
 			this.character.updateState(CharacterState.IS_LOADED, false);

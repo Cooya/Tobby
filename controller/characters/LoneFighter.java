@@ -2,17 +2,14 @@ package controller.characters;
 
 import gamedata.enums.PlayerStatusEnum;
 import controller.CharacterState;
-import controller.modules.FightAPI;
 import main.Controller;
 import main.Log;
 import messages.context.GameContextReadyMessage;
 
-public class LoneFighter extends Fighter {
-	private FightAPI fight;
+public class LoneFighter extends Character {
 
 	public LoneFighter(int id, String login, String password, int serverId, int breed, int areaId, Log log) {
-		super(id, login, password, serverId, breed, log);
-		this.fight = new FightAPI(this, areaId);
+		super(id, login, password, serverId, breed, areaId, log);
 	}
 	
 	@Override
@@ -35,7 +32,7 @@ public class LoneFighter extends Fighter {
 			// besoin de mettre à jour ses caractéristiques ou/et ses sorts ?
 			this.fight.levelUpManager();
 			
-			// besoin d'aller voir la mule ?
+			// besoin d'aller se décharger à la taverne ou en banque ?
 			this.fight.inventoryManager();
 			
 			// besoin d'aller dans l'aire de combat ?

@@ -6,30 +6,23 @@ import gamedata.enums.PlayerStatusEnum;
 import java.util.Vector;
 
 import controller.CharacterState;
-import controller.modules.FightAPI;
 import main.Controller;
 import main.Log;
 import messages.context.GameContextReadyMessage;
 
-public class Captain extends Fighter {
+public class Captain extends Character {
 	private Vector<Soldier> recruits;
-	private FightAPI fight;
 	private Vector<Soldier> squad;
 
 	public Captain(int id, String login, String password, int serverId, int breed, int areaId, Log log) {
-		super(id, login, password, serverId, breed, log);
+		super(id, login, password, serverId, breed, areaId, log);
 		this.recruits = new Vector<Soldier>();
-		this.fight = new FightAPI(this, areaId);
 	}
 
 	@Override // indique à tous les soldats de l'escouade que le capitaine a changé de map
 	public void updatePosition(Map map, int cellId) {
 		super.updatePosition(map, cellId);
 		broadcastStateUpdate();
-	}
-	
-	public void updateFightArea(int teamLevel) {
-		this.fight.updateFightArea(teamLevel);
 	}
 	
 	private void lifeManager() {
@@ -55,18 +48,15 @@ public class Captain extends Fighter {
 			need = true;
 		if(!need) {
 			for(Character soldier : this.squad)
-				if(soldier.inState(CharacterState.NEED_TO_EMPTY_INVENTORY))
+				if(soldier.inState(CharacterState.NEED_TO_EMPTY_INVENTORY)) {
 					need = true;
+					break;
+				}
 		}
 		if(need) {
-			this.log.p("Need to empty inventory.");
+			this.updateState(CharacterState.NEED_TO_EMPTY_INVENTORY, true); // TODO -> pas terrible
 			broadcastStateUpdate();
-			
-			// vérification du poids de l'inventaire
-			if(this.infos.inventoryIsFull(0.1f)) {
-				this.updateState(CharacterState.NEED_TO_EMPTY_INVENTORY, true);
-				this.exchangeManager.goToExchangeWithMule();
-			}
+			this.fight.inventoryManager();
 		}
 	}
 
@@ -147,7 +137,7 @@ public class Captain extends Fighter {
 			// besoin de mettre à jour ses caractéristiques ou/et ses sorts ?
 			this.fight.levelUpManager();
 
-			// besoin d'aller voir la mule ?
+			// besoin d'aller se décharger à la taverne ou en banque ?
 			inventoryManager();
 
 			// besoin d'aller dans l'aire de combat ?

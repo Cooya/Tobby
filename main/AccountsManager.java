@@ -49,17 +49,6 @@ public class AccountsManager {
 		return accounts;
 	}
 	
-	protected Account retrieveAnyMule(int serverId) {
-		for(Account account : this.accounts.values())
-			if(account.serverId == serverId && !account.isConnected)
-				return account;
-		ResultSet resultSet = DatabaseConnection.retrieveMules(new int[] {serverId});
-		Vector<Account> accounts = resultSetToAccounts(resultSet);
-		if(accounts.isEmpty())
-			return null;
-		return accounts.firstElement();
-	}
-	
 	protected void displayAllAccounts() {
 		for(Account account : this.accounts.values())
 			System.out.println(account);

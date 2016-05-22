@@ -33,7 +33,7 @@ public class PartyManager {
 		if(partyMembers != null) {
 			this.partyLevel++;
 			if(this.character instanceof Captain)
-				((Captain) this.character).updateFightArea(this.partyLevel);
+				this.character.fight.updateFightArea(partyLevel);
 		}
 	}
 	
@@ -45,7 +45,7 @@ public class PartyManager {
 		this.character.log.p("Party joined.");
 		
 		if(this.character instanceof Captain)
-			((Captain) this.character).updateFightArea(this.partyLevel);
+			this.character.fight.updateFightArea(this.partyLevel);
 	}
 	
 	public void partyLeft() {
@@ -55,7 +55,7 @@ public class PartyManager {
 		this.character.log.p("Party left.");
 		
 		if(this.character instanceof Captain)
-			((Captain) this.character).updateFightArea(this.character.infos.getLevel());
+			this.character.fight.updateFightArea(this.character.infos.getLevel());
 	}
 	
 	public void partyMemberAdded(PartyMemberInformations newMember) {
@@ -64,7 +64,7 @@ public class PartyManager {
 		this.character.log.p("Member " + newMember.name + " joined the party.");
 		
 		if(this.character instanceof Captain)
-			((Captain) this.character).updateFightArea(this.partyLevel);
+			this.character.fight.updateFightArea(this.partyLevel);
 	}
 	
 	public void partyMemberRemoved(double leavingMemberId) {
@@ -74,7 +74,7 @@ public class PartyManager {
 				this.character.log.p("Member " + partyMember.name + " left the party.");
 				this.partyMembers.remove(partyMember);
 				if(this.character instanceof Captain)
-					((Captain) this.character).updateFightArea(this.partyLevel);
+					this.character.fight.updateFightArea(this.partyLevel);
 				break;
 			}
 	}
@@ -88,7 +88,7 @@ public class PartyManager {
 				this.partyLevel += (member.level - partyMember.level);
 				this.partyMembers.setElementAt(member, i);
 				if(this.character instanceof Captain)
-					((Captain) this.character).updateFightArea(this.partyLevel);
+					this.character.fight.updateFightArea(this.partyLevel);
 				break;
 			}
 		}

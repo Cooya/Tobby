@@ -7,9 +7,6 @@ import java.io.InputStreamReader;
 import controller.CharacterBehaviour;
 import controller.informations.FightOptions;
 
-// TODO -> ajouter les aires de combat
-// TODO -> checker les serverId au niveau des escouades
-
 public class ConsoleInterface {
 
 	public static void start() {
@@ -33,7 +30,7 @@ public class ConsoleInterface {
 			case "log" :
 				if(args.length == 1)
 					Controller.getInstance().displayLog();
-				else if(args.length == 2)
+				else if(args.length == 2 && isInteger(args[1]))
 					Controller.getInstance().displayLog(Integer.valueOf(args[1]));
 				else {
 					System.out.println("Usage :");
@@ -53,60 +50,52 @@ public class ConsoleInterface {
 				}
 				break;
 			case "add" :
-				// TODO -> plus besoin du characterType
-				if(args.length == 6 && args[1].equals("-a")) {
-					int serverId = Integer.valueOf(args[4]);
-					if(serverId != 11) {
-						System.out.println("Unhandled server id.");
-						return;
-					}
-					int characterTypeId = translateCharacterType(args[5]);
-					if(characterTypeId == -1)
-						return;
-					Controller.getInstance().newAccount(args[2], args[3], serverId);
-				}
+				if(args.length == 4 && args[1].equals("-a"))
+					Controller.getInstance().newAccount(args[2], args[3], 0);
 				else if(args.length > 3 && args.length < 12 && args[1].equals("-s")) {
 					int[] ids = new int[args.length - 3];
-					for(int i = 3, j = 0; i < ids.length; ++i, ++j)
-						ids[j] = Integer.valueOf(args[i]);
+					for(int i = 3, j = 0; i < ids.length; ++i, ++j) {
+						if(isInteger(args[i]))
+							ids[j] = Integer.valueOf(args[i]);
+						else {
+							System.out.println("Bad id row.");
+							return;
+						}
+					}
 					Controller.getInstance().createSquad(args[2], ids);
 				}
 				else {
 					System.out.println("Usage :");
-					System.out.println("add -a [login] [password] [serverId] [characterType:string]");
+					System.out.println("add -a [login] [password]");
 					System.out.println("add -s [name] [id1] [id2] ... [id8]");
 				}
 				break;
 			case "co" :
-				// TODO -> plus besoin du behaviourId pour le moment
-				if(args.length == 4 && args[1].equals("-a")) {
-					int behaviourId = translateBehaviourId(args[3]);
-					if(behaviourId == -1) {
-						System.out.println("Invalid behaviour id.");
-						return;
-					}
-					Controller.getInstance().connectCharacter(Integer.valueOf(args[2]), 11, 0, -1); // TODO -> serveur
-				}
-				else if(args.length == 4 && args[1].equals("-s"))
-					Controller.getInstance().connectSquad(Integer.valueOf(args[2]), Boolean.valueOf(args[3]), 11, 0); // TODO -> serveur
+				if(args.length == 5 && args[1].equals("-a") && isInteger(args[2]) && isInteger(args[3]) && checkFightAreaId(args[4]))
+					Controller.getInstance().connectCharacter(Integer.valueOf(args[2]), Integer.valueOf(args[3]), Integer.valueOf(args[4]), -1);
+				else if(args.length == 6 && args[1].equals("-s") && isInteger(args[2]) && isInteger(args[3]) && checkFightAreaId(args[4]) && isBoolean(args[5]))
+					Controller.getInstance().connectSquad(Integer.valueOf(args[2]), Integer.valueOf(args[3]), Integer.valueOf(args[4]), Boolean.valueOf(args[5]));
 				else {
 					System.out.println("Usage :");
-					System.out.println("co -a [id] [behaviourId]");
-					System.out.println("co -s [id] [fightTogether:boolean]");
+					System.out.println("Can only connect lone wolves."); // TODO -> pouvoir connecter des groupes de combat
+					System.out.println("co -a [id] [serverId] [areaId]");
+					System.out.println("co -s [id] [serverId] [areaId] [fightTogether:boolean]");
 				}
 				break;
 			case "run" :
-				if(args.length == 3)
-					Controller.getInstance().connectCharacters(Integer.valueOf(args[1]), Integer.valueOf(args[2]));
+				if(args.length == 3 && isInteger(args[1]) && isInteger(args[2]))
+					Controller.getInstance().connectCharacters(Integer.valueOf(args[1]), Integer.valueOf(args[2]), 0);
+				else if(args.length == 4 && isInteger(args[1]) && isInteger(args[2]) && isInteger(args[3]))
+					Controller.getInstance().connectCharacters(Integer.valueOf(args[1]), Integer.valueOf(args[2]), Integer.valueOf(args[3]));
 				else {
 					System.out.println("Usage :");
-					System.out.println("run [number] [serverId]");
+					System.out.println("run [number] [serverId] (areaId)");
 				}
 				break;
 			case "deco" :
-				if(args.length == 3 && args[1].equals("-a"))
+				if(args.length == 3 && args[1].equals("-a") && isInteger(args[2]))
 					Controller.getInstance().deconnectCharacter(Integer.valueOf(args[2]));
-				else if(args.length == 3 && args[1].equals("-s"))
+				else if(args.length == 3 && args[1].equals("-s") && isInteger(args[2]))
 					Controller.getInstance().deconnectSquad(Integer.valueOf(args[2]));
 				else {
 					System.out.println("Usage :");
@@ -115,15 +104,14 @@ public class ConsoleInterface {
 				}
 				break;
 			case "infos" :
-				if(args.length == 2)
-					if(args[1].equals("-f"))
-						Controller.getInstance().displayFightsCounters();
-					else 
-						Controller.getInstance().displayInfos(Integer.valueOf(args[1]));
+				if(args.length == 1)
+					Controller.getInstance().displayFightsCounters();
+				else if(args.length == 2 && isInteger(args[1]))
+					Controller.getInstance().displayInfos(Integer.valueOf(args[1]));
 				else {
 					System.out.println("Usage :");
-					System.out.println("infos [characterId]");
-					System.out.println("infos -f");
+					System.out.println("infos");
+					System.out.println("infos [id]");
 				}
 				break;
 			case "options" :
@@ -132,16 +120,13 @@ public class ConsoleInterface {
 					System.out.println("salesman/fighter");
 					System.out.println();
 					System.out.println("Character behaviours :");
-					System.out.println("0  = wm -> waiting mule");
-					System.out.println("1  = tm -> training mule");
 					System.out.println("2  = se -> seller");
 					System.out.println("10 = lw -> lone wolf");
 					System.out.println("11 = cp -> captain");
 					System.out.println("12 = so -> soldier");
 					System.out.println();
 					System.out.println("Fight areas :");
-					for(int fightAreaId : FightOptions.fightAreasId)
-						System.out.println(fightAreaId + " -> \"" + FightOptions.getAreaNameFromId(fightAreaId) + "\"");
+					FightOptions.displayFightAreas();
 					System.out.println();
 					System.out.println("Handled servers :");
 					System.out.println("11 -> Brumaire");
@@ -168,7 +153,6 @@ public class ConsoleInterface {
 		}
 	}
 	
-	@SuppressWarnings("unused")
 	private static boolean checkFightAreaId(String arg) {
 		if(!isInteger(arg)) {
 			System.out.println("Invalid fight area id.");
@@ -181,6 +165,7 @@ public class ConsoleInterface {
 		return true;
 	}
 	
+	@SuppressWarnings("unused")
 	private static int translateCharacterType(String arg) {
 		if(isInteger(arg)) {
 			System.out.println("Invalid character type.");
@@ -196,13 +181,11 @@ public class ConsoleInterface {
 		}
 	}
 	
+	@SuppressWarnings("unused")
 	private static int translateBehaviourId(String arg) {
 		if(isInteger(arg)) {
 			int id = Integer.valueOf(arg);
 			switch(id) {
-				case CharacterBehaviour.WAITING_MULE : return id;
-				case CharacterBehaviour.TRAINING_MULE : return id;
-				case CharacterBehaviour.SELLER : return id;
 				case CharacterBehaviour.LONE_WOLF : return id;
 				case CharacterBehaviour.CAPTAIN : return id;
 				case CharacterBehaviour.SOLDIER : return id;
@@ -210,9 +193,6 @@ public class ConsoleInterface {
 			}
 		}
 		switch(arg) {
-			case "wm" : return CharacterBehaviour.WAITING_MULE;
-			case "tm" : return CharacterBehaviour.TRAINING_MULE;
-			case "se" : return CharacterBehaviour.SELLER;
 			case "lw" : return CharacterBehaviour.LONE_WOLF;
 			case "cp" : return CharacterBehaviour.CAPTAIN;
 			case "so" : return CharacterBehaviour.SOLDIER;
@@ -220,11 +200,11 @@ public class ConsoleInterface {
 		}
 	}
 	
-	public static boolean isInteger(String s) {
+	private static boolean isInteger(String s) {
 	    return isInteger(s, 10);
 	}
 
-	public static boolean isInteger(String s, int radix) {
+	private static boolean isInteger(String s, int radix) {
 	    if(s.isEmpty()) 
 	    	return false;
 	    for(int i = 0; i < s.length(); i++) {
@@ -238,5 +218,9 @@ public class ConsoleInterface {
 	        	return false;
 	    }
 	    return true;
+	}
+	
+	private static boolean isBoolean(String s) {
+		return s.equals("true") || s.equals("false");
 	}
 }

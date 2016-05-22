@@ -7,7 +7,6 @@ import main.AccountsManager.Account;
 import controller.CharacterBehaviour;
 import controller.characters.Captain;
 import controller.characters.Character;
-import controller.characters.Fighter;
 import controller.characters.Soldier;
 
 // gère les escouades (fixes ou non) via un vecteur d'escouades
@@ -68,14 +67,14 @@ class SquadsManager {
 	}
 
 	// crée un nouveau combattant et l'affecte à une escouade s'il n'en a pas
-	protected Fighter newSquadFighter(Account account, int serverId, int areaId, CharacterFrame frame, int captainId) {
-		Fighter newFighter;
+	protected Character newSquadFighter(Account account, int serverId, int areaId, CharacterFrame frame, int captainId) {
+		Character newFighter;
 		if(captainId == -1) { // combattant n'ayant pas d'escouade fixée
 			Squad incompleteSquad = this.squads.get(this.incompleteSquadIndex);
 			if(incompleteSquad.members.size() == 0) // capitaine
-				newFighter = (Fighter) Character.create(account.id, CharacterBehaviour.CAPTAIN, account.login, account.password, serverId, areaId, new Log(account.login, frame));
+				newFighter = Character.create(account.id, CharacterBehaviour.CAPTAIN, account.login, account.password, serverId, areaId, new Log(account.login, frame));
 			else { // soldat
-				newFighter = (Fighter) Character.create(account.id, CharacterBehaviour.SOLDIER, account.login, account.password, serverId, 0, new Log(account.login, frame));
+				newFighter = Character.create(account.id, CharacterBehaviour.SOLDIER, account.login, account.password, serverId, 0, new Log(account.login, frame));
 				((Captain) this.characters.getCharacter(incompleteSquad.members.firstElement().id)).newRecruit((Soldier) newFighter); // on ajoute ce nouveau soldat aux recrues du capitaine
 			}
 			incompleteSquad.members.add(account);
@@ -92,9 +91,9 @@ class SquadsManager {
 		}
 		else { // combattant ayant une escouade fixée
 			if(account.id == captainId) // capitaine
-				newFighter = (Fighter) Character.create(account.id, CharacterBehaviour.CAPTAIN, account.login, account.password, serverId, areaId, new Log(account.login, frame));
+				newFighter = Character.create(account.id, CharacterBehaviour.CAPTAIN, account.login, account.password, serverId, areaId, new Log(account.login, frame));
 			else {
-				newFighter = (Fighter) Character.create(account.id, CharacterBehaviour.CAPTAIN, account.login, account.password, serverId, areaId, new Log(account.login, frame));
+				newFighter = Character.create(account.id, CharacterBehaviour.CAPTAIN, account.login, account.password, serverId, areaId, new Log(account.login, frame));
 				((Captain) this.characters.getCharacter(captainId)).newRecruit((Soldier) newFighter);
 			}
 		}

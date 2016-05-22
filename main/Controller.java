@@ -103,17 +103,6 @@ public class Controller {
 			return;
 		}
 		
-		// si une mule n'est pas connectée sur le serveur, on en connecte une
-		if(account.serverId == 0 && !this.characters.muleIsConnected(serverId)) {
-			Account muleAccount = this.accounts.retrieveAnyMule(serverId);
-			if(muleAccount != null)
-				connectCharacter(muleAccount, serverId, 0, -1);
-			else {
-				Log.err("None mule has been found.");
-				return;
-			}
-		}
-		
 		if(Main.GRAPHICAL_MODE) {
 			CharacterFrame frame = new CharacterFrame(account.id, account.login);
 			this.view.addCharacterFrame(frame);
@@ -245,7 +234,7 @@ public class Controller {
 		this.squads.createFixedSquad(name, members);
 	}
 	
-	public void connectSquad(int squadId, boolean fightTogether, int serverId, int areaId) {
+	public void connectSquad(int squadId, int serverId, int areaId, boolean fightTogether) {
 		Squad squad = this.squads.getSquad(squadId);
 		if(squad == null) {
 			Log.err("Invalid squad id.");
@@ -281,9 +270,9 @@ public class Controller {
 			Log.err("Squad with id = " + squadId + " does not exist.");
 	}
 	
-	public void connectCharacters(int number, int serverId) {
+	public void connectCharacters(int number, int serverId, int areaId) {
 		for(Account account : this.accounts.retrieveFighters(number))
-			connectCharacter(account, serverId, 0, -1);
+			connectCharacter(account, serverId, areaId, -1);
 	}
 	
 	public void displayAllAccounts() {
@@ -468,7 +457,7 @@ public class Controller {
 			if(this.singleAccount)
 				self.connectCharacter(this.id, 11, this.fighterOptionsPanel.getSelectedAreaId(), -1);
 			else // escouade
-				self.connectSquad(this.id, this.fighterOptionsPanel.getSelectedBehaviour() != CharacterBehaviour.LONE_WOLF, 11, this.fighterOptionsPanel.getSelectedAreaId());
+				self.connectSquad(this.id, 11, this.fighterOptionsPanel.getSelectedAreaId(), this.fighterOptionsPanel.getSelectedBehaviour() != CharacterBehaviour.LONE_WOLF);
 			this.fighterOptionsPanel.dispose();
 		}
 	}

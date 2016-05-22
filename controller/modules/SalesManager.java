@@ -16,7 +16,6 @@ import java.util.Map;
 import java.util.Vector;
 
 import main.DatabaseConnection;
-import main.FatalError;
 import main.Log;
 import messages.exchanges.ExchangeBidHousePriceMessage;
 import messages.exchanges.ExchangeBidPriceForSellerMessage;
@@ -42,12 +41,13 @@ public class SalesManager {
 		averagePrices = new HashMap<Integer, Integer>(idsCount);
 		for(int i = 0; i < idsCount; ++i)
 			averagePrices.put(ids.get(i), avgPrices.get(i));
+		Log.info("Average prices set.");
 	}
 	
 	public static int getAveragePrice(int objectGID) {
-		int price = averagePrices.get(objectGID);
-		if(price == 0)
-			throw new FatalError("Unknown object generic ID.");
+		Integer price = averagePrices.get(objectGID);
+		if(price == null)
+			return 0;
 		return price;
 	}
 	
@@ -138,7 +138,7 @@ public class SalesManager {
 		this.character.interaction.openTavernShop();
 		ObjectItem[] inventoryObjects = this.character.inventory.getObjects();
 		for(ObjectItem object : inventoryObjects) {
-			object.averagePrice = SalesManager.getAveragePrice(object.objectGID);
+			object.averagePrice = getAveragePrice(object.objectGID);
 			if(object.averagePrice != 0 && object.averagePrice < 250)
 				sellObjectToNpc(object.objectUID, object.quantity);
 		}
@@ -263,7 +263,7 @@ public class SalesManager {
 		// on récupère la liste des objets en banque que l'on trie par prix moyen décroissant
 		ObjectItem bankObjects[] = this.character.bank.getObjects();
 		for(ObjectItem object : bankObjects)
-			object.averagePrice = SalesManager.getAveragePrice(object.objectGID);
+			object.averagePrice = getAveragePrice(object.objectGID);
 		Arrays.sort(bankObjects, ObjectItem.AVG_PRICE_DESC);
 		
 		Vector<ObjectItem> objectsToSell = new Vector<ObjectItem>(nFirst);

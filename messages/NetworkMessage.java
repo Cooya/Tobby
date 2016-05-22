@@ -20,20 +20,6 @@ public abstract class NetworkMessage {
 	private static final Map<String, Object> hashedMessages = new HashMap<String, Object>();
 	
 	static {
-		// chargement de la liste des messages (id + nom) écrite en dur
-		fillMessagesMap();
-		Log.info("Network messages list loaded.");
-		
-		// récupération de toutes les classes de sérialisation/désérialisation des messages dans le package "messages"
-		try {
-			Class<?>[] classesArray = Reflection.getClassesInPackage("messages");
-			for(Class<?> cl : classesArray)
-				msgClasses.put(cl.getSimpleName(), (Class<NetworkMessage>) cl);
-		} catch(Exception e) {
-			e.printStackTrace();
-			Controller.getInstance().exit("Error occured during loading deserialization classes.");
-		}
-		
 		// liste des messages non acquittables
 		acknowledgementExceptions.put(4, null); // IdentificationMessage
 		acknowledgementExceptions.put(40, null); // ServerSelectionMessage
@@ -80,6 +66,23 @@ public abstract class NetworkMessage {
 	// constructeur pour les messages gérés
 	public NetworkMessage() {
 		this.name = getClass().getSimpleName();
+	}
+	
+	public static void loadMessagesListAndClasses() {
+		// chargement de la liste des messages (id + nom) écrite en dur
+		fillMessagesMap();
+		Log.info("Network messages list loaded.");
+		
+		// récupération de toutes les classes de sérialisation/désérialisation des messages dans le package "messages"
+		try {
+			Class<?>[] classesArray = Reflection.getClassesInPackage("messages");
+			for(Class<?> cl : classesArray)
+				msgClasses.put(cl.getSimpleName(), (Class<NetworkMessage>) cl);
+			Log.info("Network message classes loaded.");
+		} catch(Exception e) {
+			e.printStackTrace();
+			Controller.getInstance().exit("Error occured during loading deserialization classes.");
+		}
 	}
 	
 	// sorte de méthode "factory" pour les messages reçus

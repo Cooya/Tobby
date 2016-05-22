@@ -76,31 +76,6 @@ public class MovementAPI {
 		this.character.net.send(new UnhandledMessage("GameMapMovementConfirmMessage"));
 		return true;
 	}
-
-	// définition d'une aire de destination et de parcours
-	public void defineTargetArea(int areaId) {
-		Map currentMap = this.character.infos.getCurrentMap();
-		
-		// si le perso est dans le temple céleste, il en sort
-		if(mapIsInCelestialTemple(currentMap))
-			goOutFromCelestialTemple();
-		
-		// si le perso est à Incarnam et qu'il doit aller à Astrub, il descend
-		// si le perso est à Astrub et qu'il doit aller à Incarnam, il monte
-		boolean isInIncarnam = mapIsInIncarnam(currentMap);
-		if(areaIsInIncarnam(areaId)) {
-			if(!isInIncarnam)
-				goUpToIncarnam();
-		}
-		else {
-			if(isInIncarnam)
-				goDownToAstrub();
-		}
-		
-		// l'aire cible est modifiée
-		this.pathfinding.setArea(areaId);
-		this.character.log.p("Going from map " + currentMap.id + " to area " + areaId + ".");
-	}
 	
 	// déplacement vers une cible fixe ou non (booléen "dynamic")
 	public void goTo(int mapId, boolean dynamic) {
@@ -152,6 +127,32 @@ public class MovementAPI {
 	
 	// déplacement vers la plus proche map d'une aire
 	public void goToArea(int areaId) {
+		Map currentMap = this.character.infos.getCurrentMap();
+		
+		// si le perso est dans le temple céleste, il en sort
+		if(mapIsInCelestialTemple(currentMap))
+			goOutFromCelestialTemple();
+		
+		// si le perso est dans la banque d'Astrub, il en sort
+		if(this.character.infos.getCurrentMap().id == ASTRUB_BANK_INSIDE_MAP_ID)
+			goOutAstrubBank();
+				
+		// si le perso est dans la taverne d'Astrub, il en sort
+		if(this.character.infos.getCurrentMap().id == ASTRUB_TAVERN_INSIDE_MAP_ID)
+			goOutAstrubTavern();
+		
+		// si le perso est à Incarnam et qu'il doit aller à Astrub, il descend
+		// si le perso est à Astrub et qu'il doit aller à Incarnam, il monte
+		boolean isInIncarnam = mapIsInIncarnam(currentMap);
+		if(areaIsInIncarnam(areaId)) {
+			if(!isInIncarnam)
+				goUpToIncarnam();
+		}
+		else {
+			if(isInIncarnam)
+				goDownToAstrub();
+		}
+		
 		// si le perso est déjà sur l'aire, il ne fait rien
 		if(this.character.infos.getCurrentMap().subareaId == areaId) {
 			this.pathfinding.setArea(areaId); // pas besoin du calcul du chemin
@@ -160,7 +161,8 @@ public class MovementAPI {
 		}
 		
 		// définition de l'aire cible
-		defineTargetArea(areaId);
+		this.pathfinding.setArea(areaId);
+		this.character.log.p("Going from map " + currentMap.id + " to area " + areaId + ".");
 		
 		// le perso se dirige vers cette aire cible
 		Direction direction;

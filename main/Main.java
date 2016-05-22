@@ -2,6 +2,7 @@ package main;
 
 import java.text.SimpleDateFormat;
 
+import messages.NetworkMessage;
 import utilities.Processes;
 
 public class Main {
@@ -49,6 +50,7 @@ public class Main {
 			return;
 		}
 		Emulation.runLauncher();
+		NetworkMessage.loadMessagesListAndClasses();
 		DatabaseConnection.unlockAllAccounts();
 		if(GRAPHICAL_MODE)
 			Controller.getInstance();

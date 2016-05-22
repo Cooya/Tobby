@@ -1,15 +1,13 @@
 package controller.characters;
 
 import controller.CharacterState;
-import controller.modules.FightAPI;
 import gamedata.enums.PlayerStatusEnum;
 import main.Controller;
 import main.Log;
 import messages.context.GameContextReadyMessage;
 import messages.fights.GameFightJoinRequestMessage;
 
-public class Soldier extends Fighter {
-	private FightAPI fight;
+public class Soldier extends Character {
 	private Captain captain;
 	
 	// booléens accessibles pour le capitaine (états du soldat)
@@ -17,8 +15,7 @@ public class Soldier extends Fighter {
 	protected boolean readyForFight;
 
 	public Soldier(int id, String login, String password, int serverId, int breed, Log log) {
-		super(id, login, password, serverId, breed, log);
-		this.fight = new FightAPI(this);
+		super(id, login, password, serverId, breed, 0, log);
 	}
 	
 	public Captain getCaptain() {
@@ -89,10 +86,8 @@ public class Soldier extends Fighter {
 				}
 			}
 			else if(this.captain.inState(CharacterState.NEED_TO_EMPTY_INVENTORY)) {
-				if(this.infos.inventoryIsFull(0.1f))
-					this.exchangeManager.goToExchangeWithMule();
-				else // annule l'état broadcasté par le capitaine
-					updateState(CharacterState.NEED_TO_EMPTY_INVENTORY, false);
+				this.updateState(CharacterState.NEED_TO_EMPTY_INVENTORY, true);
+				this.fight.inventoryManager();
 			}
 			
 			if(inState(CharacterState.SHOULD_DECONNECT)) {

@@ -15,7 +15,6 @@ public class ObjectAveragePricesMessage extends NetworkMessage {
 	
 	@Override
 	public void deserialize() {
-		this.avgPrices = new Vector<Integer>();
 		int nb = this.content.readShort();
 		this.ids = new Vector<Integer>(nb);
 		for(int i = 0; i < nb; ++i)

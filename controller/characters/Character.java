@@ -10,9 +10,11 @@ import java.util.Hashtable;
 import controller.CharacterBehaviour;
 import controller.CharacterState;
 import controller.informations.CharacterInformations;
+import controller.informations.FightContext;
 import controller.informations.RoleplayContext;
 import controller.informations.StorageContent;
 import controller.modules.ExchangeManager;
+import controller.modules.FightAPI;
 import controller.modules.InteractionAPI;
 import controller.modules.MovementAPI;
 import controller.modules.PartyManager;
@@ -37,17 +39,16 @@ public abstract class Character extends Thread {
 	public StorageContent inventory;
 	public StorageContent bank;
 	public RoleplayContext roleplayContext;
+	public FightContext fightContext;
 	public ExchangeManager exchangeManager;
 	public SalesManager salesManager;
 	public PartyManager partyManager;
 	public MovementAPI mvt;
+	public FightAPI fight;
 	public InteractionAPI interaction;
 	
 	public static Character create(int id, int behaviour, String login, String password, int serverId, int areaId, Log log) {
 		switch(behaviour) {
-			case CharacterBehaviour.WAITING_MULE : return new Mule(id, login, password, serverId, BreedEnum.Sadida, log);
-			case CharacterBehaviour.TRAINING_MULE : throw new FatalError("Not implemented yet !");
-			case CharacterBehaviour.SELLER : throw new FatalError("Not implemented yet !");
 			case CharacterBehaviour.LONE_WOLF : return new LoneFighter(id, login, password, serverId, BreedEnum.Cra, areaId, log);
 			case CharacterBehaviour.CAPTAIN : return new Captain(id, login, password, serverId, BreedEnum.Cra, areaId, log);
 			case CharacterBehaviour.SOLDIER : return new Soldier(id, login, password, serverId, BreedEnum.Cra, log);
@@ -55,7 +56,7 @@ public abstract class Character extends Thread {
 		}
 	}
 
-	protected Character(int id, String login, String password, int serverId, int breed, Log log) {
+	protected Character(int id, String login, String password, int serverId, int breed, int areaId, Log log) {
 		super(login + "/controller");
 		this.id = id;
 		
@@ -76,10 +77,12 @@ public abstract class Character extends Thread {
 		this.inventory = new StorageContent();
 		this.bank = new StorageContent();
 		this.roleplayContext = new RoleplayContext(this);
+		this.fightContext = new FightContext(this);
 		this.exchangeManager = new ExchangeManager(this);
 		this.salesManager = new SalesManager(this);
 		this.partyManager = new PartyManager(this);
 		this.mvt = new MovementAPI(this);
+		this.fight = new FightAPI(this, areaId);
 		this.interaction = new InteractionAPI(this);
 		
 		// initialisation de la table des états
@@ -182,16 +185,6 @@ public abstract class Character extends Thread {
 				break;
 			case PENDING_DEMAND : // état simple
 				this.log.p("Waiting for exchange demand.");
-				condition = new Condition(state, 0);
-				condition.addConstraint(CharacterState.SHOULD_DECONNECT, true); // tant qu'on ne reçoit pas d'ordre de déconnexion
-				break;
-			case MULE_ONLINE : // état simple
-				this.log.p("Waiting for mule connection.");
-				condition = new Condition(state, 0);
-				condition.addConstraint(CharacterState.SHOULD_DECONNECT, true); // tant qu'on ne reçoit pas d'ordre de déconnexion
-				break;
-			case MULE_AVAILABLE : // état simple
-				this.log.p("Waiting for mule to be available.");
 				condition = new Condition(state, 0);
 				condition.addConstraint(CharacterState.SHOULD_DECONNECT, true); // tant qu'on ne reçoit pas d'ordre de déconnexion
 				break;

@@ -30,10 +30,17 @@ public class DatabaseConnection {
 	public static int newAccount(String login, String password, int serverId) {
 		Log.info("Adding new account into database.");
 		query.setLength(0);
-		query.append("INSERT INTO accounts (login, password, serverId, owner) VALUES (");
-		query.append("\"" + login + "\", ");
-		query.append("\"" + password + "\", ");
-		query.append(serverId + ", ");
+		if(serverId != 0) {
+			query.append("INSERT INTO accounts (login, password, serverId, owner) VALUES (");
+			query.append("\"" + login + "\", ");
+			query.append("\"" + password + "\", ");
+			query.append(serverId + ", ");
+		}
+		else {
+			query.append("INSERT INTO accounts (login, password, owner) VALUES (");
+			query.append("\"" + login + "\", ");
+			query.append("\"" + password + "\", ");
+		}
 		query.append("\"" + Main.USERNAME + "\");");
 		try {
 			return st.executeUpdate(query.toString(), Statement.RETURN_GENERATED_KEYS);
@@ -53,49 +60,6 @@ public class DatabaseConnection {
 			st.executeUpdate("UPDATE accounts SET owner = \"" + Main.USERNAME + "\" WHERE serverId IS NULL AND owner IS NULL AND isBanned = 0 LIMIT " + number + ";");
 			co.commit();
 			co.setAutoCommit(true);
-			return result;
-		} catch(SQLException e) {
-			e.printStackTrace();
-			return null;
-		}
-	}
-	
-	public static ResultSet retrieveMules(int[] serverIds) {
-		Log.info("Retrieving mule(s) from database.");
-		query.setLength(0);
-		ResultSet result;
-		try {
-			co.setAutoCommit(false);
-			
-			// récupération des mules
-			query.append("SELECT id, login, password, serverId FROM accounts WHERE serverId IN (");
-			for(int serverId : serverIds)
-				if(serverId != serverIds[serverIds.length - 1])
-					query.append(serverId + ", ");
-				else
-					query.append(serverId + ")");
-			query.append(" AND owner IS NULL AND isBanned = 0 GROUP BY serverId;");
-			result = st.executeQuery(query.toString());
-			
-			// réservation des mules
-			query.setLength(0);
-			while(result.next()) {
-				query.append("UPDATE accounts SET owner = \"" + Main.USERNAME + "\" WHERE id IN (");
-				if(!result.isLast())
-					query.append(result.getInt("id") + ", ");
-				else
-					query.append(result.getInt("id") + ");");
-			}
-			
-			if(query.length() == 0)
-				throw new FatalError("None mule is available.");
-			
-			st = co.createStatement();
-			st.executeUpdate(query.toString());
-			
-			co.commit();
-			co.setAutoCommit(true);
-			result.beforeFirst();
 			return result;
 		} catch(SQLException e) {
 			e.printStackTrace();
