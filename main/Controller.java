@@ -53,7 +53,7 @@ public class Controller {
 
 	// détermine si l'identifiant du personnage passé en paramètre est un id de personnage de l'application
 	public boolean isWorkmate(double characterId) {
-		for(Character character : this.characters.getConnectedCharacters())
+		for(Character character : this.characters.getConnectedCharacters(0))
 			if(character.infos.getCharacterId() == characterId)
 				return true;
 		return false;
@@ -62,7 +62,7 @@ public class Controller {
 	// retourne l'objet Log correspondant au thread courant (utile pour les méthodes statiques)
 	public Log getLog() {
 		Thread currentThread = Thread.currentThread();
-		for(Character character : this.characters.getConnectedCharacters())
+		for(Character character : this.characters.getConnectedCharacters(0))
 			for(Thread thread : character.threads)
 				if(thread == currentThread)
 					return character.log;
@@ -72,7 +72,7 @@ public class Controller {
 	// fonction appelée à la fermeture de l'application (graphique ou CLI) ou lors d'une erreur critique
 	public void exit(String reason) {
 		Emulation.killLauncher();
-		Collection<Character> characters = this.characters.getConnectedCharacters();
+		Collection<Character> characters = this.characters.getConnectedCharacters(0);
 		for(Character character : characters)
 			character.log.flushBuffer();
 		
@@ -86,23 +86,28 @@ public class Controller {
 	}
 	
 	public Account newAccount(String login, String password, int serverId) {
-		Account account = self.accounts.getAccount(login); // si le compte existe déjà
-		if(account == null) {
-			account = self.accounts.createAccount(login, password, serverId);
+		// TODO -> verifier si le compte n'existe pas déjà
+		Account account = self.accounts.createAccount(login, password, serverId);
 			if(account != null && this.view != null)
 				this.view.newAccountItem(login, serverId);
-		}
 		return account;
+	}
+	
+	public void createSquad(String name, int[] ids) {
+		Vector<Account> members = new Vector<Account>(ids.length);
+		Account account;
+		for(int id : ids) {
+			account = this.accounts.retrieveAccount(id);
+			if(account != null)
+				members.add(account);
+			else
+				Log.err("Account with id = " + id  + " does not exist.");
+		}
+		this.squads.createFixedSquad(name, members);
 	}
 	
 	// connexion d'un personnage (passage au modèle)
 	public void connectCharacter(Account account, int serverId, int areaId, int captainId) {
-		// vérification de la disponibilité du compte (connecté ou non)
-		if(account.isConnected) {
-			Log.err("Character already connected.");
-			return;
-		}
-		
 		if(Main.GRAPHICAL_MODE) {
 			CharacterFrame frame = new CharacterFrame(account.id, account.login);
 			this.view.addCharacterFrame(frame);
@@ -114,15 +119,53 @@ public class Controller {
 			this.characters.connectCharacter(account, serverId, areaId, null, captainId);
 	}
 	
-	// connexion d'un personnage (passage au modèle)
-	public void connectCharacter(int accountId, int serverId, int areaId, int captainId) {
-		// récupération du compte
-		Account account = this.accounts.getAccount(accountId);
+	// connexion d'un personnage depuis l'interface graphique ou en ligne de commande
+	public void connectCharacter(int accountId, int serverId, int areaId) {
+		Account account = this.accounts.retrieveAccount(accountId);
 		if(account == null) {
-			Log.err("Invalid account id.");
+			Log.err("Invalid account id or account already used.");
 			return;
 		}
-		connectCharacter(account, serverId, areaId, captainId);
+		connectCharacter(account, serverId, areaId, -1);
+	}
+	
+	// connexion d'un personnage en ligne de commande
+	public void connectCharacter(String login, int serverId, int areaId) {
+		Account account = this.accounts.retrieveAccount(login);
+		if(account == null) {
+			Log.err("Invalid account id or account already used.");
+			return;
+		}
+		connectCharacter(account, serverId, areaId, -1);
+	}
+	
+	public void connectCharacters(int number, int serverId, int areaId) {
+		for(Account account : this.accounts.retrieveAccounts(number))
+			connectCharacter(account, serverId, areaId, -1);
+	}
+	
+	public void connectSquad(int squadId, int serverId, int areaId, boolean fightTogether) {
+		Squad squad = this.squads.getSquad(squadId);
+		if(squad == null) {
+			Log.err("Invalid squad id.");
+			return;
+		}
+		
+		Vector<Account> members = squad.getMembers();
+		// check le statut de connexion
+		if(!fightTogether)
+			for(Account member : members)
+				connectCharacter(member, serverId, areaId, -1);
+		else {
+			Account account = members.get(0);
+			int captainId = account.id;
+			connectCharacter(account, serverId, areaId, captainId); // connexion du capitaine
+			int squadSize = members.size();
+			for(int i = 1; i < squadSize; ++i) {
+				account = members.get(i);
+				connectCharacter(account, serverId, 0, captainId); // connexion des soldats
+			}
+		}
 	}
 	
 	// déconnexion du personnage correspondant au thread courant
@@ -151,18 +194,32 @@ public class Controller {
 			new Thread() {
 				@Override
 				public void run() {
-					deconnectAllCharacters(reason, forced, reconnection);
+					deconnectCharacters(reason, 0, forced, reconnection);
 				}
 			}.start();
 		}
 		else
-			deconnectAllCharacters(reason, forced, reconnection);
+			deconnectCharacters(reason, 0, forced, reconnection);
 	}
 	
-	private synchronized void deconnectAllCharacters(String reason, boolean forced, boolean reconnection) {
+	// déconnexion de tous les personnages connectés sur un serveur donné
+	public void serverDeconnection(String reason, int serverId, boolean forced, boolean reconnection) {
+		if(Main.GRAPHICAL_MODE) {
+			new Thread() {
+				@Override
+				public void run() {
+					deconnectCharacters(reason, serverId, forced, reconnection);
+				}
+			}.start();
+		}
+		else
+			deconnectCharacters(reason, serverId, forced, reconnection);
+	}
+	
+	private synchronized void deconnectCharacters(String reason, int serverId, boolean forced, boolean reconnection) {
 		// déconnexion (voire suppression) de tous les personnages connectés
 		Log.info("Deconnecting all characters...");
-		Collection<Character> characters = self.characters.getConnectedCharacters();
+		Collection<Character> characters = self.characters.getConnectedCharacters(serverId);
 		for(Character character : characters) {
 			character.log.p(reason);
 			character.deconnectionOrder(forced);
@@ -221,43 +278,6 @@ public class Controller {
 		}.start();
 	}
 	
-	public void createSquad(String name, int[] ids) {
-		Vector<Account> members = new Vector<Account>(ids.length);
-		Account account;
-		for(int id : ids) {
-			account = this.accounts.getAccount(id);
-			if(account != null)
-				members.add(account);
-			else
-				Log.err("Account with id = " + id  + " does not exist.");
-		}
-		this.squads.createFixedSquad(name, members);
-	}
-	
-	public void connectSquad(int squadId, int serverId, int areaId, boolean fightTogether) {
-		Squad squad = this.squads.getSquad(squadId);
-		if(squad == null) {
-			Log.err("Invalid squad id.");
-			return;
-		}
-		
-		Vector<Account> members = squad.getMembers();
-		// check le statut de connexion
-		if(!fightTogether)
-			for(Account member : members)
-				connectCharacter(member, serverId, areaId, -1);
-		else {
-			Account account = members.get(0);
-			int captainId = account.id;
-			connectCharacter(account, serverId, areaId, captainId); // connexion du capitaine
-			int squadSize = members.size();
-			for(int i = 1; i < squadSize; ++i) {
-				account = members.get(i);
-				connectCharacter(account, serverId, 0, captainId); // connexion des soldats
-			}
-		}
-	}
-	
 	public void deconnectSquad(int squadId) {
 		Squad squad = this.squads.getSquad(squadId);
 		if(squad != null) {
@@ -268,11 +288,6 @@ public class Controller {
 		}
 		else
 			Log.err("Squad with id = " + squadId + " does not exist.");
-	}
-	
-	public void connectCharacters(int number, int serverId, int areaId) {
-		for(Account account : this.accounts.retrieveFighters(number))
-			connectCharacter(account, serverId, areaId, -1);
 	}
 	
 	public void displayAllAccounts() {
@@ -288,40 +303,46 @@ public class Controller {
 	}
 	
 	public void displayLog(int accountId) {
-		Account account = this.accounts.getAccount(accountId);
-		if(account != null) {
-			Character character = this.characters.getCharacter(accountId);
-			if(character != null)	
-				character.log.displayLog(20);
-			else
-				System.out.println("Character not connected.");
-		}
+		Character character = this.characters.getCharacter(accountId);
+		if(character != null)	
+			character.log.displayLog(20);
 		else
-			Log.err("Account with id = " + accountId + " does not exist.");
+			System.out.println("Character not connected on this computer.");
 	}
 	
-	public void displayInfos(int accountId) {
-		Account account = this.accounts.getAccount(accountId);
-		if(account != null) {
-			Character character = this.characters.getCharacter(accountId);
-			if(character != null)	
-				Reflection.explore(character.infos, 1);
-			else
-				System.out.println("Character not connected.");
-		}
+	public void displayPersonalInfos(int accountId) {
+		Character character = this.characters.getCharacter(accountId);
+		if(character != null)	
+			Reflection.explore(character.infos, 1);
 		else
-			Log.err("Account with id = " + accountId + " does not exist.");
+			System.out.println("Character not connected on this computer.");
 	}
 	
-	public void displayFightsCounters() {
+	public void displayPersonalInfos(String login) {
+		Character character = this.characters.getCharacter(login);
+		if(character != null)	
+			Reflection.explore(character.infos, 1);
+		else
+			System.out.println("Character not connected on this computer.");
+	}
+	
+	public void displayGlobalInfos() {
 		Collection<Character> characters = this.characters.getInGameFighters();
 		StringBuilder str = new StringBuilder();
 		for(Character character : characters) {
+			str.append(character.id);
+			str.append(" ");
 			str.append(character.infos.getLogin());
 			str.append(" -> win : ");
 			str.append(character.infos.getFightsWonCounter());
 			str.append(", lost : ");
 			str.append(character.infos.getFightsLostCounter());
+			str.append(", level : ");
+			str.append(character.infos.getLevel());
+			str.append(", weight : ");
+			str.append(character.infos.getWeight());
+			str.append("/");
+			str.append(character.infos.getWeightMax());
 			System.out.println(str);
 			str.setLength(0);
 		}
@@ -412,11 +433,13 @@ public class Controller {
 		}
 
 		public void actionPerformed(ActionEvent e) {
+			/*
 			Account account = self.accounts.getAccount(this.accountItem.getText().split(" ")[0]);
 			if(account != null)
 				new FighterOptionsPanelListener(self.view.createFighterOptionsPanel(account.serverId, self.squads.nextFighterWillBe()), account.id, true);
 			else
 				Log.err("Unknown account.");
+			*/
 		}
 	}
 	
@@ -455,7 +478,7 @@ public class Controller {
 
 		public void actionPerformed(ActionEvent event) {
 			if(this.singleAccount)
-				self.connectCharacter(this.id, 11, this.fighterOptionsPanel.getSelectedAreaId(), -1);
+				self.connectCharacter(this.id, 11, this.fighterOptionsPanel.getSelectedAreaId());
 			else // escouade
 				self.connectSquad(this.id, 11, this.fighterOptionsPanel.getSelectedAreaId(), this.fighterOptionsPanel.getSelectedBehaviour() != CharacterBehaviour.LONE_WOLF);
 			this.fighterOptionsPanel.dispose();

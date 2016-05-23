@@ -93,7 +93,7 @@ class SquadsManager {
 			if(account.id == captainId) // capitaine
 				newFighter = Character.create(account.id, CharacterBehaviour.CAPTAIN, account.login, account.password, serverId, areaId, new Log(account.login, frame));
 			else {
-				newFighter = Character.create(account.id, CharacterBehaviour.CAPTAIN, account.login, account.password, serverId, areaId, new Log(account.login, frame));
+				newFighter = Character.create(account.id, CharacterBehaviour.SOLDIER, account.login, account.password, serverId, areaId, new Log(account.login, frame));
 				((Captain) this.characters.getCharacter(captainId)).newRecruit((Soldier) newFighter);
 			}
 		}

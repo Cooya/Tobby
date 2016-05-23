@@ -5,7 +5,7 @@ import gamedata.character.PlayerStatus;
 import gamedata.d2p.ankama.Map;
 import gamedata.enums.BreedEnum;
 
-import java.util.Hashtable;
+import java.util.HashMap;
 
 import controller.CharacterBehaviour;
 import controller.CharacterState;
@@ -16,20 +16,19 @@ import controller.informations.StorageContent;
 import controller.modules.ExchangeManager;
 import controller.modules.FightAPI;
 import controller.modules.InteractionAPI;
+import controller.modules.ModeratorDetection;
 import controller.modules.MovementAPI;
 import controller.modules.PartyManager;
 import controller.modules.SalesManager;
 import main.Controller;
 import main.FatalError;
 import main.Log;
-import main.Main;
 import main.NetworkInterface;
 import messages.NetworkMessage;
-import messages.character.BasicWhoIsRequestMessage;
 import messages.character.PlayerStatusUpdateRequestMessage;
 
 public abstract class Character extends Thread {
-	private Hashtable<CharacterState, Boolean> states;
+	private HashMap<CharacterState, Boolean> states;
 	public int id; // identifiant du personnage
 	public Log log; // gestion des logs (fichier + historique graphique)
 	public Thread[] threads; // tableau contenant les 4 threads du personnage
@@ -46,6 +45,7 @@ public abstract class Character extends Thread {
 	public MovementAPI mvt;
 	public FightAPI fight;
 	public InteractionAPI interaction;
+	public ModeratorDetection mod;
 	
 	public static Character create(int id, int behaviour, String login, String password, int serverId, int areaId, Log log) {
 		switch(behaviour) {
@@ -84,9 +84,10 @@ public abstract class Character extends Thread {
 		this.mvt = new MovementAPI(this);
 		this.fight = new FightAPI(this, areaId);
 		this.interaction = new InteractionAPI(this);
+		this.mod = new ModeratorDetection(this);
 		
 		// initialisation de la table des états
-		this.states = new Hashtable<CharacterState, Boolean>();
+		this.states = new HashMap<CharacterState, Boolean>();
 		for(CharacterState state : CharacterState.values())
 			this.states.put(state, false);
 		
@@ -144,16 +145,6 @@ public abstract class Character extends Thread {
 		PSURM.status = new PlayerStatus(status);
 		this.net.send(PSURM);
 		this.log.p("Passing in away mode.");
-	}
-
-	// envoie une requête WHOIS pour savoir si le modérateur du serveur est en ligne
-	protected void checkIfModeratorIsOnline(String moderatorName) {
-		BasicWhoIsRequestMessage BWIRM = new BasicWhoIsRequestMessage();
-		BWIRM.verbose = true;
-		BWIRM.search = moderatorName;
-		this.net.send(BWIRM);
-		this.log.p("Checking if moderator is online.");
-		waitState(CharacterState.WHOIS_RESPONSE);
 	}
 
 	// seul le thread de traitement entre ici
@@ -333,16 +324,12 @@ public abstract class Character extends Thread {
 					return false;
 				}
 			}
-			if(infiniteWaiting) {
-				//sendPingRequest();
-				if(this.infos.isInGame())
-					checkIfModeratorIsOnline(Main.MODERATOR_NAME); // requête effectuée toutes les 2 minutes
-				startTime = System.currentTimeMillis();
-			}
-			else {
+			this.mod.detectModerator();
+			if(!infiniteWaiting) {
 				this.log.p("TIMEOUT");
 				return false; // si on ne l'a pas reçu à temps
 			}
+			startTime = System.currentTimeMillis();
 		}
 		return false;
 	}

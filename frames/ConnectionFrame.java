@@ -218,7 +218,7 @@ public class ConnectionFrame extends Frame {
 	}
 	
 	protected void process(ObjectAveragePricesMessage msg) {
-		SalesManager.setAveragePrices(msg.ids, msg.avgPrices);
+		SalesManager.setAveragePrices(this.character.infos.getServerId(), msg.ids, msg.avgPrices);
 	}
 	
 	private static boolean serverIsSelectable(Vector<GameServerInformations> servers, int serverId) {

@@ -1,5 +1,7 @@
 package main;
 
+import gamedata.enums.ServerEnum;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -71,21 +73,25 @@ public class ConsoleInterface {
 				}
 				break;
 			case "co" :
-				if(args.length == 5 && args[1].equals("-a") && isInteger(args[2]) && isInteger(args[3]) && checkFightAreaId(args[4]))
-					Controller.getInstance().connectCharacter(Integer.valueOf(args[2]), Integer.valueOf(args[3]), Integer.valueOf(args[4]), -1);
-				else if(args.length == 6 && args[1].equals("-s") && isInteger(args[2]) && isInteger(args[3]) && checkFightAreaId(args[4]) && isBoolean(args[5]))
+				if(args.length == 4 && args[1].equals("-a") && isInteger(args[2]) && checkServerId(args[3]))
+					Controller.getInstance().connectCharacter(Integer.valueOf(args[2]), Integer.valueOf(args[3]), 0);
+				else if(args.length == 5 && args[1].equals("-a") && isInteger(args[2]) && checkServerId(args[3]) && checkFightAreaId(args[4]))
+					Controller.getInstance().connectCharacter(Integer.valueOf(args[2]), Integer.valueOf(args[3]), Integer.valueOf(args[4]));
+				else if(args.length == 5 && args[1].equals("-s") && isInteger(args[2]) && checkServerId(args[3]) && isBoolean(args[4]))
+					Controller.getInstance().connectSquad(Integer.valueOf(args[2]), Integer.valueOf(args[3]), 0, Boolean.valueOf(args[4]));
+				else if(args.length == 6 && args[1].equals("-s") && isInteger(args[2]) && checkServerId(args[3]) && checkFightAreaId(args[4]) && isBoolean(args[5]))
 					Controller.getInstance().connectSquad(Integer.valueOf(args[2]), Integer.valueOf(args[3]), Integer.valueOf(args[4]), Boolean.valueOf(args[5]));
 				else {
 					System.out.println("Usage :");
 					System.out.println("Can only connect lone wolves."); // TODO -> pouvoir connecter des groupes de combat
-					System.out.println("co -a [id] [serverId] [areaId]");
-					System.out.println("co -s [id] [serverId] [areaId] [fightTogether:boolean]");
+					System.out.println("co -a [id] [serverId] (areaId)");
+					System.out.println("co -s [id] [serverId] (areaId) [fightTogether:boolean]");
 				}
 				break;
 			case "run" :
-				if(args.length == 3 && isInteger(args[1]) && isInteger(args[2]))
+				if(args.length == 3 && isInteger(args[1]) && checkServerId(args[2]))
 					Controller.getInstance().connectCharacters(Integer.valueOf(args[1]), Integer.valueOf(args[2]), 0);
-				else if(args.length == 4 && isInteger(args[1]) && isInteger(args[2]) && isInteger(args[3]))
+				else if(args.length == 4 && isInteger(args[1]) && checkServerId(args[2]) && isInteger(args[3]))
 					Controller.getInstance().connectCharacters(Integer.valueOf(args[1]), Integer.valueOf(args[2]), Integer.valueOf(args[3]));
 				else {
 					System.out.println("Usage :");
@@ -105,31 +111,30 @@ public class ConsoleInterface {
 				break;
 			case "infos" :
 				if(args.length == 1)
-					Controller.getInstance().displayFightsCounters();
+					Controller.getInstance().displayGlobalInfos();
 				else if(args.length == 2 && isInteger(args[1]))
-					Controller.getInstance().displayInfos(Integer.valueOf(args[1]));
+					Controller.getInstance().displayPersonalInfos(Integer.valueOf(args[1]));
+				else if(args.length == 2)
+					Controller.getInstance().displayPersonalInfos(args[1]);
 				else {
 					System.out.println("Usage :");
 					System.out.println("infos");
 					System.out.println("infos [id]");
+					System.out.println("infos [login]");
 				}
 				break;
 			case "options" :
 				if(args.length == 1) {
-					System.out.println("Character types :");
-					System.out.println("salesman/fighter");
-					System.out.println();
 					System.out.println("Character behaviours :");
-					System.out.println("2  = se -> seller");
-					System.out.println("10 = lw -> lone wolf");
-					System.out.println("11 = cp -> captain");
-					System.out.println("12 = so -> soldier");
+					System.out.println(CharacterBehaviour.LONE_WOLF + " = lw -> lone wolf");
+					System.out.println(CharacterBehaviour.CAPTAIN + " = cp -> captain");
+					System.out.println(CharacterBehaviour.SOLDIER + " = so -> soldier");
+					System.out.println();
+					System.out.println("Game servers :");
+					ServerEnum.displayServersList();
 					System.out.println();
 					System.out.println("Fight areas :");
 					FightOptions.displayFightAreas();
-					System.out.println();
-					System.out.println("Handled servers :");
-					System.out.println("11 -> Brumaire");
 				}
 				else {
 					System.out.println("Usage :");
@@ -153,13 +158,25 @@ public class ConsoleInterface {
 		}
 	}
 	
+	private static boolean checkServerId(String arg) {
+		if(!isInteger(arg)) {
+			System.out.println("Invalid server id.");
+			return false;
+		}
+		if(!ServerEnum.isHandledServer(Integer.valueOf(arg))) {
+			System.out.println("Unhandled server.");
+			return false;
+		}
+		return true;
+	}
+	
 	private static boolean checkFightAreaId(String arg) {
 		if(!isInteger(arg)) {
 			System.out.println("Invalid fight area id.");
 			return false;
 		}
 		if(!FightOptions.isHandledFightArea(Integer.valueOf(arg))) {
-			System.out.println("Unhandled fight area id.");
+			System.out.println("Unhandled fight area.");
 			return false;
 		}
 		return true;

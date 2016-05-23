@@ -50,14 +50,48 @@ public class DatabaseConnection {
 		}
 	}
 	
-	public static ResultSet retrieveFighters(int number) {
-		Log.info("Retrieving " + number + " fighter(s) from database.");
+	public static ResultSet retrieveAccounts(int number) {
+		Log.info("Retrieving " + number + " account(s) from database.");
 		ResultSet result;
 		try {
 			co.setAutoCommit(false);
 			result = st.executeQuery("SELECT id, login, password, serverId FROM accounts WHERE serverId IS NULL AND owner IS NULL AND isBanned = 0 LIMIT " + number + ";");
 			st = co.createStatement();
 			st.executeUpdate("UPDATE accounts SET owner = \"" + Main.USERNAME + "\" WHERE serverId IS NULL AND owner IS NULL AND isBanned = 0 LIMIT " + number + ";");
+			co.commit();
+			co.setAutoCommit(true);
+			return result;
+		} catch(SQLException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
+	public static ResultSet retrieveAccount(String name) {
+		Log.info("Retrieving one account from database.");
+		ResultSet result;
+		try {
+			co.setAutoCommit(false);
+			result = st.executeQuery("SELECT id, login, password, serverId FROM accounts WHERE owner IS NULL AND isBanned = 0 AND login = " + name + ";");
+			st = co.createStatement();
+			st.executeUpdate("UPDATE accounts SET owner = \"" + Main.USERNAME + "\" WHERE login = " + name + ";");
+			co.commit();
+			co.setAutoCommit(true);
+			return result;
+		} catch(SQLException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
+	public static ResultSet retrieveAccount(int id) {
+		Log.info("Retrieving one account from database.");
+		ResultSet result;
+		try {
+			co.setAutoCommit(false);
+			result = st.executeQuery("SELECT id, login, password, serverId FROM accounts WHERE owner IS NULL AND isBanned = 0 AND id = " + id + ";");
+			st = co.createStatement();
+			st.executeUpdate("UPDATE accounts SET owner = \"" + Main.USERNAME + "\" WHERE id = " + id + ";");
 			co.commit();
 			co.setAutoCommit(true);
 			return result;

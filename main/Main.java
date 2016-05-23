@@ -41,7 +41,6 @@ public class Main {
 	public static final int SERVER_PORT = 5555;
 	public static final int LAUNCHER_PORT = 5554;
 	public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("HH:mm:ss:SSS");
-	public static final String MODERATOR_NAME = "[Alkalino]";
 	public static final boolean GRAPHICAL_MODE = false;
 
 	public static void main(String[] args) {

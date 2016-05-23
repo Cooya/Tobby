@@ -50,12 +50,19 @@ public class CharactersManager {
 			return null;
 		this.characters.remove(character);
 		this.squads.removeSquadFighter(character); // si le perso appartient à une escouade
-		this.accounts.getAccount(characterId).isConnected = false;
+		this.accounts.updateAccountConnectionStatus(characterId, false);
 		return character;
 	}
 	
 	protected Character getCharacter(int accountId) {
 		return this.characters.get(accountId);
+	}
+	
+	protected Character getCharacter(String login) {
+		for(Character character : this.characters.values())
+			if(character.infos.getLogin() == login)
+				return character;
+		return null;
 	}
 
 	protected Character getCurrentCharacter() {
@@ -68,8 +75,16 @@ public class CharactersManager {
 		return null;
 	}
 	
-	protected Collection<Character> getConnectedCharacters() {
-		return this.characters.values();
+	protected Collection<Character> getConnectedCharacters(int serverId) {
+		if(serverId == 0)
+			return this.characters.values();
+		else {
+			Collection<Character> characters = new Vector<Character>();
+			for(Character character : this.characters.values())
+				if(character.infos.getServerId() == serverId)
+					characters.add(character);
+			return characters;
+		}
 	}
 	
 	protected Collection<Character> getInGameFighters() {

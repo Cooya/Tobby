@@ -1,5 +1,7 @@
 package gamedata.enums;
 
+import java.lang.reflect.Field;
+
 public abstract class ServerEnum {
 	public static final int UNDEFINED = 0;
 	public static final int Jiva = 1;
@@ -22,4 +24,38 @@ public abstract class ServerEnum {
 	public static final int Helsephine = 18;
 	public static final int Allister = 19;
 	public static final int Otomai = 20;
+	
+	public static int[] getServerIdsList() {
+		Field[] fields = ServerEnum.class.getFields();
+		int[] serverIds = new int[fields.length];
+		for(int i = 0; i < fields.length; ++i)
+			try {
+				serverIds[i] = fields[i].getInt(null);
+			} catch(IllegalArgumentException | IllegalAccessException e) {
+				e.printStackTrace();
+			}
+		return serverIds;
+	}
+	
+	public static void displayServersList() {
+		Field[] fields = ServerEnum.class.getFields();
+		for(Field field : fields)
+			try {
+				System.out.println(field.getName() + " = " + field.getInt(null));
+			} catch(IllegalArgumentException | IllegalAccessException e) {
+				e.printStackTrace();
+			}
+	}
+	
+	public static boolean isHandledServer(int serverId) {
+		Field[] fields = ServerEnum.class.getFields();
+		for(Field field : fields)
+			try {
+				if(field.getInt(null) == serverId)
+					return true;
+			} catch(IllegalArgumentException | IllegalAccessException e) {
+				e.printStackTrace();
+			}
+		return false;
+	}
 }

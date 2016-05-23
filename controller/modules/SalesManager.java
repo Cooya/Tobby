@@ -27,7 +27,7 @@ import controller.CharacterState;
 import controller.characters.Character;
 
 public class SalesManager {
-	private static HashMap<Integer, Integer> averagePrices;
+	private static HashMap<Integer, HashMap<Integer, Integer>> averagePrices = new HashMap<Integer, HashMap<Integer,Integer>>();
 	
 	private Character character;
 	private Date lastSellingRoutine;
@@ -36,23 +36,23 @@ public class SalesManager {
 	private ExchangeBidPriceForSellerMessage objectToSellAskedInfos;
 	private int lastObjectUIDAdded;
 	
-	public static void setAveragePrices(Vector<Integer> ids, Vector<Integer> avgPrices) {
+	public static void setAveragePrices(int serverId, Vector<Integer> ids, Vector<Integer> avgPrices) {
 		int idsCount = ids.size();
-		averagePrices = new HashMap<Integer, Integer>(idsCount);
+		HashMap<Integer, Integer> prices = new HashMap<Integer, Integer>(idsCount);
 		for(int i = 0; i < idsCount; ++i)
-			averagePrices.put(ids.get(i), avgPrices.get(i));
-		Log.info("Average prices set.");
+			prices.put(ids.get(i), avgPrices.get(i));
+		averagePrices.put(serverId, prices);
 	}
 	
-	public static int getAveragePrice(int objectGID) {
-		Integer price = averagePrices.get(objectGID);
+	public static int getAveragePrice(int serverId, int objectGID) {
+		Integer price = averagePrices.get(serverId).get(objectGID);
 		if(price == null)
 			return 0;
 		return price;
 	}
 	
-	public static boolean averagePricesAreSet() {
-		return averagePrices != null;
+	public static boolean averagePricesAreSet(int serverId) {
+		return averagePrices.get(serverId) != null;
 	}
 	
 	public SalesManager(Character character) {
@@ -136,9 +136,10 @@ public class SalesManager {
 	public void npcSelling() {
 		this.character.mvt.goToInsideTavern();
 		this.character.interaction.openTavernShop();
+		int serverId = this.character.infos.getServerId();
 		ObjectItem[] inventoryObjects = this.character.inventory.getObjects();
 		for(ObjectItem object : inventoryObjects) {
-			object.averagePrice = getAveragePrice(object.objectGID);
+			object.averagePrice = getAveragePrice(serverId, object.objectGID);
 			if(object.averagePrice != 0 && object.averagePrice < 250)
 				sellObjectToNpc(object.objectUID, object.quantity);
 		}
@@ -260,10 +261,11 @@ public class SalesManager {
 	}
 	
 	private Vector<ObjectItem> getBankMoreExpensiveObjectsBy100(int nFirst) {
+		int serverId = this.character.infos.getServerId();
 		// on récupère la liste des objets en banque que l'on trie par prix moyen décroissant
 		ObjectItem bankObjects[] = this.character.bank.getObjects();
 		for(ObjectItem object : bankObjects)
-			object.averagePrice = getAveragePrice(object.objectGID);
+			object.averagePrice = getAveragePrice(serverId, object.objectGID);
 		Arrays.sort(bankObjects, ObjectItem.AVG_PRICE_DESC);
 		
 		Vector<ObjectItem> objectsToSell = new Vector<ObjectItem>(nFirst);

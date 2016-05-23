@@ -25,18 +25,13 @@ public class AccountsManager {
 		return null;
 	}
 	
-	protected Account getAccount(String login) {
-		for(Account account : this.accounts.values())
-			if(account.login.equals(login))
-				return account;
-		return null;
+	protected void updateAccountConnectionStatus(int id, boolean isConnected) {
+		Account account = this.accounts.get(id);
+		if(account != null)
+			account.isConnected = isConnected;
 	}
 	
-	protected Account getAccount(int accountId) {
-		return this.accounts.get(accountId);
-	}
-	
-	protected Vector<Account> retrieveFighters(int number) {
+	protected Vector<Account> retrieveAccounts(int number) {
 		Vector<Account> accounts = new Vector<Account>();
 		for(Account account : this.accounts.values())
 			if(account.serverId == 0 && !account.isConnected) {
@@ -44,9 +39,33 @@ public class AccountsManager {
 				if(accounts.size() == number)
 					return accounts;
 			}
-		ResultSet resultSet = DatabaseConnection.retrieveFighters(number - accounts.size());
+		ResultSet resultSet = DatabaseConnection.retrieveAccounts(number - accounts.size());
 		accounts.addAll(resultSetToAccounts(resultSet));
 		return accounts;
+	}
+	
+	protected Account retrieveAccount(String login) {
+		for(Account account : this.accounts.values())
+			if(account.login == login) {
+				if(!account.isConnected)
+					return null;
+				else
+					return account;
+			}
+		ResultSet resultSet = DatabaseConnection.retrieveAccount(login);
+		return resultSetToAccount(resultSet);
+	}
+	
+	protected Account retrieveAccount(int id) {
+		for(Account account : this.accounts.values())
+			if(account.id == id) {
+				if(!account.isConnected)
+					return null;
+				else
+					return account;
+			}
+		ResultSet resultSet = DatabaseConnection.retrieveAccount(id);
+		return resultSetToAccount(resultSet);
 	}
 	
 	protected void displayAllAccounts() {
@@ -67,18 +86,23 @@ public class AccountsManager {
 	private Vector<Account> resultSetToAccounts(ResultSet resultSet) {
 		Vector<Account> accounts = new Vector<Account>();
 		Account account;
-		try {
-			while(resultSet.next()) {
-				account = new Account(resultSet.getInt("id"), resultSet.getString("login"), resultSet.getString("password"), resultSet.getInt("serverId"));
-				this.accounts.put(account.id, account);
-				accounts.add(account);
-			}
-			resultSet.getStatement().close();
-		} catch(SQLException e) {
-			e.printStackTrace();
-			Controller.getInstance().exit("Error when retrieving accounts from database.");
+		while((account = resultSetToAccount(resultSet)) != null) {
+			this.accounts.put(account.id, account);
+			accounts.add(account);
 		}
 		return accounts;
+	}
+	
+	private Account resultSetToAccount(ResultSet resultSet) {
+		try {
+			if(resultSet.next())
+				return new Account(resultSet.getInt("id"), resultSet.getString("login"), resultSet.getString("password"), resultSet.getInt("serverId"));
+			else
+				resultSet.getStatement().close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 	protected static class Account {

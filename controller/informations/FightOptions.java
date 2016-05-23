@@ -38,7 +38,7 @@ public class FightOptions {
 		{10, 15, 20},
 		{1, 10, 15},
 		{1, 10, 15},
-		{1, 1, 5}
+		{1, 1, 1}
 	};
 	
 	// représente les différentes aires où le perso combattra pour xp le plus rapidement possible
