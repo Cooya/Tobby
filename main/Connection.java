@@ -20,6 +20,7 @@ public interface Connection {
 		
 		public Client(String serverIP, int port) throws IOException {
 			this.client = new Socket(serverIP, port);
+			this.client.setSoTimeout(0);
 			this.inputStream = this.client.getInputStream();
 			this.outputStream = this.client.getOutputStream();
 		}
@@ -27,6 +28,7 @@ public interface Connection {
 		public Client(Socket client) {
 			try {
 				this.client = client;
+				this.client.setSoTimeout(0);
 				this.inputStream = this.client.getInputStream();
 				this.outputStream = this.client.getOutputStream();
 			} catch(Exception e) {
@@ -38,6 +40,7 @@ public interface Connection {
 			try {
 				Proxy proxy = new Proxy(Proxy.Type.SOCKS, new InetSocketAddress(proxyIP, proxyPort));
 				this.client = new Socket(proxy);
+				this.client.setSoTimeout(0);
 				this.client.connect(new InetSocketAddress(serverIP, serverPort));
 				this.inputStream = this.client.getInputStream();
 				this.outputStream = this.client.getOutputStream();

@@ -266,6 +266,11 @@ public abstract class Character extends Thread {
 				condition = new Condition(state, 5000);
 				isEvent = true;
 				break;
+			case INTERACTIVE_USED : // event
+				this.log.p("Waiting for interactive be used.");
+				condition = new Condition(state, 10000);
+				isEvent = true;
+				break;
 			case SPELL_CASTED : // event avec contrainte
 				this.log.p("Waiting for result of spell cast.");
 				condition = new Condition(state, 10000);

@@ -35,7 +35,7 @@ public class Main {
 	public static final String D2O_PATH = CLIENT_PATH + "data/common/";
 	public static final String D2I_PATH = CLIENT_PATH + "data/i18n/i18n_fr.d2i";
 	public static final String LOG_PATH = "Logs/";
-	public static final int[] GAME_VERSION = {2, 34, 4, 104034, 1};
+	public static final int[] GAME_VERSION = {2, 34, 6, 104808, 2};
 	public static final String AUTH_SERVER_IP = "213.248.126.39";
 	public static final String LOCALHOST = "127.0.0.1";
 	public static final int SERVER_PORT = 5555;

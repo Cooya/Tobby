@@ -24,7 +24,7 @@ public class InteractionAPI {
 		IURM.elemId = elemId;
 		IURM.skillInstanceUid = this.character.roleplayContext.getInteractiveSkillInstanceUid(elemId);
 		this.character.net.send(IURM);
-		this.character.log.p("Interactive used.");
+		this.character.waitState(CharacterState.INTERACTIVE_USED);
 		if(withMapChangement) {
 			this.character.updateState(CharacterState.IS_LOADED, false);
 			this.character.waitState(CharacterState.IS_LOADED);

@@ -36,6 +36,7 @@ import messages.context.GameMapNoMovementMessage;
 import messages.context.GameRolePlayPlayerFightFriendlyAnswerMessage;
 import messages.context.GameRolePlayPlayerFightFriendlyRequestedMessage;
 import messages.context.GameRolePlayShowActorMessage;
+import messages.context.InteractiveUsedMessage;
 import messages.context.LeaveDialogMessage;
 import messages.context.MapComplementaryInformationsDataMessage;
 import messages.context.MapInformationsRequestMessage;
@@ -67,6 +68,11 @@ public class RoleplayContextFrame extends Frame {
 	protected void process(NpcDialogCreationMessage msg) {
 		this.character.log.p("NPC dialog displayed.");
 		this.character.updateState(CharacterState.DIALOG_DISPLAYED, true);
+	}
+	
+	protected void process(InteractiveUsedMessage msg) {
+		this.character.log.p("Interactive used.");
+		this.character.updateState(CharacterState.INTERACTIVE_USED, true);
 	}
 	
 	protected void process(TextInformationMessage msg) {

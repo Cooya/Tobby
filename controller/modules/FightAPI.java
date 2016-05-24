@@ -66,13 +66,10 @@ public class FightAPI {
 		if(this.character.infos.getHealthState() == PlayerLifeStatusEnum.STATUS_TOMBSTONE) {
 			this.character.net.send(new UnhandledMessage("GameRolePlayFreeSoulRequestMessage"));
 			this.character.updateState(CharacterState.IS_LOADED, false);
-			this.character.interaction.useInteractive(287, 479466, false); // status phénix
-			try {
-				Thread.sleep(2000); // TODO -> implémenter la réponse correspondante
-			} catch(Exception e) {
-				Thread.currentThread().interrupt();
-			}
+			this.character.waitState(CharacterState.IS_LOADED);
 		}
+		if(this.character.infos.getHealthState() == PlayerLifeStatusEnum.STATUS_PHANTOM)
+			this.character.interaction.useInteractive(287, 479466, false); // statue phénix
 	}
 
 	public void inventoryManager() {
