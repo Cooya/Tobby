@@ -230,6 +230,6 @@ public class Item {
 	
 	
 	public void postInit() {
-		// not implemented yet
+		// not implemented
 	}
 }

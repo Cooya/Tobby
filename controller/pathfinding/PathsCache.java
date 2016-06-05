@@ -4,13 +4,14 @@ import gamedata.d2o.modules.MapPosition;
 
 import java.util.Vector;
 
-import controller.characters.Character;
 import main.FatalError;
+import main.Log;
 
 // cache pas encore utilisé
 class PathsCache {
 	private static Vector<Path> cache = new Vector<Path>();
 	private static final int MAX_ENTRIES = 100;
+	private static final boolean DEBUG = false;
 	
 	/*
 	public synchronized static Path buildPath(int x1, int y1, int x2, int y2, int currentCellId) {
@@ -37,7 +38,8 @@ class PathsCache {
 	}
 	
 	protected static Path toArea(int areaId, int sourceMapId, int startCellId) {
-		Character.log("Going to area with id = " + areaId + " from  " + MapPosition.getMapPositionById(sourceMapId) + ".");
+		if(DEBUG)
+			Log.info("Going to area with id = " + areaId + " from  " + MapPosition.getMapPositionById(sourceMapId) + ".");
 		MapPosition[] mapPositions = MapPosition.getMapPositions();
 		Vector<MapPosition> mapPositionsInArea = new Vector<MapPosition>();
 		for(MapPosition mapPosition : mapPositions)
@@ -45,7 +47,8 @@ class PathsCache {
 				mapPositionsInArea.add(mapPosition);
 		if(mapPositionsInArea.size() == 0)
 			throw new FatalError("Invalid area id.");
-		Character.log(mapPositionsInArea.size() + " maps in the area with id = " + areaId + ".");
+		if(DEBUG)
+			Log.info(mapPositionsInArea.size() + " maps in the area with id = " + areaId + ".");
 		Pathfinder pathfinder = new MapsPathfinder(startCellId);
 		Path bestPath = null;
 		Path tmpPath;

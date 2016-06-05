@@ -14,7 +14,7 @@ import controller.characters.Character;
 public class RoleplayContext {
 	private Character character;
 	private Vector<GameRolePlayActorInformations> actors;
-	private Vector<InteractiveElement> interactives;
+	private InteractiveElement[] interactives;
 	public double actorDemandingExchange;
 	public boolean lastFightOutcome;
 	public boolean lastExchangeDemandOutcome;
@@ -24,14 +24,16 @@ public class RoleplayContext {
 		this.character = CC;
 	}
 	
-	public synchronized void newContextActors(Vector<GameRolePlayActorInformations> actors) {
-		this.actors = actors;
-		for(GameRolePlayActorInformations actor : actors)
+	public synchronized void newContextActors(GameRolePlayActorInformations[] actors) {
+		this.actors = new Vector<GameRolePlayActorInformations>(actors.length);
+		for(GameRolePlayActorInformations actor : actors) {
+			this.actors.add(actor);
 			if(actor.contextualId == this.character.infos.getCharacterId())
 				this.character.infos.setCurrentCellId(actor.disposition.cellId);
+		}
 	}
 	
-	public void newContextInteractives(Vector<InteractiveElement> interactives) {
+	public void newContextInteractives(InteractiveElement[] interactives) {
 		this.interactives = interactives;
 	}
 
@@ -81,7 +83,7 @@ public class RoleplayContext {
 	public int getInteractiveSkillInstanceUid(int elementId) {
 		for(InteractiveElement interactive : this.interactives)
 			if(interactive.elementId == elementId)
-				return interactive.enabledSkills.firstElement().skillInstanceUid;
+				return interactive.enabledSkills[0].skillInstanceUid;
 		return 0;
 	}
 	

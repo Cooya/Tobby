@@ -2,18 +2,16 @@ package gamedata.context;
 
 import gamedata.ProtocolTypeManager;
 
-import java.util.Vector;
-
 import utilities.ByteArray;
 
 public class FightTeamInformations extends AbstractFightTeamInformations {
-    public Vector<FightTeamMemberInformations> teamMembers;
+    public FightTeamMemberInformations[] teamMembers;
 
 	public FightTeamInformations(ByteArray buffer) {
 		super(buffer);
-		this.teamMembers = new Vector<FightTeamMemberInformations>();
 		int nb = buffer.readShort();
+		this.teamMembers = new FightTeamMemberInformations[nb];
 		for(int i = 0; i < nb; ++i)
-			this.teamMembers.add((FightTeamMemberInformations) ProtocolTypeManager.getInstance(buffer.readShort(), buffer));
+			this.teamMembers[i] = (FightTeamMemberInformations) ProtocolTypeManager.getInstance(buffer.readShort(), buffer);
 	}
 }

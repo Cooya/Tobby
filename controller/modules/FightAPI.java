@@ -23,10 +23,12 @@ import messages.fights.GameFightTurnFinishMessage;
 public class FightAPI {
 	private Character character;
 	private FightOptions fightOptions;
+	private int lastFight;
 
 	public FightAPI(Character fighter, int fightAreaId) {
 		this.character = fighter;
 		this.fightOptions = new FightOptions(fightAreaId);
+		this.lastFight = 0;
 	}
 	
 	public FightAPI(Character fighter) {
@@ -39,6 +41,15 @@ public class FightAPI {
 
 	public void updateFightArea(int level) {
 		this.fightOptions.setFightArea(level);
+	}
+	
+	public void fightAreaReplacementManager() {
+		int mapsTravelledCounter = this.character.infos.getMapsTravelledCounter();
+		if(mapsTravelledCounter - this.lastFight > 50) {
+			this.lastFight = mapsTravelledCounter;
+			this.fightOptions.replaceFightArea(this.character.infos.getLevel());
+			this.character.mvt.goToArea(this.character.fight.getFightAreaId());
+		}
 	}
 
 	public void levelUpManager() {
@@ -84,10 +95,13 @@ public class FightAPI {
 			this.character.mvt.goToInsideBank();
 			this.character.interaction.openBankStorage();	
 			this.character.exchangeManager.transfertAllObjectsFromInventory();
+			int kamasInBank = this.character.bank.getKamas();
+			if(kamasInBank > 0)
+				this.character.exchangeManager.getKamasFromBank(kamasInBank);
 			this.character.interaction.closeStorage();
 			this.character.updateState(CharacterState.NEED_TO_EMPTY_INVENTORY, false);
 			if(this.character.infos.getLevel() >= 20)
-				this.character.salesManager.bidHouseSellingRoutine();
+				this.character.salesManager.bidHouseSelling();
 		}
 	}
 
@@ -96,7 +110,7 @@ public class FightAPI {
 		int monsterGroupSize;
 		int monsterGroupMaxSize = this.fightOptions.getMonsterGroupMaxSize();
 		for(GameRolePlayGroupMonsterInformations monsterGroup : this.character.roleplayContext.getMonsterGroups()) {
-			monsterGroupSize = monsterGroup.staticInfos.underlings.size() + 1;
+			monsterGroupSize = monsterGroup.staticInfos.underlings.length + 1;
 			if(monsterGroupSize <= monsterGroupMaxSize) {
 				this.character.log.p("Going to take a monster group of size " + monsterGroupSize + " on cell id " + monsterGroup.disposition.cellId + ".");
 				if(!this.character.mvt.moveTo(monsterGroup.disposition.cellId)) // groupe de monstres inatteignable
@@ -113,6 +127,7 @@ public class FightAPI {
 	}
 
 	public void fightManager(boolean fightRecovery) {
+		this.lastFight = this.character.infos.getMapsTravelledCounter();
 		if(!fightRecovery) { // si c'est un combat tout frais
 			GameFightReadyMessage GFRM = new GameFightReadyMessage();
 			GFRM.isReady = true;

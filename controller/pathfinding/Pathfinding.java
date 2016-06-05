@@ -8,7 +8,6 @@ import gamedata.d2p.ankama.MovementPath;
 import java.util.Collections;
 import java.util.Hashtable;
 import java.util.Random;
-import java.util.Vector;
 
 import main.FatalError;
 
@@ -58,7 +57,7 @@ public class Pathfinding {
 	}
 	
 	// retourne une chemin de cellules vers une cellule cible
-	public Vector<Integer> getCellsPathTo(int targetId) {
+	public int[] getCellsPathTo(int targetId) {
 		Pathfinder pathfinder = new CellsPathfinder(this.mapNode.map);
 		this.currentCellsPath = pathfinder.compute(this.currentCellId, targetId);
 		if(this.currentCellsPath == null)

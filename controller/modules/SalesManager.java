@@ -30,17 +30,16 @@ public class SalesManager {
 	private static HashMap<Integer, HashMap<Integer, Integer>> averagePrices = new HashMap<Integer, HashMap<Integer,Integer>>();
 	
 	private Character character;
-	private Date lastSellingRoutine;
+	private long lastSalesReview;
 	private Map<Integer, ObjectItemToSellInBid> objectsInBid;
 	private SellerBuyerDescriptor infos;
 	private ExchangeBidPriceForSellerMessage objectToSellAskedInfos;
 	private int lastObjectUIDAdded;
 	
-	public static void setAveragePrices(int serverId, Vector<Integer> ids, Vector<Integer> avgPrices) {
-		int idsCount = ids.size();
-		HashMap<Integer, Integer> prices = new HashMap<Integer, Integer>(idsCount);
-		for(int i = 0; i < idsCount; ++i)
-			prices.put(ids.get(i), avgPrices.get(i));
+	public static void setAveragePrices(int serverId, int[] ids, int[] avgPrices) {
+		HashMap<Integer, Integer> prices = new HashMap<Integer, Integer>(ids.length);
+		for(int i = 0; i < ids.length; ++i)
+			prices.put(ids[i], avgPrices[i]);
 		averagePrices.put(serverId, prices);
 	}
 	
@@ -59,8 +58,8 @@ public class SalesManager {
 		this.character = character;
 	}
 	
-	public void setObjectsInBid(Vector<ObjectItemToSellInBid> objectsInBid) {
-		this.objectsInBid = new HashMap<Integer, ObjectItemToSellInBid>(objectsInBid.size());
+	public void setObjectsInBid(ObjectItemToSellInBid[] objectsInBid) {
+		this.objectsInBid = new HashMap<Integer, ObjectItemToSellInBid>(objectsInBid.length);
 		for(ObjectItemToSellInBid object : objectsInBid)
 			this.objectsInBid.put(object.objectUID, object);
 	}
@@ -133,6 +132,8 @@ public class SalesManager {
 		this.character.waitState(CharacterState.EXCHANGE_ACTION_RESPONSE);
 	}
 	
+	/********** Fonctions principales *********/
+	
 	public void npcSelling() {
 		this.character.mvt.goToInsideTavern();
 		this.character.interaction.openTavernShop();
@@ -146,17 +147,12 @@ public class SalesManager {
 		this.character.interaction.closeStorage();
 	}
 	
-	public void bidHouseSellingRoutine() {
-		if(this.lastSellingRoutine != null && new Date().getTime() - this.lastSellingRoutine.getTime() < 1000 * 3600 * 4) // 4 heures
-			return;
-		
+	public void bidHouseSelling() {
 		this.character.mvt.goToBidHouse();
 		this.character.interaction.openBidHouse();
-		reviewSales();
+		this.character.interaction.closeStorage();
 		int freeSlots = infos.maxItemPerAccount - this.objectsInBid.size();
 		Log.info(freeSlots + " free slot(s) into the bid house.");
-		this.character.interaction.closeStorage();
-		this.lastSellingRoutine = new Date();
 		if(freeSlots == 0)
 			return;
 		else
@@ -164,36 +160,59 @@ public class SalesManager {
 		this.character.interaction.openBankStorage();
 		Vector<ObjectItem> objectsToSell = getBankMoreExpensiveObjectsBy100(freeSlots);
 		if(objectsToSell.isEmpty()) {
-			Log.info("Noting interesting in bank.");
+			this.character.interaction.closeStorage();
+			Log.info("Nothing interesting in bank.");
 			return;
 		}
 		
+		boolean canSellObjects;
 		while(true) {
 			takeMaxObjetsAsPossible(objectsToSell);
 			this.character.interaction.closeStorage();
 			this.character.mvt.goToBidHouse();
 			this.character.interaction.openBidHouse();
-			sellObjects();
+			canSellObjects = sellObjects();
 			this.character.interaction.closeStorage();
-			if(objectsToSell.isEmpty())
+			if(!canSellObjects) { // pas assez de kamas pour continuer la vente
+				this.character.mvt.goToInsideBank();
+				this.character.interaction.openBankStorage();
+				this.character.exchangeManager.transfertAllObjectsFromInventory();
+				this.character.interaction.closeStorage();
 				break;
-			else {
+			}
+			else if(objectsToSell.isEmpty()) // tout a été mis en vente
+				break;
+			else { // retour en banque pour aller chercher d'autres objets
 				this.character.mvt.goToInsideBank();
 				this.character.interaction.openBankStorage();
 			}
 		}
 	}
 	
-	private void reviewSales() {
+	public void reviewBidHouseSales() {
+		if(new Date().getTime() - this.lastSalesReview < 1000 * 3600 * 4) // moins de 4 heures
+			return;
+		this.lastSalesReview = new Date().getTime();
 		int serverId = this.character.infos.getServerId();
+		
+		// récupération des objets en vente du compte sur ce serveur stockés dans la base de données
+		ResultSet resultSet = DatabaseConnection.retrieveAllSales(serverId, this.character.id);
+		try {
+			if(!resultSet.last())
+				return; // si aucun objet en vente, on a rien à faire
+			resultSet.beforeFirst();
+		} catch(SQLException e) {
+			e.printStackTrace();
+			return;
+		}
+		
 		int currentPrice;
 		int newPrice;
 		Vector<Integer> objectGIDProcessed = new Vector<Integer>();
 		
-		// récupération des objets en vente du compte sur ce serveur stockés dans la base de données
-		ResultSet resultSet = DatabaseConnection.retrieveAllSales(serverId, this.character.id);
-		if(resultSet == null) // si aucun objet en vente, on a rien à faire
-			return;
+		// ouverture de l'hôtel de vente et synchronisation avec la base de données
+		this.character.mvt.goToBidHouse();
+		this.character.interaction.openBidHouse();
 		Vector<ObjectItemToSellInBid> objectsFromDatabase = convertFromResultSet(resultSet);
 		synchronizeBidHouseAndDatabase(objectsFromDatabase);
 		
@@ -206,18 +225,16 @@ public class SalesManager {
 			
 			// récupération du prix actuel et du prix moyen
 			getObjectToSellInfos(object.objectGID);
-			currentPrice = this.objectToSellAskedInfos.minimalPrices.get(2);
+			currentPrice = this.objectToSellAskedInfos.minimalPrices[2];
 			
 			// si le prix actuel est inférieur au prix de l'objet en vente
 			if(currentPrice < object.objectPrice) {
-				// on interroge la base de données sur le prix de vente des collègues pour cet objet
-				resultSet = DatabaseConnection.retrievePrices(object.objectGID, serverId);
-				
 				// récupération du prix des collègues depuis la base de données
 				newPrice = setPrice(object.objectGID, currentPrice);
 				
 				// modification du prix pour tous les objets du même type
-				modifyObjectsToSellPrice(objectsFromDatabase, object.objectGID, newPrice);
+				if(!modifyObjectsToSellPrice(objectsFromDatabase, object.objectGID, newPrice))
+					break;
 			}
 			// si l'objet est en vente au même prix depuis plus de 24h
 			else if(object.unsoldDelay + 24 < infos.unsoldDelay) {
@@ -225,27 +242,34 @@ public class SalesManager {
 				newPrice = (int) (currentPrice * 0.95);
 				
 				// modification du prix pour tous les objets du même type
-				modifyObjectsToSellPrice(objectsFromDatabase, object.objectGID, newPrice);
+				if(!modifyObjectsToSellPrice(objectsFromDatabase, object.objectGID, newPrice))
+					break;
 			}
 			this.objectToSellAskedInfos = null;
 			objectGIDProcessed.add(object.objectGID);
 		}
+		this.character.interaction.closeStorage();
 	}
 	
-	private void modifyObjectsToSellPrice(Vector<ObjectItemToSellInBid> objectsInBid, int objectGID, int price) {
+	/********** Fonctions auxiliaires ***********/
+	
+	private boolean modifyObjectsToSellPrice(Vector<ObjectItemToSellInBid> objectsInBid, int objectGID, int price) {
 		int serverId = this.character.infos.getServerId();
 		String objectName = Item.getItemById(objectGID, false).getName();
 		for(ObjectItemToSellInBid object : objectsInBid)
 			if(object.objectGID == objectGID) {
+				if(this.infos.taxModificationPercentage * price > this.character.inventory.getKamas())
+					return false;
 				modifyObjectToSellPrice(object.objectUID, price);
 				DatabaseConnection.updateSale(object.objectUID, this.lastObjectUIDAdded, price, serverId);
 				Log.info("Price decreased at " + price + " kamas for \"" + objectName + "\".");
 			}
+		return true;
 	}
 	
 	private void synchronizeBidHouseAndDatabase(Vector<ObjectItemToSellInBid> objectsFromDatabase) {
 		// si l'hotel de vente et la base de données ne sont pas synchronisés
-		if(this.objectsInBid.size() != objectsFromDatabase.size()) {
+		if(this.objectsInBid.size() > objectsFromDatabase.size()) {
 			Log.warn("Bid house and database are not synchronized.");
 			int serverId = this.character.infos.getServerId();
 			
@@ -269,33 +293,37 @@ public class SalesManager {
 		Arrays.sort(bankObjects, ObjectItem.AVG_PRICE_DESC);
 		
 		Vector<ObjectItem> objectsToSell = new Vector<ObjectItem>(nFirst);
+		int objectType;
 		int packsBy100Counter = 0;
 		int nbPossiblePacks;
 		
 		// parcours de la liste des objets en banque triés
 		for(ObjectItem object : bankObjects) {
+			objectType = ItemType.getItemTypeById(Item.getItemById(object.objectGID, false).typeId).id;
 			// si l'objet est vendable en hdv ressources
-			if(this.infos.types.contains(ItemType.getItemTypeById(Item.getItemById(object.objectGID, false).typeId).id)) {
-				// et qu'il y en a au moins 100
-				if(object.quantity >= 100) {
-					// on ajoute l'objet aux objets à vendre et on ajuste la quantité pour pouvoir faire des packs de 100
-					objectsToSell.add(object);
-					nbPossiblePacks = object.quantity / 100;
-					object.quantity = nbPossiblePacks * 100;
-					
-					// on incrémente le compteur de packs avec le nombre de packs possible pour cet objet
-					packsBy100Counter += nbPossiblePacks;
-					
-					// si le compteur tombe exactement avec le nombre de packs demandés, on a fini 
-					if(packsBy100Counter == nFirst)
-						return objectsToSell;
-					// sinon, on limite la quantité à récupérer pour cet objet
-					else if(packsBy100Counter > nFirst) {
-						object.quantity -= (packsBy100Counter - nFirst) * 100;
-						return objectsToSell;
+			for(int type : this.infos.types)
+				if(objectType == type) {
+					// et qu'il y en a au moins 100
+					if(object.quantity >= 100) {
+						// on ajoute l'objet aux objets à vendre et on ajuste la quantité pour pouvoir faire des packs de 100
+						objectsToSell.add(object);
+						nbPossiblePacks = object.quantity / 100;
+						object.quantity = nbPossiblePacks * 100;
+						
+						// on incrémente le compteur de packs avec le nombre de packs possible pour cet objet
+						packsBy100Counter += nbPossiblePacks;
+						
+						// si le compteur tombe exactement avec le nombre de packs demandés, on a fini 
+						if(packsBy100Counter == nFirst)
+							return objectsToSell;
+						// sinon, on limite la quantité à récupérer pour cet objet
+						else if(packsBy100Counter > nFirst) {
+							object.quantity -= (packsBy100Counter - nFirst) * 100;
+							return objectsToSell;
+						}
 					}
+					break;
 				}
-			}
 		}
 		return objectsToSell;
 	}
@@ -332,7 +360,7 @@ public class SalesManager {
 		}
 	}
 	
-	private void sellObjects() {
+	private boolean sellObjects() {
 		// besoin d'une copie de la map car elle est modifiée pendant le parcours des objets de l'inventaire et leur mise en vente
 		ObjectItem[] objectsToSell = this.character.inventory.getObjects();
 		
@@ -350,7 +378,7 @@ public class SalesManager {
 			
 			// récupération du prix actuel et du prix moyen
 			getObjectToSellInfos(object.objectGID);
-			currentPrice = this.objectToSellAskedInfos.minimalPrices.get(2);
+			currentPrice = this.objectToSellAskedInfos.minimalPrices[2];
 			
 			// récupération du prix des collègues depuis la base de données
 			newPrice = setPrice(object.objectGID, currentPrice);
@@ -359,6 +387,8 @@ public class SalesManager {
 			
 			// on met tous les packs de 100 possibles en vente
 			while(object.quantity > 0) {
+				if(this.infos.taxPercentage * newPrice > this.character.inventory.getKamas())
+					return false;
 				putObjectToSell(object.objectUID, 100, newPrice);
 				DatabaseConnection.newSale(object.objectUID, object.objectGID, objectName, newPrice, 100, serverId, this.character.id);
 				object.quantity -= 100;
@@ -366,6 +396,7 @@ public class SalesManager {
 				Log.info("Object \"" + objectName + "\" put for sale at " + newPrice + " kamas.");
 			}
 		}
+		return true;
 	}
 	
 	private int setPrice(int objectGID, int currentPrice) {

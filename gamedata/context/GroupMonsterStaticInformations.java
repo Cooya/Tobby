@@ -1,19 +1,16 @@
 package gamedata.context;
 
-import java.util.Vector;
-
 import utilities.ByteArray;
 
 public class GroupMonsterStaticInformations {
-    public MonsterInGroupLightInformations mainCreatureLightInfos;
-    public Vector<MonsterInGroupInformations> underlings;
+	public MonsterInGroupLightInformations mainCreatureLightInfos;
+	public MonsterInGroupInformations[] underlings;
 
 	public GroupMonsterStaticInformations(ByteArray buffer) {
-		this.underlings = new Vector<MonsterInGroupInformations>();
-		
 		this.mainCreatureLightInfos = new MonsterInGroupLightInformations(buffer);
 		int nb = buffer.readShort();
+		this.underlings = new MonsterInGroupInformations[nb];
 		for(int i = 0; i < nb; ++i)
-			this.underlings.add(new MonsterInGroupInformations(buffer));
+			this.underlings[i] = new MonsterInGroupInformations(buffer);
 	}
 }

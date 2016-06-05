@@ -5,10 +5,9 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.locks.ReentrantLock;
 
 import controller.characters.Character;
+import frames.Processor;
 import messages.NetworkDataContainerMessage;
 import messages.NetworkMessage;
 import messages.synchronisation.BasicPingMessage;
@@ -17,19 +16,22 @@ import utilities.ByteArray;
 public class NetworkInterface extends Thread {
 	private Character character;
 	private Reader reader;
+	private Processor processor;
 	private Connection.Client serverCo;
 	private String gameServerIP;
-	public Sender sender;
-	public Latency latency;
+	private List<NetworkMessage> acknowledgementList; // file des messages qui attendent d'être acquitté
+	private Latency latency;
 	
 	public NetworkInterface(Character character, String login) {
 		super(login + "/receiver");
 		this.character = character;
 		this.reader = new Reader();
-		this.sender = new Sender(login);
+		this.processor = new Processor(character, login);
+		this.acknowledgementList = new Vector<NetworkMessage>();
 		this.latency = new Latency();
 	}
 	
+	@Override
 	public void run() {
 		this.character.log.p("Connection to authentification server, waiting response...");
 		connectionToServer(Main.AUTH_SERVER_IP, Main.SERVER_PORT);
@@ -44,7 +46,7 @@ public class NetworkInterface extends Thread {
 			this.character.log.p("Deconnected from game server.");
 		}
 		Log.info("Thread receiver of character with id = " + character.id + " terminated.");
-		Controller.getInstance().threadTerminated();
+		this.character.threadTerminated();
 	}
 	
 	private void connectionToServer(String IP, int port) {
@@ -80,12 +82,16 @@ public class NetworkInterface extends Thread {
 		while((msg = msgStack.poll()) != null) {
 			this.latency.updateLatency();
 			this.character.log.p("r", msg);
-			this.character.processor.incomingMessage(msg);
+			this.processor.processMessage(msg);
 		}
 	}
 	
 	public void processNetworkDataContainerMessage(NetworkDataContainerMessage msg) {
 		processMsgStack(this.reader.processBuffer(msg.getContent()));
+	}
+	
+	public Latency getLatency() {
+		return this.latency;
 	}
 	
 	public void setGameServerIP(String gameServerIP) {
@@ -100,84 +106,46 @@ public class NetworkInterface extends Thread {
 	}
 	
 	public void send(NetworkMessage msg) {
-		this.sender.output.add(msg);
-		synchronized(this.sender) {
-			this.sender.notify();
+		if(isInterrupted())
+			return;
+		latency.setLatestSent();
+		serverCo.send(msg.pack(character.id));
+		/*
+		if(msg.isAcknowledgable()) {
+			msg.setSendingTime(new Date());
+			if(!this.acknowledgementList.contains(msg))
+				this.acknowledgementList.add(msg);
 		}
+		browseAcknowledgeList(); // TODO test en cours
+		*/
+		character.log.p("s", msg);
 	}
 	
 	// appelée lors de la réception d'un BasicAckMessage
-	public void acknowledgeMessage(int msgId) {
-		this.sender.listLock.lock();
-		for(NetworkMessage msg : this.sender.acknowledgementList)
+	public synchronized void acknowledgeMessage(int msgId) {
+		for(NetworkMessage msg : this.acknowledgementList)
 			if(msg.getId() == msgId) {
-				this.sender.acknowledgementList.remove(msg);
-				this.sender.listLock.unlock();
+				this.acknowledgementList.remove(msg);
 				return;
 			}
-		this.sender.listLock.unlock();
 		//throw new FatalError("Receive a acknowledgement for message with id = " + msgId + " but not found into the acknowledgement list.");
 	}
-	
-	public class Sender extends Thread {
-		private ConcurrentLinkedQueue<NetworkMessage> output; // file des messages qui doivent être envoyé
-		private List<NetworkMessage> acknowledgementList; // file des messages qui attendent d'être acquitté
-		private ReentrantLock listLock;
 		
-		private Sender(String login) {
-			super(login + "/sender");
-			this.output = new ConcurrentLinkedQueue<NetworkMessage>();
-			this.acknowledgementList = new Vector<NetworkMessage>();
-			this.listLock = new ReentrantLock();
-		}
-		
-		private void browseAcknowledgeList() {
-			Date now = new Date();
-			this.listLock.lock();
-			for(NetworkMessage msg : this.acknowledgementList) {
-				// TODO -> test en cours
-				if(msg.getId() == 950) {
-					if(now.getTime() - msg.getSendingTime().getTime() > 20000) {
-						send(msg);
-						Log.warn("Resending " + msg.getName() + ".");
-					}
-				}
-				else if(now.getTime() - msg.getSendingTime().getTime() > 10000) { // 10 secondes
+	// parcourt la liste des messages en attente d'acquittement
+	@SuppressWarnings("unused")
+	private synchronized void browseAcknowledgeList() {
+		Date now = new Date();
+		for(NetworkMessage msg : this.acknowledgementList) {
+			if(msg.getId() == 950) {
+				if(now.getTime() - msg.getSendingTime().getTime() > 20000) {
 					send(msg);
 					Log.warn("Resending " + msg.getName() + ".");
 				}
 			}
-			this.listLock.unlock();
-		}
-		
-		private void addMessageToAcknowledgeList(NetworkMessage msg) {
-			msg.setSendingTime(new Date());
-			this.listLock.lock();
-			if(!this.acknowledgementList.contains(msg))
-				this.acknowledgementList.add(msg);
-			this.listLock.unlock();
-		}
-	
-		public synchronized void run() {
-			NetworkMessage msg;
-			while (!isInterrupted()) {
-				if((msg = this.output.poll()) != null) {
-					latency.setLatestSent();
-					serverCo.send(msg.pack(character.id));
-					if(msg.isAcknowledgable())
-						addMessageToAcknowledgeList(msg);
-					character.log.p("s", msg);
-				}
-				else
-					try {
-						wait(5000);
-						browseAcknowledgeList();
-					} catch(InterruptedException e) {
-						interrupt();
-					}
+			else if(now.getTime() - msg.getSendingTime().getTime() > 10000) { // 10 secondes
+				send(msg);
+				Log.warn("Resending " + msg.getName() + ".");
 			}
-			Log.info("Thread sender of character with id = " + character.id + " terminated.");
-			Controller.getInstance().threadTerminated();
 		}
 	}
 }

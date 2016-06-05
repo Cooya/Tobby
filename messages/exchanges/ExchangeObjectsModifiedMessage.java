@@ -1,11 +1,9 @@
 package messages.exchanges;
 
-import java.util.Vector;
-
 import gamedata.inventory.ObjectItem;
 
 public class ExchangeObjectsModifiedMessage extends ExchangeObjectMessage {
-	public Vector<ObjectItem> object;
+	public ObjectItem[] object;
 
 	@Override
 	public void serialize() {
@@ -16,8 +14,8 @@ public class ExchangeObjectsModifiedMessage extends ExchangeObjectMessage {
 	public void deserialize() {
 		super.deserialize();
 		int nb = this.content.readShort();
-		this.object = new Vector<ObjectItem>(nb);
+		this.object = new ObjectItem[nb];
 		for(int i = 0; i < nb; ++i)
-			this.object.add(new ObjectItem(this.content));
+			this.object[i] = new ObjectItem(this.content);
 	}
 }

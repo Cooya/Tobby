@@ -4,10 +4,10 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import main.Controller;
 import main.Emulation;
 import main.FatalError;
 import main.Log;
+import main.Main;
 import utilities.BiMap;
 import utilities.ByteArray;
 import utilities.Reflection;
@@ -81,7 +81,7 @@ public abstract class NetworkMessage {
 			Log.info("Network message classes loaded.");
 		} catch(Exception e) {
 			e.printStackTrace();
-			Controller.getInstance().exit("Error occured during loading deserialization classes.");
+			Main.exit("Error occured during loading deserialization classes.");
 		}
 	}
 	

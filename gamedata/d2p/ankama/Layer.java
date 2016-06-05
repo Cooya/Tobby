@@ -1,7 +1,5 @@
 package gamedata.d2p.ankama;
 
-import java.util.Vector;
-
 import utilities.ByteArray;
 
 public class Layer {
@@ -12,7 +10,7 @@ public class Layer {
     public int layerId;
     public int refCell = 0;
     public int cellsCount;
-    public Vector<Cell> cells;
+    public Cell[] cells;
     private Map _map;
 
     public Layer(Map map) {
@@ -26,12 +24,12 @@ public class Layer {
     public void fromRaw(ByteArray raw, int mapVersion) {
         this.layerId = raw.readInt();
         this.cellsCount = raw.readShort();
-        this.cells = new Vector<Cell>();
-        Cell c;
+        this.cells = new Cell[this.cellsCount];
+        Cell cell;
         for(int i = 0; i < this.cellsCount; ++i) {
-            c = new Cell(this);
-            c.fromRaw(raw, mapVersion);
-            this.cells.add(c);
+            cell = new Cell(this);
+            cell.fromRaw(raw, mapVersion);
+            this.cells[i] = cell;
         }
     }
 }

@@ -37,11 +37,13 @@ public class PartyManager {
 		}
 	}
 	
-	public void partyJoined(int partyId, Vector<PartyMemberInformations> members) {
+	public void partyJoined(int partyId, PartyMemberInformations[] members) {
 		this.partyId = partyId;
-		this.partyMembers = members;
-		for(PartyMemberInformations partyMember : this.partyMembers)
-			this.partyLevel += partyMember.level;
+		this.partyMembers = new Vector<PartyMemberInformations>(8);
+		for(PartyMemberInformations member : members) {
+			this.partyMembers.add(member);
+			this.partyLevel += member.level;
+		}
 		this.character.log.p("Party joined.");
 		
 		if(this.character instanceof Captain)

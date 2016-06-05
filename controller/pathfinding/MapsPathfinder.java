@@ -107,10 +107,10 @@ class MapsPathfinder extends Pathfinder {
 		// détermine la cellule d'arrivée après un changement de map
 		private Cell getNewCellAfterMapChangement(int srcId, int direction) {
 			switch(direction) {
-				case Map.RIGHT : return this.map.cells.get(srcId + 1 - (Map.WIDTH - 1));
-				case Map.LEFT : return this.map.cells.get(srcId - 1 + (Map.WIDTH - 1));
-				case Map.UP : return this.map.cells.get((srcId - Map.WIDTH * 2) + 560);
-				case Map.DOWN : return this.map.cells.get((srcId + Map.WIDTH * 2) - 560);
+				case Map.RIGHT : return this.map.cells[srcId + 1 - (Map.WIDTH - 1)];
+				case Map.LEFT : return this.map.cells[srcId - 1 + (Map.WIDTH - 1)];
+				case Map.UP : return this.map.cells[(srcId - Map.WIDTH * 2) + 560];
+				case Map.DOWN : return this.map.cells[(srcId + Map.WIDTH * 2) - 560];
 			}
 			throw new FatalError("Invalid direction for changing map.");
 		}

@@ -1,5 +1,7 @@
 package controller.modules;
 
+import gamedata.enums.ServerEnum;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -8,14 +10,15 @@ import controller.CharacterState;
 import controller.characters.Character;
 
 public class ModeratorDetection {
-	private static Map<Integer, String> moderators = new HashMap<Integer, String>();
+	private static Map<Integer, String> moderators = new HashMap<Integer, String>(20);
+	private static Map<Integer, Long> lastWHOISTimes = new HashMap<Integer, Long>(20);
 	
 	static {
 		moderators.put(1, "[Jial]");
 		moderators.put(2, null);
 		moderators.put(3, "[Lytimelle]");
 		moderators.put(4, "[Ylleh]");
-		moderators.put(5, "[Gazviv]");
+		moderators.put(5, null); // "[Gazviv]"
 		moderators.put(6, "[Yesht]");
 		moderators.put(7, "[Arkansyelle]");
 		moderators.put(8, null);
@@ -31,16 +34,19 @@ public class ModeratorDetection {
 		moderators.put(18, "[Griffinx]");
 		moderators.put(19, "[Lobeline]");
 		moderators.put(20, "[Eradror]");
+		
+		for(int serverId : ServerEnum.getServerIdsList())
+			lastWHOISTimes.put(serverId, 0l);
 	}
 	
 	private Character character;
+	private int serverId;
 	private String moderator;
-	private long lastWHOISTime;
 
 	public ModeratorDetection(Character character) {
 		this.character = character;
-		this.moderator = moderators.get(this.character.infos.getServerId());
-		this.lastWHOISTime = 0l;
+		this.serverId = character.infos.getServerId();
+		this.moderator = moderators.get(this.serverId);
 	}
 	
 	public void detectModerator() {
@@ -48,10 +54,14 @@ public class ModeratorDetection {
 			return;
 		
 		long currentTime = System.currentTimeMillis();
-		if(currentTime - this.lastWHOISTime > 120000 && this.character.infos.isInGame()) { // plus de deux minutes
+		if(currentTime - lastWHOISTimes.get(this.serverId) > 120000 && this.character.infos.isInGame()) { // plus de deux minutes
 			checkIfModeratorIsOnline(this.moderator);
-			this.lastWHOISTime = currentTime;
+			lastWHOISTimes.put(this.serverId, currentTime);
 		}
+	}
+	
+	public void cancelModeratorDetection() {
+		this.moderator = null;
 	}
 	
 	// envoie une requête WHOIS pour savoir si le modérateur du serveur est en ligne

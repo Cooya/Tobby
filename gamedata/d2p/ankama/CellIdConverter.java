@@ -6,7 +6,7 @@ import java.util.Vector;
 public class CellIdConverter {
 	private static final int MAP_WIDTH = 14;
 	private static final int MAP_HEIGHT = 20;
-    public static Vector<Point> CELLPOS = new Vector<Point>();
+    private static Vector<Point> CELLPOS = new Vector<Point>(MAP_WIDTH * 2 * MAP_HEIGHT);
     private static boolean _bInit = false;
     
     private static void init() {

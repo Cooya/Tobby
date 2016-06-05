@@ -16,7 +16,7 @@ public class MapPoint {
 	public static final int UP_RIGHT = 7;
 	public static final int MAP_WIDTH = 14;
 	public static final int MAP_HEIGHT = 20;
-	public static Vector<Point> CELLPOS = new Vector<Point>();
+	public static Vector<Point> CELLPOS = new Vector<Point>(MAP_WIDTH * 2 * MAP_HEIGHT);
 	private static final Point  VECTOR_RIGHT = new Point(1, 1);
 	private static final Point VECTOR_DOWN_RIGHT = new Point(1, 0);
 	private static final Point VECTOR_DOWN = new Point(1, -1);

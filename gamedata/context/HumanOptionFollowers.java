@@ -1,17 +1,15 @@
 package gamedata.context;
 
-import java.util.Vector;
-
 import utilities.ByteArray;
 
 public class HumanOptionFollowers extends HumanOption {
-	public Vector<IndexedEntityLook> followingCharactersLook;
+	public IndexedEntityLook[] followingCharactersLook;
 	
 	public HumanOptionFollowers(ByteArray buffer) {
 		super(buffer);
-		this.followingCharactersLook = new Vector<IndexedEntityLook>();
 		int nb = buffer.readShort();
+		this.followingCharactersLook = new IndexedEntityLook[nb];
 		for(int i = 0; i < nb; ++i)
-			this.followingCharactersLook.add(new IndexedEntityLook(buffer));
+			this.followingCharactersLook[i] = new IndexedEntityLook(buffer);
 	}
 }

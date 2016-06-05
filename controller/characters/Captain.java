@@ -6,7 +6,6 @@ import gamedata.enums.PlayerStatusEnum;
 import java.util.Vector;
 
 import controller.CharacterState;
-import main.Controller;
 import main.Log;
 import messages.context.GameContextReadyMessage;
 
@@ -54,7 +53,7 @@ public class Captain extends Character {
 				}
 		}
 		if(need) {
-			this.updateState(CharacterState.NEED_TO_EMPTY_INVENTORY, true); // TODO -> pas terrible
+			this.updateState(CharacterState.NEED_TO_EMPTY_INVENTORY, true); // TODO pas terrible
 			broadcastStateUpdate();
 			this.fight.inventoryManager();
 		}
@@ -113,6 +112,7 @@ public class Captain extends Character {
 
 	@Override
 	public void run() {
+		super.run();
 		waitState(CharacterState.IS_LOADED); // attendre l'entrée en jeu
 		this.fight.updateFightArea(this.infos.getLevel());
 
@@ -168,6 +168,6 @@ public class Captain extends Character {
 			}
 		}
 		Log.info("Thread controller of character with id = " + this.id + " terminated.");
-		Controller.getInstance().threadTerminated();
+		threadTerminated();
 	}
 }

@@ -1,11 +1,9 @@
 package messages.exchanges;
 
-import java.util.Vector;
-
 import messages.NetworkMessage;
 
 public class StorageObjectsRemoveMessage extends NetworkMessage {
-	public Vector<Integer> objectUIDList;
+	public int[] objectUIDList;
 
 	@Override
 	public void serialize() {
@@ -15,8 +13,8 @@ public class StorageObjectsRemoveMessage extends NetworkMessage {
 	@Override
 	public void deserialize() {
 		int nb = this.content.readShort();
-		this.objectUIDList = new Vector<Integer>(nb);
+		this.objectUIDList = new int[nb];
 		for(int i = 0; i < nb; ++i)
-			this.objectUIDList.add(this.content.readVarInt());
+			this.objectUIDList[i] = this.content.readVarInt();
 	}
 }

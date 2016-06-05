@@ -1,18 +1,23 @@
 package main;
 
+import controller.characters.Character;
 
 public class FatalError extends Error {
 	private static final long serialVersionUID = -293840118247954992L;
 	
 	public FatalError(String msg) {
 		super(msg);
-		Controller.getInstance().deconnectCurrentCharacter(msg, true, true);
-		Controller.getInstance().threadTerminated();
+		deconnectCurrentCharacter(msg);
 	}
 	
 	public FatalError(Exception e) {
 		super(e);
-		Controller.getInstance().deconnectCurrentCharacter(e.getMessage(), true, true);
-		Controller.getInstance().threadTerminated();
+		deconnectCurrentCharacter(e.getMessage());
+	}
+	
+	private void deconnectCurrentCharacter(String msg) {
+		Character character = CharactersManager.getInstance().getCurrentCharacter();
+		CharactersManager.getInstance().deconnectCharacter(character, msg, true, true);
+		character.threadTerminated();
 	}
 }

@@ -1,29 +1,27 @@
 package messages.fights;
 
-import java.util.Vector;
-
 import messages.NetworkMessage;
 
 public class GameFightPlacementPossiblePositionsMessage extends NetworkMessage {
-	public Vector<Integer> positionsForChallengers;
-	public Vector<Integer> positionsForDefenders;
+	public int[] positionsForChallengers;
+	public int[] positionsForDefenders;
 	public int teamNumber = 2;
 
 	@Override
 	public void serialize() {
-		// not implemented yet
+
 	}
 
 	@Override
 	public void deserialize() {
-		this.positionsForChallengers = new Vector<Integer>();
-    	this.positionsForDefenders = new Vector<Integer>();
 		int nb = this.content.readShort();
+		this.positionsForChallengers = new int[nb];
 		for(int i = 0; i < nb; ++i)
-			this.positionsForChallengers.add(this.content.readVarShort());
+			this.positionsForChallengers[i] = this.content.readVarShort();
 		nb = this.content.readShort();
+		this.positionsForDefenders = new int[nb];
 		for(int i = 0; i < nb; ++i)
-			this.positionsForDefenders.add(this.content.readVarShort());
+			this.positionsForDefenders[i] = this.content.readVarShort();
 		this.teamNumber = this.content.readByte();
 	}
 }

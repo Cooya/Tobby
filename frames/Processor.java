@@ -4,23 +4,17 @@ import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 import utilities.Reflection;
 import controller.characters.Character;
-import main.Controller;
-import main.Log;
 import main.Main;
 import messages.NetworkMessage;
 
 @SuppressWarnings("unchecked")
-public class Processor extends Thread {
-	private static Character characterInConnection; // personnage en cours de connexion
+public class Processor {
 	private static Vector<Class<? extends Frame>> processFrames = new Vector<Class<? extends Frame>>();
 	
-	private Character character;
 	private Map<String, Process> processTable;
-	private ConcurrentLinkedQueue<NetworkMessage> input; // file des messages reçus qui doivent être traité
 	
 	static {
 		// récupération des différentes frames de traitement dans le package "frames"
@@ -31,7 +25,7 @@ public class Processor extends Thread {
 					processFrames.add((Class<? extends Frame>) cl);
 		} catch(Exception e) {
 			e.printStackTrace();
-			Controller.getInstance().exit("Impossible to load frame classes.");
+			Main.exit("Impossible to load frame classes.");
 		}
 		
 		/*
@@ -44,10 +38,7 @@ public class Processor extends Thread {
 	}
 
 	public Processor(Character character, String login) {
-		super(login + "/processor");
-		this.character = character;
 		this.processTable = new HashMap<String, Process>();
-		this.input = new ConcurrentLinkedQueue<NetworkMessage>();
 		Frame frame;
 		Method[] methods;
 		String msgName;
@@ -67,69 +58,9 @@ public class Processor extends Thread {
 		}
 	}
 	
-	// attente si une connexion d'un autre personnage est déjà en cours
-	public void waitForConnection() {
-		synchronized(Main.class) {
-			while(!isInterrupted() && characterInConnection != null) {
-				this.character.log.p("Waiting for connection.");
-				try {
-					Main.class.wait();
-				} catch (Exception e) {
-					Thread.currentThread().interrupt();
-				}
-			}
-			characterInConnection = this.character;
-		}
-	}
-	
-	// signale à un autre personnage en attente de connexion qu'il peut se connecter
-	// appelée lors de la réception du CharacterSelectedSuccessMessage
-	public void endOfConnection() {
-		synchronized(Main.class) {
-			characterInConnection = null;
-			Main.class.notify();
-		}
-	}
-	
-	// appelée depuis le "receiver" uniquement
-	public synchronized void incomingMessage(NetworkMessage msg) {
-		this.input.add(msg);
-		notify();
-	}
-	
-	@Override
-	public synchronized void run() {
-		waitForConnection(); // attente de fin de connexion du personage précédent
-		
-		// lancement des threads de l'interface réseau
-		this.character.net.start();
-		this.character.net.sender.start();
-		
-		NetworkMessage msg;
-		while(!isInterrupted()) {
-			if((msg = this.input.poll()) != null)
-				processMessage(msg);
-			else
-				try {
-					wait();
-				} catch(Exception e) {
-					Thread.currentThread().interrupt();
-				}
-		}
-		if(characterInConnection == this.character) { // on libère le launcher
-			synchronized(Main.class) {
-				characterInConnection = null;
-				Main.class.notify();
-			}
-		}
-		Log.info("Thread process of character with id = " + this.character.id + " terminated.");
-		Controller.getInstance().threadTerminated();
-	}
-	
-	// ne reçoit pas de message inconnu
 	public void processMessage(NetworkMessage msg) {
 		Process process = this.processTable.get(msg.getName());
-		if(process == null) // message inconnu ou n'ayant pas de traitement associé
+		if(process == null) // message inconnu ou n'ayant pas de traitement implémenté
 			return;
 		process.process(msg);
 	}

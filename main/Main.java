@@ -31,6 +31,7 @@ public class Main {
 		}
 	}
 	
+	public static final String DOFUS_PATH = "C:/Program Files (x86)/Ankama/Dofus/app";
 	public static final String D2P_PATH = CLIENT_PATH + "content/maps/maps0.d2p";
 	public static final String D2O_PATH = CLIENT_PATH + "data/common/";
 	public static final String D2I_PATH = CLIENT_PATH + "data/i18n/i18n_fr.d2i";
@@ -41,7 +42,6 @@ public class Main {
 	public static final int SERVER_PORT = 5555;
 	public static final int LAUNCHER_PORT = 5554;
 	public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("HH:mm:ss:SSS");
-	public static final boolean GRAPHICAL_MODE = false;
 
 	public static void main(String[] args) {
 		if(!Processes.fileExists(BYPASS_PATH)) {
@@ -51,10 +51,7 @@ public class Main {
 		Emulation.runLauncher();
 		NetworkMessage.loadMessagesListAndClasses();
 		DatabaseConnection.unlockAllAccounts();
-		if(GRAPHICAL_MODE)
-			Controller.getInstance();
-		else
-			ConsoleInterface.start();
+		ConsoleInterface.start();
 		//new Sniffer();
 		
 		/*
@@ -135,5 +132,16 @@ public class Main {
 		for(Cell cell : map.cells)
 			System.out.println(cell.id + " " + cell.getFloor() + " " + cell.getNonWalkableDuringRP());
 		 */
+	}
+	
+	// fonction appelée à la fermeture de l'application ou lors d'une erreur critique
+	public static void exit(String reason) {
+		Emulation.killLauncher();
+		DatabaseConnection.unlockAllAccounts();
+		if(reason != null)
+			Log.err(reason);
+		else
+			Log.info("Application closed by user.");
+		System.exit(0);
 	}
 }

@@ -3,8 +3,6 @@ package messages.character;
 import gamedata.ProtocolTypeManager;
 import gamedata.context.AbstractSocialGroupInfos;
 
-import java.util.Vector;
-
 import utilities.BooleanByteWrapper;
 import messages.NetworkMessage;
 
@@ -17,7 +15,7 @@ public class BasicWhoIsMessage extends NetworkMessage {
 	public double playerId = 0;
 	public int areaId = 0;
 	public int serverId = 0;
-	public Vector<AbstractSocialGroupInfos> socialGroups;
+	public AbstractSocialGroupInfos[] socialGroups;
 	public boolean verbose = false;
 	public int playerState = 99;
 	
@@ -28,7 +26,6 @@ public class BasicWhoIsMessage extends NetworkMessage {
 
 	@Override
 	public void deserialize() {
-		this.socialGroups = new Vector<AbstractSocialGroupInfos>();
 		int b = this.content.readByte();
 		this.self = BooleanByteWrapper.getFlag(b, 0);
 		this.verbose = BooleanByteWrapper.getFlag(b, 1);
@@ -40,8 +37,9 @@ public class BasicWhoIsMessage extends NetworkMessage {
 		this.areaId = this.content.readShort();
 		this.serverId = this.content.readShort();
 		int nb = this.content.readShort();
+		this.socialGroups = new AbstractSocialGroupInfos[nb];
 		for(int i = 0; i < nb; ++i)
-			this.socialGroups.add((AbstractSocialGroupInfos) ProtocolTypeManager.getInstance(this.content.readShort(), this.content));
+			this.socialGroups[i] = (AbstractSocialGroupInfos) ProtocolTypeManager.getInstance(this.content.readShort(), this.content);
 		this.playerState = this.content.readByte();
 	}
 }

@@ -1,7 +1,5 @@
 package controller.modules;
 
-import java.util.Vector;
-
 import controller.CharacterState;
 import controller.characters.Character;
 import controller.pathfinding.Pathfinding;
@@ -53,7 +51,7 @@ public class MovementAPI {
 		
 		this.character.log.p("Moving from cell " + currentCellId + " to " + targetId + ".");
 		
-		Vector<Integer> path = pathfinding.getCellsPathTo(targetId);
+		int[] path = pathfinding.getCellsPathTo(targetId);
 		if(path == null)
 			return false;
 		

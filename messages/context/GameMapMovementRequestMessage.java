@@ -1,16 +1,14 @@
 package messages.context;
 
-import java.util.Vector;
-
 import messages.NetworkMessage;
 
 public class GameMapMovementRequestMessage extends NetworkMessage {
-	public Vector<Integer> keyMovements;
+	public int[] keyMovements;
 	public int mapId = 0;
 
 	@Override
 	public void serialize() {
-		this.content.writeShort(this.keyMovements.size());
+		this.content.writeShort(this.keyMovements.length);
 		for(int i : this.keyMovements)
 			this.content.writeShort(i);
 		this.content.writeInt(mapId);
@@ -18,6 +16,6 @@ public class GameMapMovementRequestMessage extends NetworkMessage {
 
 	@Override
 	public void deserialize() {
-		// not implemented yet
+		
 	}
 }

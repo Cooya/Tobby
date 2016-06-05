@@ -80,7 +80,7 @@ class CellsPathfinder extends Pathfinder {
 		}
     	
     	private CellNode(int cellId) {
-    		this(mapNode.map.cells.get(cellId), -1, null);
+    		this(mapNode.map.cells[cellId], -1, null);
     	}
     	
 		@SuppressWarnings("unused")

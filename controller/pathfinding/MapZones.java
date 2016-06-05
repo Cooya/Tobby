@@ -33,8 +33,9 @@ class MapZones {
 	private void retrieveZones(Map map) {
 		this.zones = new Vector<Vector<Cell>>();
 		LightMapNode mapNode = new LightMapNode(map);
-		@SuppressWarnings("unchecked")
-		Vector<Cell> cells = (Vector<Cell>) map.cells.clone();
+		Vector<Cell> cells = new Vector<Cell>(map.cells.length);
+		for(Cell cell : map.cells)
+			cells.add(cell);
 		Vector<Cell> buffer = new Vector<Cell>();
 		Cell currentCell;
 		Vector<Cell> neighbours;

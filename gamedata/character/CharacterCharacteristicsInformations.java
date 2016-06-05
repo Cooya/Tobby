@@ -2,8 +2,6 @@ package gamedata.character;
 
 import gamedata.context.ActorExtendedAlignmentInformations;
 
-import java.util.Vector;
-
 import utilities.ByteArray;
 
 public class CharacterCharacteristicsInformations {
@@ -81,7 +79,7 @@ public class CharacterCharacteristicsInformations {
 	public CharacterBaseCharacteristic pvpWaterElementReduction;
 	public CharacterBaseCharacteristic pvpAirElementReduction;
 	public CharacterBaseCharacteristic pvpFireElementReduction;
-	public Vector<CharacterSpellModification> spellModifications;
+	public CharacterSpellModification[] spellModifications;
 	public int probationTime = 0;
 
 	public CharacterCharacteristicsInformations(ByteArray buffer) {
@@ -160,8 +158,9 @@ public class CharacterCharacteristicsInformations {
 		this.pvpAirElementReduction = new CharacterBaseCharacteristic(buffer);
 		this.pvpFireElementReduction = new CharacterBaseCharacteristic(buffer);
 		int nb = buffer.readShort();
+		this.spellModifications = new CharacterSpellModification[nb];
 		for(int i = 0; i < nb; ++i)
-			this.spellModifications.add(new CharacterSpellModification(buffer));
+			this.spellModifications[i] = new CharacterSpellModification(buffer);
 		this.probationTime = buffer.readInt();
 	}
 }

@@ -2,12 +2,10 @@ package messages.connection;
 
 import gamedata.connection.GameServerInformations;
 
-import java.util.Vector;
-
 import messages.NetworkMessage;
 
 public class ServersListMessage extends NetworkMessage {
-    public Vector<GameServerInformations> servers;
+    public GameServerInformations[] servers;
     public int alreadyConnectedToServerId = 0;
     public boolean canCreateNewCharacter = false;
 	
@@ -18,10 +16,10 @@ public class ServersListMessage extends NetworkMessage {
 	
 	@Override
 	public void deserialize() {
-		this.servers = new Vector<GameServerInformations>();
 		int nb = this.content.readShort();
+		this.servers = new GameServerInformations[nb];
 		for(int i = 0; i < nb; ++i)
-			this.servers.add(new GameServerInformations(this.content));
+			this.servers[i] = new GameServerInformations(this.content);
 		this.alreadyConnectedToServerId = this.content.readVarShort();
 		this.canCreateNewCharacter = this.content.readBoolean();
 	}

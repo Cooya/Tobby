@@ -123,7 +123,7 @@ public static ResultSet retrieveMules(int[] serverIds) {
 				query.append(serverId + ", ");
 			else
 				query.append(serverId + ")");
-		query.append(" AND owner IS NULL AND isBanned = 0 GROUP BY serverId;");
+		query.append(" AND owner IS NULL AND status = 0 GROUP BY serverId;");
 		result = st.executeQuery(query.toString());
 		
 		// réservation des mules

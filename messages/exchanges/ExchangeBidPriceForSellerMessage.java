@@ -1,10 +1,8 @@
 package messages.exchanges;
 
-import java.util.Vector;
-
 public class ExchangeBidPriceForSellerMessage extends ExchangeBidPriceMessage {
 	public boolean allIdentical = false;
-	public Vector<Integer> minimalPrices;
+	public int[] minimalPrices;
 	
 	@Override
 	public void serialize() {
@@ -16,8 +14,8 @@ public class ExchangeBidPriceForSellerMessage extends ExchangeBidPriceMessage {
 		super.deserialize();
 		this.allIdentical = this.content.readBoolean();
 		int nb = this.content.readShort();
-		this.minimalPrices = new Vector<Integer>(nb);
+		this.minimalPrices = new int[nb];
 		for(int i = 0; i < nb; ++i)
-			this.minimalPrices.add(this.content.readVarInt());
+			this.minimalPrices[i] = this.content.readVarInt();
 	}
 }

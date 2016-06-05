@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Date;
-import java.util.concurrent.locks.ReentrantLock;
 
 import utilities.Processes;
 import messages.NetworkMessage;
@@ -17,11 +16,8 @@ public class Log {
 	private StringBuilder logFrameString;
 	private StringBuilder logFileBuffer;
 	private long lastFlushDate;
-	private ReentrantLock stringLock;
-	private ReentrantLock bufferLock;
-	private CharacterFrame graphicalFrame;
 	
-	public Log(String login, CharacterFrame graphicalFrame) {
+	public Log(String login) {
 		if(!Processes.dirExists(Main.LOG_PATH))
 			new File(Main.LOG_PATH).mkdir();
 		this.logFilepath = Main.LOG_PATH + login + ".txt";
@@ -33,15 +29,12 @@ public class Log {
 		this.logFrameString = new StringBuilder();
 		this.logFileBuffer = new StringBuilder();
 		this.lastFlushDate = new Date().getTime();
-		this.stringLock = new ReentrantLock();
-		this.bufferLock = new ReentrantLock();
-		this.graphicalFrame = graphicalFrame;
 	}
 	
-	public void p(String msgDirection, NetworkMessage msg) { // pour la réception et l'envoi de messages
+	public synchronized void p(String msgDirection, NetworkMessage msg) { // pour la réception et l'envoi de messages
 		if(Thread.currentThread().isInterrupted())
 			return;
-		this.stringLock.lock();
+		
 		this.logFrameString.append("[").append(Main.DATE_FORMAT.format(new Date())).append("] ");
 		if(msgDirection == "r" || msgDirection == "reception")
 			this.logFrameString.append("Receiving message ").append(msg.getId()).append(" (").append(msg.getName()).append(")");
@@ -50,20 +43,15 @@ public class Log {
 		this.logFrameString.append(EOL);
 		writeIntoLogFile(this.logFrameString);
 		this.logFrameString.setLength(0);
-		this.stringLock.unlock();
 	}
 	
-	public void p(String str) {
+	public synchronized void p(String str) {
 		if(Thread.currentThread().isInterrupted())
 			return;
 		
-		this.stringLock.lock();
 		this.logFrameString.append("[").append(Main.DATE_FORMAT.format(new Date())).append("] ").append(str).append(EOL);
-		if(this.graphicalFrame != null)
-			this.graphicalFrame.appendText(this.logFrameString);
 		writeIntoLogFile(this.logFrameString);
 		this.logFrameString.setLength(0);
-		this.stringLock.unlock();
 	}
 	
 	public static void info(String msg) {
@@ -96,18 +84,18 @@ public class Log {
 	}
 	
 	public void flushBuffer() {
-		this.bufferLock.lock();
-		this.writer.print(this.logFileBuffer);
-		this.writer.flush();
-		this.logFileBuffer.setLength(0);
-		this.bufferLock.unlock();
+		synchronized(this.logFileBuffer) {
+			this.writer.print(this.logFileBuffer);
+			this.writer.flush();
+			this.logFileBuffer.setLength(0);
+		}
 		this.lastFlushDate = new Date().getTime();
 	}
 	
 	private void writeIntoLogFile(StringBuilder msg) {
-		this.bufferLock.lock();
-		this.logFileBuffer.append(msg);
-		this.bufferLock.unlock();
+		synchronized(this.logFileBuffer) {
+			this.logFileBuffer.append(msg);
+		}
 		if(new Date().getTime() - this.lastFlushDate > 10000) // 10 secondes
 			flushBuffer();
 	}

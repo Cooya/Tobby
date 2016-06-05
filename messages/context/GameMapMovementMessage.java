@@ -1,11 +1,9 @@
 package messages.context;
 
-import java.util.Vector;
-
 import messages.NetworkMessage;
 
 public class GameMapMovementMessage extends NetworkMessage{
-	public Vector<Integer> keyMovements;
+	public int[] keyMovements;
 	public double actorId = 0;
 	
 	@Override
@@ -15,10 +13,10 @@ public class GameMapMovementMessage extends NetworkMessage{
 
 	@Override
 	public void deserialize() {
-		this.keyMovements = new Vector<Integer>();
 		int nb = this.content.readShort();
+		this.keyMovements = new int[nb];
 		for(int i = 0; i < nb; ++i)
-			this.keyMovements.add(this.content.readShort());
+			this.keyMovements[i] = this.content.readShort();
 		this.actorId = this.content.readDouble();
 	}
 }

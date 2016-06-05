@@ -34,9 +34,9 @@ public class Map {
     public int relativeId;
     public int mapType;
     public int backgroundsCount;
-    public Vector<Fixture> backgroundFixtures;
+    public Fixture[] backgroundFixtures;
     public int foregroundsCount;
-    public Vector<Fixture> foregroundFixtures;
+    public Fixture[] foregroundFixtures;
     public int subareaId;
     public int shadowBonusOnEntities;
     public int backgroundColor;
@@ -53,8 +53,8 @@ public class Map {
     public int cellsCount;
     public int layersCount;
     public boolean isUsingNewMovementSystem = false;
-    public Vector<Layer> layers;
-    public Vector<Cell> cells;
+    public Layer[] layers;
+    public Cell[] cells;
     public Vector<Integer> topArrowCell;
     public Vector<Integer> leftArrowCell;
     public Vector<Integer> bottomArrowCell;
@@ -127,43 +127,43 @@ public class Map {
             	this.presetId = raw.readInt();
             else
             	this.presetId = -1;
-            Fixture bg;
+            Fixture fixture;
             this.backgroundsCount = raw.readByte();
-            this.backgroundFixtures = new Vector<Fixture>();
+            this.backgroundFixtures = new Fixture[this.backgroundsCount];
             for(int i = 0; i < this.backgroundsCount; ++i) {
-            	bg = new Fixture(this);
-            	bg.fromRaw(raw);
-            	this.backgroundFixtures.add(bg);
+            	fixture = new Fixture(this);
+            	fixture.fromRaw(raw);
+            	this.backgroundFixtures[i] = fixture;
             }
             this.foregroundsCount = raw.readByte();
-            this.foregroundFixtures = new Vector<Fixture>();
+            this.foregroundFixtures = new Fixture[this.foregroundsCount];
             for(int i = 0; i < this.foregroundsCount; ++i) {
-            	bg = new Fixture(this);
-            	bg.fromRaw(raw);
-            	this.foregroundFixtures.add(bg);
+            	fixture = new Fixture(this);
+            	fixture.fromRaw(raw);
+            	this.foregroundFixtures[i] = fixture;
             }
             this.cellsCount = CELLS_COUNT;
             raw.readInt();
             this.groundCRC = raw.readInt();
             this.layersCount = raw.readByte();
-            this.layers = new Vector<Layer>();
+            this.layers = new Layer[this.layersCount];
             Layer layer;
             for(int i = 0; i < layersCount; ++i) {
             	layer = new Layer(this);
             	layer.fromRaw(raw, this.mapVersion);
-            	this.layers.add(layer);
+            	this.layers[i] = layer;
             }
-            this.cells = new Vector<Cell>();
-            Cell cd;
+            this.cells = new Cell[this.cellsCount];
+            Cell cell;
             int _oldMvtSystem = -1;
-            for(int i = 0; i < cellsCount; ++i) {
-            	cd = new Cell(this, i);
-            	cd.fromRaw(raw);
+            for(int i = 0; i < this.cellsCount; ++i) {
+            	cell = new Cell(this, i);
+            	cell.fromRaw(raw);
             	if(_oldMvtSystem == -1)
-            		_oldMvtSystem = cd.moveZone;
-            	if(cd.moveZone != _oldMvtSystem)
+            		_oldMvtSystem = cell.moveZone;
+            	if(cell.moveZone != _oldMvtSystem)
             		this.isUsingNewMovementSystem = true;
-            	this.cells.add(cd);
+            	this.cells[i] = cell;
             }
             this._parsed = true;
 		}

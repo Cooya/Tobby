@@ -135,37 +135,42 @@ public class MovementPath {
 		}
 	}
 
-	public Vector<Integer> getCells() {
-		MapPoint mp;
-		Vector<Integer> vi = new Vector<Integer>();
-		int vectorSize = this._aPath.size();
-		for(int i = 0; i < vectorSize; ++i) {
-			mp = this._aPath.get(i).getStep();
-			vi.add(mp.getCellId());
-		}
-		vi.add(this._oEnd.getCellId());
-		return vi;
+	public int[] getCells() {
+		int size = this._aPath.size();
+		int[] cells = new int[size + 1];
+		for(int i = 0; i < size; ++i)
+			cells[i] = this._aPath.get(i).getStep().getCellId();
+		cells[size] = this._oEnd.getCellId();
+		return cells;
 	}
 
 	public void replaceEnd(MapPoint mp) {
 		this._oEnd = mp;
 	}
 	
-	public Vector<Integer> getServerMovement() {
+	public int[] getServerMovement() {
 		compress();
+		
 		int nb;
-		Vector<Integer> result = new Vector<Integer>();
 		PathElement pe = null;
+		int[] result;
 		int mpLength = getPath().size();
+		
+		if(getPath().get(mpLength - 1) != null)
+			result = new int[mpLength + 1];
+		else
+			result = new int[mpLength];
+			
 		for(int i = 0; i < mpLength; ++i) {
 			pe = getPath().get(i);
 			nb = ((pe.getOrientation() & 7) << 12) | (pe.getStep().getCellId() & 4095);
-			result.add(nb);
+			result[i] = nb;
 		}
 		if(pe != null) {
 			nb = ((pe.getOrientation() & 7) << 12) | (getEnd().getCellId() & 4095);
-			result.add(nb);
+			result[mpLength] = nb;
 		}
+		
 		return result;
 	}
 }

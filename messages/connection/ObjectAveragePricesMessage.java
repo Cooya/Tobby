@@ -1,12 +1,10 @@
 package messages.connection;
 
-import java.util.Vector;
-
 import messages.NetworkMessage;
 
 public class ObjectAveragePricesMessage extends NetworkMessage {
-	public Vector<Integer> ids;
-    public Vector<Integer> avgPrices;
+	public int[] ids;
+    public int[] avgPrices;
     
 	@Override
 	public void serialize() {
@@ -16,12 +14,12 @@ public class ObjectAveragePricesMessage extends NetworkMessage {
 	@Override
 	public void deserialize() {
 		int nb = this.content.readShort();
-		this.ids = new Vector<Integer>(nb);
+		this.ids = new int[nb];
 		for(int i = 0; i < nb; ++i)
-			this.ids.add(this.content.readVarShort());
+			this.ids[i] = this.content.readVarShort();
 		nb = this.content.readShort();
-		this.avgPrices = new Vector<Integer>(nb);
+		this.avgPrices = new int[nb];
 		for(int i = 0; i < nb; ++i)
-			this.avgPrices.add(this.content.readVarInt());
+			this.avgPrices[i] = this.content.readVarInt();
 	}
 }

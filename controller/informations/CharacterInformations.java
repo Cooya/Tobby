@@ -78,6 +78,10 @@ public class CharacterInformations {
 		return this.isInGame;
 	}
 	
+	public boolean firstSelection() {
+		return this.firstSelection;
+	}
+	
 	public String getLogin() {
 		return this.login;
 	}
@@ -162,12 +166,12 @@ public class CharacterInformations {
 		return this.fightsLostCounter;
 	}
 	
-	public void inGame(boolean isInGame) {
-		this.isInGame = isInGame;
+	public int getMapsTravelledCounter() {
+		return this.mapsTravelledCounter;
 	}
 	
-	public boolean firstSelection() {
-		return this.firstSelection;
+	public void inGame(boolean isInGame) {
+		this.isInGame = isInGame;
 	}
 	
 	public void setFirstSelection(boolean firstSelection) {
@@ -240,7 +244,7 @@ public class CharacterInformations {
 		//this.graphicalFrame.setExperienceLabel(this.experience, this.experienceNextLevelFloor);
 	}
 	
-	public void setSpellList(Vector<SpellItem> spells) {
+	public void setSpellList(SpellItem[] spells) {
 		this.spellList = new HashMap<Integer, SpellItem>();
 		for(SpellItem spellItem : spells)
 			this.spellList.put(spellItem.spellId, spellItem);

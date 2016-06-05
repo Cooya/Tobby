@@ -4,34 +4,32 @@ import gamedata.ProtocolTypeManager;
 import gamedata.fight.FightResultListEntry;
 import gamedata.fight.NamedPartyTeamWithOutcome;
 
-import java.util.Vector;
-
 import messages.NetworkMessage;
 
 public class GameFightEndMessage extends NetworkMessage{
 	public int duration = 0;   
 	public int ageBonus = 0;
 	public int lootShareLimitMalus = 0;
-	public Vector<FightResultListEntry> results;
-	public Vector<NamedPartyTeamWithOutcome> namedPartyTeamsOutcomes;
+	public FightResultListEntry[] results;
+	public NamedPartyTeamWithOutcome[] namedPartyTeamsOutcomes;
 
 	@Override
 	public void serialize() {
-		// not implemented yet
+		
 	}
 
 	@Override
 	public void deserialize() {
-		this.results = new Vector<FightResultListEntry>();
-		this.namedPartyTeamsOutcomes = new Vector<NamedPartyTeamWithOutcome>();
 		this.duration = this.content.readInt();
 		this.ageBonus = this.content.readShort();
 		this.lootShareLimitMalus = this.content.readShort();
 		int nb = this.content.readShort();
+		this.results = new FightResultListEntry[nb];
 		for(int i = 0; i < nb; ++i)
-			this.results.add((FightResultListEntry) ProtocolTypeManager.getInstance(this.content.readShort(), this.content));
+			this.results[i] = (FightResultListEntry) ProtocolTypeManager.getInstance(this.content.readShort(), this.content);
 		nb = this.content.readShort();
+		this.namedPartyTeamsOutcomes = new NamedPartyTeamWithOutcome[nb];
 		for(int i = 0; i < nb; ++i)
-			this.namedPartyTeamsOutcomes.add(new NamedPartyTeamWithOutcome(this.content));
+			this.namedPartyTeamsOutcomes[i] = new NamedPartyTeamWithOutcome(this.content);
 	}
 }

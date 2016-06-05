@@ -2,7 +2,6 @@ package controller.characters;
 
 import controller.CharacterState;
 import gamedata.enums.PlayerStatusEnum;
-import main.Controller;
 import main.Log;
 import messages.context.GameContextReadyMessage;
 import messages.fights.GameFightJoinRequestMessage;
@@ -45,6 +44,7 @@ public class Soldier extends Character {
 	}
 	
 	public void run() {
+		super.run();
 		waitState(CharacterState.IS_LOADED); // attendre l'entrée en jeu
 		
 		// reprise de combat à la connexion
@@ -96,6 +96,6 @@ public class Soldier extends Character {
 			}
 		}
 		Log.info("Thread controller of character with id = " + this.id + " terminated.");
-		Controller.getInstance().threadTerminated();
+		threadTerminated();
 	}
 }

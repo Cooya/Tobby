@@ -4,7 +4,6 @@ import gamedata.inventory.ObjectItem;
 import gamedata.inventory.ObjectItemQuantity;
 
 import java.util.HashMap;
-import java.util.Vector;
 
 public class StorageContent {
 	private HashMap<Integer, ObjectItem> objects;
@@ -14,12 +13,16 @@ public class StorageContent {
 		return this.kamas;
 	}
 	
+	public void setKamas(int kamas) {
+		this.kamas = kamas;
+	}
+	
 	public ObjectItem[] getObjects() {
 		return this.objects.values().toArray(new ObjectItem[this.objects.size()]);
 	}
 	
-	public void setObjects(Vector<ObjectItem> objects) {
-		this.objects = new HashMap<Integer, ObjectItem>(objects.size());
+	public void setObjects(ObjectItem[] objects) {
+		this.objects = new HashMap<Integer, ObjectItem>(objects.length);
 		for(ObjectItem object : objects)
 			this.objects.put(object.objectUID, object);
 	}
@@ -28,7 +31,7 @@ public class StorageContent {
 		this.objects.put(object.objectUID, object);
 	}
 	
-	public void addObjects(Vector<ObjectItem> objects) {
+	public void addObjects(ObjectItem[] objects) {
 		for(ObjectItem object : objects)
 			this.objects.put(object.objectUID, object);
 	}
@@ -37,7 +40,7 @@ public class StorageContent {
 		this.objects.get(objectUID).quantity = quantity;
 	}
 	
-	public void updateObjectQuantities(Vector<ObjectItemQuantity> quantities) {
+	public void updateObjectQuantities(ObjectItemQuantity[] quantities) {
 		for(ObjectItemQuantity quantity : quantities)
 			this.objects.get(quantity.objectUID).quantity = quantity.quantity;
 	}
@@ -46,12 +49,8 @@ public class StorageContent {
 		this.objects.remove(objectUID);
 	}
 	
-	public void removeObjects(Vector<Integer> objectsUIDList) {
+	public void removeObjects(int[] objectsUIDList) {
 		for(int objectUID : objectsUIDList)
 			this.objects.remove(objectUID);
-	}
-	
-	public void setKamas(int kamas) {
-		this.kamas = kamas;
 	}
 }

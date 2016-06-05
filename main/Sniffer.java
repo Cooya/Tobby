@@ -19,7 +19,7 @@ public class Sniffer extends Thread {
 	private static Thread serverCoThread;
 	
 	public Sniffer() {
-		log = new Log("Sniffer", null);
+		log = new Log("Sniffer");
 		launch();
 	}
 	

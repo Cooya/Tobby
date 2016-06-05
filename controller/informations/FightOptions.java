@@ -24,11 +24,14 @@ import main.FatalError;
 
 public class FightOptions {
 	// contient les différents identifiants des aires de combat gérées
-	private static final int[] fightAreasId = {92, 95, 97, 98, 101, 173, 442, 443, 444, 445, 450};
+	private static final int[] fightAreaIds = {92, 95, 97, 98, 101, 173, 442, 443, 444, 445, 450};
+	
+	// contient les différents remplacements des aires de combats gérées
+	private static final int[] fightAreaIdReplacements = {173, 92, 173, 445, 92, 92, 445, 445, 445, 444, 445};
 	
 	// contient les paliers de niveau pour chaque aire de combat gérée
 	private static final int[][] fightAreasRawParameters = {
-		{20, 40, 80, 120, 160, 200, 250, 300},
+		{20, 30, 60, 100, 140, 180, 220, 260},
 		{20, 40, 80, 120, 160, 200, 250, 300},
 		{30, 60, 100, 140, 180, 220, 270, 320},
 		{20, 40, 80, 120, 160, 200, 250, 300},
@@ -45,7 +48,7 @@ public class FightOptions {
 	private static final int[][] xpPath = {
 		{450, 10}, // jusqu'au niveau 10 -> route des âmes d'Incarnam
 		{445, 20}, // jusqu'au niveau 20 -> pâturages d'Incarnam
-		{443, 30}, // jusqu'au niveau 30 -> forêt d'Incarnam
+		{443, 25}, // jusqu'au niveau 25 -> forêt d'Incarnam
 		{92, 9999} // à partir du niveau 30 -> contour d'Astrub
 	};
 	
@@ -56,11 +59,11 @@ public class FightOptions {
 	private static final BiMap<Integer, String> areaTable = new BiMap<Integer, String>(Integer.class, String.class);
 	
 	static {
-		for(int i = 0; i < fightAreasId.length; ++i)
-			fightAreasParameters.put(fightAreasId[i], fightAreasRawParameters[i]);
+		for(int i = 0; i < fightAreaIds.length; ++i)
+			fightAreasParameters.put(fightAreaIds[i], fightAreasRawParameters[i]);
 		
 		SubArea subArea;
-		for(int subAreaId : fightAreasId) {
+		for(int subAreaId : fightAreaIds) {
 			subArea = SubArea.getSubAreaById(subAreaId);
 			areaTable.put(subArea.id, new String(((subArea.getName() + " (" + subArea.getArea().getName() + ")").getBytes()), StandardCharsets.UTF_8));
 		}
@@ -85,7 +88,7 @@ public class FightOptions {
 	}
 	
 	public static void displayFightAreas() {
-		for(int fightAreaId : FightOptions.fightAreasId)
+		for(int fightAreaId : FightOptions.fightAreaIds)
 			System.out.println(fightAreaId + " -> \"" + areaTable.get(fightAreaId) + "\"");
 	}
 	
@@ -128,7 +131,7 @@ public class FightOptions {
 		}
 		else {
 			this.fightAreaId = this.fixedFightAreaId;
-			this.fightAreaParameters = fightAreasParameters.get(fightAreaId);
+			this.fightAreaParameters = fightAreasParameters.get(this.fightAreaId);
 		}
 		for(int i = 1; i < this.fightAreaParameters.length; ++i)
 			if(level < this.fightAreaParameters[i]) {
@@ -136,5 +139,20 @@ public class FightOptions {
 				return;
 			}
 		this.monsterGroupMaxSize = 8;
+	}
+	
+	public void replaceFightArea(int level) {
+		for(int i = 0; i < fightAreaIds.length; ++i)
+			if(this.fightAreaId == fightAreaIds[i]) {
+				this.fightAreaId = fightAreaIdReplacements[i];
+				this.fightAreaParameters = fightAreasParameters.get(this.fightAreaId);
+				for(int j = 1; j < this.fightAreaParameters.length; ++j)
+					if(level < this.fightAreaParameters[j]) {
+						this.monsterGroupMaxSize = j;
+						return;
+					}
+				this.monsterGroupMaxSize = 8;
+				return;
+			}
 	}
 }

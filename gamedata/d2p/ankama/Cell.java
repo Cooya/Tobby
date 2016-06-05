@@ -1,7 +1,6 @@
 package gamedata.d2p.ankama;
 
 import java.awt.Point;
-import java.util.Vector;
 
 import utilities.ByteArray;
 
@@ -13,7 +12,7 @@ public class Cell {
 	private static Point _cellCoords;
     public int cellId;
     public int elementsCount;
-    public Vector<BasicElement> elements;
+    public BasicElement[] elements;
     private Layer _layer;
     
     public Cell(Layer layer) {
@@ -58,12 +57,12 @@ public class Cell {
     public void fromRaw(ByteArray raw, int mapVersion) {
     	this.cellId = raw.readShort();
     	this.elementsCount = raw.readShort();
-    	this.elements = new Vector<BasicElement>();
+    	this.elements = new BasicElement[this.elementsCount];
     	BasicElement be;
     	for(int i = 0; i < this.elementsCount; ++i) {
     		be = BasicElement.getElementFromType(raw.readByte(), this);
     		be.fromRaw(raw, mapVersion);
-    		this.elements.add(be);
+    		this.elements[i] = be;
     	}
     }
 }

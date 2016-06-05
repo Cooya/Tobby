@@ -1,6 +1,5 @@
 package controller.characters;
 
-import frames.Processor;
 import gamedata.character.PlayerStatus;
 import gamedata.d2p.ankama.Map;
 import gamedata.enums.BreedEnum;
@@ -20,20 +19,20 @@ import controller.modules.ModeratorDetection;
 import controller.modules.MovementAPI;
 import controller.modules.PartyManager;
 import controller.modules.SalesManager;
-import main.Controller;
+import main.CharactersManager;
 import main.FatalError;
 import main.Log;
 import main.NetworkInterface;
-import messages.NetworkMessage;
 import messages.character.PlayerStatusUpdateRequestMessage;
 
 public abstract class Character extends Thread {
 	private HashMap<CharacterState, Boolean> states;
+	private int activeThreads;
+	private boolean runOnce;
+	
 	public int id; // identifiant du personnage
-	public Log log; // gestion des logs (fichier + historique graphique)
-	public Thread[] threads; // tableau contenant les 4 threads du personnage
+	public Log log; // gestion des logs
 	public NetworkInterface net; // gestion de la connexion réseau
-	public Processor processor; // entité chargée du traitement des messages
 	public CharacterInformations infos;
 	public StorageContent inventory;
 	public StorageContent bank;
@@ -45,7 +44,7 @@ public abstract class Character extends Thread {
 	public MovementAPI mvt;
 	public FightAPI fight;
 	public InteractionAPI interaction;
-	public ModeratorDetection mod;
+	public ModeratorDetection modo;
 	
 	public static Character create(int id, int behaviour, String login, String password, int serverId, int areaId, Log log) {
 		switch(behaviour) {
@@ -55,22 +54,29 @@ public abstract class Character extends Thread {
 			default : throw new FatalError("Unknown behaviour.");
 		}
 	}
+	
+	public static Character clone(Character character) {
+		int behaviour;
+		if(character instanceof LoneFighter)
+			behaviour = CharacterBehaviour.LONE_WOLF;
+		else if(character instanceof Captain)
+			behaviour = CharacterBehaviour.CAPTAIN;
+		else if(character instanceof Soldier)
+			behaviour = CharacterBehaviour.SOLDIER;
+		else
+			throw new FatalError("Unknown behaviour.");	
+		return create(character.id, behaviour, character.infos.getLogin(), character.infos.getPassword(), character.infos.getServerId(), character.fight.getFightAreaId(), character.log);
+	}
 
 	protected Character(int id, String login, String password, int serverId, int breed, int areaId, Log log) {
 		super(login + "/controller");
+		this.activeThreads = 0;
+		this.runOnce = false;
 		this.id = id;
 		
 		// initialisation des modules principaux
 		this.log = log;
 		this.net = new NetworkInterface(this, login);
-		this.processor = new Processor(this, login);
-		
-		// initialisation des threads
-		this.threads = new Thread[4];
-		this.threads[0] = this.net;
-		this.threads[1] = this.net.sender;
-		this.threads[2] = this.processor;
-		this.threads[3] = this;
 		
 		// initialisation des modules du contrôleur
 		this.infos = new CharacterInformations(login, password, serverId, breed);
@@ -84,55 +90,47 @@ public abstract class Character extends Thread {
 		this.mvt = new MovementAPI(this);
 		this.fight = new FightAPI(this, areaId);
 		this.interaction = new InteractionAPI(this);
-		this.mod = new ModeratorDetection(this);
+		this.modo = new ModeratorDetection(this);
 		
 		// initialisation de la table des états
 		this.states = new HashMap<CharacterState, Boolean>();
 		for(CharacterState state : CharacterState.values())
 			this.states.put(state, false);
-		
-		// lancement de la thread de traitement (qui va lancer les autres threads le moment venu)
-		this.processor.start();
+	}
+	
+	@Override
+	public void run() {
+		this.activeThreads++;
+	}
+	
+	// lancement des threads de l'interface réseau et du traitement des messages
+	public void connect() {
+		this.net.start();
+		this.activeThreads++;
+		this.runOnce = true;
 		
 		Log.info("Character with id = " + this.id + " started.");
 	}
 	
-	@Override
-	public abstract void run(); // implémentée par les différents personnages
-	
-	public static void log(String msg) {
-		Log log = Controller.getInstance().getLog();
-		if(log != null)
-			log.p(msg);
-		else
-			Log.info(msg);
-	}
-	
-	public static void log(String direction, NetworkMessage msg) {
-		Log log = Controller.getInstance().getLog();
-		if(log != null)
-			log.p(direction, msg);
-		else
-			Log.info(msg.toString());
-	}
-	
-	// destruction des threads du personnage depuis la GUI (forcée ou non)
+	// arrêt des threads du personnage (forcée ou non)
 	public void deconnectionOrder(boolean forced) {
 		if(forced) {
-			this.net.sender.interrupt(); // on interrompt d'abord le sender pour éviter une exception
 			this.net.closeReceiver();
-			this.processor.interrupt();
 			interrupt();
 		}
 		else
 			updateState(CharacterState.SHOULD_DECONNECT, true);
 	}
 	
-	public boolean isActive() {
-		for(Thread thread : this.threads)
-			if(thread.isAlive())
-				return true;
-		return false;
+	// permet de savoir si le personnage a déjà été lancé pour savoir si on doit le cloner ou non
+	public boolean alreadyRun() {
+		return this.runOnce;
+	}
+	
+	public void threadTerminated() {
+		this.activeThreads--;
+		if(this.activeThreads == 0)
+			CharactersManager.getInstance().deconnectionCallback(this);
 	}
 
 	public void updatePosition(Map map, int cellId) {
@@ -329,7 +327,7 @@ public abstract class Character extends Thread {
 					return false;
 				}
 			}
-			this.mod.detectModerator();
+			this.modo.detectModerator();
 			if(!infiniteWaiting) {
 				this.log.p("TIMEOUT");
 				return false; // si on ne l'a pas reçu à temps

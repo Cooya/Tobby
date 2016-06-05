@@ -2,32 +2,29 @@ package gamedata.context;
 
 import gamedata.ProtocolTypeManager;
 
-import java.util.Vector;
-
 import utilities.ByteArray;
 
 public class FightCommonInformations {
-    public int fightId = 0;
-    public int fightType = 0;
-    public Vector<FightTeamInformations> fightTeams;
-    public Vector<Integer> fightTeamsPositions;
-    public Vector<FightOptionsInformations> fightTeamsOptions;
-    
+	public int fightId = 0;
+	public int fightType = 0;
+	public FightTeamInformations[] fightTeams;
+	public int[] fightTeamsPositions;
+	public FightOptionsInformations[] fightTeamsOptions;
+
 	public FightCommonInformations(ByteArray buffer) {
-        this.fightTeams = new Vector<FightTeamInformations>();
-        this.fightTeamsPositions = new Vector<Integer>();
-        this.fightTeamsOptions = new Vector<FightOptionsInformations>();
-		
-        this.fightId = buffer.readInt();
-        this.fightType = buffer.readByte();
-        int nb = buffer.readShort();
-        for(int i = 0; i < nb; ++i)
-        	this.fightTeams.add((FightTeamInformations) ProtocolTypeManager.getInstance(buffer.readShort(), buffer));
-        nb = buffer.readShort();
-        for(int i = 0; i < nb; ++i)
-        	this.fightTeamsPositions.add(buffer.readVarShort());
-        nb = buffer.readShort();
-        for(int i = 0; i < nb; ++i)
-        	this.fightTeamsOptions.add(new FightOptionsInformations(buffer));
+		this.fightId = buffer.readInt();
+		this.fightType = buffer.readByte();
+		int nb = buffer.readShort();
+		this.fightTeams = new FightTeamInformations[nb];
+		for(int i = 0; i < nb; ++i)
+			this.fightTeams[i] = (FightTeamInformations) ProtocolTypeManager.getInstance(buffer.readShort(), buffer);
+		nb = buffer.readShort();
+		this.fightTeamsPositions = new int[nb];
+		for(int i = 0; i < nb; ++i)
+			this.fightTeamsPositions[i] = buffer.readVarShort();
+		nb = buffer.readShort();
+		this.fightTeamsOptions = new FightOptionsInformations[nb];
+		for(int i = 0; i < nb; ++i)
+			this.fightTeamsOptions[i] = new FightOptionsInformations(buffer);
 	}
 }

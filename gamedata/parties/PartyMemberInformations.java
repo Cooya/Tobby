@@ -1,7 +1,5 @@
 package gamedata.parties;
 
-import java.util.Vector;
-
 import utilities.ByteArray;
 import gamedata.ProtocolTypeManager;
 import gamedata.character.CharacterBaseInformations;
@@ -19,7 +17,7 @@ public class PartyMemberInformations extends CharacterBaseInformations {
     public int mapId = 0;
     public int subAreaId = 0;
     public PlayerStatus status;
-    public Vector<PartyCompanionMemberInformations> companions;
+    public PartyCompanionMemberInformations[] companions;
     
     public PartyMemberInformations(ByteArray buffer) {
     	super(buffer);
@@ -35,8 +33,8 @@ public class PartyMemberInformations extends CharacterBaseInformations {
         this.subAreaId = buffer.readVarShort();
         this.status = (PlayerStatus) ProtocolTypeManager.getInstance(buffer.readShort(), buffer);
         int nb = buffer.readShort();
-        this.companions = new Vector<PartyCompanionMemberInformations>();
+        this.companions = new PartyCompanionMemberInformations[nb];
         for(int i = 0; i < nb; ++i)
-        	this.companions.add(new PartyCompanionMemberInformations(buffer));
+        	this.companions[i] = new PartyCompanionMemberInformations(buffer);
     }
 }

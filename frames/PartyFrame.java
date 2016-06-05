@@ -1,6 +1,6 @@
 package frames;
 
-import main.Controller;
+import main.CharactersManager;
 import messages.parties.PartyAcceptInvitationMessage;
 import messages.parties.PartyDeletedMessage;
 import messages.parties.PartyInvitationMessage;
@@ -21,7 +21,7 @@ public class PartyFrame extends Frame {
 	
 	protected void process(PartyInvitationMessage PIM) {
 		this.character.log.p("Party invitation received.");
-		if(Controller.getInstance().isWorkmate(PIM.fromId)) {
+		if(CharactersManager.getInstance().isWorkmate(PIM.fromId)) {
 			PartyAcceptInvitationMessage PAIM = new PartyAcceptInvitationMessage();
 			PAIM.partyId = PIM.partyId;
 			this.character.net.send(PAIM);

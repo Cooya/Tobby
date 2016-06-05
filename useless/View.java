@@ -9,6 +9,7 @@ import java.awt.event.WindowEvent;
 import java.util.Collection;
 import java.util.Vector;
 
+import javax.swing.AbstractButton;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
@@ -21,9 +22,19 @@ import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.event.InternalFrameEvent;
+import javax.swing.event.InternalFrameListener;
 
+import main.CharactersManager;
+import main.FighterOptionsPanel;
+import main.Log;
+import main.LoginPanel;
+import main.AccountsManager.Account;
+import main.Controller.ConnectionListener;
+import main.Controller.FighterOptionsPanelListener;
 import controller.CharacterBehaviour;
 import controller.informations.FightOptions;
 
@@ -68,12 +79,8 @@ public class View {
 		frame.setVisible(true);
 	}
 	
-	protected void newAccountItem(String login, int serverId) {
-		JMenuItem item;
-		if(serverId != 0)
-			item = new JMenuItem(login + " (salesman)");
-		else
-			item = new JMenuItem(login + " (fighter)");
+	protected void newAccountItem(String login) {
+		JMenuItem item = new JMenuItem(login + " (fighter)");
 		this.accountsListMenu.add(item);
 		new Controller.AccountItemListener(item);
 	}
@@ -298,6 +305,140 @@ public class View {
 				if(this.nextFighterBehaviour != -1)
 					displayAreasPanel();
 			}
+		}
+	}
+	
+	/* PARTIE CONTROLEUR */
+	
+	// méthode déclenchée par la fermeture d'une frame graphique
+	private synchronized void killCharacter(JInternalFrame graphicalFrame) {
+		this.view.removeCharacterFrame(graphicalFrame);
+		CharactersManager.getInstance().deconnectCharacter(this.view.getCharacter(graphicalFrame).id, "Graphical frame closed.", true, false);
+	}
+	
+	// écoute du clic sur le bouton "load account"
+	// => lancement de la boîte de dialogue pour la création d'un nouveau compte
+	protected static class LoadAccountListener implements ActionListener {
+		protected LoadAccountListener(AbstractButton button) {
+			button.addActionListener(this);
+		}
+
+		public void actionPerformed(ActionEvent event) {
+			new ConnectionListener(self.view.createLoginPanel());
+		}
+	}
+
+	// écoute du bouton "Run" dans la boîte de dialogue de création de nouveau de compte
+	// => création d'un compte, ajout dans le fichier texte et lancement de la boîte de dialogue des options de combat
+	private static class ConnectionListener implements ActionListener {
+		private LoginPanel loginPanel;
+
+		private ConnectionListener(LoginPanel loginPanel) {
+			this.loginPanel = loginPanel;
+			this.loginPanel.connectButton.addActionListener(this);
+		}
+
+		public void actionPerformed(ActionEvent event) {
+			String login = this.loginPanel.loginField.getText();
+			String password = this.loginPanel.passwordField.getText();
+			int serverId = Integer.parseInt(this.loginPanel.serverField.getText());
+			if(login.isEmpty() || password.isEmpty() || serverId == 0)
+				JOptionPane.showMessageDialog(null, "Missing informations.", "Erreur", JOptionPane.ERROR_MESSAGE);
+			else {
+				this.loginPanel.dispose();
+				Account account = self.newAccount(login, password);
+				new FighterOptionsPanelListener(self.view.createFighterOptionsPanel(0, self.squads.nextFighterWillBe()), account.id, true); // affichage des options de combat éventuelles
+			}
+		}
+	}
+
+	// fermeture d'une CharacterFrame
+	private static class CharacterFrameListener implements InternalFrameListener {
+
+		@Override
+		public void internalFrameActivated(InternalFrameEvent arg0) {}
+
+		@Override
+		public void internalFrameClosed(InternalFrameEvent arg0) {}
+
+		@Override
+		public void internalFrameClosing(InternalFrameEvent event) {
+			self.killCharacter(event.getInternalFrame());
+		}
+
+		@Override
+		public void internalFrameDeactivated(InternalFrameEvent arg0) {}
+
+		@Override
+		public void internalFrameDeiconified(InternalFrameEvent arg0) {}
+
+		@Override
+		public void internalFrameIconified(InternalFrameEvent arg0) {}
+
+		@Override
+		public void internalFrameOpened(InternalFrameEvent arg0) {}
+	}
+
+	// écoute du bouton de lancement rapide d'un compte dans la liste des comptes du menu déroulant
+	// => lancement de la boîte de dialogue des options de combat
+	protected static class AccountItemListener implements ActionListener {
+		private JMenuItem accountItem;
+
+		protected AccountItemListener(JMenuItem item) {
+			this.accountItem = item;
+			this.accountItem.addActionListener(this);
+		}
+
+		public void actionPerformed(ActionEvent e) {
+			/*
+			Account account = self.accounts.getAccount(this.accountItem.getText().split(" ")[0]);
+			if(account != null)
+				new FighterOptionsPanelListener(self.view.createFighterOptionsPanel(account.serverId, self.squads.nextFighterWillBe()), account.id, true);
+			else
+				Log.err("Unknown account.");
+			*/
+		}
+	}
+	
+	// écoute du bouton de lancement rapide d'une escouade dans la liste des escouades du menu déroulant
+	// => lancement de la boîte de dialogue des options de combat de l'escouade
+	protected static class SquadItemListener implements ActionListener {
+		private JMenuItem squadItem;
+
+		protected SquadItemListener(JMenuItem item) {
+			this.squadItem = item;
+			this.squadItem.addActionListener(this);
+		}
+
+		public void actionPerformed(ActionEvent e) {
+			int id = self.squads.getSquadId(this.squadItem.getText().split(" ")[0]);
+			if(id >= 0)
+				new FighterOptionsPanelListener(self.view.createFighterOptionsPanel(CharacterBehaviour.CAPTAIN, -1), id, false);
+			else
+				Log.err("Unknown squad.");
+		}
+	}
+
+	// écoute du bouton "Go" dans la boîte de dialogue des options de combat
+	// => démarrage d'un personnage
+	private static class FighterOptionsPanelListener implements ActionListener {
+		private FighterOptionsPanel fighterOptionsPanel;
+		private int id;
+		private boolean singleAccount;
+
+		private FighterOptionsPanelListener(FighterOptionsPanel fighterOptionsPanel, int id, boolean singleAccount) {
+			this.fighterOptionsPanel = fighterOptionsPanel;
+			this.id = id;
+			this.singleAccount = singleAccount;
+			this.fighterOptionsPanel.submitButton.addActionListener(this);
+		}
+
+		public void actionPerformed(ActionEvent event) {
+			if(this.singleAccount)
+				self.connectCharacter(this.id, 11, this.fighterOptionsPanel.getSelectedAreaId());
+			else // escouade
+				self.connectSquad(this.id, 11, this.fighterOptionsPanel.getSelectedAreaId(), this.fighterOptionsPanel.getSelectedBehaviour() != CharacterBehaviour.LONE_WOLF);
+			this.fighterOptionsPanel.dispose();
 		}
 	}
 }

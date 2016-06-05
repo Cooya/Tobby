@@ -45,42 +45,42 @@ class LightMapNode extends PathNode {
 			case Map.RIGHT :
 				destId = srcId + 1;
 				if(destId % Map.WIDTH != 0)
-					return this.map.cells.get(destId);
+					return this.map.cells[destId];
 				return null;
 			case Map.DOWN_RIGHT :
 				destId = srcId + Map.WIDTH + offsetId;
 				if(destId < Map.CELLS_COUNT && (srcId + 1) % (Map.WIDTH * 2) != 0)
-					return this.map.cells.get(destId);
+					return this.map.cells[destId];
 				return null;
 			case Map.DOWN :
 				destId = srcId + Map.WIDTH * 2;
 				if(destId < Map.CELLS_COUNT)
-					return this.map.cells.get(destId);
+					return this.map.cells[destId];
 				return null;
 			case Map.DOWN_LEFT :
 				destId = srcId + Map.WIDTH - 1 + offsetId;
 				if(destId < Map.CELLS_COUNT && srcId % (Map.WIDTH * 2) != 0)
-					return this.map.cells.get(destId);
+					return this.map.cells[destId];
 				return null;
 			case Map.LEFT :
 				destId = srcId - 1;
 				if(srcId % Map.WIDTH != 0)
-					return this.map.cells.get(destId);
+					return this.map.cells[destId];
 				return null;
 			case Map.UP_LEFT :
 				destId = srcId - Map.WIDTH - 1 + offsetId;
 				if(destId >= 0 && srcId % (Map.WIDTH * 2) != 0)
-					return this.map.cells.get(destId);
+					return this.map.cells[destId];
 				return null;
 			case Map.UP :
 				destId = srcId - Map.WIDTH * 2;
 				if(destId >= 0)
-					return this.map.cells.get(destId);
+					return this.map.cells[destId];
 				return null;
 			case Map.UP_RIGHT :
 				destId = srcId - Map.WIDTH + offsetId;
 				if(destId > 0 && (srcId + 1) % (Map.WIDTH * 2) != 0)
-					return this.map.cells.get(destId);
+					return this.map.cells[destId];
 				return null;
 		}
 		throw new FatalError("Invalid direction.");
@@ -110,10 +110,10 @@ class LightMapNode extends PathNode {
 	protected int getOutgoingCellId(int direction) {
 		Cell middleCell;
 		switch(direction) {
-			case Map.RIGHT : middleCell = this.map.cells.get(MIDDLE_RIGHT_CELL_ID); break;
-			case Map.DOWN : middleCell = this.map.cells.get(MIDDLE_DOWN_CELL_ID); break;
-			case Map.LEFT : middleCell = this.map.cells.get(MIDDLE_LEFT_CELL_ID); break;
-			case Map.UP : middleCell = this.map.cells.get(MIDDLE_UP_CELL_ID); break;
+			case Map.RIGHT : middleCell = this.map.cells[MIDDLE_RIGHT_CELL_ID]; break;
+			case Map.DOWN : middleCell = this.map.cells[MIDDLE_DOWN_CELL_ID]; break;
+			case Map.LEFT : middleCell = this.map.cells[MIDDLE_LEFT_CELL_ID]; break;
+			case Map.UP : middleCell = this.map.cells[MIDDLE_UP_CELL_ID]; break;
 			default : throw new FatalError("Invalid direction for changing map.");
 		}	
 		

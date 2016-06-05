@@ -2,12 +2,10 @@ package messages.inventory;
 
 import gamedata.inventory.ObjectItemQuantity;
 
-import java.util.Vector;
-
 import messages.NetworkMessage;
 
 public class ObjectsQuantityMessage extends NetworkMessage {
-	public Vector<ObjectItemQuantity> objectsUIDAndQty;
+	public ObjectItemQuantity[] objectsUIDAndQty;
 
 	@Override
 	public void serialize() {
@@ -17,8 +15,8 @@ public class ObjectsQuantityMessage extends NetworkMessage {
 	@Override
 	public void deserialize() {
 		int nb = this.content.readShort();
-		this.objectsUIDAndQty = new Vector<ObjectItemQuantity>(nb);
+		this.objectsUIDAndQty = new ObjectItemQuantity[nb];
 		for(int i = 0; i < nb; ++i)
-			this.objectsUIDAndQty.add(new ObjectItemQuantity(this.content));
+			this.objectsUIDAndQty[i] = new ObjectItemQuantity(this.content);
 	}
 }

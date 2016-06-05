@@ -6,28 +6,27 @@ import java.security.MessageDigest;
 import utilities.ByteArray;
 import controller.CharacterState;
 import controller.characters.Character;
-import controller.modules.SalesManager;
+import gamedata.ParamsDecoder;
 import gamedata.d2i.I18n;
 import gamedata.d2o.modules.InfoMessage;
 import gamedata.d2o.modules.MapPosition;
 import gamedata.d2p.MapsCache;
 import gamedata.d2p.ankama.Map;
 import gamedata.enums.DialogTypeEnum;
+import gamedata.enums.ServerEnum;
 import gamedata.enums.TextInformationTypeEnum;
-import main.Controller;
+import main.CharactersManager;
 import main.FatalError;
 import main.Log;
-import messages.UnhandledMessage;
+import main.Main;
 import messages.character.BasicWhoIsMessage;
+import messages.character.BasicWhoIsNoMatchMessage;
 import messages.character.CharacterLevelUpMessage;
-import messages.character.CharacterLoadingCompleteMessage;
 import messages.character.CharacterStatsListMessage;
 import messages.character.GameRolePlayPlayerLifeStatusMessage;
 import messages.character.LifePointsRegenBeginMessage;
 import messages.character.PlayerStatusUpdateMessage;
 import messages.character.SpellListMessage;
-import messages.connection.ChannelEnablingMessage;
-import messages.connection.PrismsListRegisterMessage;
 import messages.context.CurrentMapMessage;
 import messages.context.GameContextCreateMessage;
 import messages.context.GameContextRemoveElementMessage;
@@ -48,7 +47,6 @@ import messages.interactions.NpcGenericActionFailureMessage;
 import messages.security.AccountLoggingKickedMessage;
 import messages.security.CheckFileMessage;
 import messages.security.CheckFileRequestMessage;
-import messages.security.ClientKeyMessage;
 import messages.security.PopupWarningMessage;
 
 public class RoleplayContextFrame extends Frame {
@@ -59,10 +57,19 @@ public class RoleplayContextFrame extends Frame {
 	
 	protected void process(BasicWhoIsMessage msg) {
 		this.character.log.p("Whois response received.");
-		if(msg.playerState != 0)
-			Controller.getInstance().serverDeconnection("The moderator is online.", this.character.infos.getServerId(), true, false);
+		if(msg.playerState != 0) {
+			Log.info("The moderator is online.");
+			CharactersManager.getInstance().deconnectCharacters("The moderator is online.", this.character.infos.getServerId(), true, false);
+		}
 		else
 			this.character.updateState(CharacterState.WHOIS_RESPONSE, true);
+	}
+	
+	protected void process(BasicWhoIsNoMatchMessage msg) {
+		this.character.log.p("Whois response received.");
+		Log.info("Character \"" + msg.search + "\" does not exist on the server " + ServerEnum.getServerName(this.character.infos.getServerId()) + ".");
+		this.character.modo.cancelModeratorDetection();
+		this.character.updateState(CharacterState.WHOIS_RESPONSE, true);
 	}
 	
 	protected void process(NpcDialogCreationMessage msg) {
@@ -77,20 +84,20 @@ public class RoleplayContextFrame extends Frame {
 	
 	protected void process(TextInformationMessage msg) {
 		if(msg.msgType == 1 && msg.msgId == 245) // limite de 200 combats par jour atteinte
-			Controller.getInstance().deconnectCurrentCharacter("Limit of 200 fights per day reached.", false, false);
+			CharactersManager.getInstance().deconnectCharacter(CharactersManager.getInstance().getCurrentCharacter(), "Limit of 200 fights per day reached.", false, false);
 		else {
 			this.character.log.p("Text information received, reading...");
 			InfoMessage infoMessage = InfoMessage.getInfoMessageById((msg.msgType * 10000) + msg.msgId);
 			int textId;
-			Object[] parameters;
+			String[] parameters = null;
 			if(infoMessage != null) {
 				textId = infoMessage.textId;
-				if(msg.parameters.size() > 0) {
-					String parameter = msg.parameters.get(0);
+				if(msg.parameters.length > 0) {
+					String parameter = msg.parameters[0];
 					if(parameter != null && parameter.indexOf("~") == -1)
 						parameters = parameter.split("~");
 					else
-						parameters = (String[]) msg.parameters.toArray();
+						parameters = msg.parameters;
 				}
 			}
 			else {
@@ -100,12 +107,11 @@ public class RoleplayContextFrame extends Frame {
 				else
 					textId = InfoMessage.getInfoMessageById(207).textId;
 				parameters = new String[1];
-				parameters[0] = msg.msgId;
+				parameters[0] = String.valueOf(msg.msgId);
 			}
 			String messageContent = I18n.getText(textId);
 			if(messageContent != null)
-				//this.character.log.p(ParamsDecoder.applyParams(msgContent, parameters));
-				this.character.log.p(messageContent);
+				this.character.log.p(ParamsDecoder.applyParams(messageContent, parameters, '%'));
 			else
 				this.character.log.p("There is no message for id " + (msg.msgType * 10000 + msg.msgId) + ".");
 		}
@@ -116,8 +122,8 @@ public class RoleplayContextFrame extends Frame {
 		String str;
 		if(infoMsg != null) {
 			str = I18n.getText(infoMsg.textId);
-			//if(str != null)
-				//str = ParamsDecoder.applyParams(str, msg.parameters);
+			if(str != null)
+				str = ParamsDecoder.applyParams(str, msg.parameters, '%');
 		}
 		else
 			str = "Information message " + (40000 + msg.msgId) + " cannot be found.";
@@ -135,21 +141,6 @@ public class RoleplayContextFrame extends Frame {
 		}
 		else
 			this.character.log.p("Unknown dialog window closed.");
-	}
-	
-	protected void process(CharacterLoadingCompleteMessage msg) {
-		Log.info("Character with id = " + this.character.id + " connected in game.");
-		
-		this.character.net.send(new UnhandledMessage("FriendsGetListMessage"));
-		this.character.net.send(new UnhandledMessage("IgnoredGetListMessage"));
-		this.character.net.send(new UnhandledMessage("SpouseGetInformationsMessage"));
-		this.character.net.send(new ClientKeyMessage());
-		this.character.net.send(new UnhandledMessage("GameContextCreateRequestMessage"));
-		if(!SalesManager.averagePricesAreSet(this.character.infos.getServerId()))
-			this.character.net.send(new UnhandledMessage("ObjectAveragePricesGetMessage"));
-		this.character.net.send(new UnhandledMessage("QuestListRequestMessage"));
-		this.character.net.send(new PrismsListRegisterMessage());
-		this.character.net.send(new ChannelEnablingMessage());
 	}
 	
 	protected void process(GameContextCreateMessage msg) {
@@ -205,7 +196,7 @@ public class RoleplayContextFrame extends Frame {
 	}
 	
 	protected void process(GameMapMovementMessage msg) {
-		int position = msg.keyMovements.lastElement();
+		int position = msg.keyMovements[msg.keyMovements.length - 1];
 		this.character.roleplayContext.updateContextActorPosition(msg.actorId, position);
 		if(msg.actorId == this.character.infos.getCharacterId()) {
 			this.character.infos.setCurrentCellId(position);
@@ -252,7 +243,7 @@ public class RoleplayContextFrame extends Frame {
 	}
 	
 	protected void process(CheckFileRequestMessage msg) {
-		this.character.log.p("Request for check file \"" + msg.filename + "\" received.");
+		Log.info("Request for check file \"" + msg.filename + "\" received.");
 		CheckFileMessage CFM = new CheckFileMessage();
 		MessageDigest md;
 		try {
@@ -262,7 +253,7 @@ public class RoleplayContextFrame extends Frame {
 		} catch(Exception e) {
 			throw new FatalError(e);
 		}
-		File file = new File(msg.filename);
+		File file = new File(Main.DOFUS_PATH + msg.filename);
 		if(file == null || !file.exists())
 			CFM.value = "-1";
 		else {

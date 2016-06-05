@@ -13,19 +13,34 @@ import controller.characters.Soldier;
 class SquadsManager {
 	private static final String EOL = System.getProperty("line.separator");
 	private static final int MAX_GROUP_SIZE = 8;
+	private static SquadsManager self;
 	
 	private List<Squad> squads;
-	private CharactersManager characters;
 	private int incompleteSquadIndex; // correspond à l'index de l'escouade à compléter par un ou plusieurs combattants
 	
-	protected SquadsManager() {
-		this.squads = new Vector<Squad>();
+	private SquadsManager() {
+		this.squads = new Vector<Squad>(5);
 		this.squads.add(new Squad());
 		this.incompleteSquadIndex = 0;
 	}
 	
-	protected void setCharactersManager(CharactersManager characters) {
-		this.characters = characters;
+	protected static SquadsManager getInstance() {
+		if(self == null)
+			self = new SquadsManager();
+		return self;
+	}
+	
+	protected void createSquad(String name, int[] ids) {
+		Vector<Account> members = new Vector<Account>(ids.length);
+		Account account;
+		for(int id : ids) {
+			account = AccountsManager.retrieveAccount(id);
+			if(account != null)
+				members.add(account);
+			else
+				Log.err("Account with id = " + id  + " does not exist.");
+		}
+		createFixedSquad(name, members);
 	}
 	
 	// crée une escouade fixe (qui ne peut être complétée par de nouveaux membres)
@@ -38,23 +53,39 @@ class SquadsManager {
 		this.squads.add(new Squad(squadName, members));
 	}
 	
-	// retourne l'identifiant d'une escouade grâce à son nom (unique)
-	protected int getSquadId(String squadName) {
-		for(Squad squad : this.squads)
-			if(squad.name.equals(squadName))
-				return squad.id;
-		return -1;
+	protected void connectSquad(int squadId, int serverId, int areaId, boolean fightTogether) {
+		Squad squad = this.squads.get(squadId);
+		if(squad == null) {
+			Log.err("Squad with id = " + squadId + " does not exist.");
+			return;
+		}
+		
+		Vector<Account> members = squad.getMembers();
+		// check le statut de connexion
+		if(!fightTogether)
+			for(Account member : members)
+				CharactersManager.getInstance().connectCharacter(member, serverId, areaId, -1);
+		else {
+			Account account = members.get(0);
+			int captainId = account.id;
+			CharactersManager.getInstance().connectCharacter(account, serverId, areaId, captainId); // connexion du capitaine
+			int squadSize = members.size();
+			for(int i = 1; i < squadSize; ++i) {
+				account = members.get(i);
+				CharactersManager.getInstance().connectCharacter(account, serverId, 0, captainId); // connexion des soldats
+			}
+		}
 	}
 	
-	protected Squad getSquad(int id) {
-		for(Squad squad : this.squads)
-			if(squad.id == id)
-				return squad;
-		return null;
-	}
-	
-	protected List<Squad> getAllSquads() {
-		return this.squads;
+	protected void deconnectSquad(int squadId) {
+		Squad squad = this.squads.get(squadId);
+		if(squad != null) {
+			Vector<Account> members = squad.getMembers();
+			for(Account member : members)
+				CharactersManager.getInstance().deconnectCharacter(member.id, "Deconnected by console interface.", true, false);
+		}
+		else
+			Log.err("Squad with id = " + squadId + " does not exist.");
 	}
 
 	// détermine si le prochain combattant sera un capitaine ou un soldat
@@ -67,15 +98,15 @@ class SquadsManager {
 	}
 
 	// crée un nouveau combattant et l'affecte à une escouade s'il n'en a pas
-	protected Character newSquadFighter(Account account, int serverId, int areaId, CharacterFrame frame, int captainId) {
+	protected Character newSquadFighter(Account account, int serverId, int areaId, int captainId) {
 		Character newFighter;
 		if(captainId == -1) { // combattant n'ayant pas d'escouade fixée
 			Squad incompleteSquad = this.squads.get(this.incompleteSquadIndex);
 			if(incompleteSquad.members.size() == 0) // capitaine
-				newFighter = Character.create(account.id, CharacterBehaviour.CAPTAIN, account.login, account.password, serverId, areaId, new Log(account.login, frame));
+				newFighter = Character.create(account.id, CharacterBehaviour.CAPTAIN, account.login, account.password, serverId, areaId, new Log(account.login));
 			else { // soldat
-				newFighter = Character.create(account.id, CharacterBehaviour.SOLDIER, account.login, account.password, serverId, 0, new Log(account.login, frame));
-				((Captain) this.characters.getCharacter(incompleteSquad.members.firstElement().id)).newRecruit((Soldier) newFighter); // on ajoute ce nouveau soldat aux recrues du capitaine
+				newFighter = Character.create(account.id, CharacterBehaviour.SOLDIER, account.login, account.password, serverId, 0, new Log(account.login));
+				((Captain) CharactersManager.getInstance().getInGameCharacter(incompleteSquad.members.firstElement().id)).newRecruit((Soldier) newFighter); // on ajoute ce nouveau soldat aux recrues du capitaine
 			}
 			incompleteSquad.members.add(account);
 			if(incompleteSquad.members.size() == MAX_GROUP_SIZE) { // si l'escouade est complète
@@ -91,10 +122,10 @@ class SquadsManager {
 		}
 		else { // combattant ayant une escouade fixée
 			if(account.id == captainId) // capitaine
-				newFighter = Character.create(account.id, CharacterBehaviour.CAPTAIN, account.login, account.password, serverId, areaId, new Log(account.login, frame));
+				newFighter = Character.create(account.id, CharacterBehaviour.CAPTAIN, account.login, account.password, serverId, areaId, new Log(account.login));
 			else {
-				newFighter = Character.create(account.id, CharacterBehaviour.SOLDIER, account.login, account.password, serverId, areaId, new Log(account.login, frame));
-				((Captain) this.characters.getCharacter(captainId)).newRecruit((Soldier) newFighter);
+				newFighter = Character.create(account.id, CharacterBehaviour.SOLDIER, account.login, account.password, serverId, areaId, new Log(account.login));
+				((Captain) CharactersManager.getInstance().getInGameCharacter(captainId)).newRecruit((Soldier) newFighter);
 			}
 		}
 		return newFighter;
@@ -111,8 +142,8 @@ class SquadsManager {
 				continue; // on ne touche pas aux escouades enregistrées
 			currentSquadSize = currentSquad.members.size();
 			for(int j = 0; j < currentSquadSize; ++j)
-				if(this.characters.getCharacter(currentSquad.members.get(j).id) == fighter) {
-					currentSquad.members.remove(j); // TODO -> problème si c'est le capitaine
+				if(CharactersManager.getInstance().getInGameCharacter(currentSquad.members.get(j).id) == fighter) {
+					currentSquad.members.remove(j); // TODO problème si c'est le capitaine
 					if(i < this.incompleteSquadIndex)
 						this.incompleteSquadIndex = i; // changement du groupe de combat à compléter
 					return;

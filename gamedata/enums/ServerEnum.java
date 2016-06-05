@@ -5,13 +5,13 @@ import java.lang.reflect.Field;
 public abstract class ServerEnum {
 	public static final int UNDEFINED = 0;
 	public static final int Jiva = 1;
-	public static final int Rushu = 2;
+	//public static final int Rushu = 2;
 	public static final int Djaul = 3;
 	public static final int Raval = 4;
 	public static final int Hecate = 5;
 	public static final int Sumens = 6;
 	public static final int Menalt = 7;
-	public static final int Rosal = 8;
+	//public static final int Rosal = 8;
 	public static final int Maimane = 9;
 	public static final int Silvosse = 10;
 	public static final int Brumaire = 11;
@@ -57,5 +57,17 @@ public abstract class ServerEnum {
 				e.printStackTrace();
 			}
 		return false;
+	}
+	
+	public static String getServerName(int serverId) {
+		Field[] fields = ServerEnum.class.getFields();
+		for(Field field : fields)
+			try {
+				if(field.getInt(null) == serverId)
+					return field.getName();
+			} catch(IllegalArgumentException | IllegalAccessException e) {
+				e.printStackTrace();
+			}
+		return null;
 	}
 }

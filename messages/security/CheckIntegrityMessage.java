@@ -1,15 +1,13 @@
 package messages.security;
 
-import java.util.Vector;
-
 import messages.NetworkMessage;
 
 public class CheckIntegrityMessage extends NetworkMessage {
-	public Vector<Integer> data;
+	public int[] data;
 
 	@Override
 	public void serialize() {
-		this.content.writeVarInt(this.data.size());
+		this.content.writeVarInt(this.data.length);
 		for(int i : this.data)
 			this.content.writeByte(i);
 	}
@@ -17,8 +15,8 @@ public class CheckIntegrityMessage extends NetworkMessage {
 	@Override
 	public void deserialize() {
 		int nb = this.content.readVarInt();
-		this.data = new Vector<Integer>(nb);
+		this.data = new int[nb];
 		for(int i = 0; i < nb; ++i)
-			this.data.add(this.content.readByte());
+			this.data[i] = this.content.readByte();
 	}
 }

@@ -2,8 +2,6 @@ package messages.connection;
 
 import gamedata.connection.VersionExtended;
 
-import java.util.Vector;
-
 import messages.NetworkMessage;
 import utilities.BooleanByteWrapper;
 
@@ -16,7 +14,7 @@ public class IdentificationMessage extends NetworkMessage {
 	public boolean useCertificate = false;
 	public boolean useLoginToken = false;
 	public double sessionOptionalSalt = 0;
-	public Vector<Integer> failedAttempts;
+	public int[] failedAttempts;
 	
 	@Override
 	public void serialize() {
@@ -34,7 +32,7 @@ public class IdentificationMessage extends NetworkMessage {
 		if(this.failedAttempts == null)
 			this.content.writeShort(0);
 		else {
-			this.content.writeShort(this.failedAttempts.size());
+			this.content.writeShort(this.failedAttempts.length);
 			for(int i : this.failedAttempts)
 				this.content.writeVarShort(i);
 		}

@@ -30,7 +30,7 @@ public class SynchronisationFrame extends Frame {
 	
 	protected void process(BasicLatencyStatsRequestMessage BLSRM) {
 		BasicLatencyStatsMessage BLSM = new BasicLatencyStatsMessage();
-		Latency latency = character.net.latency;
+		Latency latency = character.net.getLatency();
 		BLSM.latency = latency.latencyAvg();
 		BLSM.sampleCount = latency.latencySamplesCount();
 		BLSM.max = latency.latencySamplesMax();

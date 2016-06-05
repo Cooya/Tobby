@@ -2,7 +2,6 @@ package controller.characters;
 
 import gamedata.enums.PlayerStatusEnum;
 import controller.CharacterState;
-import main.Controller;
 import main.Log;
 import messages.context.GameContextReadyMessage;
 
@@ -14,6 +13,7 @@ public class LoneFighter extends Character {
 	
 	@Override
 	public void run() {
+		super.run();
 		waitState(CharacterState.IS_LOADED); // attendre l'entrée en jeu
 		changePlayerStatus(PlayerStatusEnum.PLAYER_STATUS_AFK);
 		this.fight.updateFightArea(this.infos.getLevel());
@@ -35,21 +35,33 @@ public class LoneFighter extends Character {
 			// besoin d'aller se décharger à la taverne ou en banque ?
 			this.fight.inventoryManager();
 			
+			// besoin d'aller revoir les prix à l'hôtel de vente ?
+			this.salesManager.reviewBidHouseSales();
+			
 			// besoin d'aller dans l'aire de combat ?
 			this.mvt.goToArea(this.fight.getFightAreaId());
 			
 			// besoin de récupérer sa vie ?
 			this.fight.lifeManager();
 			
-			while(!isInterrupted() && !inState(CharacterState.SHOULD_DECONNECT)) { // boucle recherche & combat
-				if(this.fight.fightSearchManager()) { // lancement de combat
-					if(waitState(CharacterState.IN_FIGHT)) { // on vérifie si le combat a bien été lancé (avec timeout)
+			// boucle recherche et combat
+			while(!isInterrupted() && !inState(CharacterState.SHOULD_DECONNECT)) {
+				// recherche et lancement de combat
+				if(this.fight.fightSearchManager()) {
+					// on vérifie si le combat a bien été lancé (avec timeout)
+					if(waitState(CharacterState.IN_FIGHT)) {
+						// combat
 						this.fight.fightManager(false);
 						break;
 					}
 				}
-				else
+				else {
+					//changement de map
 					this.mvt.changeMap();
+					
+					// besoin de changer d'aire de combat ?
+					this.fight.fightAreaReplacementManager();
+				}
 			}
 			
 			if(inState(CharacterState.SHOULD_DECONNECT)) {
@@ -58,6 +70,6 @@ public class LoneFighter extends Character {
 			}
 		}
 		Log.info("Thread controller of character with id = " + this.id + " terminated.");
-		Controller.getInstance().threadTerminated();
+		threadTerminated();
 	}
 }
