@@ -10,10 +10,10 @@
 * ~~**Améliorer les échanges et les dialogues avec les PNJ (suppression de "sleeps" peu propres)**~~
 * ~~Supprimer à terme les boucles infinies lors de l'attente d'états~~
 * ~~**Création automatique de personnage dans les comptes vides**~~
-* **Implémenter la vente de ressources**
-* Déserialiser automatiquement un message reçu
-* Implémenter le personnage "vendeur"
+* ~~**Implémenter la vente de ressources**~~
+* ~~Déserialiser automatiquement un message reçu~~
 * Créer une API pour les "squads"
+* Bloquer l'écriture des logs lorsque l'on écrit dans stdin
 
 ### Bugs à résoudre ###
 
@@ -32,14 +32,18 @@
 * ~~**Au bout d'un moment, un message n'est pas envoyé (ou n'est pas reçu par le serveur), de ce fait, le bot est kické**~~
 * ~~**Latence au lancement d'une CharacterFrame (et même des fois, plantage de la CharacterFrame)**~~
 * ~~**Erreur de frame nulle lors de certains lancements du launcher**~~
-* **Pertes de connexion avec le serveur ("connection reset")**
+* ~~**Pertes de connexion avec le serveur ("connection reset")**~~
+* Bug à la reconnexion après une sauvegarde
+* Suppression puis ajout de la totalité des objets de l'HDV dans la base de données
 
-### Échanges ###
+
+### Échanges/Vente ###
 
 * ~~Vérifier le lanceur de l'échange (côté mule)~~
 * ~~Vérifier si l'échange a été un succès ou pas du côté combattant~~
 * ~~Ajouter les kamas lors de l'échange (fighter -> mule)~~
 * ~~Si la demande d'échange a échoué (cible occupée ou pas encore chargée complètement sur la map), la relancer lorsque la cible sera disponible~~
+* Limiter à un certain nombre la mise en vente simultanée d'un objet
 
 ### Groupes de combat ###
 
@@ -50,22 +54,16 @@
 * ~~Améliorer l'intégration d'un soldat au groupe (pas bien fait et actuellement trop long)~~
 * Optimiser la régénération de la vie (beaucoup de pertes de temps actuellement)
 * Promouvoir un soldat lorsque le capitaine du groupe est déconnecté
-
-### Interface graphique (facultatif) ###
-
-* ~~Améliorer le rafraichissement des informations dans les CharacterFrames (trop lourd actuellement)~~
-* "Scroll down" automatique qui s'arrête
-* Ajouter la couleur dans les logs des CharacterFrames
-* Padding à ajouter autour des logs des CharacterFrames
-* Ajouter l'encodage "UTF-8" dans les CharacterFrames (pour afficher les accents)
+* Améliorer la gestion des inventaires pleins en mode combat de groupe
 
 ### Facultatif ###
 
 * ~~Envoyer le message "GameContextReadyMessage"~~
 * ~~Éviter de repartir sur l'aire de combat lorsqu'on est full pods~~
 * ~~Gérer les "TextInformationMessages" qui peuvent donner des informations utiles pour le debuggage~~
+* ~~Traduire la classe "ParamsDecoder" pour un meilleur affichage des "TextInformationMessages" et des "SystemMessageDisplayMessages"~~
 * Optimiser le pathfinder (changements de direction)
 * Améliorer l'utilisation des "interactives" (récupérer le résultat et se rendre à la cellule adjacente à l'"interactive")
-* Traduire la classe "ParamsDecoder" pour un meilleur affichage des "TextInformationMessages" et des "SystemMessageDisplayMessages"
 * Améliorer l'IA de combat
 * Ajouter, lors de la recherche d'un chemin vers une map distante, une cellule cible pour la map cible (ça évitera de se retrouver de l'autre côté d'une muraille par rapport au capitaine par exemple)
+* Éviter un aller-retour en banque lors du début de la vente d'objets
