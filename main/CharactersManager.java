@@ -4,6 +4,7 @@ import gamedata.enums.ServerEnum;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -16,6 +17,11 @@ import controller.characters.Character;
 
 public class CharactersManager extends Thread {
 	private static CharactersManager self;
+	private static Map<Integer, Boolean> serverAvailabilities = new HashMap<Integer, Boolean>();
+	{
+		for(int serverId : ServerEnum.getServerIdsList())
+			serverAvailabilities.put(serverId, true);
+	}
 	
 	private Map<Integer, Character> inGameCharacters;
 	private TreeMap<Long, Character> connectionQueue;
@@ -25,9 +31,9 @@ public class CharactersManager extends Thread {
 	
 	private CharactersManager() {
 		super("CharactersManager");
-		this.inGameCharacters = new HashMap<Integer, Character>();
+		this.inGameCharacters = new HashMap<Integer, Character>(50);
 		this.connectionQueue = new TreeMap<Long, Character>();
-		this.inProgressDeconnectionCharacters = new Vector<Character>();
+		this.inProgressDeconnectionCharacters = new Vector<Character>(10);
 		this.insertionIndex = 0;
 		this.connectionInProgress = null;
 		
@@ -42,6 +48,8 @@ public class CharactersManager extends Thread {
 	
 	// fonction principale pour la connexion d'un personnage
 	protected void connectCharacter(Account account, int serverId, int areaId, int captainId) {
+		if(!serverAvailabilities.get(serverId))
+			return;
 		if(captainId == -1) // loup solitaire (pas de capitaine)
 			this.connectionQueue.put(this.insertionIndex++, Character.create(account.id, CharacterBehaviour.LONE_WOLF, account.login, account.password, serverId, areaId, new Log(account.login)));
 		else // combattants en groupe (capitaines ou soldats)
@@ -75,23 +83,7 @@ public class CharactersManager extends Thread {
 	// connexion de plusieurs personnages en ligne de commande
 	protected void connectCharacters(int number, int serverId, int areaId) {
 		for(Account account : AccountsManager.retrieveAccounts(serverId, number))
-			CharactersManager.getInstance().connectCharacter(account, serverId, areaId, -1);
-	}
-	
-	// suppression d'un personnage de la file de connexion ou de la map des personnages en jeu
-	private void removeCharacter(int characterId) {
-		Character character;
-		synchronized(this) {
-			character = this.inGameCharacters.get(this.connectionInProgress);
-			if(character != null && character.id == characterId) {
-				this.connectionQueue.remove(this.connectionInProgress);
-				this.connectionInProgress = null;
-				notify();
-			}
-		}
-		character = this.inGameCharacters.remove(characterId);
-		if(character != null)
-			SquadsManager.getInstance().removeSquadFighter(character); // si le perso appartient à une escouade
+			connectCharacter(account, serverId, areaId, -1);
 	}
 	
 	// retourne un personnage en jeu via son identifiant
@@ -202,10 +194,77 @@ public class CharactersManager extends Thread {
 		this.inProgressDeconnectionCharacters.remove(character);
 		if(!this.connectionQueue.containsValue(character))
 			DatabaseConnection.unlockAccount(character.id);
-		Log.info("Character with id = " + character.id + " deconnected.");
+		Log.info("Character with id = " + character.id + " deconnected, " + this.inProgressDeconnectionCharacters.size() + " remaining(s).");
 		synchronized(this) {
 			notify();
 		}
+	}
+	
+	// déconnexion d'un personnage via son identifiant (appel de la fonction principale de déconnexion)
+	protected void deconnectCharacter(int characterId, String reason, boolean forced, boolean reconnection) {
+		synchronized(this) {
+			if(this.connectionInProgress != null) {
+				Character character = this.connectionQueue.get(this.connectionInProgress);
+				if(character.id == characterId) {
+					deconnectCharacter(character, reason, forced, reconnection);
+					return;
+				}
+			}
+		}
+		deconnectCharacter(this.inGameCharacters.get(characterId), reason, forced, reconnection);	
+	}
+	
+	// fonction principale de déconnexion des personnages
+	// TODO prise en considération du booléen de reconnexion
+	public void deconnectCharacter(Character character, String reason, boolean forced, boolean reconnection) {
+		if(character == null) {
+			Log.err("Character is not connected or does not exist.");
+			return;
+		}
+		else
+			Log.info("Deconnecting character with id = " + character.id + "...");
+		character.log.p(reason);
+		character.log.flushBuffer();
+		synchronized(this) {
+			if(this.connectionInProgress != null) {
+				if(character.id == this.connectionQueue.get(this.connectionInProgress).id) {
+					this.connectionQueue.remove(this.connectionInProgress);
+					this.connectionInProgress = null;
+					notify();
+					return;
+				}
+			}
+		}
+		character = this.inGameCharacters.remove(character.id);
+		this.inProgressDeconnectionCharacters.add(character);
+		character.deconnectionOrder(forced);
+	}
+	
+	// déconnexion de tous les personnages connectés (sur un serveur spécifié ou sur tous)
+	public synchronized void deconnectCharacters(String reason, int serverId, boolean forced, boolean reconnection) {
+		if(serverId == 0) {
+			Log.info("Deconnecting all connected characters...");
+			for(int id : serverAvailabilities.keySet())
+				serverAvailabilities.put(id, false);
+			if(this.connectionInProgress != null)
+				deconnectCharacter(this.connectionQueue.get(this.connectionInProgress), reason, forced, reconnection);
+			for(Iterator<Character> it = this.connectionQueue.values().iterator(); it.hasNext(); it.next())
+				it.remove();
+		}
+		else {
+			Log.info("Deconnecting all connected characters on server " + ServerEnum.getServerName(serverId) + ".");
+			serverAvailabilities.put(serverId, false);
+			if(this.connectionInProgress != null) {
+				Character coCharacter = this.connectionQueue.get(this.connectionInProgress);
+				if(coCharacter.infos.getServerId() == serverId)
+					deconnectCharacter(coCharacter, reason, forced, reconnection);
+			}
+			for(Iterator<Character> it = this.connectionQueue.values().iterator(); it.hasNext();)
+				if(it.next().infos.getServerId() == serverId)
+					it.remove();
+		}
+		for(Character character : getInGameCharacters(serverId))
+			deconnectCharacter(character, reason, forced, reconnection);
 	}
 	
 	// thread connecteur de personnages
@@ -215,14 +274,20 @@ public class CharactersManager extends Thread {
 		Character character;
 		long currentTime;
 		long characterCoTime;
+		long timeToWait = 0;
 		
 		while(true) {
 			try {
-				wait();
+				wait(timeToWait);
 			} catch(InterruptedException e) {
 				return;
 			}
-			while((firstEntry = this.connectionQueue.firstEntry()) != null) {
+			if(Main.exitAsked() && this.inProgressDeconnectionCharacters.isEmpty()) {
+				Main.exit(null);
+				return;
+			}
+			timeToWait = 0;
+			if(this.inProgressDeconnectionCharacters.isEmpty() && this.connectionInProgress == null && (firstEntry = this.connectionQueue.firstEntry()) != null) {
 				currentTime = System.currentTimeMillis();
 				characterCoTime = firstEntry.getKey();
 				if(currentTime >= characterCoTime) {
@@ -235,73 +300,10 @@ public class CharactersManager extends Thread {
 						this.connectionQueue.put(characterCoTime, character);
 						character.connect();
 					}
-					try {
-						wait();
-					} catch(InterruptedException e) {
-						return;
-					}
 				}
-				else {
-					try {
-						wait(characterCoTime - currentTime);
-					} catch(InterruptedException e) {
-						return;
-					}
-				}
+				else
+					timeToWait = characterCoTime - currentTime;
 			}
 		}
-	}
-	
-	// déconnexion d'un personnage via son identifiant (appel de la fonction principale de déconnexion)
-	protected void deconnectCharacter(int characterId, String reason, boolean forced, boolean reconnection) {
-		Character character;
-		
-		synchronized(this) {
-			if(this.connectionInProgress != null) {
-				character = this.connectionQueue.get(this.connectionInProgress);
-				if(character.id == characterId) {
-					deconnectCharacter(character, reason, forced, reconnection);
-					return;
-				}
-			}
-		}
-		
-		character = this.inGameCharacters.get(characterId);
-		if(character != null)
-			deconnectCharacter(character, reason, forced, reconnection);
-		else
-			Log.err("Character with id = " + characterId + " is not connected or does not exist.");
-	}
-	
-	// fonction principale de déconnexion des personnages
-	// TODO prise en considération du booléen de reconnexion
-	public void deconnectCharacter(Character character, String reason, boolean forced, boolean reconnection) {
-		Log.info("Deconnecting character with id = " + character.id + "...");
-		character.log.p(reason);
-		character.log.flushBuffer();
-		removeCharacter(character.id);
-		this.inProgressDeconnectionCharacters.add(character);
-		character.deconnectionOrder(forced);
-	}
-	
-	// déconnexion de tous les personnages connectés (sur un serveur spécifié ou sur tous)
-	// TODO vider aussi les différentes structures de données et empêcher la connexion
-	public void deconnectCharacters(String reason, int serverId, boolean forced, boolean reconnection) {
-		if(serverId == 0)
-			Log.info("Deconnecting all connected characters...");
-		else
-			Log.info("Deconnecting all connected characters on server " + ServerEnum.getServerName(serverId) + ".");
-		for(Character character : getInGameCharacters(serverId))
-			deconnectCharacter(character, reason, forced, reconnection);
-		synchronized(this) {
-			while(!this.inProgressDeconnectionCharacters.isEmpty())
-				try {
-					wait();
-				} catch(InterruptedException e) {
-					e.printStackTrace();
-					return;
-				}
-		}
-		Log.info("Deconnection terminated.");
 	}
 }

@@ -18,6 +18,7 @@ public class FatalError extends Error {
 	private void deconnectCurrentCharacter(String msg) {
 		Character character = CharactersManager.getInstance().getCurrentCharacter();
 		CharactersManager.getInstance().deconnectCharacter(character, msg, true, true);
-		character.threadTerminated();
+		if(character != null)
+			character.threadTerminated();
 	}
 }

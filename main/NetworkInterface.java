@@ -87,7 +87,7 @@ public class NetworkInterface extends Thread {
 	}
 	
 	public void processNetworkDataContainerMessage(NetworkDataContainerMessage msg) {
-		processMsgStack(this.reader.processBuffer(msg.getContent()));
+		processMsgStack(new Reader().processBuffer(msg.getContent()));
 	}
 	
 	public Latency getLatency() {

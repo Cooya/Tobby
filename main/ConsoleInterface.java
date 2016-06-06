@@ -2,9 +2,7 @@ package main;
 
 import gamedata.enums.ServerEnum;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.util.Scanner;
 
 import utilities.Reflection;
 import controller.CharacterBehaviour;
@@ -14,16 +12,11 @@ import controller.informations.FightOptions;
 public class ConsoleInterface {
 
 	public static void start() {
-		try {
-			BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-			Log.info("Command line interface ready.");
-			String input;
-			while((input = br.readLine()) != null)
-				processCommand(input);
-
-		} catch(IOException e) {
-			e.printStackTrace();
-		}	
+		Scanner sc = new Scanner(System.in);
+		Log.info("Command line interface ready.");
+		while(sc.hasNext())
+			processCommand(sc.nextLine());
+		sc.close();
 	}
 
 	private static void processCommand(String command) {
@@ -144,7 +137,7 @@ public class ConsoleInterface {
 			case "exit" :
 				if(args.length == 1) {
 					CharactersManager.getInstance().deconnectCharacters("Application closed by user.", 0, false, false);
-					Main.exit(null);
+					Main.askExit();
 				}
 				else if(args.length == 2 && args[1].equals("-f"))
 					Main.exit(null);		

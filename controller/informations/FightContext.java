@@ -35,9 +35,10 @@ public class FightContext {
 	// appelée à chaque synchronisation (nouveau tour)
 	public synchronized void setFightContext(GameFightFighterInformations[] fighters) {
 		this.fighters = new Vector<GameFightFighterInformations>(fighters.length);
-		for(GameFightFighterInformations fighter : this.fighters) {
+		double characterId = this.character.infos.getCharacterId();
+		for(GameFightFighterInformations fighter : fighters) {
 			this.fighters.add(fighter);
-			if(fighter.contextualId == this.character.infos.getCharacterId())
+			if(fighter.contextualId == characterId)
 				this.self = fighter;
 		}
 	}

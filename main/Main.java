@@ -42,6 +42,7 @@ public class Main {
 	public static final int SERVER_PORT = 5555;
 	public static final int LAUNCHER_PORT = 5554;
 	public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("HH:mm:ss:SSS");
+	private static boolean exitAsked = false;
 
 	public static void main(String[] args) {
 		if(!Processes.fileExists(BYPASS_PATH)) {
@@ -132,6 +133,14 @@ public class Main {
 		for(Cell cell : map.cells)
 			System.out.println(cell.id + " " + cell.getFloor() + " " + cell.getNonWalkableDuringRP());
 		 */
+	}
+	
+	protected static void askExit() {
+		exitAsked = true;
+	}
+	
+	protected static boolean exitAsked() {
+		return exitAsked;
 	}
 	
 	// fonction appelée à la fermeture de l'application ou lors d'une erreur critique

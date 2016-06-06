@@ -225,6 +225,17 @@ public abstract class NetworkMessage {
 		return !acknowledgementExceptions.containsKey(this.id);
 	}
 	
+	@Override
+	public String toString() {
+		StringBuilder str = new StringBuilder();
+		str.append("Network message :\n");
+		str.append("name = " + this.name + "\n");
+		str.append("id = " + this.id + "\n");
+		str.append("lenofsize = " + this.lenofsize + "\n");
+		str.append("size = " + this.size + "\n");
+		return str.toString();
+	}
+	
 	private static short computeLenOfSize(int size) {
 	    if(size > 65535)
 	        return 3;
