@@ -151,12 +151,10 @@ public class Captain extends Character {
 
 				// combats
 				if(this.fight.fightSearchManager()) {
-					if(waitState(CharacterState.IN_FIGHT)) { // on vérifie si le combat a bien été lancé (avec timeout)
-						broadcastStateUpdate();
-						waitSoldiersInFight();
-						this.fight.fightManager(false);
-						break;
-					}
+					broadcastStateUpdate();
+					waitSoldiersInFight();
+					this.fight.fightManager(false);
+					break;
 				}
 				else
 					this.mvt.changeMap();

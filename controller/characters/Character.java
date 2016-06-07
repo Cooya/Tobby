@@ -177,13 +177,9 @@ public abstract class Character extends Thread {
 				condition = new Condition(state, 0);
 				condition.addConstraint(CharacterState.SHOULD_DECONNECT, true); // tant qu'on ne reçoit pas d'ordre de déconnexion
 				break;
-			case IN_FIGHT : // état simple
-				this.log.p("Waiting for fight beginning.");
-				condition = new Condition(state, 5000);
-				break;
 			case IN_EXCHANGE : // état simple
 				this.log.p("Waiting for exchange acceptance.");
-				condition = new Condition(state, 5000);
+				condition = new Condition(state, 10000);
 				break;
 			case NOT_IN_EXCHANGE : // état inverse
 				this.log.p("Waiting for leaving exchange.");
@@ -221,6 +217,11 @@ public abstract class Character extends Thread {
 			case NEW_ACTOR_ON_MAP : // event
 				this.log.p("Waiting for new actor on the map.");
 				condition = new Condition(state, 0);
+				isEvent = true;
+				break;
+			case NEW_FIGHT_ON_MAP : // event
+				this.log.p("Waiting for new fight on the map.");
+				condition = new Condition(state, 5000);
 				isEvent = true;
 				break;
 			case CAPTAIN_ACT : // event
@@ -281,6 +282,7 @@ public abstract class Character extends Thread {
 				condition.addConstraint(CharacterState.IN_GAME_TURN, true);
 				isEvent = true;
 				break;
+			case IN_FIGHT : // état ponctuel
 			case LEVEL_UP : // état ponctuel
 			case NEED_TO_EMPTY_INVENTORY : // état ponctuel
 			case SHOULD_DECONNECT : // état ponctuel

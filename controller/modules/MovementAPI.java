@@ -251,6 +251,7 @@ public class MovementAPI {
 		// on sélectionne la première réponse
 		this.character.interaction.answerToNpc(25209);
 		
+		//TODO sleep à remplacer
 		try {
 			Thread.sleep(1000); // on attend la seconde question
 		} catch (InterruptedException e) {

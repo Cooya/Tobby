@@ -48,12 +48,8 @@ public class LoneFighter extends Character {
 			while(!isInterrupted() && !inState(CharacterState.SHOULD_DECONNECT)) {
 				// recherche et lancement de combat
 				if(this.fight.fightSearchManager()) {
-					// on vérifie si le combat a bien été lancé (avec timeout)
-					if(waitState(CharacterState.IN_FIGHT)) {
-						// combat
-						this.fight.fightManager(false);
-						break;
-					}
+					this.fight.fightManager(false); // combat
+					break;
 				}
 				else {
 					//changement de map

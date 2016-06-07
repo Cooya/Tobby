@@ -1,5 +1,7 @@
 package controller.informations;
 
+import gamedata.context.FightCommonInformations;
+import gamedata.context.FightTeamInformations;
 import gamedata.context.GameRolePlayActorInformations;
 import gamedata.context.GameRolePlayGroupMonsterInformations;
 import gamedata.context.GameRolePlayNamedActorInformations;
@@ -14,6 +16,7 @@ import controller.characters.Character;
 public class RoleplayContext {
 	private Character character;
 	private Vector<GameRolePlayActorInformations> actors;
+	private Vector<FightCommonInformations> fights;
 	private InteractiveElement[] interactives;
 	public double actorDemandingExchange;
 	public boolean lastFightOutcome;
@@ -22,10 +25,12 @@ public class RoleplayContext {
 	
 	public RoleplayContext(Character CC) {
 		this.character = CC;
+		this.actors = new Vector<GameRolePlayActorInformations>(10);
+		this.fights = new Vector<FightCommonInformations>(3);
 	}
 	
 	public synchronized void newContextActors(GameRolePlayActorInformations[] actors) {
-		this.actors = new Vector<GameRolePlayActorInformations>(actors.length);
+		this.actors.clear();
 		for(GameRolePlayActorInformations actor : actors) {
 			this.actors.add(actor);
 			if(actor.contextualId == this.character.infos.getCharacterId())
@@ -33,7 +38,13 @@ public class RoleplayContext {
 		}
 	}
 	
-	public void newContextInteractives(InteractiveElement[] interactives) {
+	public synchronized void newContextFights(FightCommonInformations[] fights) {
+		this.fights.clear();
+		for(FightCommonInformations fight : this.fights)
+			this.fights.add(fight);
+	}
+	
+	public synchronized void newContextInteractives(InteractiveElement[] interactives) {
 		this.interactives = interactives;
 	}
 
@@ -43,8 +54,17 @@ public class RoleplayContext {
 				actor.disposition.cellId = position;
 	} 
 	
+	public synchronized void updateMapFightCount(int fightCount) {
+		if(fightCount == 0)
+			this.fights.clear();
+	}
+	
 	public synchronized void addContextActor(GameRolePlayActorInformations actor) {
 		this.actors.add(actor);
+	}
+	
+	public synchronized void addContextFight(FightCommonInformations fight) {
+		this.fights.add(fight);
 	}
 	
 	public synchronized void removeContextActor(double actorId) {
@@ -56,14 +76,14 @@ public class RoleplayContext {
 	
 	public synchronized Vector<Integer> getCellIdsTakenByMonsters() {
 		Vector<Integer> cellIds = new Vector<Integer>();
-		for(GameRolePlayActorInformations actor : actors)
+		for(GameRolePlayActorInformations actor : this.actors)
 			if(actor instanceof GameRolePlayGroupMonsterInformations)
 				cellIds.add(actor.disposition.cellId);		
 		return cellIds;
 	}
 	
 	public synchronized double getActorIdByName(String name) {
-		for(GameRolePlayActorInformations actor : actors)
+		for(GameRolePlayActorInformations actor : this.actors)
 			if(actor instanceof GameRolePlayNamedActorInformations && ((GameRolePlayNamedActorInformations) actor).name == name)
 				return actor.contextualId;
 		return -1;
@@ -80,7 +100,7 @@ public class RoleplayContext {
 		return 0;
 	}
 	
-	public int getInteractiveSkillInstanceUid(int elementId) {
+	public synchronized int getInteractiveSkillInstanceUid(int elementId) {
 		for(InteractiveElement interactive : this.interactives)
 			if(interactive.elementId == elementId)
 				return interactive.enabledSkills[0].skillInstanceUid;
@@ -88,15 +108,15 @@ public class RoleplayContext {
 	}
 	
 	public synchronized GameRolePlayActorInformations getActorById(double id) {
-		for(GameRolePlayActorInformations actor : actors)
+		for(GameRolePlayActorInformations actor : this.actors)
 			if(actor.contextualId == id)
 				return actor;
 		return null;
 	}
 	
 	public synchronized Vector<GameRolePlayGroupMonsterInformations> getMonsterGroups() {
-		Vector<GameRolePlayGroupMonsterInformations> monsters = new Vector<GameRolePlayGroupMonsterInformations>();
-		for(GameRolePlayActorInformations actor : actors)
+		Vector<GameRolePlayGroupMonsterInformations> monsters = new Vector<GameRolePlayGroupMonsterInformations>(this.actors.size());
+		for(GameRolePlayActorInformations actor : this.actors)
 			if(actor instanceof GameRolePlayGroupMonsterInformations)
 				monsters.add((GameRolePlayGroupMonsterInformations) actor);	
 		return monsters;
@@ -113,6 +133,14 @@ public class RoleplayContext {
 		for(GameRolePlayActorInformations actor : this.actors)
 			if(actor.contextualId == actorId)
 				return true;
+		return false;
+	}
+	
+	public synchronized boolean monsterGroupIsInFight(double monsterGroupId) {
+		for(FightCommonInformations fight : this.fights)
+			for(FightTeamInformations team : fight.fightTeams)
+				if(team.leaderId == monsterGroupId)
+					return true;
 		return false;
 	}
 }

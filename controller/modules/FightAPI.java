@@ -107,19 +107,31 @@ public class FightAPI {
 
 	public boolean fightSearchManager() {
 		this.character.log.p("Searching for monster group to fight.");
-		int monsterGroupSize;
 		int monsterGroupMaxSize = this.fightOptions.getMonsterGroupMaxSize();
 		for(GameRolePlayGroupMonsterInformations monsterGroup : this.character.roleplayContext.getMonsterGroups()) {
-			monsterGroupSize = monsterGroup.staticInfos.underlings.length + 1;
-			if(monsterGroupSize <= monsterGroupMaxSize) {
-				this.character.log.p("Going to take a monster group of size " + monsterGroupSize + " on cell id " + monsterGroup.disposition.cellId + ".");
-				if(!this.character.mvt.moveTo(monsterGroup.disposition.cellId)) // groupe de monstres inatteignable
+			if(monsterGroup.staticInfos.underlings.length + 1 <= monsterGroupMaxSize) {
+				// on se dirige vers le groupe de monstre et on l'attaque
+				if(!attackMonsterGroup(monsterGroup))
 					continue;
-				this.character.log.p("Sending attack request.");
-				GameRolePlayAttackMonsterRequestMessage GRPAMRM = new GameRolePlayAttackMonsterRequestMessage();
-				GRPAMRM.monsterGroupId = monsterGroup.contextualId;
-				this.character.net.send(GRPAMRM);
-				return true;
+				while(true) {
+					// un combat a été lancé sur la map
+					if(this.character.waitState(CharacterState.NEW_FIGHT_ON_MAP)) {
+						// on est entré dans ce nouveau combat
+						if(this.character.inState(CharacterState.IN_FIGHT))
+							return true;
+						// le groupe de monstre visé a été attaqué par quelqu'un d'autre
+						if(this.character.roleplayContext.monsterGroupIsInFight(monsterGroup.contextualId))
+							break;
+						// le combat lancé ne concerne pas le groupe de monstre visé
+					}
+					// timeout => le groupe de monstre a bougé ou le combat met du temps à se lancer
+					// on vérifie si le groupe de monstre a bougé
+					else if(this.character.infos.getCurrentCellId() != monsterGroup.disposition.cellId)
+						// si c'est le cas, on relance l'attaque
+						if(!attackMonsterGroup(monsterGroup))
+							break;
+						// sinon on attend encore un peu
+				}
 			}
 		}
 		this.character.log.p("None monster group available or attackable on the map.");
@@ -141,7 +153,7 @@ public class FightAPI {
 			this.character.log.p(aliveMonsters.size() + " alive monster(s) remaining.");
 			for(GameFightMonsterInformations aliveMonster : aliveMonsters) {
 				if(this.character.inState(CharacterState.IN_GAME_TURN) && this.character.fightContext.self.stats.actionPoints >= this.character.infos.getAttackSpellActionPoints())
-					castSpellOverMonster(aliveMonster);
+					castSpellOverMonster(aliveMonster.contextualId);
 				else
 					break;
 			}
@@ -189,12 +201,23 @@ public class FightAPI {
 		this.character.net.send(SURM);
 		this.character.log.p("Increase stat : " + SURM.statId + ".");
 	}
+	
+	private boolean attackMonsterGroup(GameRolePlayGroupMonsterInformations monsterGroup) {
+		this.character.log.p("Going to take a monster group of size " + (monsterGroup.staticInfos.underlings.length + 1) + " on cell id " + monsterGroup.disposition.cellId + ".");
+		if(!this.character.mvt.moveTo(monsterGroup.disposition.cellId)) // groupe de monstres inatteignable
+			return false;
+		this.character.log.p("Sending attack request.");
+		GameRolePlayAttackMonsterRequestMessage GRPAMRM = new GameRolePlayAttackMonsterRequestMessage();
+		GRPAMRM.monsterGroupId = monsterGroup.contextualId;
+		this.character.net.send(GRPAMRM);
+		return true;
+	}
 
-	private void castSpellOverMonster(GameFightMonsterInformations monster) {
+	private void castSpellOverMonster(double monsterId) {
 		this.character.log.p("Trying to cast a spell over a monster.");
 		GameActionFightCastOnTargetRequestMessage GAFCOTRM = new GameActionFightCastOnTargetRequestMessage();
 		GAFCOTRM.spellId = this.character.infos.getAttackSpell();
-		GAFCOTRM.targetId = monster.contextualId;
+		GAFCOTRM.targetId = monsterId;
 		this.character.net.send(GAFCOTRM);
 		/*
 		GameActionFightCastRequestMessage GAFCRM = new GameActionFightCastRequestMessage();

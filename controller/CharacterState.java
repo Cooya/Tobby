@@ -18,6 +18,7 @@ public enum CharacterState {
 	
 	// events
 	NEW_ACTOR_ON_MAP,
+	NEW_FIGHT_ON_MAP,
 	NEW_ACTOR_IN_FIGHT,
 	CAPTAIN_ACT,
 	SOLDIER_ACT,

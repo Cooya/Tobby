@@ -16,25 +16,24 @@ public class FightContext {
 	
 	public FightContext(Character character) {
 		this.character = character;
+		this.fighters = new Vector<GameFightFighterInformations>(16);
 	}
 	
 	public synchronized void clearFightContext() {
 		this.self = null;
-		this.fighters = null;
+		this.fighters.clear();
 		this.positionsForChallengers = null;
 		this.positionsForDefenders = null;
 	}
 	
 	// phase de préparation du combat
 	public synchronized void newFighter(GameFightFighterInformations fighter) {
-		if(this.fighters == null)
-			this.fighters = new Vector<GameFightFighterInformations>(16);
 		this.fighters.add(fighter);
 	}
 	
 	// appelée à chaque synchronisation (nouveau tour)
 	public synchronized void setFightContext(GameFightFighterInformations[] fighters) {
-		this.fighters = new Vector<GameFightFighterInformations>(fighters.length);
+		this.fighters.clear();
 		double characterId = this.character.infos.getCharacterId();
 		for(GameFightFighterInformations fighter : fighters) {
 			this.fighters.add(fighter);

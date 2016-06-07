@@ -35,9 +35,11 @@ import messages.context.GameMapNoMovementMessage;
 import messages.context.GameRolePlayPlayerFightFriendlyAnswerMessage;
 import messages.context.GameRolePlayPlayerFightFriendlyRequestedMessage;
 import messages.context.GameRolePlayShowActorMessage;
+import messages.context.GameRolePlayShowChallengeMessage;
 import messages.context.InteractiveUsedMessage;
 import messages.context.LeaveDialogMessage;
 import messages.context.MapComplementaryInformationsDataMessage;
+import messages.context.MapFightCountMessage;
 import messages.context.MapInformationsRequestMessage;
 import messages.context.SystemMessageDisplayMessage;
 import messages.context.TextInformationMessage;
@@ -152,6 +154,7 @@ public class RoleplayContextFrame extends Frame {
 		else if(msg.context == 2) {
 			this.character.updateState(CharacterState.IS_LOADED, false);
 			this.character.updateState(CharacterState.IN_FIGHT, true);
+			this.character.updateState(CharacterState.NEW_FIGHT_ON_MAP, true);
 		}
 	}
 	
@@ -178,6 +181,7 @@ public class RoleplayContextFrame extends Frame {
 	
 	protected void process(MapComplementaryInformationsDataMessage msg) {
 		this.character.roleplayContext.newContextActors(msg.actors);
+		this.character.roleplayContext.newContextFights(msg.fights);
 		this.character.roleplayContext.newContextInteractives(msg.interactiveElements);
 		int currentCellId = this.character.infos.getCurrentCellId();
 		Map currentMap = this.character.infos.getCurrentMap();
@@ -191,8 +195,17 @@ public class RoleplayContextFrame extends Frame {
 		this.character.updateState(CharacterState.NEW_ACTOR_ON_MAP, true);
 	}
 	
+	protected void process(GameRolePlayShowChallengeMessage msg) {
+		this.character.roleplayContext.addContextFight(msg.commonsInfos);
+		this.character.updateState(CharacterState.NEW_FIGHT_ON_MAP, true);
+	}
+	
 	protected void process(GameContextRemoveElementMessage msg) {
 		this.character.roleplayContext.removeContextActor(msg.id);
+	}
+	
+	protected void process(MapFightCountMessage msg) {
+		this.character.roleplayContext.updateMapFightCount(msg.fightCount);
 	}
 	
 	protected void process(GameMapMovementMessage msg) {
