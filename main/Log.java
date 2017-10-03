@@ -11,9 +11,10 @@ import messages.NetworkMessage;
 public class Log {
 	private static final String EOL = System.getProperty("line.separator");
 	private static final StringBuilder globalLog = new StringBuilder();
+	
 	private String logFilepath;
 	private PrintWriter writer;
-	private StringBuilder logFrameString;
+	private StringBuilder logString;
 	private StringBuilder logFileBuffer;
 	private long lastFlushDate;
 	
@@ -26,7 +27,7 @@ public class Log {
 		} catch(Exception e) {
 			e.printStackTrace();
 		}
-		this.logFrameString = new StringBuilder();
+		this.logString = new StringBuilder();
 		this.logFileBuffer = new StringBuilder();
 		this.lastFlushDate = new Date().getTime();
 	}
@@ -35,52 +36,53 @@ public class Log {
 		if(Thread.currentThread().isInterrupted())
 			return;
 		
-		this.logFrameString.append("[").append(Main.DATE_FORMAT.format(new Date())).append("] ");
+		this.logString.append("[").append(Main.DATE_FORMAT.format(new Date())).append("] ");
 		if(msgDirection == "r" || msgDirection == "reception")
-			this.logFrameString.append("Receiving message ").append(msg.getId()).append(" (").append(msg.getName()).append(")");
+			this.logString.append("Receiving message ").append(msg.getId()).append(" (").append(msg.getName()).append(")");
 		else if(msgDirection == "s" || msgDirection == "sending")
-			this.logFrameString.append("Sending message " + msg.getId() + " (" + msg.getName() + ")");
-		this.logFrameString.append(EOL);
-		writeIntoLogFile(this.logFrameString);
-		this.logFrameString.setLength(0);
+			this.logString.append("Sending message " + msg.getId() + " (" + msg.getName() + ")");
+		this.logString.append(EOL);
+		writeIntoLogFile(this.logString);
 	}
 	
 	public synchronized void p(String str) {
 		if(Thread.currentThread().isInterrupted())
 			return;
 		
-		this.logFrameString.append("[").append(Main.DATE_FORMAT.format(new Date())).append("] ").append(str).append(EOL);
-		writeIntoLogFile(this.logFrameString);
-		this.logFrameString.setLength(0);
+		this.logString.append("[").append(Main.DATE_FORMAT.format(new Date())).append("] ").append(str).append(EOL);
+		writeIntoLogFile(this.logString);
 	}
 	
-	public static void info(String msg) {
+	public synchronized static void info(String msg) {
 		msg = "[" + Main.DATE_FORMAT.format(new Date()) + "] INFO : " + msg;
 		globalLog.append(msg);
 		globalLog.append(EOL);
-		System.out.println(msg);
+		if(Main.TEST_MODE)
+			System.out.println(msg);
 	}
 	
-	public static void warn(String msg) {
+	public synchronized static void warn(String msg) {
 		msg = "[" + Main.DATE_FORMAT.format(new Date()) + "] WARNING : " + msg;
 		globalLog.append(msg);
 		globalLog.append(EOL);
-		System.out.println(msg);
+		if(Main.TEST_MODE)
+			System.out.println(msg);
 	}
 	
-	public static void err(String msg) {
+	public synchronized static void err(String msg) {
 		msg = "[" + Main.DATE_FORMAT.format(new Date()) + "] ERROR : " + msg;
 		globalLog.append(msg);
 		globalLog.append(EOL);
-		System.out.println(msg);
+		if(Main.TEST_MODE)
+			System.out.println(msg);
 	}
 	
-	public static void displayGlobalLog() {
-		System.out.println(globalLog);
+	public synchronized static String getGlobalLog() {
+		return globalLog.toString();
 	}
 	
-	public void displayLog(int linesNumber) {
-		System.out.println(tail(new File(this.logFilepath), linesNumber));
+	public String getCharacterLog(int linesNumber) {
+		return tail(new File(this.logFilepath), linesNumber);
 	}
 	
 	public void flushBuffer() {
@@ -96,6 +98,7 @@ public class Log {
 		synchronized(this.logFileBuffer) {
 			this.logFileBuffer.append(msg);
 		}
+		msg.setLength(0);
 		if(new Date().getTime() - this.lastFlushDate > 10000) // 10 secondes
 			flushBuffer();
 	}

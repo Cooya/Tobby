@@ -29,6 +29,14 @@ public class RoleplayContext {
 		this.fights = new Vector<FightCommonInformations>(3);
 	}
 	
+	public synchronized Vector<GameRolePlayNamedActorInformations> getContextCharacters() {
+		Vector<GameRolePlayNamedActorInformations> contextCharacters = new Vector<GameRolePlayNamedActorInformations>(this.actors.size());
+		for(GameRolePlayActorInformations actor : this.actors)
+			if(actor instanceof GameRolePlayNamedActorInformations)
+				contextCharacters.add((GameRolePlayNamedActorInformations) actor);
+		return contextCharacters;
+	}
+	
 	public synchronized void newContextActors(GameRolePlayActorInformations[] actors) {
 		this.actors.clear();
 		for(GameRolePlayActorInformations actor : actors) {

@@ -1,4 +1,4 @@
-package main;
+package gamedata.enums;
 
 public enum ConnectionResult {
 	UNKNOWN,

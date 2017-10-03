@@ -87,9 +87,11 @@ public class FightOptions {
 		return areaTable.values();
 	}
 	
-	public static void displayFightAreas() {
+	public static String displayFightAreas() {
+		StringBuffer str = new StringBuffer();
 		for(int fightAreaId : FightOptions.fightAreaIds)
-			System.out.println(fightAreaId + " -> \"" + areaTable.get(fightAreaId) + "\"");
+			str.append(fightAreaId + " -> \"" + areaTable.get(fightAreaId) + "\"\n");
+		return str.toString();
 	}
 	
 	public static boolean isHandledFightArea(int id) {

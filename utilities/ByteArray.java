@@ -1,6 +1,5 @@
 package utilities;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.nio.ByteBuffer;
 
@@ -120,19 +119,11 @@ public class ByteArray {
 		this.pos = 0;
 	}
 	
-	public static ByteArray fileToByteArray(String filepath) {
-		File file = new File(filepath);
-		if(!file.exists())
-			throw new FatalError("File '" + filepath + "' does not exist.");
-		byte[] bytes = new byte[(int) file.length()];
-		FileInputStream is;
-		try {
-			is = new FileInputStream(file);
-			is.read(bytes);
-			is.close();
-		} catch(Exception e) {
-			return null;
-		}
+	public static ByteArray fileToByteArray(String filepath) throws Exception {
+		FileInputStream is = new FileInputStream(filepath);
+		byte[] bytes = new byte[is.available()];
+		is.read(bytes);
+		is.close();
 		return new ByteArray(bytes);
 	}
 	

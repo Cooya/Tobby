@@ -3,16 +3,16 @@ package messages.security;
 import messages.NetworkMessage;
 
 public class RawDataMessage extends NetworkMessage {
-	public byte[] content2;
+	public byte[] _content;
 	
 	@Override
 	public void serialize() {
-		this.content.writeVarInt(this.content2.length);
-		this.content.writeBytes(this.content2);
+		this.content.writeVarInt(this._content.length);
+		this.content.writeBytes(this._content);
 	}
 	
 	@Override
 	public void deserialize() {
-		this.content2 = this.content.readBytes(this.content.readVarInt());
+		this._content = this.content.readBytes(this.content.readVarInt());
 	}
 }

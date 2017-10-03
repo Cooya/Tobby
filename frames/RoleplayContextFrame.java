@@ -7,6 +7,7 @@ import utilities.ByteArray;
 import controller.CharacterState;
 import controller.characters.Character;
 import gamedata.ParamsDecoder;
+import gamedata.context.GameRolePlayNamedActorInformations;
 import gamedata.d2i.I18n;
 import gamedata.d2o.modules.InfoMessage;
 import gamedata.d2o.modules.MapPosition;
@@ -86,7 +87,7 @@ public class RoleplayContextFrame extends Frame {
 	
 	protected void process(TextInformationMessage msg) {
 		if(msg.msgType == 1 && msg.msgId == 245) // limite de 200 combats par jour atteinte
-			CharactersManager.getInstance().deconnectCharacter(CharactersManager.getInstance().getCurrentCharacter(), "Limit of 200 fights per day reached.", false, false);
+			CharactersManager.getInstance().deconnectCharacter(this.character, "Limit of 200 fights per day reached.", false, false);
 		else {
 			this.character.log.p("Text information received, reading...");
 			InfoMessage infoMessage = InfoMessage.getInfoMessageById((msg.msgType * 10000) + msg.msgId);
@@ -247,7 +248,9 @@ public class RoleplayContextFrame extends Frame {
 	}
 	
 	protected void process(PopupWarningMessage msg) {
-		this.character.log.p("Popup received by " + msg.author + " that contains : \"" + msg.content2 + "\".");
+		Log.warn("Popup warning received");
+		this.character.log.p("Popup warning received by " + msg.author + " that contains : \"" + msg._content + "\".");
+		this.character.log.p(String.valueOf(msg.lockDuration));
 		try {
 			Thread.sleep(msg.lockDuration * 1000); // attendre le nombre de secondes indiqué
 		} catch (InterruptedException e) {
@@ -256,7 +259,11 @@ public class RoleplayContextFrame extends Frame {
 	}
 	
 	protected void process(CheckFileRequestMessage msg) {
-		Log.info("Request for check file \"" + msg.filename + "\" received.");
+		Log.warn("Request for check file \"" + msg.filename + "\" received.");
+		this.character.log.p("Characters there on the map :");
+		for(GameRolePlayNamedActorInformations character : this.character.roleplayContext.getContextCharacters())
+			this.character.log.p(character.name);
+		
 		CheckFileMessage CFM = new CheckFileMessage();
 		MessageDigest md;
 		try {
@@ -266,24 +273,19 @@ public class RoleplayContextFrame extends Frame {
 		} catch(Exception e) {
 			throw new FatalError(e);
 		}
-		File file = new File(Main.DOFUS_PATH + msg.filename);
-		if(file == null || !file.exists())
-			CFM.value = "-1";
-		else {
-			ByteArray buffer = ByteArray.fileToByteArray(msg.filename);
-			if(buffer == null)
-				CFM.value = "-1";
-			if(CFM.value.equals("")) {
-				if(msg.type == 0)
-					CFM.value = String.valueOf(buffer.getSize());
-				else if(msg.type == 1)
-					try {
-						CFM.value = new String(md.digest(buffer.bytes()), "UTF-8");
-					} catch(Exception e) {
-						throw new FatalError(e);
-					}
+		
+		// on retourne simplement la taille du fichier
+		if(msg.type == 0)
+			CFM.value = String.valueOf((int) new File(Main.DOFUS_PATH + msg.filename).length());
+		// on retourne le hash MD5 du fichier
+		else if(msg.type == 1)
+			try {
+				ByteArray buffer = ByteArray.fileToByteArray(Main.DOFUS_PATH + msg.filename);
+				CFM.value = new String(md.digest(buffer.bytes()), "UTF-8");
+			} catch(Exception e) {
+				throw new FatalError(e);
 			}
-		}
+		
 		CFM.type = msg.type;
 		this.character.net.send(CFM);
 		this.character.log.p(CFM.filenameHash);

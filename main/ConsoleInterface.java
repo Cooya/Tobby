@@ -10,38 +10,34 @@ import controller.characters.Character;
 import controller.informations.FightOptions;
 
 public class ConsoleInterface {
+	private static StringBuffer output = new StringBuffer();
 
 	public static void start() {
 		Scanner sc = new Scanner(System.in);
 		Log.info("Command line interface ready.");
-		while(sc.hasNext())
+		while(sc.hasNext()) {
 			processCommand(sc.nextLine());
+			if(output.length() > 0)
+				System.out.print(output);
+		}
 		sc.close();
 	}
 
-	private static void processCommand(String command) {
+	public synchronized static String processCommand(String command) {
+		output.setLength(0);
 		if(command.equals(""))
-			return;
+			return "";
 		String[] args = command.split(" ");
 		switch(args[0]) {
 			case "log" :
 				if(args.length == 1)
-					displayLog();
+					appendLine(Log.getGlobalLog());
 				else if(args.length == 2 && isInteger(args[1]))
 					displayLog(Integer.valueOf(args[1]));
 				else {
-					System.out.println("Usage :");
-					System.out.println("log");
-					System.out.println("log [characterId]");
-				}
-				break;
-			case "list" :
-				if(args.length == 2 && args[1].equals("-s"))
-					displayAllSquads();
-				else {
-					System.out.println("Usage :");
-					System.out.println("list -a");
-					System.out.println("list -s");
+					appendLine("Usage :");
+					appendLine("log");
+					appendLine("log [characterId]");
 				}
 				break;
 			case "add" :
@@ -53,16 +49,16 @@ public class ConsoleInterface {
 						if(isInteger(args[i]))
 							ids[j] = Integer.valueOf(args[i]);
 						else {
-							System.out.println("Bad id row.");
-							return;
+							appendLine("Bad id row.");
+							return output.toString();
 						}
 					}
 					SquadsManager.getInstance().createSquad(args[2], ids);
 				}
 				else {
-					System.out.println("Usage :");
-					System.out.println("add -a [login] [password]");
-					System.out.println("add -s [name] [id1] [id2] ... [id8]");
+					appendLine("Usage :");
+					appendLine("add -a [login] [password]");
+					appendLine("add -s [name] [id1] [id2] ... [id8]");
 				}
 				break;
 			case "co" :
@@ -75,10 +71,10 @@ public class ConsoleInterface {
 				else if(args.length == 6 && args[1].equals("-s") && isInteger(args[2]) && checkServerId(args[3]) && checkFightAreaId(args[4]) && isBoolean(args[5]))
 					SquadsManager.getInstance().connectSquad(Integer.valueOf(args[2]), Integer.valueOf(args[3]), Integer.valueOf(args[4]), Boolean.valueOf(args[5]));
 				else {
-					System.out.println("Usage :");
-					System.out.println("Can only connect lone wolves."); // TODO pouvoir connecter des groupes de combat
-					System.out.println("co -a [id] [serverId] (areaId)");
-					System.out.println("co -s [id] [serverId] (areaId) [fightTogether:boolean]");
+					appendLine("Usage :");
+					appendLine("Can only connect lone wolves."); // TODO pouvoir connecter des groupes de combat
+					appendLine("co -a [id] [serverId] (areaId)");
+					appendLine("co -s [id] [serverId] (areaId) [fightTogether:boolean]");
 				}
 				break;
 			case "run" :
@@ -86,9 +82,35 @@ public class ConsoleInterface {
 					CharactersManager.getInstance().connectCharacters(Integer.valueOf(args[1]), Integer.valueOf(args[2]), 0);
 				else if(args.length == 4 && isInteger(args[1]) && checkServerId(args[2]) && isInteger(args[3]))
 					CharactersManager.getInstance().connectCharacters(Integer.valueOf(args[1]), Integer.valueOf(args[2]), Integer.valueOf(args[3]));
+				else if(args.length == 4 && args[1].equals("-r") && isInteger(args[2]) && isInteger(args[3])) {
+					int charactersCount = Integer.valueOf(args[2]);
+					int serversCount = Integer.valueOf(args[3]);
+					int i = 0;
+					for(int serverId : ServerEnum.getServerIdsList())
+						if(i++ < serversCount)
+							CharactersManager.getInstance().connectCharacters(charactersCount, serverId, 0);
+						else
+							break;
+				}
+				else if(args.length == 5 && args[1].equals("-r") && isInteger(args[2]) && checkServerId(args[3]) && checkServerId(args[4])) {
+					int charactersCount = Integer.valueOf(args[2]);
+					int serverIdFrom = Integer.valueOf(args[3]);
+					int serverIdTo = Integer.valueOf(args[4]);
+					if(serverIdTo < serverIdFrom) {
+						appendLine("Invalid options.");
+						return output.toString();
+					}
+					for(int serverId : ServerEnum.getServerIdsList())
+						if(serverId >= serverIdFrom && serverId <= serverIdTo)
+							CharactersManager.getInstance().connectCharacters(charactersCount, serverId, 0);
+						else if(serverId > serverIdTo)
+							break;
+				}
 				else {
-					System.out.println("Usage :");
-					System.out.println("run [number] [serverId] (areaId)");
+					appendLine("Usage :");
+					appendLine("run [charactersCount] [serverId] (areaId)");
+					appendLine("run -r [charactersCount] [serversCount]");
+					appendLine("run -r [charactersCount] [serverIdFrom] [serverIdTo]");
 				}
 				break;
 			case "deco" :
@@ -97,9 +119,9 @@ public class ConsoleInterface {
 				else if(args.length == 3 && args[1].equals("-s") && isInteger(args[2]))
 					SquadsManager.getInstance().deconnectSquad(Integer.valueOf(args[2]));
 				else {
-					System.out.println("Usage :");
-					System.out.println("deco -a [id]");
-					System.out.println("deco -s [id]");
+					appendLine("Usage :");
+					appendLine("deco -a [id]");
+					appendLine("deco -s [id]");
 				}
 				break;
 			case "infos" :
@@ -110,28 +132,28 @@ public class ConsoleInterface {
 				else if(args.length == 2)
 					displayPersonalInfos(args[1]);
 				else {
-					System.out.println("Usage :");
-					System.out.println("infos");
-					System.out.println("infos [id]");
-					System.out.println("infos [login]");
+					appendLine("Usage :");
+					appendLine("infos");
+					appendLine("infos [id]");
+					appendLine("infos [login]");
 				}
 				break;
 			case "options" :
 				if(args.length == 1) {
-					System.out.println("Character behaviours :");
-					System.out.println(CharacterBehaviour.LONE_WOLF + " = lw -> lone wolf");
-					System.out.println(CharacterBehaviour.CAPTAIN + " = cp -> captain");
-					System.out.println(CharacterBehaviour.SOLDIER + " = so -> soldier");
-					System.out.println();
-					System.out.println("Game servers :");
-					ServerEnum.displayServersList();
-					System.out.println();
-					System.out.println("Fight areas :");
-					FightOptions.displayFightAreas();
+					appendLine("Character behaviours :");
+					appendLine(CharacterBehaviour.LONE_WOLF + " = lw -> lone wolf");
+					appendLine(CharacterBehaviour.CAPTAIN + " = cp -> captain");
+					appendLine(CharacterBehaviour.SOLDIER + " = so -> soldier");
+					appendLine("");
+					appendLine("Game servers :");
+					output.append(ServerEnum.displayServersList());
+					appendLine("");
+					appendLine("Fight areas :");
+					output.append(FightOptions.displayFightAreas());
 				}
 				else {
-					System.out.println("Usage :");
-					System.out.println("options");
+					appendLine("Usage :");
+					appendLine("options");
 				}
 				break;
 			case "exit" :
@@ -142,22 +164,28 @@ public class ConsoleInterface {
 				else if(args.length == 2 && args[1].equals("-f"))
 					Main.exit(null);		
 				else {
-					System.out.println("Usage :");
-					System.out.println("exit");
-					System.out.println("exit -f");
+					appendLine("Usage :");
+					appendLine("exit");
+					appendLine("exit -f");
 				}
 				break;
-			default : System.out.println("Invalid command.");
+			default : appendLine("Invalid command.");
 		}
+		return output.toString();
+	}
+	
+	private static void appendLine(String line) {
+		output.append(line);
+		output.append("\n");
 	}
 	
 	private static boolean checkServerId(String arg) {
 		if(!isInteger(arg)) {
-			System.out.println("Invalid server id.");
+			appendLine("Invalid server id.");
 			return false;
 		}
 		if(!ServerEnum.isHandledServer(Integer.valueOf(arg))) {
-			System.out.println("Unhandled server.");
+			appendLine("Unhandled server.");
 			return false;
 		}
 		return true;
@@ -165,11 +193,11 @@ public class ConsoleInterface {
 	
 	private static boolean checkFightAreaId(String arg) {
 		if(!isInteger(arg)) {
-			System.out.println("Invalid fight area id.");
+			appendLine("Invalid fight area id.");
 			return false;
 		}
 		if(!FightOptions.isHandledFightArea(Integer.valueOf(arg))) {
-			System.out.println("Unhandled fight area.");
+			appendLine("Unhandled fight area.");
 			return false;
 		}
 		return true;
@@ -178,7 +206,7 @@ public class ConsoleInterface {
 	@SuppressWarnings("unused")
 	private static int translateCharacterType(String arg) {
 		if(isInteger(arg)) {
-			System.out.println("Invalid character type.");
+			appendLine("Invalid character type.");
 			return -1;
 		}
 		if(arg.equals("salesman"))
@@ -186,7 +214,7 @@ public class ConsoleInterface {
 		else if(arg.equals("fighter"))
 			return 10;
 		else {
-			System.out.println("Invalid character type.");
+			appendLine("Invalid character type.");
 			return -1;
 		}
 	}
@@ -234,20 +262,12 @@ public class ConsoleInterface {
 		return s.equals("true") || s.equals("false");
 	}
 	
-	private static void displayAllSquads() {
-		System.out.print(SquadsManager.getInstance());
-	}
-	
-	private static void displayLog() {
-		Log.displayGlobalLog();
-	}
-	
 	private static void displayLog(int accountId) {
 		Character character = CharactersManager.getInstance().getInGameCharacter(accountId);
 		if(character != null)	
-			character.log.displayLog(20);
+			appendLine(character.log.getCharacterLog(20));
 		else
-			System.out.println("Character not connected on this computer.");
+			appendLine("Character not connected on this computer.");
 	}
 	
 	private static void displayPersonalInfos(int accountId) {
@@ -255,7 +275,7 @@ public class ConsoleInterface {
 		if(character != null)	
 			Reflection.explore(character.infos, 1);
 		else
-			System.out.println("Character not connected on this computer.");
+			appendLine("Character not connected on this computer.");
 	}
 	
 	private static void displayPersonalInfos(String login) {
@@ -263,7 +283,7 @@ public class ConsoleInterface {
 		if(character != null)	
 			Reflection.explore(character.infos, 1);
 		else
-			System.out.println("Character not connected on this computer.");
+			appendLine("Character not connected on this computer.");
 	}
 	
 	private static void displayGlobalInfos() {
@@ -273,7 +293,9 @@ public class ConsoleInterface {
 			str.append(character.id);
 			str.append(" ");
 			str.append(character.infos.getLogin());
-			str.append(" -> win : ");
+			str.append(" (");
+			str.append(ServerEnum.getServerName(character.infos.getServerId()));
+			str.append(") -> win : ");
 			str.append(character.infos.getFightsWonCounter());
 			str.append(", lost : ");
 			str.append(character.infos.getFightsLostCounter());
@@ -283,7 +305,7 @@ public class ConsoleInterface {
 			str.append(character.infos.getWeight());
 			str.append("/");
 			str.append(character.infos.getWeightMax());
-			System.out.println(str);
+			appendLine(str.toString());
 			str.setLength(0);
 		}
 	}

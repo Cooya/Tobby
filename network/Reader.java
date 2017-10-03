@@ -1,15 +1,15 @@
-package main;
+package network;
 
 import java.util.LinkedList;
 
 import messages.NetworkMessage;
 import utilities.ByteArray;
 
-public class Reader {
+class Reader {
 	private NetworkMessage incompleteMsg; // message incomplet qui attend d'être complété
 	private byte[] incompleteHeader; // header incomplet qui attend d'être complété
 	
-	public LinkedList<NetworkMessage> processBuffer(ByteArray buffer) {
+	protected LinkedList<NetworkMessage> processBuffer(ByteArray buffer) {
 		LinkedList<NetworkMessage> msgStack = new LinkedList<NetworkMessage>();
 		if(this.incompleteHeader != null) {
 			buffer.appendBefore(this.incompleteHeader);

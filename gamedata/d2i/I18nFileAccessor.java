@@ -37,7 +37,11 @@ public class I18nFileAccessor {
 		File file = new File(d2iPath);
 		if(file == null || !file.exists())
 			throw new FatalError("I18n file not readable.");
-		this._stream = ByteArray.fileToByteArray(d2iPath);
+		try {
+			this._stream = ByteArray.fileToByteArray(d2iPath);
+		} catch(Exception e) {
+			throw new FatalError(e);
+		}
 		this._indexes = new Hashtable<Integer, Integer>();
 		this._unDiacriticalIndex = new Hashtable<Integer, Integer>();
 		this._textIndexes = new Hashtable<String, Integer>();

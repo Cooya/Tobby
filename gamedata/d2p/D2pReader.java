@@ -54,7 +54,11 @@ public class D2pReader {
 		
 		while(true) {
 			//Log.p("Reading d2p file " + filepath + "...");
-			buffer = ByteArray.fileToByteArray(filepath);
+			try {
+				buffer = ByteArray.fileToByteArray(filepath);
+			} catch(Exception e) {
+				throw new FatalError(e);
+			}
 			nextFile = false;
 			if(buffer.readByte() != 2 || buffer.readByte() != 1)
 				throw new FatalError("Invalid d2p file header.");

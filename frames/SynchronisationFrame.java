@@ -1,7 +1,7 @@
 package frames;
 
+import network.Latency;
 import controller.characters.Character;
-import main.Latency;
 import messages.synchronisation.BasicAckMessage;
 import messages.synchronisation.BasicLatencyStatsMessage;
 import messages.synchronisation.BasicLatencyStatsRequestMessage;

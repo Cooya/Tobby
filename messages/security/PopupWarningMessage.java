@@ -5,7 +5,7 @@ import messages.NetworkMessage;
 public class PopupWarningMessage extends NetworkMessage {
 	public int lockDuration = 0;
 	public String author = "";
-	public String content2 = ""; // nom de variable déjà utilisé
+	public String _content = ""; // nom de variable déjà utilisé
 	
 	@Override
 	public void serialize() {
@@ -16,6 +16,6 @@ public class PopupWarningMessage extends NetworkMessage {
 	public void deserialize() {
         this.lockDuration = this.content.readByte();
         this.author = this.content.readUTF();
-        this.content2 = this.content.readUTF();
+        this._content = this.content.readUTF();
     }
 }

@@ -12,7 +12,6 @@ import java.util.regex.Pattern;
 public class Crawler {
 	private static final String SOURCES_PATH = "C:\\Users\\Nicolas\\Documents\\Programmation\\Java\\Tobby\\Workshop\\Client décompilé 2.34.4";
 	private static final String MSG_FILE = "Workshop/messagesList.txt";
-	private static final String EOL = System.getProperty("line.separator");
 	private static final Pattern regexp = Pattern.compile("protocolId:uint = ([0-9]+|0x[0-9A-F]+);");
 	
 	public static void buildMessagesFile() {
@@ -22,7 +21,7 @@ public class Crawler {
 			splitLine = line.split(" ");
 			str.append("messages.put(");
 			str.append(Integer.valueOf(splitLine[1]));
-			str.append(", \"" + splitLine[0] + "\");" + EOL);
+			str.append(", \"" + splitLine[0] + "\");\n");
 		}
 		
 		try {

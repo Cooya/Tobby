@@ -4,20 +4,20 @@ import gamedata.character.CharacterBaseInformations;
 import gamedata.connection.GameServerInformations;
 import gamedata.connection.VersionExtended;
 import gamedata.enums.BreedEnum;
+import gamedata.enums.ConnectionResult;
 import gamedata.enums.IdentificationFailureReasonEnum;
 import gamedata.enums.ServerEnum;
 import gamedata.enums.ServerStatusEnum;
 
 import java.util.Random;
 
+import network.DatabaseConnection;
+import network.ServerInterface;
 import utilities.ByteArray;
 import utilities.Encryption;
 import controller.characters.Character;
 import controller.modules.SalesManager;
 import main.CharactersManager;
-import main.ConnectionResult;
-import main.DatabaseConnection;
-import main.Emulation;
 import main.FatalError;
 import main.Log;
 import main.Main;
@@ -187,7 +187,7 @@ public class ConnectionFrame extends Frame {
 	}
 	
 	protected void process(RawDataMessage msg) {
-		NetworkMessage CIM = Emulation.emulateServer(this.character.infos.getLogin(), this.character.infos.getPassword(), this.HCM, this.ISM, msg, character.id);
+		NetworkMessage CIM = ServerInterface.getInstance().emulateServer(this.character.infos.getLogin(), this.character.infos.getPassword(), this.HCM, this.ISM, msg, character.id);
 		CIM.deserialize(); // exception
 		this.character.net.send(CIM);
 	}

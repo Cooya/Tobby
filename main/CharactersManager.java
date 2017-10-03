@@ -1,5 +1,6 @@
 package main;
 
+import gamedata.enums.ConnectionResult;
 import gamedata.enums.ServerEnum;
 
 import java.util.Collection;
@@ -11,14 +12,15 @@ import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.Vector;
 
+import network.DatabaseConnection;
 import main.AccountsManager.Account;
 import controller.CharacterBehaviour;
 import controller.characters.Character;
 
 public class CharactersManager extends Thread {
 	private static CharactersManager self;
-	private static Map<Integer, Boolean> serverAvailabilities = new HashMap<Integer, Boolean>();
-	{
+	private static final Map<Integer, Boolean> serverAvailabilities = new HashMap<Integer, Boolean>();
+	static {
 		for(int serverId : ServerEnum.getServerIdsList())
 			serverAvailabilities.put(serverId, true);
 	}
@@ -142,17 +144,17 @@ public class CharactersManager extends Thread {
 	// fonction appelée à la connexion en jeu ou à l'échec de la connexion d'un personnage
 	public void connectionCallback(ConnectionResult status, String str) {
 		Character character;
-		Long characterTime;
 		synchronized(this) {
 			character = this.connectionQueue.get(this.connectionInProgress);
-			characterTime = this.connectionInProgress;
-			this.connectionInProgress = null;
 		}
 		switch(status) {
 			case SUCCESS :
 				character.log.p(str);
-				this.inGameCharacters.put(character.id, character);
-				this.connectionQueue.remove(characterTime);
+				synchronized(this) {
+					this.connectionQueue.remove(this.connectionInProgress);
+					this.connectionInProgress = null;
+					this.inGameCharacters.put(character.id, character);
+				}
 				break;
 			case SERVER_SAVING :
 				deconnectCharacter(character, str, true, false);
@@ -181,7 +183,6 @@ public class CharactersManager extends Thread {
 			case ACCOUNT_BANNED_TEMPORARILY :
 			case AUTHENTIFICATION_FAILED :
 				deconnectCharacter(character, str, true, false);
-				this.connectionQueue.remove(characterTime);
 				break;
 		}
 		synchronized(this) {
@@ -230,14 +231,12 @@ public class CharactersManager extends Thread {
 				if(character.id == this.connectionQueue.get(this.connectionInProgress).id) {
 					this.connectionQueue.remove(this.connectionInProgress);
 					this.connectionInProgress = null;
-					notify();
-					return;
 				}
 			}
 		}
-		character = this.inGameCharacters.remove(character.id);
 		this.inProgressDeconnectionCharacters.add(character);
 		character.deconnectionOrder(forced);
+		this.inGameCharacters.remove(character.id);
 	}
 	
 	// déconnexion de tous les personnages connectés (sur un serveur spécifié ou sur tous)

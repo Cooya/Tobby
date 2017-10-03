@@ -6,6 +6,7 @@ import gamedata.enums.BreedEnum;
 
 import java.util.HashMap;
 
+import network.NetworkInterface;
 import controller.CharacterBehaviour;
 import controller.CharacterState;
 import controller.informations.CharacterInformations;
@@ -22,7 +23,6 @@ import controller.modules.SalesManager;
 import main.CharactersManager;
 import main.FatalError;
 import main.Log;
-import main.NetworkInterface;
 import messages.character.PlayerStatusUpdateRequestMessage;
 
 public abstract class Character extends Thread {
@@ -112,11 +112,11 @@ public abstract class Character extends Thread {
 		Log.info("Character with id = " + this.id + " started.");
 	}
 	
-	// arrêt des threads du personnage (forcée ou non)
+	// arrêt des threads du personnage (forcé ou non)
 	public void deconnectionOrder(boolean forced) {
 		if(forced) {
-			this.net.closeReceiver();
 			interrupt();
+			this.net.closeReceiver();
 		}
 		else
 			updateState(CharacterState.SHOULD_DECONNECT, true);

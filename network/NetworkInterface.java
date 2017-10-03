@@ -1,6 +1,8 @@
-package main;
+package network;
 
 import java.io.IOException;
+import java.net.SocketException;
+import java.net.SocketTimeoutException;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -8,6 +10,10 @@ import java.util.Vector;
 
 import controller.characters.Character;
 import frames.Processor;
+import main.CharactersManager;
+import main.FatalError;
+import main.Log;
+import main.Main;
 import messages.NetworkDataContainerMessage;
 import messages.NetworkMessage;
 import messages.synchronisation.BasicPingMessage;
@@ -17,7 +23,7 @@ public class NetworkInterface extends Thread {
 	private Character character;
 	private Reader reader;
 	private Processor processor;
-	private Connection.Client serverCo;
+	private Client serverCo;
 	private String gameServerIP;
 	private List<NetworkMessage> acknowledgementList; // file des messages qui attendent d'être acquitté
 	private Latency latency;
@@ -52,7 +58,7 @@ public class NetworkInterface extends Thread {
 	private void connectionToServer(String IP, int port) {
 		// connexion au serveur et envoi d'un ping
 		try {
-			this.serverCo = new Connection.Client(IP, port);
+			this.serverCo = new Client(IP, port);
 		} catch(IOException e) {
 			throw new FatalError(e);
 		}
@@ -62,18 +68,26 @@ public class NetworkInterface extends Thread {
 		send(BPM);
 		
 		// écoute du serveur et désérialisation des messages reçus
+		ByteArray array = new ByteArray(0);
 		byte[] buffer = new byte[ByteArray.BUFFER_DEFAULT_SIZE];
-		ByteArray array = new ByteArray();
 		int bytesReceived;
-		while(!isInterrupted())
+		while(true)
 			try {
 				if((bytesReceived = this.serverCo.receive(buffer)) == -1)
 					break;
 				array.setArray(buffer, bytesReceived); // le buffer n'est pas complet, donc on le coupe
 				processMsgStack(this.reader.processBuffer(array));
+			} catch(SocketTimeoutException e) {
+				Log.warn(e.getMessage());
+			} catch(SocketException e) {
+				if(isInterrupted())
+					break;
+				Log.err(e.getMessage());
+				CharactersManager.getInstance().deconnectCharacter(this.character, e.getMessage(), true, true);
 			} catch(IOException e) {
-				if(!isInterrupted())
-					throw new FatalError(e);
+				if(isInterrupted())
+					break;
+				throw new FatalError(e);
 			}
 	}
 	
@@ -106,10 +120,12 @@ public class NetworkInterface extends Thread {
 	}
 	
 	public void send(NetworkMessage msg) {
-		if(isInterrupted())
-			return;
 		latency.setLatestSent();
-		serverCo.send(msg.pack(character.id));
+		try {
+			serverCo.send(msg.pack(character.id));
+		} catch(IOException e) {
+			return;
+		}
 		/*
 		if(msg.isAcknowledgable()) {
 			msg.setSendingTime(new Date());

@@ -15,7 +15,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Vector;
 
-import main.DatabaseConnection;
+import network.DatabaseConnection;
 import main.Log;
 import messages.exchanges.ExchangeBidHousePriceMessage;
 import messages.exchanges.ExchangeBidPriceForSellerMessage;

@@ -113,7 +113,7 @@ public class FightAPI {
 				// on se dirige vers le groupe de monstre et on l'attaque
 				if(!attackMonsterGroup(monsterGroup))
 					continue;
-				while(true) {
+				while(!this.character.isInterrupted()) {
 					// un combat a été lancé sur la map
 					if(this.character.waitState(CharacterState.NEW_FIGHT_ON_MAP)) {
 						// on est entré dans ce nouveau combat

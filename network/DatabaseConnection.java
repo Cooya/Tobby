@@ -1,4 +1,4 @@
-package main;
+package network;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -8,12 +8,16 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Vector;
 
+import main.Log;
+import main.Main;
+
 public class DatabaseConnection {
 	private static final boolean DEBUG = false;
 	private static final String url = "jdbc:mysql://nicodev.fr/tobby";
 	private static final String login = "tobby";
 	private static final String password = "tobby";
 	private static Connection co;
+	private static boolean connectionUnderRepair = false;
 	
 	private static final String NEW_ACCOUNT = "INSERT INTO accounts (login, password, owner) VALUES (?, ?, ?)";
 	private static final String NEW_CHARACTER = "INSERT INTO characters (name, serverId, accountId, level, breedId) VALUES (?, ?, ?, ?, ?)";
@@ -47,6 +51,9 @@ public class DatabaseConnection {
 	}
 	
 	public static int newAccount(String login, String password) {
+		if(!connectionIsOk())
+			return 0;
+		
 		Log.info("Adding new account into database.");
 		try {
 			PreparedStatement st = co.prepareStatement(NEW_ACCOUNT, Statement.RETURN_GENERATED_KEYS);
@@ -61,12 +68,15 @@ public class DatabaseConnection {
 			st.close();
 			return generatedKey;
 		} catch(SQLException e) {
-			e.printStackTrace();
-			return 0;
+			fixConnection();
+			return newAccount(login, password);
 		}
 	}
 	
 	public static ResultSet retrieveAccounts(int serverId, int number) {
+		if(!connectionIsOk())
+			return null;
+		
 		Log.info("Retrieving " + number + " character(s) from database for server with id = " + serverId + ".");
 		ResultSet result = null;
 		Vector<Integer> accountIds = new Vector<Integer>();
@@ -89,13 +99,17 @@ public class DatabaseConnection {
 			co.commit();
 			co.setAutoCommit(true);
 		} catch(SQLException e) {
-			e.printStackTrace();
+			fixConnection();
+			return retrieveAccounts(serverId, number);
 		}
 		
 		return result;
 	}
 	
 	public static ResultSet retrieveAccount(String login) {
+		if(!connectionIsOk())
+			return null;
+		
 		Log.info("Retrieving one account from database.");
 		ResultSet result = null;
 		int id = 0;
@@ -123,13 +137,17 @@ public class DatabaseConnection {
 			co.setAutoCommit(true);
 			st2.close();
 		} catch(SQLException e) {
-			e.printStackTrace();
+			fixConnection();
+			return retrieveAccount(login);
 		}
 		
 		return result;
 	}
 	
 	public static ResultSet retrieveAccount(int id) {
+		if(!connectionIsOk())
+			return null;
+		
 		Log.info("Retrieving one account from database.");
 		ResultSet result = null;
 		try {
@@ -153,13 +171,17 @@ public class DatabaseConnection {
 			co.setAutoCommit(true);
 			st2.close();
 		} catch(SQLException e) {
-			e.printStackTrace();
+			fixConnection();
+			return retrieveAccount(id);
 		}
 		
 		return result;
 	}
 	
 	public static void updateAccountStatus(int id, int status) {
+		if(!connectionIsOk())
+			return;
+		
 		Log.info("Updating status for account with id = " + id + " into database.");
 		try {
 			PreparedStatement st = co.prepareStatement(UPDATE_ACCOUNT_STATUS);
@@ -168,11 +190,15 @@ public class DatabaseConnection {
 			st.executeUpdate();
 			st.close();
 		} catch(SQLException e) {
-			e.printStackTrace();
+			fixConnection();
+			updateAccountStatus(id, status);
 		}
 	}
 	
 	public static void unlockAccount(int id) {
+		if(!connectionIsOk())
+			return;
+		
 		Log.info("Unlocking account with id = " + id + " into database.");
 		try {
 			PreparedStatement st = co.prepareStatement(UNLOCK_ACCOUNT);
@@ -180,11 +206,15 @@ public class DatabaseConnection {
 			st.executeUpdate();
 			st.close();
 		} catch(SQLException e) {
-			e.printStackTrace();
+			fixConnection();
+			unlockAccount(id);
 		}
 	}
 	
 	public static void unlockAllAccounts() {
+		if(!connectionIsOk())
+			return;
+		
 		Log.info("Unlocking all accounts into database.");
 		try {
 			PreparedStatement st = co.prepareStatement(UNLOCK_ALL_ACCOUNTS);
@@ -192,11 +222,15 @@ public class DatabaseConnection {
 			st.executeUpdate();
 			st.close();
 		} catch(SQLException e) {
-			e.printStackTrace();
+			fixConnection();
+			unlockAllAccounts();
 		}
 	}
 	
 	public static boolean newCharacter(String name, int serverId, int accountId, int level, int breedId) {
+		if(!connectionIsOk())
+			return false;
+		
 		Log.info("Adding new character into database.");
 		try {
 			PreparedStatement st = co.prepareStatement(NEW_CHARACTER);
@@ -209,12 +243,15 @@ public class DatabaseConnection {
 			st.close();
 			return true;
 		} catch(SQLException e) {
-			e.printStackTrace();
-			return false;
+			fixConnection();
+			return newCharacter(name, serverId, accountId, level, breedId);
 		}
 	}
 	
 	public static void updateCharacterLevel(String name, int serverId, int level) {
+		if(!connectionIsOk())
+			return;
+		
 		if(DEBUG)
 			Log.info("Updating character level into database.");
 		try {
@@ -225,12 +262,16 @@ public class DatabaseConnection {
 			st.executeUpdate();
 			st.close();
 		} catch(SQLException e) {
-			e.printStackTrace();
+			fixConnection();
+			updateCharacterLevel(name, serverId, level);
 		}
 	}
 	
 	public static void newSale(int objectUID, int objectGID, String objectName, int price, int quantity, int serverId, int accountId) {
-		Log.info("Adding new sale into database.");
+		if(!connectionIsOk())
+			return;
+		
+		Log.info("Adding new sale with UID = " + objectUID + " into database.");
 		try {
 			PreparedStatement st = co.prepareStatement(NEW_SALE);
 			st.setInt(1, objectUID);
@@ -243,11 +284,15 @@ public class DatabaseConnection {
 			st.executeUpdate();
 			st.close();
 		} catch(SQLException e) {
-			e.printStackTrace();
+			fixConnection();
+			newSale(objectUID, objectGID, objectName, price, quantity, serverId, accountId);
 		}
 	}
 	
 	public static void updateSale(int oldObjectUID, int newObjectUID, int newPrice, int serverId) {
+		if(!connectionIsOk())
+			return;
+		
 		Log.info("Updating sale into database.");
 		try {
 			PreparedStatement st = co.prepareStatement(UPDATE_SALE);
@@ -258,12 +303,16 @@ public class DatabaseConnection {
 			st.executeUpdate();
 			st.close();
 		} catch(SQLException e) {
-			e.printStackTrace();
+			fixConnection();
+			updateSale(oldObjectUID, newObjectUID, newPrice, serverId);
 		}
 	}
 	
 	public static void removeSale(int objectUID, int serverId) {
-		Log.info("Deleting sale into database.");
+		if(!connectionIsOk())
+			return;
+		
+		Log.info("Deleting sale with UID = " + objectUID + " into database.");
 		try {
 			PreparedStatement st = co.prepareStatement(REMOVE_SALE);
 			st.setInt(1, objectUID);
@@ -271,11 +320,15 @@ public class DatabaseConnection {
 			st.executeUpdate();
 			st.close();
 		} catch(SQLException e) {
-			e.printStackTrace();
+			fixConnection();
+			removeSale(objectUID, serverId);
 		}
 	}
 	
 	public static ResultSet retrievePrices(int objectGID, int serverId) {
+		if(!connectionIsOk())
+			return null;
+		
 		Log.info("Retrieving prices for a sale into database.");
 		ResultSet resultSet = null;
 		try {
@@ -284,13 +337,17 @@ public class DatabaseConnection {
 			st.setInt(2, serverId);
 			resultSet = st.executeQuery();
 		} catch(SQLException e) {
-			e.printStackTrace();
+			fixConnection();
+			return retrievePrices(objectGID, serverId);
 		}
 		
 		return resultSet;
 	}
 	
 	public static ResultSet retrieveAllSales(int serverId, int accountId) {
+		if(!connectionIsOk())
+			return null;
+		
 		if(DEBUG)
 			Log.info("Retrieving all sales from database.");
 		ResultSet resultSet = null;
@@ -300,13 +357,17 @@ public class DatabaseConnection {
 			st.setInt(2, accountId);
 			resultSet = st.executeQuery();
 		} catch(SQLException e) {
-			e.printStackTrace();
+			fixConnection();
+			return retrieveAllSales(serverId, accountId);
 		}
 		
 		return resultSet;
 	}
 	
 	private static void lockAccounts(Vector<Integer> accountIds, String owner) {
+		if(!connectionIsOk())
+			return;
+		
 		Log.info("Locking account(s) into database.");
 		try {
 			PreparedStatement st = co.prepareStatement(LOCK_ACCOUNTS + vectorToSQLArray(accountIds));
@@ -314,7 +375,8 @@ public class DatabaseConnection {
 			st.executeUpdate();
 			st.close();
 		} catch(SQLException e) {
-			e.printStackTrace();
+			fixConnection();
+			lockAccounts(accountIds, owner);
 		}
 	}
 	
@@ -328,5 +390,45 @@ public class DatabaseConnection {
 		str.append(vector.lastElement());
 		str.append(")");
 		return str.toString();
+	}
+	
+	private static synchronized boolean connectionIsOk() {
+		if(connectionUnderRepair) {
+			try {
+				DatabaseConnection.class.wait();
+			} catch(InterruptedException e) {
+				Thread.currentThread().interrupt();
+			}
+			return !connectionUnderRepair;
+		}
+		else
+			return true;
+	}
+	
+	private static synchronized boolean fixConnection() {
+		connectionUnderRepair = true;
+		Log.warn("Connection lost with the database.");
+		for(int i = 0; i < 5; ++i) {
+			Log.info("Trying to fix the connection...");
+			try {
+				Thread.sleep(5000);
+			} catch(InterruptedException e) {
+				Thread.currentThread().interrupt();
+				DatabaseConnection.class.notifyAll();
+				return false;
+			}
+			try {
+				co = DriverManager.getConnection(url, login, password);
+				Log.info("Connection to the database fixed.");
+				connectionUnderRepair = false;
+				DatabaseConnection.class.notifyAll();
+				return true;
+			} catch(SQLException e) {
+				
+			}
+		}
+		DatabaseConnection.class.notifyAll();
+		Log.err("Connection lost with the database. Impossible to fix the connection.");
+		return false;
 	}
 }

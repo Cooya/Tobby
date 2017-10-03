@@ -27,27 +27,34 @@ public abstract class ServerEnum {
 	
 	public static int[] getServerIdsList() {
 		Field[] fields = ServerEnum.class.getFields();
-		int[] serverIds = new int[fields.length];
-		for(int i = 0; i < fields.length; ++i)
+		int[] serverIds = new int[fields.length - 1];
+		for(int i = 0; i < fields.length - 1; ++i)
 			try {
-				serverIds[i] = fields[i].getInt(null);
+				serverIds[i] = fields[i + 1].getInt(null);
 			} catch(IllegalArgumentException | IllegalAccessException e) {
 				e.printStackTrace();
 			}
 		return serverIds;
 	}
 	
-	public static void displayServersList() {
+	public static String displayServersList() {
+		StringBuffer str = new StringBuffer();
 		Field[] fields = ServerEnum.class.getFields();
-		for(Field field : fields)
+		for(Field field : fields) {
+			if(field == fields[0])
+				continue;
 			try {
-				System.out.println(field.getName() + " = " + field.getInt(null));
+				str.append(field.getName() + " = " + field.getInt(null) + "\n");
 			} catch(IllegalArgumentException | IllegalAccessException e) {
 				e.printStackTrace();
 			}
+		}
+		return str.toString();
 	}
 	
 	public static boolean isHandledServer(int serverId) {
+		if(serverId <= 0)
+			return false;
 		Field[] fields = ServerEnum.class.getFields();
 		for(Field field : fields)
 			try {

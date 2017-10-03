@@ -4,7 +4,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import main.Emulation;
+import network.ServerInterface;
 import main.FatalError;
 import main.Log;
 import main.Main;
@@ -125,7 +125,7 @@ public abstract class NetworkMessage {
 		this.content = new ByteArray();
 		serialize(); // unique appel de la fonction "serialize()"
 		if(hashedMessages.containsKey(this.name))
-			Emulation.hashMessage(this.content, characterId);
+			ServerInterface.getInstance().hashMessage(this.content, characterId);
 		this.size = this.content.getSize();
 		this.lenofsize = computeLenOfSize(this.size);
 		
@@ -248,6 +248,7 @@ public abstract class NetworkMessage {
 	}
 	
 	private static void fillMessagesMap() {
+		messages.put(0, "UserCommandMessage");
 		messages.put(1, "ProtocolRequired");
 		
 		messages.put(6118, "AbstractGameActionFightTargetedAbilityMessage");

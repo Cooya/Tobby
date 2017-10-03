@@ -1,8 +1,12 @@
-package main;
+package network;
 
 import java.io.IOException;
+import java.net.ServerSocket;
 import java.util.LinkedList;
 
+import main.FatalError;
+import main.Log;
+import main.Main;
 import messages.NetworkMessage;
 import messages.connection.SelectedServerDataMessage;
 import utilities.ByteArray;
@@ -12,8 +16,9 @@ public class Sniffer extends Thread {
 	private static final String DOFUS_EXE = "Dofus.exe";
 	private static Reader reader = new Reader();
 	private static String gameServerAddress;
-	private static Connection.Server clientCo;
-	private static Connection.Client serverCo;
+	private static ServerSocket clientCo;
+	private static Client client;
+	private static Client serverCo;
 	private static boolean mustDeconnectClient = false;
 	private static Log log;
 	private static Thread serverCoThread;
@@ -31,14 +36,14 @@ public class Sniffer extends Thread {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-		Processes.injectDLL(Main.LIB_PATH, "Dofus.exe");
+		Processes.injectDLL("A COMPLETER", "Dofus.exe");
 		
-		clientCo = new Connection.Server(Main.SERVER_PORT);
-		log.p("Running sniffer server. Waiting Dofus client connection...");
-		clientCo.waitClient();
-		log.p("Dofus client connected.");
 		try {
-			serverCo = new Connection.Client(Main.AUTH_SERVER_IP, Main.SERVER_PORT);
+			clientCo = new ServerSocket(Main.SERVER_PORT);
+			log.p("Running sniffer server. Waiting Dofus client connection...");
+			client = new Client(clientCo.accept());
+			log.p("Dofus client connected.");
+			serverCo = new Client(Main.AUTH_SERVER_IP, Main.SERVER_PORT);
 		} catch(IOException e) {
 			e.printStackTrace();
 			return;
@@ -51,33 +56,40 @@ public class Sniffer extends Thread {
 		ByteArray array = new ByteArray();
 		int bytesReceived = 0;
 		try {
-			while((bytesReceived = clientCo.receive(buffer)) != -1) {
+			while((bytesReceived = client.receive(buffer)) != -1) {
 				array.setArray(buffer, bytesReceived);
 				processMsgStack(reader.processBuffer(array), "s");
 				serverCo.send(ByteArray.trimBuffer(buffer, bytesReceived));
 			}
-		} catch(Exception e) {
+		} catch(IOException e) {
 			e.printStackTrace();
+			return;
 		}
 		
 		log.p("Waiting client reconnection...");
-		clientCo.waitClient();
+		try {
+			client = new Client(clientCo.accept());
+		} catch(IOException e) {
+			e.printStackTrace();
+			return;
+		}
 		log.p("Dofus client reconnected.");
 		synchronized(this) {
 			serverCoThread.notify();
 		}
 		
 		try {
-			while((bytesReceived = clientCo.receive(buffer)) != -1) {
+			while((bytesReceived = client.receive(buffer)) != -1) {
 				array.setArray(buffer, bytesReceived);
 				processMsgStack(reader.processBuffer(array), "s");
 				serverCo.send(ByteArray.trimBuffer(buffer, bytesReceived));
 			}
 		} catch(Exception e) {
 			e.printStackTrace();
+			return;
 		}
 		log.p("Dofus client deconnected from sniffer server.");
-		clientCo.close();
+		client.close();
 	}
 	
 	public void run() { // connexion au serveur officiel
@@ -90,7 +102,7 @@ public class Sniffer extends Thread {
 			while((bytesReceived = serverCo.receive(buffer)) != -1) {
 				array.setArray(buffer, bytesReceived);
 				if(processMsgStack(reader.processBuffer(array), "r"))
-					clientCo.send(ByteArray.trimBuffer(buffer, bytesReceived));
+					client.send(ByteArray.trimBuffer(buffer, bytesReceived));
 				if(mustDeconnectClient)
 					break;
 			}
@@ -98,7 +110,7 @@ public class Sniffer extends Thread {
 			e.printStackTrace();
 			return;
 		}
-		clientCo.closeClient();
+		client.close();
 		log.p("Deconnection from Dofus client.");
 		serverCo.close();
 		log.p("Deconnected from authentification server.");
@@ -113,11 +125,11 @@ public class Sniffer extends Thread {
 		if(gameServerAddress != null) {
 			log.p("Connecting to game server, waiting response...");
 			try {
-				serverCo = new Connection.Client(gameServerAddress, Main.SERVER_PORT);
+				serverCo = new Client(gameServerAddress, Main.SERVER_PORT);
 				while((bytesReceived = serverCo.receive(buffer)) != -1) {
 					array.setArray(buffer, bytesReceived);
 					processMsgStack(reader.processBuffer(array), "r");
-					clientCo.send(ByteArray.trimBuffer(buffer, bytesReceived));
+					client.send(ByteArray.trimBuffer(buffer, bytesReceived));
 				}
 			} catch(IOException e) {
 				e.printStackTrace();
@@ -141,7 +153,11 @@ public class Sniffer extends Thread {
 				if(msgStack.size() > 1)
 					throw new FatalError("Little problem !");
 				SSDM.address = Main.LOCALHOST;
-				clientCo.send(SSDM.pack(0));
+				try {
+					client.send(SSDM.pack(0));
+				} catch(IOException e) {
+					e.printStackTrace();
+				}
 				return false;
 			}
 		}

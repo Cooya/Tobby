@@ -37,7 +37,11 @@ public class GameDataFileAccessor {
             this._streamStartIndex = new Hashtable<String, Integer>();
     	ByteArray buffer;
     	if(!this._streams.containsKey(d2oModule)) {
-    		buffer = ByteArray.fileToByteArray(Main.D2O_PATH + d2oModule + ".d2o");
+    		try {
+				buffer = ByteArray.fileToByteArray(Main.D2O_PATH + d2oModule + ".d2o");
+			} catch(Exception e) {
+				throw new FatalError(e);
+			}
     		this._streams.put(d2oModule, buffer);
     		this._streamStartIndex.put(d2oModule, 7);
     	}

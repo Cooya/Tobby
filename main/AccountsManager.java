@@ -3,6 +3,8 @@ package main;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import network.DatabaseConnection;
+
 public class AccountsManager {
 
 	protected static Account newAccount(String login, String password) {

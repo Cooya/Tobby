@@ -54,7 +54,7 @@ public class Processes {
 	
 	public static void injectDLL(String libName, String exeName) {
 		try {
-			Runtime.getRuntime().exec(Main.INJECTOR_PATH + " " + libName + " " + exeName);
+			Runtime.getRuntime().exec("A COMPLETER" + " " + libName + " " + exeName);
 			//InputStream in = process.getInputStream();
 			//byte[] bytes = new byte[ByteArray.BUFFER_DEFAULT_SIZE];
 			//in.read(bytes);
