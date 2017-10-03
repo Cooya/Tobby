@@ -1,0 +1,1 @@
+AdobeAIRSDK/bin/adt.bat -package -keystore cert.pfx -storetype pkcs12 Bypass application.xml DofusInvokerPatched.swf SharedDefinitions.swf content data ui config.xml

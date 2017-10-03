@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LangFile>
+	<!--
+							Fichier de configuration
+		Syntaxe :
+			<entry key="nom de la clef">contenu</entry>
+			
+		Note :
+			Le nom du fichier (sans son extension) est automatiquement ajouté avant la clef. Par
+			exmple, pour faire référence aux clefs déclarées dans le fichier "config.xml", il
+			faudra ajouter "config." aux noms des clefs
+		
+		Référence à d'autres clefs :
+			- [nom de ma clef]  : Référence statique, la référence est remplacé lors du premier
+								  chargement du fichier de config.
+			
+			- [#nom de ma clef] : Référence dynamique, la référence est calculée au moment où
+								  l'on utilise la clef dans le programme.  
+	-->
+	
+	<!--======================================================================-->
+	<!--                            Mode salon                                -->
+	<!--======================================================================-->
+	
+	<entry key="maps.encryptionKey">649ae451ca33ec53bbcbcc33becf15f4</entry>
+	
+	<entry key="eventMode">false</entry>
+	<entry key="characterCreationAllowed">true</entry>
+	<entry key="buildType">release</entry>
+	<entry key="autoMaximize">false</entry>
+	
+	<!--======================================================================-->
+	<!--               Constantes pour les Chemins basiques                   -->
+	<!--======================================================================-->
+	
+	<entry key="root.path">file://</entry>
+	<entry key="content.path">[config.root.path]content/</entry>
+	<entry key="ui">[config.content.path]ui/</entry>
+	<entry key="mod.path">./ui/</entry>
+	<entry key="theme.path">./content/themes/</entry>
+	<entry key="gfx.path">[config.content.path]gfx/</entry>
+	<entry key="script.path">[config.content.path]scripts/</entry>
+	<entry key="data.path.root">[config.root.path]data/</entry>
+	<entry key="audio">pak://content/audio/audio0.d2p|</entry>
+	
+	
+	<!--======================================================================-->
+	<!--                  Constantes pour l'accès au serveur                  -->
+	<!--======================================================================-->
+	
+	
+	<entry key="connection.useSniffer" type="Boolean" >false</entry>
+	<entry key="connection.snifferHost">localhost</entry>
+	<entry key="connection.snifferPort" type="int">18001</entry>
+ 	<entry key="connection.host">127.0.0.1</entry>
+ 	<entry key="connection.host.signature">AARBS1NGAAEAAACAG8omsvP+gEZQPBG5e1qY2oFy/5hhGv+nsFi0uxcRViDonkvmPj/sQps6GH0oR1E5cRZDath/4+b/pt5iZUIGO6Mvo8kw6jvWyWFYIIOHQdiYYcrdI4wX55pLFAWcdvKb8WFfDch8nDsqwBa+ftPSamcq74+X37TMB+DVYczagRU=</entry>
+	<entry key="connection.port">5555</entry>
+	
+	<!--======================================================================-->
+	<!--                  Constantes pour les interfaces                      -->
+	<!--======================================================================-->
+	
+	<entry key="ui.asset">[config.ui]assets/</entry>
+	<entry key="ui.common">[config.ui.asset]common/</entry>
+	<entry key="ui.common.css">[config.ui.common]css/</entry>
+	<entry key="ui.common.test">[config.ui.common]test/</entry>
+	<entry key="ui.common.logo">[config.ui.common]logo/</entry>
+	<entry key="ui.common.fonts">[config.content.path]fonts/</entry>
+	<entry key="ui.common.themes">[config.content.path]themes/</entry>
+	<entry key="ui.common.button">[config.ui.common]button/</entry>
+	<entry key="ui.common.radio">[config.ui.common]radio/</entry>
+	<entry key="ui.common.border">[config.ui.common]border/</entry>
+	<entry key="ui.common.texture">[config.ui.common]texture/</entry>
+	<entry key="ui.common.checkbox">[config.ui.common]checkbox/</entry>
+	<entry key="ui.common.scrollbar">[config.ui.common]scrollbar/</entry>
+	<entry key="ui.common.texture.spells">[config.ui.common.texture]spells/</entry>
+	<entry key="ui.common.texture.icons">[config.ui.common.texture]icons/</entry>
+	
+	<entry key="ui.gfx.artworks">[config.gfx.path]artworks/</entry>
+		
+	<entry key="ui.definitions">[config.ui]definitions/</entry>
+	<entry key="ui.definitions.items">[config.ui.definitions]items/</entry>
+	<entry key="ui.definitions.tooltips">[config.ui.definitions]tooltips/</entry>
+	
+	<entry key="mod.path.Ankama_Common">[config.mod.path]Ankama_Common/</entry>
+	<entry key="mod.path.Ankama_Common.graphics">[config.mod.path.Ankama_Common]graphics/</entry>
+	<entry key="mod.path.Ankama_Common.ui">[config.mod.path.Ankama_Common]ui/</entry>
+	<entry key="mod.template">mod://Ankama_Common/ui/template/</entry>
+	<entry key="mod.template.button">[config.mod.template]button/</entry>
+	
+	<entry key="ui.asset.fontsList">[config.content.path]fonts/fonts.xml</entry>
+	
+	<entry key="subscribersGift">http://www.dofus.com/fr/json/shoplogincurentoffers.json</entry>
+	<entry key="customLoadingScreen">http://www.dofus.com/{lang}/rss/loadingscreens.xml?{nickname}</entry>
+	<entry key="loginNews">http://dl.ak.ankama.com/games/dofus2/data/news/</entry>
+	<entry key="legal">http://dl.ak.ankama.com/games/dofus2/data/legal/</entry>
+	
+	<!--======================================================================-->
+	<!--                  			 Challenges	  		                  	  -->
+	<!--======================================================================-->
+	
+	<entry key="gfx.path.challenges">[config.gfx.path]challenges/</entry>
+
+	<!--======================================================================-->
+	<!--                  			   Icones  	  		                  	  -->
+	<!--======================================================================-->
+	
+	<entry key="gfx.path.item.bitmap">pak://content/gfx/items/bitmap0.d2p|</entry>
+	<entry key="gfx.path.item.vector">pak://content/gfx/items/vector0.d2p|</entry>
+	
+	<!--======================================================================-->
+	<!--                  			   Cinématiques                   -->
+	<!--======================================================================-->
+
+	<entry key="gfx.path.cinematic">[config.gfx.path]cinematics/</entry>	
+
+	<!--======================================================================-->
+	<!--                  			 Emblemes	  		                  	  -->
+	<!--======================================================================-->
+	
+	<entry key="gfx.path.emblem_icons.small">[config.gfx.path]emblems/icons/</entry>
+	<entry key="gfx.path.emblem_icons.large">[config.gfx.path]emblems/</entry>
+	
+	
+    <!--======================================================================-->
+    <!--                  			 Ornements  		                  	  -->
+    <!--======================================================================-->
+
+    <entry key="gfx.path.ornament">[config.gfx.path]ornaments/</entry>
+	
+	<!--======================================================================-->
+	<!--                  			 Sorts	  		                  	  -->
+	<!--======================================================================-->
+	
+	<entry key="gfx.path.spells">[config.gfx.path]spells/</entry>
+	<entry key="gfx.path.monsters">pak://content/gfx/monsters/monsters0.d2p|</entry>
+	
+	<!--======================================================================-->
+	<!--                     Constantes pour les maps                         -->
+	<!--======================================================================-->
+	
+	<entry key="gfx.path.world">[config.gfx.path]world/</entry>
+    <entry key="gfx.path.maps">pak://content/gfx/maps/worldmap0.d2p|</entry>
+		
+	<!--======================================================================-->
+	<!--                   Constantes pour les langues                        -->
+	<!--======================================================================-->
+	
+	<entry key="lang.current">fr</entry>
+	<entry key="lang.usingIME">ja</entry>
+	
+	<!--======================================================================-->
+	<!--                  Constantes pour les données                         -->
+	<!--======================================================================--> 
+
+	<entry key="data.path.common">[config.data.path.root]common/</entry> 
+    <entry key="data.path.common.list">[config.data.path.common]data.meta</entry> 
+    <entry key="data.path.i18n">[config.data.path.root]i18n/</entry> 
+    <entry key="data.path.i18n.list">[config.data.path.i18n]data.meta</entry> 
+    <entry key="data.SQLMode">false</entry>
+
+	<!--======================================================================--> 
+	<!--               Constantes pour les raccourcis clavier                 -->
+	<!--======================================================================-->
+	
+	<entry key="binds.current">frFR</entry>
+	<entry key="binds.path.root">[config.data.path.root]binds/</entry>
+	
+	<!--======================================================================-->
+	<!--                 Constantes pour le moteur de rendu                   -->
+	<!--======================================================================-->
+	
+	<entry key="atouin.path.maps">pak://content/maps/maps0.d2p|</entry>
+	<entry key="atouin.path.elements">[config.content.path]maps/elements.ele</entry>
+	<entry key="atouin.path.emitters">[config.script.path]emitters/</entry>
+	<entry key="atouin.frustum.marginLeft" type="int">0</entry>
+	<entry key="atouin.frustum.marginTop" type="int">0</entry>
+	<entry key="atouin.frustum.marginRight" type="int">0</entry>
+	<entry key="atouin.frustum.marginBottom" type="int">130</entry>
+	<entry key="gfx.path.cellElement">pak://content/gfx/world/gfx0.d2p|</entry>
+	
+	<!--======================================================================-->
+	<!--               Constantes pour le moteur d'animation                  -->
+	<!--======================================================================-->
+
+	<entry key="gfx.path.skin">pak://content/gfx/sprites/skins.d2p|</entry>
+	<entry key="gfx.path.skull">pak://content/gfx/sprites/bones0.d2p|</entry>
+	<entry key="gfx.path.fx">[config.gfx.path]sprites/fx/</entry>
+	<entry key="gfx.path.animIndex">[config.gfx.path]sprites/bones/index.xml</entry>
+    
+    <!--======================================================================-->
+	<!--                 Constantes pour le moteur de son                     -->
+	<!--======================================================================-->
+
+	<entry key="audio.barks">[config.audio]barks/</entry>
+	<entry key="audio.music">[config.audio]music/</entry>
+	<entry key="audio.ambient">[config.audio]ambient/</entry>
+	<entry key="audio.fight">[config.audio]fight/</entry>
+	<entry key="audio.local">[config.audio]local/</entry>
+	<entry key="audio.foleys">[config.audio]foleys/</entry>
+	<entry key="audio.ui">[config.audio]ui/</entry>
+	<entry key="audio.presets">[config.audio]presets/</entry>
+    <entry key="audio.sfx">[config.audio]sfx/</entry>
+    <entry key="audio.gfx">[config.audio]gfx/</entry>
+	
+	<!--======================================================================-->
+	<!--                      Constantes les scripts                          -->
+	<!--======================================================================-->
+
+	<entry key="script.spellFx">[config.script.path]spellFx/</entry>
+	
+	<!--======================================================================-->
+	<!--             Constantes pour les notifications externes	              -->
+	<!--======================================================================-->
+	
+	<entry key="gfx.path.notifications">[config.gfx.path]notifications/</entry>
+</LangFile>

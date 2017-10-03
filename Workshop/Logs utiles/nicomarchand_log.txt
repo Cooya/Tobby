@@ -1,0 +1,1381 @@
+[19:24:35:878] Connection to authentification server, waiting response...
+[19:24:35:881] Waiting for character to be free.
+[19:24:39:281] Loading informations from messages file.
+[19:24:39:288] Receiving message 1 (ProtocolRequired)
+[19:24:39:520] Receiving message 3 (HelloConnectMessage)
+[19:24:40:703] Sending message 4 (IdentificationMessage)
+[19:24:40:747] Receiving message 10 (LoginQueueStatusMessage)
+[19:24:40:990] Receiving message 6314 (CredentialsAcknowledgementMessage)
+[19:24:40:990] Receiving message 10 (LoginQueueStatusMessage)
+[19:24:40:990] Receiving message 22 (IdentificationSuccessMessage)
+[19:24:40:990] Receiving message 30 (ServersListMessage)
+[19:24:40:993] Sending message 40 (ServerSelectionMessage)
+[19:24:41:034] Receiving message 42 (SelectedServerDataMessage)
+[19:24:42:037] Deconnected from authentification server.
+[19:24:42:037] Connection to game server, waiting response...
+[19:24:42:108] Receiving message 1 (ProtocolRequired)
+[19:24:42:108] Receiving message 101 (HelloGameMessage)
+[19:24:42:132] Sending message 110 (AuthenticationTicketMessage)
+[19:24:42:165] Receiving message 6362 (BasicAckMessage)
+[19:24:42:360] Receiving message 6253 (RawDataMessage)
+[19:24:42:361] Connection to AS launcher.
+[19:24:42:364] Sending credentials to AS launcher.
+[19:24:42:368] Running emulation server. Waiting Dofus client connection...
+[19:24:43:023] Dofus client connected.
+[19:24:43:025] HCM sent to Dofus client
+[19:24:43:262] 283 bytes received from Dofus client.
+[19:24:43:262] Receiving message 4 (IdentificationMessage)
+[19:24:43:263] ISM sent to Dofus client
+[19:24:43:282] RDM sent to Dofus client
+[19:24:44:632] 262 bytes received from Dofus client.
+[19:24:44:632] Receiving message 6372 (CheckIntegrityMessage)
+[19:24:44:633] Asking hash function to AS launcher.
+[19:24:44:633] Deconnection from Dofus client.
+[19:24:46:673] Sending message 6372 (CheckIntegrityMessage)
+[19:24:46:713] Receiving message 6362 (BasicAckMessage)
+[19:24:46:944] Receiving message 111 (AuthentificationTicketAcceptedMessage)
+[19:24:46:944] Receiving message 175 (AtlasPointsInformations)
+[19:24:46:945] Receiving message 6340 (ServerSettingsMessage)
+[19:24:46:945] Receiving message 6305 (ServerOptionalFeaturesMessage)
+[19:24:46:945] Receiving message 6434 (ServerSessionConstantsMessage)
+[19:24:46:945] Receiving message 6216 (AccountCapabilitiesMessage)
+[19:24:46:945] Receiving message 6267 (TrustStatusMessage)
+[19:24:46:947] Sending message 150 (CharactersListRequestMessage)
+[19:24:46:982] Receiving message 6362 (BasicAckMessage)
+[19:24:46:982] Receiving message 6100 (QueueStatusMessage)
+[19:24:46:982] Receiving message 6100 (QueueStatusMessage)
+[19:24:47:215] Receiving message 6100 (QueueStatusMessage)
+[19:24:47:215] Receiving message 151 (CharactersListMessage)
+[19:24:47:216] Sending message 152 (CharacterSelectionMessage)
+[19:24:47:254] Receiving message 6362 (BasicAckMessage)
+[19:24:47:284] Receiving message 6087 (NotificationListMessage)
+[19:24:47:285] Receiving message 153 (CharacterSelectedSuccessMessage)
+[19:24:47:285] Receiving message 3016 (InventoryContentMessage)
+[19:24:47:285] Receiving message 5503 (SetUpdateMessage)
+[19:24:47:285] Receiving message 6231 (ShortcutBarContentMessage)
+[19:24:47:285] Receiving message 6231 (ShortcutBarContentMessage)
+[19:24:47:285] Receiving message 6630 (RoomAvailableUpdateMessage)
+[19:24:47:285] Receiving message 6620 (HavenBagPackListMessage)
+[19:24:47:285] Receiving message 5689 (EmoteListMessage)
+[19:24:47:285] Receiving message 5655 (JobDescriptionMessage)
+[19:24:47:285] Receiving message 5809 (JobExperienceMultiUpdateMessage)
+[19:24:47:285] Receiving message 5652 (JobCrafterDirectorySettingsMessage)
+[19:24:47:285] Receiving message 6058 (AlignmentRankUpdateMessage)
+[19:24:47:297] Receiving message 6440 (PrismsListMessage)
+[19:24:47:315] Receiving message 892 (EnabledChannelsMessage)
+[19:24:47:315] Receiving message 1200 (SpellListMessage)
+[19:24:47:316] Receiving message 6231 (ShortcutBarContentMessage)
+[19:24:47:319] Receiving message 170 (SetCharacterRestrictionsMessage)
+[19:24:47:319] Receiving message 3009 (InventoryWeightMessage)
+[19:24:47:319] Receiving message 5630 (FriendWarnOnConnectionStateMessage)
+[19:24:47:319] Receiving message 6078 (FriendWarnOnLevelGainStateMessage)
+[19:24:47:319] Receiving message 6383 (FriendGuildWarnOnAchievementCompleteStateMessage)
+[19:24:47:320] Receiving message 6513 (WarnOnPermaDeathStateMessage)
+[19:24:47:320] Receiving message 6160 (GuildMemberWarnOnConnectionStateMessage)
+[19:24:47:320] Receiving message 6316 (SequenceNumberRequestMessage)
+[19:24:47:320] Receiving message 780 (TextInformationMessage)
+[19:24:47:320] Receiving message 6103 (NotificationByServerMessage)
+[19:24:47:320] Receiving message 780 (TextInformationMessage)
+[19:24:47:320] Receiving message 6265 (SpouseStatusMessage)
+[19:24:47:320] Receiving message 6205 (AchievementListMessage)
+[19:24:47:320] Receiving message 6301 (GameRolePlayArenaUpdatePlayerInfosMessage)
+[19:24:47:320] Receiving message 6339 (CharacterCapabilitiesMessage)
+[19:24:47:320] Receiving message 6341 (AlmanachCalendarDateMessage)
+[19:24:47:320] Receiving message 6585 (IdolListMessage)
+[19:24:47:320] Receiving message 6275 (MailStatusMessage)
+[19:24:47:320] Receiving message 1301 (StartupActionsListMessage)
+[19:24:47:320] Receiving message 6471 (CharacterLoadingCompleteMessage)
+[19:24:47:322] Sending message 6317 (SequenceNumberMessage)
+[19:24:47:354] Receiving message 6362 (BasicAckMessage)
+[19:24:48:115] Bienvenue sur DOFUS, dans le Monde des Douze !
+Il est interdit de transmettre votre identifiant ou votre mot de passe.
+[19:24:48:143] PrÃ©cÃ©dente connexion sur ce compte : %3/%2/%1 Ã  %4:%5
+[19:24:48:191] Sending message 4001 (FriendsGetListMessage)
+[19:24:48:191] Sending message 5676 (IgnoredGetListMessage)
+[19:24:48:191] Sending message 6355 (SpouseGetInformationsMessage)
+[19:24:48:191] Sending message 5607 (ClientKeyMessage)
+[19:24:48:191] Sending message 250 (GameContextCreateRequestMessage)
+[19:24:48:192] Sending message 5623 (QuestListRequestMessage)
+[19:24:48:192] Sending message 6441 (PrismsListRegisterMessage)
+[19:24:48:192] Sending message 890 (ChannelEnablingMessage)
+[19:24:48:192] Receiving message 176 (BasicNoOperationMessage)
+[19:24:48:224] Receiving message 6362 (BasicAckMessage)
+[19:24:48:224] Receiving message 4002 (FriendsListMessage)
+[19:24:48:224] Receiving message 176 (BasicNoOperationMessage)
+[19:24:48:260] Receiving message 6362 (BasicAckMessage)
+[19:24:48:260] Receiving message 5674 (IgnoredListMessage)
+[19:24:48:260] Receiving message 176 (BasicNoOperationMessage)
+[19:24:48:260] Receiving message 6362 (BasicAckMessage)
+[19:24:48:260] Receiving message 176 (BasicNoOperationMessage)
+[19:24:48:492] Receiving message 6362 (BasicAckMessage)
+[19:24:48:493] Receiving message 176 (BasicNoOperationMessage)
+[19:24:48:493] Receiving message 6362 (BasicAckMessage)
+[19:24:48:493] Receiving message 201 (ActorAlignmentInformations)
+[19:24:48:493] Receiving message 200 (GameContextCreateMessage)
+[19:24:48:494] Receiving message 5684 (LifePointsRegenBeginMessage)
+[19:24:48:494] Receiving message 220 (CurrentMapMessage)
+[19:24:48:495] Receiving message 175 (AtlasPointsInformations)
+[19:24:49:566] Receiving message 500 (CharacterStatsListMessage)
+[19:24:49:566] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:24:49:566] Receiving message 176 (BasicNoOperationMessage)
+[19:24:49:566] Receiving message 6362 (BasicAckMessage)
+[19:24:49:566] Receiving message 5626 (QuestListMessage)
+[19:24:49:566] Receiving message 176 (BasicNoOperationMessage)
+[19:24:49:567] Receiving message 6362 (BasicAckMessage)
+[19:24:49:567] Sending message 225 (MapInformationsRequestMessage)
+[19:24:49:567] Receiving message 176 (BasicNoOperationMessage)
+[19:24:49:567] Receiving message 6362 (BasicAckMessage)
+[19:24:49:567] Receiving message 176 (BasicNoOperationMessage)
+[19:24:49:601] Receiving message 6362 (BasicAckMessage)
+[19:24:49:833] Receiving message 226 (MapComplementaryInformationsDataMessage)
+[19:24:49:833] Receiving message 210 (MapFightCountMessage)
+[19:24:49:833] Receiving message 176 (BasicNoOperationMessage)
+[19:24:50:417] Current map : MapPosition : 84673538 [2, -20].
+Current cell id : 17.
+Current area id : 95.
+[19:24:50:483] State updated : IS_LOADED = true.
+[19:24:50:483] Waiting for character to be loaded.
+[19:24:50:484] Going from map 84673538 to map 84674566.
+[19:24:50:491] Waiting for character to be loaded.
+[19:24:50:928] Waiting for character to be free.
+[19:24:50:930] Moving from cell 17 to 552.
+[19:24:50:987] Sending movement request.
+[19:24:52:532] Receiving message 210 (MapFightCountMessage)
+[19:24:52:766] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:24:52:766] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:24:52:766] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:24:52:768] State updated : NEW_ACTOR_ON_MAP = true.
+[19:24:52:768] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:24:52:768] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:24:52:768] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:24:52:768] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:24:52:768] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:24:52:768] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:24:52:768] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:24:52:768] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:24:52:768] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:24:52:768] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:24:52:768] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:24:52:768] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:24:52:768] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:24:52:770] State updated : NEW_ACTOR_ON_MAP = true.
+[19:24:52:770] State updated : NEW_ACTOR_ON_MAP = true.
+[19:24:52:770] State updated : NEW_ACTOR_ON_MAP = true.
+[19:24:52:770] State updated : NEW_ACTOR_ON_MAP = true.
+[19:24:52:771] State updated : NEW_ACTOR_ON_MAP = true.
+[19:24:52:771] State updated : NEW_ACTOR_ON_MAP = true.
+[19:24:52:771] State updated : NEW_ACTOR_ON_MAP = true.
+[19:24:53:024] Receiving message 5683 (EmotePlayMessage)
+[19:24:53:260] Receiving message 5683 (EmotePlayMessage)
+[19:24:53:260] Receiving message 951 (GameMapMovementMessage)
+[19:24:53:260] Receiving message 951 (GameMapMovementMessage)
+[19:24:53:262] Receiving message 951 (GameMapMovementMessage)
+[19:24:53:262] Receiving message 5683 (EmotePlayMessage)
+[19:24:53:492] Receiving message 951 (GameMapMovementMessage)
+[19:24:53:895] Receiving message 951 (GameMapMovementMessage)
+[19:24:54:061] Waiting for movement acceptation by server.
+[19:24:54:061] Sending message 950 (GameMapMovementRequestMessage)
+[19:24:54:098] Receiving message 6362 (BasicAckMessage)
+[19:24:54:098] Receiving message 951 (GameMapMovementMessage)
+[19:24:54:098] Receiving message 176 (BasicNoOperationMessage)
+[19:24:54:099] Next cell id after movement : 552.
+[19:24:54:099] State updated : CAN_MOVE = true.
+[19:24:54:099] Movement duration : 3675 ms.
+[19:24:56:205] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:24:56:206] Receiving message 251 (GameContextRemoveElementMessage)
+[19:24:56:640] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:24:56:640] Receiving message 251 (GameContextRemoveElementMessage)
+[19:24:56:946] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:24:56:947] Receiving message 251 (GameContextRemoveElementMessage)
+[19:24:57:207] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:24:57:444] Receiving message 251 (GameContextRemoveElementMessage)
+[19:24:57:708] Receiving message 951 (GameMapMovementMessage)
+[19:24:57:774] Target cell reached.
+[19:24:57:774] State updated : CAN_MOVE = false.
+[19:24:57:774] Moving to down map.
+[19:24:57:775] Sending map changement request. Next map id : 84673539.
+[19:24:57:775] Sending message 952 (GameMapMovementConfirmMessage)
+[19:24:57:775] Sending message 221 (ChangeMapMessage)
+[19:24:57:775] State updated : IS_LOADED = false.
+[19:24:57:776] Waiting for character to be free.
+[19:24:57:811] Receiving message 6362 (BasicAckMessage)
+[19:24:57:811] Receiving message 176 (BasicNoOperationMessage)
+[19:24:57:843] Receiving message 6362 (BasicAckMessage)
+[19:24:57:843] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:24:58:080] Receiving message 220 (CurrentMapMessage)
+[19:24:58:082] Receiving message 175 (AtlasPointsInformations)
+[19:24:58:082] Receiving message 176 (BasicNoOperationMessage)
+[19:24:58:082] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:24:58:083] Sending message 225 (MapInformationsRequestMessage)
+[19:24:58:118] Receiving message 6362 (BasicAckMessage)
+[19:24:58:355] Receiving message 226 (MapComplementaryInformationsDataMessage)
+[19:24:58:355] Receiving message 210 (MapFightCountMessage)
+[19:24:58:393] Current map : MapPosition : 84673539 [2, -19].
+Current cell id : 20.
+Current area id : 95.
+[19:24:58:395] State updated : IS_LOADED = true.
+[19:24:58:395] Moving from cell 20 to 552.
+[19:24:58:396] Receiving message 5734 (HousePropertiesMessage)
+[19:24:58:397] Receiving message 5734 (HousePropertiesMessage)
+[19:24:58:397] Receiving message 176 (BasicNoOperationMessage)
+[19:24:58:398] Sending movement request.
+[19:24:58:632] Receiving message 951 (GameMapMovementMessage)
+[19:25:00:339] Waiting for movement acceptation by server.
+[19:25:00:340] Sending message 950 (GameMapMovementRequestMessage)
+[19:25:00:376] Receiving message 6362 (BasicAckMessage)
+[19:25:00:376] Receiving message 951 (GameMapMovementMessage)
+[19:25:00:376] Receiving message 176 (BasicNoOperationMessage)
+[19:25:00:376] Next cell id after movement : 552.
+[19:25:00:377] State updated : CAN_MOVE = true.
+[19:25:00:377] Movement duration : 3420 ms.
+[19:25:01:398] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:25:01:398] Receiving message 251 (GameContextRemoveElementMessage)
+[19:25:01:632] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:25:01:632] Receiving message 251 (GameContextRemoveElementMessage)
+[19:25:01:864] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:25:01:864] Receiving message 251 (GameContextRemoveElementMessage)
+[19:25:01:864] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:25:01:864] Receiving message 251 (GameContextRemoveElementMessage)
+[19:25:03:159] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:25:03:394] Receiving message 251 (GameContextRemoveElementMessage)
+[19:25:03:797] Target cell reached.
+[19:25:03:797] Sending message 952 (GameMapMovementConfirmMessage)
+[19:25:03:797] State updated : CAN_MOVE = false.
+[19:25:03:798] Moving to down map.
+[19:25:03:798] Sending map changement request. Next map id : 84673540.
+[19:25:03:798] State updated : IS_LOADED = false.
+[19:25:03:798] Waiting for character to be free.
+[19:25:03:799] Sending message 221 (ChangeMapMessage)
+[19:25:03:831] Receiving message 6362 (BasicAckMessage)
+[19:25:03:831] Receiving message 176 (BasicNoOperationMessage)
+[19:25:03:863] Receiving message 6362 (BasicAckMessage)
+[19:25:03:863] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:25:03:863] Receiving message 220 (CurrentMapMessage)
+[19:25:03:863] Receiving message 175 (AtlasPointsInformations)
+[19:25:03:863] Receiving message 176 (BasicNoOperationMessage)
+[19:25:03:864] Sending message 225 (MapInformationsRequestMessage)
+[19:25:03:896] Receiving message 6362 (BasicAckMessage)
+[19:25:04:134] Receiving message 226 (MapComplementaryInformationsDataMessage)
+[19:25:04:135] Receiving message 5734 (HousePropertiesMessage)
+[19:25:04:180] Current map : MapPosition : 84673540 [2, -18].
+Current cell id : 20.
+Current area id : 95.
+[19:25:04:181] State updated : IS_LOADED = true.
+[19:25:04:181] Moving from cell 20 to 307.
+[19:25:04:182] Sending movement request.
+[19:25:04:182] Receiving message 5734 (HousePropertiesMessage)
+[19:25:04:183] Receiving message 176 (BasicNoOperationMessage)
+[19:25:06:114] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:25:06:114] Receiving message 251 (GameContextRemoveElementMessage)
+[19:25:06:445] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:25:06:445] Receiving message 251 (GameContextRemoveElementMessage)
+[19:25:06:616] Sending message 950 (GameMapMovementRequestMessage)
+[19:25:06:616] Waiting for movement acceptation by server.
+[19:25:06:711] Receiving message 6362 (BasicAckMessage)
+[19:25:06:711] Receiving message 951 (GameMapMovementMessage)
+[19:25:06:711] Receiving message 176 (BasicNoOperationMessage)
+[19:25:06:712] Next cell id after movement : 307.
+[19:25:06:712] State updated : CAN_MOVE = true.
+[19:25:06:712] Movement duration : 2960 ms.
+[19:25:06:942] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:25:06:943] Receiving message 251 (GameContextRemoveElementMessage)
+[19:25:07:185] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:25:07:185] Receiving message 251 (GameContextRemoveElementMessage)
+[19:25:08:167] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:25:08:167] Receiving message 251 (GameContextRemoveElementMessage)
+[19:25:09:673] Target cell reached.
+[19:25:09:673] State updated : CAN_MOVE = false.
+[19:25:09:673] Sending message 952 (GameMapMovementConfirmMessage)
+[19:25:09:673] Moving to right map.
+[19:25:09:673] Sending map changement request. Next map id : 84674052.
+[19:25:09:673] Sending message 221 (ChangeMapMessage)
+[19:25:09:673] State updated : IS_LOADED = false.
+[19:25:09:673] Waiting for character to be free.
+[19:25:09:752] Receiving message 6362 (BasicAckMessage)
+[19:25:09:752] Receiving message 176 (BasicNoOperationMessage)
+[19:25:09:785] Receiving message 6362 (BasicAckMessage)
+[19:25:09:785] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:25:10:023] Receiving message 220 (CurrentMapMessage)
+[19:25:10:023] Receiving message 175 (AtlasPointsInformations)
+[19:25:10:023] Receiving message 176 (BasicNoOperationMessage)
+[19:25:10:024] Sending message 225 (MapInformationsRequestMessage)
+[19:25:10:067] Receiving message 6362 (BasicAckMessage)
+[19:25:10:295] Receiving message 226 (MapComplementaryInformationsDataMessage)
+[19:25:10:296] Current map : MapPosition : 84674052 [3, -18].
+Current cell id : 294.
+Current area id : 95.
+[19:25:10:296] Receiving message 176 (BasicNoOperationMessage)
+[19:25:10:297] State updated : IS_LOADED = true.
+[19:25:10:297] Moving from cell 294 to 552.
+[19:25:10:299] Sending movement request.
+[19:25:11:925] Receiving message 5683 (EmotePlayMessage)
+[19:25:12:544] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:25:12:545] State updated : NEW_ACTOR_ON_MAP = true.
+[19:25:12:545] Receiving message 951 (GameMapMovementMessage)
+[19:25:12:733] Sending message 950 (GameMapMovementRequestMessage)
+[19:25:12:733] Waiting for movement acceptation by server.
+[19:25:12:773] Receiving message 6362 (BasicAckMessage)
+[19:25:12:773] Receiving message 951 (GameMapMovementMessage)
+[19:25:12:773] Receiving message 176 (BasicNoOperationMessage)
+[19:25:12:773] Next cell id after movement : 552.
+[19:25:12:773] State updated : CAN_MOVE = true.
+[19:25:12:773] Movement duration : 2490 ms.
+[19:25:13:384] Receiving message 951 (GameMapMovementMessage)
+[19:25:13:945] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:25:13:945] State updated : NEW_ACTOR_ON_MAP = true.
+[19:25:14:934] Receiving message 5683 (EmotePlayMessage)
+[19:25:15:263] Target cell reached.
+[19:25:15:263] State updated : CAN_MOVE = false.
+[19:25:15:263] Moving to down map.
+[19:25:15:263] Sending message 952 (GameMapMovementConfirmMessage)
+[19:25:15:263] Sending map changement request. Next map id : 84674053.
+[19:25:15:264] State updated : IS_LOADED = false.
+[19:25:15:264] Waiting for character to be free.
+[19:25:15:266] Sending message 221 (ChangeMapMessage)
+[19:25:15:299] Receiving message 6362 (BasicAckMessage)
+[19:25:15:299] Receiving message 176 (BasicNoOperationMessage)
+[19:25:15:334] Receiving message 6362 (BasicAckMessage)
+[19:25:15:335] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:25:15:335] Receiving message 220 (CurrentMapMessage)
+[19:25:15:335] Receiving message 175 (AtlasPointsInformations)
+[19:25:15:335] Receiving message 176 (BasicNoOperationMessage)
+[19:25:15:335] Sending message 225 (MapInformationsRequestMessage)
+[19:25:15:374] Receiving message 6362 (BasicAckMessage)
+[19:25:15:614] Receiving message 226 (MapComplementaryInformationsDataMessage)
+[19:25:15:614] Receiving message 5734 (HousePropertiesMessage)
+[19:25:15:614] Receiving message 176 (BasicNoOperationMessage)
+[19:25:15:616] Current map : MapPosition : 84674053 [3, -17].
+Current cell id : 20.
+Current area id : 95.
+[19:25:15:617] State updated : IS_LOADED = true.
+[19:25:15:617] Moving from cell 20 to 307.
+[19:25:15:619] Sending movement request.
+[19:25:15:622] Waiting for movement acceptation by server.
+[19:25:15:623] Sending message 950 (GameMapMovementRequestMessage)
+[19:25:15:730] Receiving message 6362 (BasicAckMessage)
+[19:25:15:730] Receiving message 951 (GameMapMovementMessage)
+[19:25:15:731] Next cell id after movement : 307.
+[19:25:15:731] State updated : CAN_MOVE = true.
+[19:25:15:731] Movement duration : 2895 ms.
+[19:25:15:962] Receiving message 176 (BasicNoOperationMessage)
+[19:25:18:626] Target cell reached.
+[19:25:18:626] State updated : CAN_MOVE = false.
+[19:25:18:626] Moving to right map.
+[19:25:18:626] Sending message 952 (GameMapMovementConfirmMessage)
+[19:25:18:626] Sending map changement request. Next map id : 84674565.
+[19:25:18:627] Sending message 221 (ChangeMapMessage)
+[19:25:18:627] State updated : IS_LOADED = false.
+[19:25:18:627] Waiting for character to be free.
+[19:25:18:699] Receiving message 6362 (BasicAckMessage)
+[19:25:18:699] Receiving message 176 (BasicNoOperationMessage)
+[19:25:18:934] Receiving message 6362 (BasicAckMessage)
+[19:25:18:934] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:25:18:934] Receiving message 220 (CurrentMapMessage)
+[19:25:18:934] Receiving message 175 (AtlasPointsInformations)
+[19:25:18:934] Receiving message 176 (BasicNoOperationMessage)
+[19:25:18:935] Sending message 225 (MapInformationsRequestMessage)
+[19:25:18:970] Receiving message 6362 (BasicAckMessage)
+[19:25:19:198] Receiving message 226 (MapComplementaryInformationsDataMessage)
+[19:25:19:198] Receiving message 5734 (HousePropertiesMessage)
+[19:25:19:198] Receiving message 176 (BasicNoOperationMessage)
+[19:25:19:199] Current map : MapPosition : 84674565 [4, -17].
+Current cell id : 294.
+Current area id : 95.
+[19:25:19:200] State updated : IS_LOADED = true.
+[19:25:19:200] Moving from cell 294 to 552.
+[19:25:19:202] Sending movement request.
+[19:25:19:203] Waiting for movement acceptation by server.
+[19:25:19:203] Sending message 950 (GameMapMovementRequestMessage)
+[19:25:19:299] Receiving message 6362 (BasicAckMessage)
+[19:25:19:300] Receiving message 951 (GameMapMovementMessage)
+[19:25:19:300] Receiving message 176 (BasicNoOperationMessage)
+[19:25:19:300] Next cell id after movement : 552.
+[19:25:19:300] State updated : CAN_MOVE = true.
+[19:25:19:300] Movement duration : 2490 ms.
+[19:25:21:388] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:25:21:388] State updated : NEW_ACTOR_ON_MAP = true.
+[19:25:21:622] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:25:21:790] Target cell reached.
+[19:25:21:790] State updated : CAN_MOVE = false.
+[19:25:21:790] Moving to down map.
+[19:25:21:790] Sending message 952 (GameMapMovementConfirmMessage)
+[19:25:21:790] Sending map changement request. Next map id : 84674566.
+[19:25:21:790] Sending message 221 (ChangeMapMessage)
+[19:25:21:791] State updated : IS_LOADED = false.
+[19:25:21:791] Waiting for exchange demand.
+[19:25:21:823] Receiving message 6362 (BasicAckMessage)
+[19:25:21:823] Receiving message 176 (BasicNoOperationMessage)
+[19:25:22:064] Receiving message 6362 (BasicAckMessage)
+[19:25:22:064] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:25:22:064] Receiving message 220 (CurrentMapMessage)
+[19:25:22:064] Receiving message 175 (AtlasPointsInformations)
+[19:25:22:064] Receiving message 176 (BasicNoOperationMessage)
+[19:25:22:064] Sending message 225 (MapInformationsRequestMessage)
+[19:25:22:095] Receiving message 6362 (BasicAckMessage)
+[19:25:22:130] Receiving message 226 (MapComplementaryInformationsDataMessage)
+[19:25:22:130] Receiving message 5734 (HousePropertiesMessage)
+[19:25:22:130] Receiving message 176 (BasicNoOperationMessage)
+[19:25:22:153] Current map : MapPosition : 84674566 [4, -16].
+Current cell id : 20.
+Current area id : 95.
+[19:25:22:154] State updated : IS_LOADED = true.
+[19:25:24:463] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:25:24:463] State updated : NEW_ACTOR_ON_MAP = true.
+[19:25:24:704] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:25:25:441] Receiving message 251 (GameContextRemoveElementMessage)
+[19:25:25:674] Receiving message 951 (GameMapMovementMessage)
+[19:25:26:143] Receiving message 951 (GameMapMovementMessage)
+[19:25:26:659] Receiving message 951 (GameMapMovementMessage)
+[19:25:27:408] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:25:27:409] State updated : NEW_ACTOR_ON_MAP = true.
+[19:25:27:643] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:25:27:643] Receiving message 251 (GameContextRemoveElementMessage)
+[19:25:29:764] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:25:29:765] State updated : NEW_ACTOR_ON_MAP = true.
+[19:25:29:998] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:25:29:998] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:25:29:998] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:25:29:998] State updated : NEW_ACTOR_ON_MAP = true.
+[19:25:29:999] State updated : NEW_ACTOR_ON_MAP = true.
+[19:25:30:649] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:25:30:649] State updated : NEW_ACTOR_ON_MAP = true.
+[19:25:30:880] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:25:31:350] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:25:31:350] Receiving message 951 (GameMapMovementMessage)
+[19:25:31:351] State updated : NEW_ACTOR_ON_MAP = true.
+[19:25:31:970] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:25:31:971] State updated : NEW_ACTOR_ON_MAP = true.
+[19:25:32:202] Receiving message 951 (GameMapMovementMessage)
+[19:25:32:434] Receiving message 951 (GameMapMovementMessage)
+[19:25:33:699] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:25:33:700] Receiving message 251 (GameContextRemoveElementMessage)
+[19:25:34:069] Receiving message 5745 (InteractiveUsedMessage)
+[19:25:34:304] Receiving message 251 (GameContextRemoveElementMessage)
+[19:25:34:304] Receiving message 5745 (InteractiveUsedMessage)
+[19:25:34:304] Receiving message 251 (GameContextRemoveElementMessage)
+[19:25:35:481] Receiving message 951 (GameMapMovementMessage)
+[19:25:36:889] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:25:36:889] State updated : NEW_ACTOR_ON_MAP = true.
+[19:25:37:124] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:25:37:360] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:25:37:360] Receiving message 251 (GameContextRemoveElementMessage)
+[19:25:38:648] Receiving message 951 (GameMapMovementMessage)
+[19:25:40:578] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:25:40:578] Receiving message 251 (GameContextRemoveElementMessage)
+[19:25:43:778] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:25:43:779] State updated : NEW_ACTOR_ON_MAP = true.
+[19:25:44:012] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:25:44:012] Receiving message 951 (GameMapMovementMessage)
+[19:25:45:147] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:25:45:148] State updated : NEW_ACTOR_ON_MAP = true.
+[19:25:45:384] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:25:45:384] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:25:45:384] State updated : NEW_ACTOR_ON_MAP = true.
+[19:25:45:617] Receiving message 951 (GameMapMovementMessage)
+[19:25:46:872] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:25:46:872] Receiving message 251 (GameContextRemoveElementMessage)
+[19:25:49:329] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:25:49:329] Receiving message 951 (GameMapMovementMessage)
+[19:25:49:329] State updated : NEW_ACTOR_ON_MAP = true.
+[19:25:49:992] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:25:49:992] State updated : NEW_ACTOR_ON_MAP = true.
+[19:25:50:217] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:25:50:987] Receiving message 951 (GameMapMovementMessage)
+[19:25:51:218] Receiving message 951 (GameMapMovementMessage)
+[19:25:51:674] Receiving message 951 (GameMapMovementMessage)
+[19:25:52:165] Receiving message 5745 (InteractiveUsedMessage)
+[19:25:52:401] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:25:52:401] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:25:52:402] State updated : NEW_ACTOR_ON_MAP = true.
+[19:25:52:403] State updated : NEW_ACTOR_ON_MAP = true.
+[19:25:52:403] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:25:53:086] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:25:53:319] Receiving message 251 (GameContextRemoveElementMessage)
+[19:25:54:297] Receiving message 951 (GameMapMovementMessage)
+[19:25:54:560] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:25:54:561] State updated : NEW_ACTOR_ON_MAP = true.
+[19:25:54:793] Receiving message 951 (GameMapMovementMessage)
+[19:25:55:668] Receiving message 951 (GameMapMovementMessage)
+[19:25:55:903] Receiving message 951 (GameMapMovementMessage)
+[19:25:56:141] Receiving message 5745 (InteractiveUsedMessage)
+[19:25:56:141] Receiving message 251 (GameContextRemoveElementMessage)
+[19:25:56:378] Receiving message 5709 (StatedElementUpdatedMessage)
+[19:25:56:378] Receiving message 5708 (InteractiveElementUpdatedMessage)
+[19:25:56:613] Receiving message 5745 (InteractiveUsedMessage)
+[19:25:56:613] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:25:56:613] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:25:56:614] State updated : NEW_ACTOR_ON_MAP = true.
+[19:25:58:148] Receiving message 951 (GameMapMovementMessage)
+[19:25:58:380] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:25:58:380] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:25:58:380] State updated : NEW_ACTOR_ON_MAP = true.
+[19:25:59:378] Receiving message 5709 (StatedElementUpdatedMessage)
+[19:25:59:378] Receiving message 5708 (InteractiveElementUpdatedMessage)
+[19:25:59:604] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:25:59:604] Receiving message 251 (GameContextRemoveElementMessage)
+[19:26:04:645] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:26:04:645] State updated : NEW_ACTOR_ON_MAP = true.
+[19:26:04:645] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:26:04:645] Receiving message 951 (GameMapMovementMessage)
+[19:26:04:645] Receiving message 951 (GameMapMovementMessage)
+[19:26:07:130] Receiving message 951 (GameMapMovementMessage)
+[19:26:07:130] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:26:07:130] Receiving message 251 (GameContextRemoveElementMessage)
+[19:26:07:130] Receiving message 951 (GameMapMovementMessage)
+[19:26:08:074] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:26:08:075] State updated : NEW_ACTOR_ON_MAP = true.
+[19:26:08:428] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:26:08:871] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:26:08:871] State updated : NEW_ACTOR_ON_MAP = true.
+[19:26:09:247] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:26:09:247] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:26:09:248] State updated : NEW_ACTOR_ON_MAP = true.
+[19:26:10:529] Receiving message 951 (GameMapMovementMessage)
+[19:26:10:847] Receiving message 951 (GameMapMovementMessage)
+[19:26:11:946] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:26:11:946] Receiving message 251 (GameContextRemoveElementMessage)
+[19:26:12:229] Receiving message 951 (GameMapMovementMessage)
+[19:26:12:460] Receiving message 951 (GameMapMovementMessage)
+[19:26:12:937] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:26:12:937] State updated : NEW_ACTOR_ON_MAP = true.
+[19:26:12:938] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:26:13:789] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:26:13:789] Receiving message 251 (GameContextRemoveElementMessage)
+[19:26:15:029] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:26:15:029] State updated : NEW_ACTOR_ON_MAP = true.
+[19:26:15:263] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:26:16:717] Receiving message 951 (GameMapMovementMessage)
+[19:26:18:140] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:26:18:140] Receiving message 251 (GameContextRemoveElementMessage)
+[19:26:18:992] Receiving message 951 (GameMapMovementMessage)
+[19:26:21:306] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:26:21:307] State updated : NEW_ACTOR_ON_MAP = true.
+[19:26:21:543] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:26:22:981] Receiving message 951 (GameMapMovementMessage)
+[19:26:24:324] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:26:24:324] Receiving message 251 (GameContextRemoveElementMessage)
+[19:26:25:993] Receiving message 951 (GameMapMovementMessage)
+[19:26:26:227] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:26:26:227] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:26:26:227] State updated : NEW_ACTOR_ON_MAP = true.
+[19:26:27:509] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:26:27:509] State updated : NEW_ACTOR_ON_MAP = true.
+[19:26:27:851] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:26:29:194] Receiving message 951 (GameMapMovementMessage)
+[19:26:29:508] Receiving message 951 (GameMapMovementMessage)
+[19:26:29:970] Receiving message 251 (GameContextRemoveElementMessage)
+[19:26:30:601] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:26:30:601] Receiving message 251 (GameContextRemoveElementMessage)
+[19:26:33:684] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:26:33:684] State updated : NEW_ACTOR_ON_MAP = true.
+[19:26:33:919] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:26:34:153] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:26:34:153] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:26:34:153] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:26:34:153] Receiving message 251 (GameContextRemoveElementMessage)
+[19:26:34:153] State updated : NEW_ACTOR_ON_MAP = true.
+[19:26:34:679] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:26:34:679] State updated : NEW_ACTOR_ON_MAP = true.
+[19:26:34:923] Receiving message 951 (GameMapMovementMessage)
+[19:26:35:518] Receiving message 951 (GameMapMovementMessage)
+[19:26:37:009] Receiving message 951 (GameMapMovementMessage)
+[19:26:37:240] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:26:37:240] Receiving message 251 (GameContextRemoveElementMessage)
+[19:26:37:472] Receiving message 951 (GameMapMovementMessage)
+[19:26:40:481] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:26:40:482] State updated : NEW_ACTOR_ON_MAP = true.
+[19:26:40:713] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:26:42:163] Receiving message 951 (GameMapMovementMessage)
+[19:26:42:397] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:26:42:397] Receiving message 251 (GameContextRemoveElementMessage)
+[19:26:43:468] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:26:43:703] Receiving message 251 (GameContextRemoveElementMessage)
+[19:26:46:608] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:26:46:608] State updated : NEW_ACTOR_ON_MAP = true.
+[19:26:46:840] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:26:47:510] Receiving message 951 (GameMapMovementMessage)
+[19:26:48:304] Receiving message 951 (GameMapMovementMessage)
+[19:26:49:785] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:26:49:786] Receiving message 251 (GameContextRemoveElementMessage)
+[19:26:52:946] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:26:52:947] State updated : NEW_ACTOR_ON_MAP = true.
+[19:26:53:181] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:26:54:513] Receiving message 951 (GameMapMovementMessage)
+[19:26:54:751] Receiving message 951 (GameMapMovementMessage)
+[19:26:56:035] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:26:56:267] Receiving message 251 (GameContextRemoveElementMessage)
+[19:26:59:218] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:26:59:218] State updated : NEW_ACTOR_ON_MAP = true.
+[19:26:59:453] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:27:01:167] Receiving message 951 (GameMapMovementMessage)
+[19:27:02:571] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:27:02:571] Receiving message 251 (GameContextRemoveElementMessage)
+[19:27:03:905] Receiving message 951 (GameMapMovementMessage)
+[19:27:05:777] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:27:05:777] State updated : NEW_ACTOR_ON_MAP = true.
+[19:27:06:009] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:27:07:480] Receiving message 951 (GameMapMovementMessage)
+[19:27:08:556] Receiving message 951 (GameMapMovementMessage)
+[19:27:08:792] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:27:08:793] State updated : NEW_ACTOR_ON_MAP = true.
+[19:27:09:019] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:27:09:019] Receiving message 251 (GameContextRemoveElementMessage)
+[19:27:10:782] Receiving message 951 (GameMapMovementMessage)
+[19:27:11:745] Receiving message 951 (GameMapMovementMessage)
+[19:27:12:110] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:27:12:110] State updated : NEW_ACTOR_ON_MAP = true.
+[19:27:12:343] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:27:12:573] Receiving message 951 (GameMapMovementMessage)
+[19:27:13:022] Receiving message 951 (GameMapMovementMessage)
+[19:27:13:788] Receiving message 951 (GameMapMovementMessage)
+[19:27:14:021] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:27:14:022] State updated : NEW_ACTOR_ON_MAP = true.
+[19:27:15:138] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:27:15:138] Receiving message 251 (GameContextRemoveElementMessage)
+[19:27:15:719] Receiving message 951 (GameMapMovementMessage)
+[19:27:18:253] Receiving message 951 (GameMapMovementMessage)
+[19:27:18:488] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:27:18:488] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:27:18:488] State updated : NEW_ACTOR_ON_MAP = true.
+[19:27:19:501] Receiving message 951 (GameMapMovementMessage)
+[19:27:20:071] Receiving message 951 (GameMapMovementMessage)
+[19:27:20:679] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:27:20:679] Receiving message 251 (GameContextRemoveElementMessage)
+[19:27:21:542] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:27:21:542] Receiving message 251 (GameContextRemoveElementMessage)
+[19:27:22:722] Receiving message 951 (GameMapMovementMessage)
+[19:27:24:247] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:27:24:247] State updated : NEW_ACTOR_ON_MAP = true.
+[19:27:24:482] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:27:24:717] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:27:24:717] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:27:24:718] State updated : NEW_ACTOR_ON_MAP = true.
+[19:27:26:325] Receiving message 951 (GameMapMovementMessage)
+[19:27:27:003] Receiving message 951 (GameMapMovementMessage)
+[19:27:27:687] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:27:27:920] Receiving message 251 (GameContextRemoveElementMessage)
+[19:27:29:724] Receiving message 951 (GameMapMovementMessage)
+[19:27:30:854] Receiving message 5709 (StatedElementUpdatedMessage)
+[19:27:30:854] Receiving message 5708 (InteractiveElementUpdatedMessage)
+[19:27:31:088] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:27:31:088] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:27:31:088] State updated : NEW_ACTOR_ON_MAP = true.
+[19:27:31:323] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:27:31:323] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:27:31:323] State updated : NEW_ACTOR_ON_MAP = true.
+[19:27:32:968] Receiving message 951 (GameMapMovementMessage)
+[19:27:33:341] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:27:33:341] Receiving message 951 (GameMapMovementMessage)
+[19:27:33:342] State updated : NEW_ACTOR_ON_MAP = true.
+[19:27:34:032] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:27:34:033] State updated : NEW_ACTOR_ON_MAP = true.
+[19:27:34:263] Receiving message 951 (GameMapMovementMessage)
+[19:27:34:499] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:27:34:499] Receiving message 251 (GameContextRemoveElementMessage)
+[19:27:34:733] Receiving message 5709 (StatedElementUpdatedMessage)
+[19:27:34:733] Receiving message 5708 (InteractiveElementUpdatedMessage)
+[19:27:34:733] Receiving message 5745 (InteractiveUsedMessage)
+[19:27:36:725] Receiving message 951 (GameMapMovementMessage)
+[19:27:36:960] Receiving message 5637 (GameContextRefreshEntityLookMessage)
+[19:27:36:960] Receiving message 170 (SetCharacterRestrictionsMessage)
+[19:27:37:473] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:27:37:473] State updated : NEW_ACTOR_ON_MAP = true.
+[19:27:37:712] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:27:37:712] Receiving message 5709 (StatedElementUpdatedMessage)
+[19:27:37:712] Receiving message 5708 (InteractiveElementUpdatedMessage)
+[19:27:39:138] Receiving message 951 (GameMapMovementMessage)
+[19:27:39:892] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:27:39:893] State updated : NEW_ACTOR_ON_MAP = true.
+[19:27:40:122] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:27:40:542] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:27:40:773] Receiving message 251 (GameContextRemoveElementMessage)
+[19:27:41:644] Receiving message 951 (GameMapMovementMessage)
+[19:27:42:018] Receiving message 951 (GameMapMovementMessage)
+[19:27:42:341] Receiving message 6316 (SequenceNumberRequestMessage)
+[19:27:42:341] Receiving message 5816 (BasicLatencyStatsRequestMessage)
+[19:27:42:341] Sending message 6317 (SequenceNumberMessage)
+[19:27:42:342] Sending message 5663 (BasicLatencyStatsMessage)
+[19:27:42:423] Receiving message 6362 (BasicAckMessage)
+[19:27:42:423] Receiving message 176 (BasicNoOperationMessage)
+[19:27:42:653] Receiving message 6362 (BasicAckMessage)
+[19:27:42:653] Receiving message 176 (BasicNoOperationMessage)
+[19:27:43:254] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:27:43:254] State updated : NEW_ACTOR_ON_MAP = true.
+[19:27:43:759] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:27:43:759] State updated : NEW_ACTOR_ON_MAP = true.
+[19:27:44:001] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:27:45:438] Receiving message 951 (GameMapMovementMessage)
+[19:27:45:674] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:27:45:674] Receiving message 251 (GameContextRemoveElementMessage)
+[19:27:45:674] Receiving message 5637 (GameContextRefreshEntityLookMessage)
+[19:27:45:674] Receiving message 170 (SetCharacterRestrictionsMessage)
+[19:27:46:857] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:27:47:092] Receiving message 251 (GameContextRemoveElementMessage)
+[19:27:49:980] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:27:49:981] State updated : NEW_ACTOR_ON_MAP = true.
+[19:27:50:218] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:27:50:767] Receiving message 951 (GameMapMovementMessage)
+[19:27:50:999] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:27:50:999] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:27:51:000] State updated : NEW_ACTOR_ON_MAP = true.
+[19:27:51:710] Receiving message 951 (GameMapMovementMessage)
+[19:27:51:945] Receiving message 951 (GameMapMovementMessage)
+[19:27:52:220] Receiving message 951 (GameMapMovementMessage)
+[19:27:52:452] Receiving message 951 (GameMapMovementMessage)
+[19:27:53:064] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:27:53:064] Receiving message 251 (GameContextRemoveElementMessage)
+[19:27:53:850] Receiving message 951 (GameMapMovementMessage)
+[19:27:54:341] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:27:54:341] Receiving message 251 (GameContextRemoveElementMessage)
+[19:27:56:189] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:27:56:189] State updated : NEW_ACTOR_ON_MAP = true.
+[19:27:56:423] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:27:56:423] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:27:56:423] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:27:56:423] State updated : NEW_ACTOR_ON_MAP = true.
+[19:27:57:769] Receiving message 951 (GameMapMovementMessage)
+[19:27:58:005] Receiving message 951 (GameMapMovementMessage)
+[19:27:59:321] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:27:59:550] Receiving message 251 (GameContextRemoveElementMessage)
+[19:27:59:781] Receiving message 251 (GameContextRemoveElementMessage)
+[19:28:02:497] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:28:02:497] State updated : NEW_ACTOR_ON_MAP = true.
+[19:28:02:729] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:28:04:208] Receiving message 951 (GameMapMovementMessage)
+[19:28:05:621] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:28:05:621] Receiving message 251 (GameContextRemoveElementMessage)
+[19:28:08:832] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:28:08:833] State updated : NEW_ACTOR_ON_MAP = true.
+[19:28:09:069] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:28:10:517] Receiving message 951 (GameMapMovementMessage)
+[19:28:11:936] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:28:12:180] Receiving message 251 (GameContextRemoveElementMessage)
+[19:28:14:327] Receiving message 951 (GameMapMovementMessage)
+[19:28:15:165] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:28:15:165] State updated : NEW_ACTOR_ON_MAP = true.
+[19:28:15:412] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:28:17:122] Receiving message 951 (GameMapMovementMessage)
+[19:28:17:691] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:28:17:692] State updated : NEW_ACTOR_ON_MAP = true.
+[19:28:17:924] Receiving message 251 (GameContextRemoveElementMessage)
+[19:28:17:924] Receiving message 251 (GameContextRemoveElementMessage)
+[19:28:17:924] Receiving message 251 (GameContextRemoveElementMessage)
+[19:28:17:924] Receiving message 301 (GameRolePlayShowChallengeMessage)
+[19:28:17:924] Receiving message 210 (MapFightCountMessage)
+[19:28:17:924] Receiving message 5572 (GameFightUpdateTeamMessage)
+[19:28:17:924] Receiving message 5572 (GameFightUpdateTeamMessage)
+[19:28:17:924] Receiving message 5572 (GameFightUpdateTeamMessage)
+[19:28:17:924] Receiving message 5572 (GameFightUpdateTeamMessage)
+[19:28:17:924] Receiving message 5572 (GameFightUpdateTeamMessage)
+[19:28:18:470] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:28:18:704] Receiving message 251 (GameContextRemoveElementMessage)
+[19:28:18:944] Receiving message 951 (GameMapMovementMessage)
+[19:28:21:555] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:28:21:555] State updated : NEW_ACTOR_ON_MAP = true.
+[19:28:21:805] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:28:24:004] Receiving message 951 (GameMapMovementMessage)
+[19:28:25:206] Receiving message 300 (GameRolePlayRemoveChallengeMessage)
+[19:28:25:455] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:28:25:455] Receiving message 251 (GameContextRemoveElementMessage)
+[19:28:26:001] Receiving message 951 (GameMapMovementMessage)
+[19:28:29:170] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:28:29:170] State updated : NEW_ACTOR_ON_MAP = true.
+[19:28:29:401] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:28:30:850] Receiving message 951 (GameMapMovementMessage)
+[19:28:32:198] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:28:32:198] Receiving message 251 (GameContextRemoveElementMessage)
+[19:28:34:164] Receiving message 951 (GameMapMovementMessage)
+[19:28:35:334] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:28:35:334] State updated : NEW_ACTOR_ON_MAP = true.
+[19:28:35:584] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:28:36:083] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:28:36:083] State updated : NEW_ACTOR_ON_MAP = true.
+[19:28:36:332] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:28:37:003] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:28:37:003] State updated : NEW_ACTOR_ON_MAP = true.
+[19:28:37:253] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:28:37:502] Receiving message 951 (GameMapMovementMessage)
+[19:28:37:502] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:28:37:502] Receiving message 251 (GameContextRemoveElementMessage)
+[19:28:38:423] Receiving message 951 (GameMapMovementMessage)
+[19:28:38:813] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:28:39:062] Receiving message 251 (GameContextRemoveElementMessage)
+[19:28:40:950] Receiving message 5745 (InteractiveUsedMessage)
+[19:28:41:184] Receiving message 251 (GameContextRemoveElementMessage)
+[19:28:41:917] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:28:41:917] State updated : NEW_ACTOR_ON_MAP = true.
+[19:28:42:167] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:28:42:416] Receiving message 951 (GameMapMovementMessage)
+[19:28:43:586] Receiving message 951 (GameMapMovementMessage)
+[19:28:44:179] Receiving message 5745 (InteractiveUsedMessage)
+[19:28:44:179] Receiving message 251 (GameContextRemoveElementMessage)
+[19:28:45:006] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:28:45:006] Receiving message 251 (GameContextRemoveElementMessage)
+[19:28:47:003] Receiving message 951 (GameMapMovementMessage)
+[19:28:47:752] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:28:47:752] State updated : NEW_ACTOR_ON_MAP = true.
+[19:28:48:001] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:28:48:235] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:28:48:235] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:28:48:235] State updated : NEW_ACTOR_ON_MAP = true.
+[19:28:48:968] Receiving message 951 (GameMapMovementMessage)
+[19:28:49:780] Receiving message 951 (GameMapMovementMessage)
+[19:28:51:277] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:28:51:527] Receiving message 251 (GameContextRemoveElementMessage)
+[19:28:52:666] Receiving message 951 (GameMapMovementMessage)
+[19:28:54:413] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:28:54:413] State updated : NEW_ACTOR_ON_MAP = true.
+[19:28:54:662] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:28:54:912] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:28:54:912] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:28:54:912] State updated : NEW_ACTOR_ON_MAP = true.
+[19:28:55:349] Receiving message 5745 (InteractiveUsedMessage)
+[19:28:55:598] Receiving message 251 (GameContextRemoveElementMessage)
+[19:28:56:082] Receiving message 951 (GameMapMovementMessage)
+[19:28:57:424] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:28:57:673] Receiving message 251 (GameContextRemoveElementMessage)
+[19:28:59:374] Receiving message 951 (GameMapMovementMessage)
+[19:29:01:043] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:29:01:043] State updated : NEW_ACTOR_ON_MAP = true.
+[19:29:01:261] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:29:01:511] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:29:01:511] Receiving message 251 (GameContextRemoveElementMessage)
+[19:29:02:712] Receiving message 951 (GameMapMovementMessage)
+[19:29:04:132] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:29:04:132] Receiving message 251 (GameContextRemoveElementMessage)
+[19:29:07:283] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:29:07:283] State updated : NEW_ACTOR_ON_MAP = true.
+[19:29:07:532] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:29:08:110] Receiving message 951 (GameMapMovementMessage)
+[19:29:09:170] Receiving message 951 (GameMapMovementMessage)
+[19:29:10:543] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:29:10:543] State updated : NEW_ACTOR_ON_MAP = true.
+[19:29:10:777] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:29:10:777] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:29:10:777] State updated : NEW_ACTOR_ON_MAP = true.
+[19:29:11:058] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:29:11:308] Receiving message 251 (GameContextRemoveElementMessage)
+[19:29:13:928] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:29:13:928] State updated : NEW_ACTOR_ON_MAP = true.
+[19:29:14:178] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:29:14:428] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:29:14:428] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:29:14:428] State updated : NEW_ACTOR_ON_MAP = true.
+[19:29:15:972] Receiving message 951 (GameMapMovementMessage)
+[19:29:16:580] Receiving message 951 (GameMapMovementMessage)
+[19:29:17:392] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:29:17:657] Receiving message 251 (GameContextRemoveElementMessage)
+[19:29:19:061] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:29:19:061] Receiving message 251 (GameContextRemoveElementMessage)
+[19:29:19:513] Receiving message 251 (GameContextRemoveElementMessage)
+[19:29:20:933] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:29:20:933] State updated : NEW_ACTOR_ON_MAP = true.
+[19:29:21:167] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:29:22:228] Receiving message 951 (GameMapMovementMessage)
+[19:29:22:602] Receiving message 951 (GameMapMovementMessage)
+[19:29:22:836] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:29:22:836] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:29:22:836] Receiving message 951 (GameMapMovementMessage)
+[19:29:22:836] State updated : NEW_ACTOR_ON_MAP = true.
+[19:29:23:944] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:29:23:944] Receiving message 251 (GameContextRemoveElementMessage)
+[19:29:26:861] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:29:26:861] Receiving message 251 (GameContextRemoveElementMessage)
+[19:29:27:110] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:29:27:110] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:29:27:110] State updated : NEW_ACTOR_ON_MAP = true.
+[19:29:28:296] Receiving message 210 (MapFightCountMessage)
+[19:29:28:546] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:29:28:546] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:29:28:546] State updated : NEW_ACTOR_ON_MAP = true.
+[19:29:28:795] Receiving message 951 (GameMapMovementMessage)
+[19:29:30:106] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:29:30:106] Receiving message 251 (GameContextRemoveElementMessage)
+[19:29:33:475] Receiving message 951 (GameMapMovementMessage)
+[19:29:33:850] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:29:33:850] State updated : NEW_ACTOR_ON_MAP = true.
+[19:29:34:099] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:29:35:534] Receiving message 951 (GameMapMovementMessage)
+[19:29:35:784] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:29:35:784] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:29:35:784] State updated : NEW_ACTOR_ON_MAP = true.
+[19:29:36:892] Receiving message 951 (GameMapMovementMessage)
+[19:29:37:640] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:29:37:890] Receiving message 251 (GameContextRemoveElementMessage)
+[19:29:40:760] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:29:40:760] Receiving message 251 (GameContextRemoveElementMessage)
+[19:29:41:010] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:29:41:010] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:29:41:010] State updated : NEW_ACTOR_ON_MAP = true.
+[19:29:43:085] Receiving message 951 (GameMapMovementMessage)
+[19:29:44:498] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:29:44:731] Receiving message 251 (GameContextRemoveElementMessage)
+[19:29:47:607] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:29:47:607] State updated : NEW_ACTOR_ON_MAP = true.
+[19:29:47:903] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:29:49:307] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:29:49:307] State updated : NEW_ACTOR_ON_MAP = true.
+[19:29:49:619] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:29:49:619] Receiving message 951 (GameMapMovementMessage)
+[19:29:50:742] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:29:50:992] Receiving message 251 (GameContextRemoveElementMessage)
+[19:29:53:909] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:29:53:909] State updated : NEW_ACTOR_ON_MAP = true.
+[19:29:54:143] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:29:55:594] Receiving message 951 (GameMapMovementMessage)
+[19:29:56:967] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:29:57:216] Receiving message 251 (GameContextRemoveElementMessage)
+[19:29:58:917] Receiving message 951 (GameMapMovementMessage)
+[19:30:00:071] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:30:00:071] State updated : NEW_ACTOR_ON_MAP = true.
+[19:30:00:321] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:30:00:617] Receiving message 951 (GameMapMovementMessage)
+[19:30:01:335] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:30:01:335] Receiving message 251 (GameContextRemoveElementMessage)
+[19:30:01:756] Receiving message 951 (GameMapMovementMessage)
+[19:30:03:113] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:30:03:113] Receiving message 251 (GameContextRemoveElementMessage)
+[19:30:04:252] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:30:04:252] Receiving message 251 (GameContextRemoveElementMessage)
+[19:30:04:502] Receiving message 951 (GameMapMovementMessage)
+[19:30:06:233] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:30:06:233] State updated : NEW_ACTOR_ON_MAP = true.
+[19:30:06:483] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:30:07:934] Receiving message 951 (GameMapMovementMessage)
+[19:30:09:291] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:30:09:291] Receiving message 251 (GameContextRemoveElementMessage)
+[19:30:11:381] Receiving message 951 (GameMapMovementMessage)
+[19:30:12:442] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:30:12:442] State updated : NEW_ACTOR_ON_MAP = true.
+[19:30:12:692] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:30:14:127] Receiving message 951 (GameMapMovementMessage)
+[19:30:15:547] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:30:15:796] Receiving message 251 (GameContextRemoveElementMessage)
+[19:30:18:698] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:30:18:698] State updated : NEW_ACTOR_ON_MAP = true.
+[19:30:18:932] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:30:20:398] Receiving message 951 (GameMapMovementMessage)
+[19:30:20:648] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:30:20:648] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:30:20:648] State updated : NEW_ACTOR_ON_MAP = true.
+[19:30:21:802] Sending message 182 (BasicPingMessage)
+[19:30:21:802] Sending a ping request to server for stay connected.
+[19:30:21:818] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:30:22:052] Receiving message 251 (GameContextRemoveElementMessage)
+[19:30:22:052] Receiving message 6362 (BasicAckMessage)
+[19:30:22:052] Receiving message 183 (BasicPongMessage)
+[19:30:22:052] Receiving message 176 (BasicNoOperationMessage)
+[19:30:23:612] Receiving message 251 (GameContextRemoveElementMessage)
+[19:30:25:125] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:30:25:141] State updated : NEW_ACTOR_ON_MAP = true.
+[19:30:25:390] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:30:26:950] Receiving message 951 (GameMapMovementMessage)
+[19:30:28:370] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:30:28:370] Receiving message 251 (GameContextRemoveElementMessage)
+[19:30:29:041] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:30:29:041] State updated : NEW_ACTOR_ON_MAP = true.
+[19:30:29:290] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:30:31:474] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:30:31:474] State updated : NEW_ACTOR_ON_MAP = true.
+[19:30:31:724] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:30:33:159] Receiving message 951 (GameMapMovementMessage)
+[19:30:34:594] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:30:34:594] Receiving message 251 (GameContextRemoveElementMessage)
+[19:30:37:776] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:30:37:777] State updated : NEW_ACTOR_ON_MAP = true.
+[19:30:38:010] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:30:39:389] Receiving message 951 (GameMapMovementMessage)
+[19:30:39:639] Receiving message 951 (GameMapMovementMessage)
+[19:30:40:889] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:30:41:121] Receiving message 251 (GameContextRemoveElementMessage)
+[19:30:41:626] Receiving message 951 (GameMapMovementMessage)
+[19:30:44:071] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:30:44:071] State updated : NEW_ACTOR_ON_MAP = true.
+[19:30:44:321] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:30:44:570] Receiving message 5745 (InteractiveUsedMessage)
+[19:30:44:570] Receiving message 251 (GameContextRemoveElementMessage)
+[19:30:45:756] Receiving message 951 (GameMapMovementMessage)
+[19:30:47:097] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:30:47:097] Receiving message 251 (GameContextRemoveElementMessage)
+[19:30:47:331] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:30:47:331] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:30:47:331] State updated : NEW_ACTOR_ON_MAP = true.
+[19:30:50:171] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:30:50:171] State updated : NEW_ACTOR_ON_MAP = true.
+[19:30:50:420] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:30:51:871] Receiving message 951 (GameMapMovementMessage)
+[19:30:53:135] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:30:53:135] State updated : NEW_ACTOR_ON_MAP = true.
+[19:30:53:384] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:30:53:384] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:30:53:384] Receiving message 251 (GameContextRemoveElementMessage)
+[19:30:53:618] Receiving message 951 (GameMapMovementMessage)
+[19:30:54:601] Receiving message 951 (GameMapMovementMessage)
+[19:30:55:444] Receiving message 951 (GameMapMovementMessage)
+[19:30:55:849] Receiving message 951 (GameMapMovementMessage)
+[19:30:56:286] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:30:56:286] State updated : NEW_ACTOR_ON_MAP = true.
+[19:30:56:536] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:30:57:082] Receiving message 5745 (InteractiveUsedMessage)
+[19:30:57:331] Receiving message 251 (GameContextRemoveElementMessage)
+[19:30:57:971] Receiving message 951 (GameMapMovementMessage)
+[19:30:58:735] Receiving message 951 (GameMapMovementMessage)
+[19:30:58:985] Receiving message 951 (GameMapMovementMessage)
+[19:30:59:234] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:30:59:234] Receiving message 251 (GameContextRemoveElementMessage)
+[19:30:59:468] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:30:59:468] Receiving message 251 (GameContextRemoveElementMessage)
+[19:30:59:468] Receiving message 5745 (InteractiveUsedMessage)
+[19:31:00:623] Receiving message 951 (GameMapMovementMessage)
+[19:31:01:044] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:31:01:044] State updated : NEW_ACTOR_ON_MAP = true.
+[19:31:01:294] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:31:02:448] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:31:02:448] State updated : NEW_ACTOR_ON_MAP = true.
+[19:31:02:698] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:31:04:086] Receiving message 951 (GameMapMovementMessage)
+[19:31:04:336] Receiving message 951 (GameMapMovementMessage)
+[19:31:05:474] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:31:05:740] Receiving message 251 (GameContextRemoveElementMessage)
+[19:31:06:473] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:31:06:473] Receiving message 251 (GameContextRemoveElementMessage)
+[19:31:08:579] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:31:08:579] State updated : NEW_ACTOR_ON_MAP = true.
+[19:31:08:813] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:31:10:232] Receiving message 951 (GameMapMovementMessage)
+[19:31:11:652] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:31:11:902] Receiving message 251 (GameContextRemoveElementMessage)
+[19:31:14:616] Receiving message 951 (GameMapMovementMessage)
+[19:31:14:881] Receiving message 951 (GameMapMovementMessage)
+[19:31:14:881] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:31:14:881] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:31:14:881] State updated : NEW_ACTOR_ON_MAP = true.
+[19:31:15:755] Receiving message 5745 (InteractiveUsedMessage)
+[19:31:16:394] Receiving message 951 (GameMapMovementMessage)
+[19:31:17:736] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:31:17:736] Receiving message 251 (GameContextRemoveElementMessage)
+[19:31:20:029] Receiving message 951 (GameMapMovementMessage)
+[19:31:21:074] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:31:21:074] State updated : NEW_ACTOR_ON_MAP = true.
+[19:31:21:308] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:31:22:744] Receiving message 951 (GameMapMovementMessage)
+[19:31:23:149] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:31:23:149] Receiving message 251 (GameContextRemoveElementMessage)
+[19:31:24:085] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:31:24:085] Receiving message 251 (GameContextRemoveElementMessage)
+[19:31:26:020] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:31:26:020] State updated : NEW_ACTOR_ON_MAP = true.
+[19:31:26:269] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:31:27:268] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:31:27:268] State updated : NEW_ACTOR_ON_MAP = true.
+[19:31:27:517] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:31:28:625] Receiving message 951 (GameMapMovementMessage)
+[19:31:29:296] Receiving message 951 (GameMapMovementMessage)
+[19:31:30:700] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:31:30:700] Receiving message 251 (GameContextRemoveElementMessage)
+[19:31:33:773] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:31:33:773] State updated : NEW_ACTOR_ON_MAP = true.
+[19:31:34:022] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:31:35:442] Receiving message 951 (GameMapMovementMessage)
+[19:31:36:784] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:31:36:784] Receiving message 251 (GameContextRemoveElementMessage)
+[19:31:39:997] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:31:39:997] State updated : NEW_ACTOR_ON_MAP = true.
+[19:31:40:247] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:31:40:247] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:31:40:247] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:31:40:247] State updated : NEW_ACTOR_ON_MAP = true.
+[19:31:41:682] Receiving message 951 (GameMapMovementMessage)
+[19:31:41:932] Receiving message 951 (GameMapMovementMessage)
+[19:31:42:322] Receiving message 6316 (SequenceNumberRequestMessage)
+[19:31:42:322] Receiving message 5816 (BasicLatencyStatsRequestMessage)
+[19:31:42:322] Sending message 6317 (SequenceNumberMessage)
+[19:31:42:322] Sending message 5663 (BasicLatencyStatsMessage)
+[19:31:42:353] Receiving message 6362 (BasicAckMessage)
+[19:31:42:353] Receiving message 176 (BasicNoOperationMessage)
+[19:31:42:602] Receiving message 6362 (BasicAckMessage)
+[19:31:42:602] Receiving message 176 (BasicNoOperationMessage)
+[19:31:43:055] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:31:43:304] Receiving message 251 (GameContextRemoveElementMessage)
+[19:31:45:286] Receiving message 5745 (InteractiveUsedMessage)
+[19:31:45:535] Receiving message 251 (GameContextRemoveElementMessage)
+[19:31:45:535] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:31:45:535] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:31:45:535] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:31:45:535] State updated : NEW_ACTOR_ON_MAP = true.
+[19:31:45:535] State updated : NEW_ACTOR_ON_MAP = true.
+[19:31:46:175] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:31:46:175] State updated : NEW_ACTOR_ON_MAP = true.
+[19:31:46:409] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:31:47:875] Receiving message 951 (GameMapMovementMessage)
+[19:31:48:125] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:31:48:125] Receiving message 951 (GameMapMovementMessage)
+[19:31:48:125] State updated : NEW_ACTOR_ON_MAP = true.
+[19:31:49:310] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:31:49:560] Receiving message 251 (GameContextRemoveElementMessage)
+[19:31:49:810] Receiving message 251 (GameContextRemoveElementMessage)
+[19:31:51:026] Receiving message 5745 (InteractiveUsedMessage)
+[19:31:51:292] Receiving message 251 (GameContextRemoveElementMessage)
+[19:31:52:399] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:31:52:399] State updated : NEW_ACTOR_ON_MAP = true.
+[19:31:52:649] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:31:52:898] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:31:52:898] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:31:52:898] State updated : NEW_ACTOR_ON_MAP = true.
+[19:31:54:084] Receiving message 951 (GameMapMovementMessage)
+[19:31:55:488] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:31:55:738] Receiving message 251 (GameContextRemoveElementMessage)
+[19:31:58:583] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:31:58:583] State updated : NEW_ACTOR_ON_MAP = true.
+[19:31:58:814] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:32:00:364] Receiving message 951 (GameMapMovementMessage)
+[19:32:00:941] Receiving message 951 (GameMapMovementMessage)
+[19:32:01:721] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:32:01:971] Receiving message 251 (GameContextRemoveElementMessage)
+[19:32:04:873] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:32:04:873] State updated : NEW_ACTOR_ON_MAP = true.
+[19:32:05:122] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:32:05:122] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:32:05:122] Receiving message 251 (GameContextRemoveElementMessage)
+[19:32:05:372] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:32:05:372] State updated : NEW_ACTOR_ON_MAP = true.
+[19:32:05:372] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:32:06:542] Receiving message 951 (GameMapMovementMessage)
+[19:32:07:961] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:32:07:961] Receiving message 251 (GameContextRemoveElementMessage)
+[19:32:09:958] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:32:09:958] State updated : NEW_ACTOR_ON_MAP = true.
+[19:32:10:208] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:32:10:769] Receiving message 951 (GameMapMovementMessage)
+[19:32:11:113] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:32:11:113] State updated : NEW_ACTOR_ON_MAP = true.
+[19:32:11:362] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:32:12:454] Receiving message 951 (GameMapMovementMessage)
+[19:32:12:797] Receiving message 951 (GameMapMovementMessage)
+[19:32:13:047] Receiving message 951 (GameMapMovementMessage)
+[19:32:13:047] Receiving message 951 (GameMapMovementMessage)
+[19:32:14:155] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:32:14:404] Receiving message 251 (GameContextRemoveElementMessage)
+[19:32:15:247] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:32:15:247] Receiving message 251 (GameContextRemoveElementMessage)
+[19:32:17:290] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:32:17:290] State updated : NEW_ACTOR_ON_MAP = true.
+[19:32:17:540] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:32:18:148] Receiving message 951 (GameMapMovementMessage)
+[19:32:18:959] Receiving message 951 (GameMapMovementMessage)
+[19:32:20:395] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:32:20:395] Receiving message 251 (GameContextRemoveElementMessage)
+[19:32:23:515] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:32:23:515] State updated : NEW_ACTOR_ON_MAP = true.
+[19:32:23:749] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:32:25:184] Receiving message 951 (GameMapMovementMessage)
+[19:32:26:588] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:32:26:588] Receiving message 251 (GameContextRemoveElementMessage)
+[19:32:29:661] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:32:29:661] State updated : NEW_ACTOR_ON_MAP = true.
+[19:32:29:911] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:32:31:346] Receiving message 951 (GameMapMovementMessage)
+[19:32:31:595] Receiving message 5709 (StatedElementUpdatedMessage)
+[19:32:31:595] Receiving message 5708 (InteractiveElementUpdatedMessage)
+[19:32:31:829] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:32:31:829] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:32:31:829] State updated : NEW_ACTOR_ON_MAP = true.
+[19:32:32:734] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:32:32:968] Receiving message 251 (GameContextRemoveElementMessage)
+[19:32:35:885] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:32:35:885] State updated : NEW_ACTOR_ON_MAP = true.
+[19:32:36:135] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:32:37:570] Receiving message 951 (GameMapMovementMessage)
+[19:32:38:912] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:32:38:912] Receiving message 251 (GameContextRemoveElementMessage)
+[19:32:39:255] Receiving message 951 (GameMapMovementMessage)
+[19:32:39:505] Receiving message 951 (GameMapMovementMessage)
+[19:32:40:846] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:32:40:846] State updated : NEW_ACTOR_ON_MAP = true.
+[19:32:41:096] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:32:41:813] Receiving message 5745 (InteractiveUsedMessage)
+[19:32:42:063] Receiving message 251 (GameContextRemoveElementMessage)
+[19:32:42:063] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:32:42:063] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:32:42:063] Receiving message 951 (GameMapMovementMessage)
+[19:32:42:063] State updated : NEW_ACTOR_ON_MAP = true.
+[19:32:43:685] Receiving message 951 (GameMapMovementMessage)
+[19:32:45:121] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:32:45:121] Receiving message 251 (GameContextRemoveElementMessage)
+[19:32:46:010] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:32:46:259] Receiving message 251 (GameContextRemoveElementMessage)
+[19:32:46:509] Receiving message 951 (GameMapMovementMessage)
+[19:32:46:509] Receiving message 951 (GameMapMovementMessage)
+[19:32:46:509] Receiving message 951 (GameMapMovementMessage)
+[19:32:47:897] Receiving message 5745 (InteractiveUsedMessage)
+[19:32:47:897] Receiving message 251 (GameContextRemoveElementMessage)
+[19:32:48:147] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:32:48:147] State updated : NEW_ACTOR_ON_MAP = true.
+[19:32:48:381] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:32:48:381] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:32:48:381] State updated : NEW_ACTOR_ON_MAP = true.
+[19:32:48:958] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:32:48:958] State updated : NEW_ACTOR_ON_MAP = true.
+[19:32:49:192] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:32:49:957] Receiving message 951 (GameMapMovementMessage)
+[19:32:50:893] Receiving message 951 (GameMapMovementMessage)
+[19:32:51:314] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:32:51:563] Receiving message 251 (GameContextRemoveElementMessage)
+[19:32:53:233] Receiving message 5745 (InteractiveUsedMessage)
+[19:32:53:233] Receiving message 251 (GameContextRemoveElementMessage)
+[19:32:54:855] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:32:54:855] State updated : NEW_ACTOR_ON_MAP = true.
+[19:32:55:183] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:32:56:587] Receiving message 951 (GameMapMovementMessage)
+[19:32:57:788] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:32:57:788] State updated : NEW_ACTOR_ON_MAP = true.
+[19:32:57:788] Receiving message 951 (GameMapMovementMessage)
+[19:32:58:459] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:32:58:708] Receiving message 251 (GameContextRemoveElementMessage)
+[19:33:00:284] Receiving message 951 (GameMapMovementMessage)
+[19:33:01:594] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:33:01:594] State updated : NEW_ACTOR_ON_MAP = true.
+[19:33:01:844] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:33:03:263] Receiving message 951 (GameMapMovementMessage)
+[19:33:04:621] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:33:04:621] Receiving message 251 (GameContextRemoveElementMessage)
+[19:33:07:288] Receiving message 951 (GameMapMovementMessage)
+[19:33:07:694] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:33:07:694] State updated : NEW_ACTOR_ON_MAP = true.
+[19:33:07:943] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:33:09:379] Receiving message 951 (GameMapMovementMessage)
+[19:33:10:783] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:33:11:032] Receiving message 251 (GameContextRemoveElementMessage)
+[19:33:13:856] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:33:13:856] State updated : NEW_ACTOR_ON_MAP = true.
+[19:33:14:090] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:33:15:525] Receiving message 951 (GameMapMovementMessage)
+[19:33:16:882] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:33:16:882] Receiving message 251 (GameContextRemoveElementMessage)
+[19:33:20:033] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:33:20:033] State updated : NEW_ACTOR_ON_MAP = true.
+[19:33:20:267] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:33:21:703] Receiving message 951 (GameMapMovementMessage)
+[19:33:23:122] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:33:23:122] Receiving message 251 (GameContextRemoveElementMessage)
+[19:33:26:273] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:33:26:273] State updated : NEW_ACTOR_ON_MAP = true.
+[19:33:26:507] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:33:27:943] Receiving message 951 (GameMapMovementMessage)
+[19:33:29:362] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:33:29:612] Receiving message 251 (GameContextRemoveElementMessage)
+[19:33:32:326] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:33:32:326] State updated : NEW_ACTOR_ON_MAP = true.
+[19:33:32:576] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:33:32:576] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:33:32:576] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:33:32:576] State updated : NEW_ACTOR_ON_MAP = true.
+[19:33:34:245] Receiving message 951 (GameMapMovementMessage)
+[19:33:35:821] Receiving message 951 (GameMapMovementMessage)
+[19:33:36:257] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:33:36:507] Receiving message 251 (GameContextRemoveElementMessage)
+[19:33:38:909] Receiving message 5745 (InteractiveUsedMessage)
+[19:33:39:159] Receiving message 251 (GameContextRemoveElementMessage)
+[19:33:39:409] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:33:39:409] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:33:39:409] State updated : NEW_ACTOR_ON_MAP = true.
+[19:33:40:984] Receiving message 951 (GameMapMovementMessage)
+[19:33:41:343] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:33:41:343] State updated : NEW_ACTOR_ON_MAP = true.
+[19:33:41:593] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:33:42:404] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:33:42:654] Receiving message 251 (GameContextRemoveElementMessage)
+[19:33:44:541] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:33:44:541] State updated : NEW_ACTOR_ON_MAP = true.
+[19:33:44:791] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:33:44:791] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:33:44:791] State updated : NEW_ACTOR_ON_MAP = true.
+[19:33:45:633] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:33:45:633] State updated : NEW_ACTOR_ON_MAP = true.
+[19:33:45:883] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:33:47:318] Receiving message 951 (GameMapMovementMessage)
+[19:33:48:660] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:33:48:660] Receiving message 251 (GameContextRemoveElementMessage)
+[19:33:49:128] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:33:49:128] Receiving message 951 (GameMapMovementMessage)
+[19:33:49:128] State updated : NEW_ACTOR_ON_MAP = true.
+[19:33:51:202] Receiving message 5745 (InteractiveUsedMessage)
+[19:33:51:202] Receiving message 251 (GameContextRemoveElementMessage)
+[19:33:51:592] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:33:51:592] State updated : NEW_ACTOR_ON_MAP = true.
+[19:33:51:842] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:33:51:842] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:33:51:842] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:33:51:842] State updated : NEW_ACTOR_ON_MAP = true.
+[19:33:52:918] Receiving message 951 (GameMapMovementMessage)
+[19:33:53:355] Receiving message 951 (GameMapMovementMessage)
+[19:33:53:589] Receiving message 951 (GameMapMovementMessage)
+[19:33:54:744] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:33:54:744] Receiving message 251 (GameContextRemoveElementMessage)
+[19:33:55:087] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:33:55:087] State updated : NEW_ACTOR_ON_MAP = true.
+[19:33:55:336] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:33:55:570] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:33:55:570] State updated : NEW_ACTOR_ON_MAP = true.
+[19:33:56:304] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:33:56:304] Receiving message 251 (GameContextRemoveElementMessage)
+[19:33:56:553] Receiving message 951 (GameMapMovementMessage)
+[19:33:56:803] Receiving message 5745 (InteractiveUsedMessage)
+[19:33:56:803] Receiving message 251 (GameContextRemoveElementMessage)
+[19:33:57:827] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:33:57:827] State updated : NEW_ACTOR_ON_MAP = true.
+[19:33:58:061] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:34:00:379] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:34:03:375] Receiving message 951 (GameMapMovementMessage)
+[19:34:10:366] Receiving message 951 (GameMapMovementMessage)
+[19:34:10:616] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:34:10:616] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:34:10:616] State updated : NEW_ACTOR_ON_MAP = true.
+[19:34:12:035] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:34:12:035] State updated : NEW_ACTOR_ON_MAP = true.
+[19:34:12:285] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:34:14:516] Receiving message 951 (GameMapMovementMessage)
+[19:34:17:230] Receiving message 5745 (InteractiveUsedMessage)
+[19:34:17:230] Receiving message 251 (GameContextRemoveElementMessage)
+[19:34:17:480] Receiving message 951 (GameMapMovementMessage)
+[19:34:18:884] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:34:18:884] State updated : NEW_ACTOR_ON_MAP = true.
+[19:34:19:133] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:34:20:116] Receiving message 951 (GameMapMovementMessage)
+[19:34:23:002] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:34:23:002] State updated : NEW_ACTOR_ON_MAP = true.
+[19:34:23:252] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:34:23:252] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:34:23:252] Receiving message 251 (GameContextRemoveElementMessage)
+[19:34:24:422] Receiving message 951 (GameMapMovementMessage)
+[19:34:25:482] Receiving message 951 (GameMapMovementMessage)
+[19:34:25:997] Receiving message 6154 (null)
+[19:34:27:822] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:34:27:822] Receiving message 251 (GameContextRemoveElementMessage)
+[19:34:30:833] Receiving message 5745 (InteractiveUsedMessage)
+[19:34:30:833] Receiving message 251 (GameContextRemoveElementMessage)
+[19:34:31:083] Receiving message 6154 (null)
+[19:34:31:426] Receiving message 951 (GameMapMovementMessage)
+[19:34:38:415] Receiving message 951 (GameMapMovementMessage)
+[19:34:41:800] Receiving message 6134 (null)
+[19:34:41:800] Receiving message 780 (TextInformationMessage)
+[19:34:41:800] %1 : %2
+[19:34:45:450] Receiving message 951 (GameMapMovementMessage)
+[19:34:46:714] Receiving message 5632 (GameRolePlayShowActorMessage)
+[19:34:46:714] State updated : NEW_ACTOR_ON_MAP = true.
+[19:34:46:964] Receiving message 6454 (UpdateMapPlayersAgressableStatusMessage)
+[19:34:48:352] Receiving message 6154 (null)
+[19:34:48:602] Receiving message 951 (GameMapMovementMessage)
+[19:34:51:176] Receiving message 946 (GameMapChangeOrientationMessage)
+[19:34:51:425] Receiving message 251 (GameContextRemoveElementMessage)
+[19:34:52:455] Receiving message 951 (GameMapMovementMessage)
+[19:34:53:344] Receiving message 6154 (null)
+[19:34:59:553] Receiving message 951 (GameMapMovementMessage)
+[19:35:06:557] Receiving message 951 (GameMapMovementMessage)
+[19:35:13:577] Receiving message 951 (GameMapMovementMessage)
+[19:35:17:540] Receiving message 951 (GameMapMovementMessage)
+[19:35:18:195] Receiving message 189 (SystemMessageDisplayMessage)
+[19:35:18:195] Receiving message 6029 (null)
+[19:35:18:195] Deconnected from game server.
+[19:35:21:815] Sending a ping request to server for stay connected.
+[19:35:21:831] Socket closed
